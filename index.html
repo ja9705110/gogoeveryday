@@ -1,0 +1,3998 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>春社 DA01 交通接送管理系統</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.js"></script>
+<style>
+:root{
+  --bg:#f5f7fa;--bg2:#ffffff;--bg3:#eef1f6;--panel:#ffffff;
+  --border:#dde2ec;--teal:#0aaa93;--teal2:#088f7b;
+  --amber:#d97706;--red:#dc2626;--green:#16a34a;--blue:#2563eb;--purple:#7c3aed;
+  --text:#1e2d3d;--text2:#4b5563;--text3:#9ca3af;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;font-size:13px;}
+
+.topbar{background:var(--bg2);border-bottom:2px solid var(--teal);padding:0 18px;height:50px;display:flex;align-items:center;gap:5px;flex-shrink:0;box-shadow:0 1px 8px rgba(0,0,0,.06);}
+.logo-main{font-weight:700;font-size:14px;color:var(--teal);}
+.logo-sub{font-size:10px;color:var(--text3);}
+.nav-btn{padding:6px 13px;border-radius:6px;border:1px solid transparent;font-size:12px;cursor:pointer;color:var(--text2);background:transparent;font-family:inherit;transition:all .18s;}
+.nav-btn:hover{background:var(--bg3);color:var(--text);}
+.nav-btn.active{background:var(--teal);color:#fff;font-weight:600;}
+.ml-auto{margin-left:auto;}
+.store-badge{font-size:11px;color:var(--green);font-family:'IBM Plex Mono';display:flex;align-items:center;gap:5px;}
+
+.main{display:flex;flex:1;overflow:hidden;}
+.view{display:none;flex:1;overflow:hidden;}
+.view.active{display:flex;}
+
+.sidebar{width:200px;background:var(--bg2);border-right:1px solid var(--border);padding:12px 8px;display:flex;flex-direction:column;gap:2px;flex-shrink:0;overflow-y:auto;}
+.side-item{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:7px;cursor:pointer;font-size:12px;color:var(--text2);transition:all .14s;}
+.side-item:hover{background:var(--bg3);color:var(--text);}
+.side-item.active{background:rgba(13,207,180,.12);color:var(--teal);}
+.side-icon{font-size:14px;width:17px;text-align:center;flex-shrink:0;}
+.side-lbl{font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;padding:6px 9px 1px;}
+.side-divider{height:1px;background:var(--border);margin:5px 0;}
+
+.content{flex:1;overflow-y:auto;padding:18px;}
+.page-title{font-size:17px;font-weight:700;margin-bottom:3px;}
+.page-sub{font-size:12px;color:var(--text2);margin-bottom:16px;}
+
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.stat{background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:12px 14px;}
+.stat-lbl{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+.stat-val{font-size:22px;font-weight:700;font-family:'IBM Plex Mono';line-height:1;}
+.stat-note{font-size:11px;margin-top:3px;color:var(--text3);}
+
+.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px;}
+.card-head{padding:11px 15px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.card-title{font-size:13px;font-weight:600;}
+.card-body{padding:15px;}
+
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{text-align:left;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap;}
+.tbl td{padding:8px 10px;font-size:12px;border-bottom:1px solid rgba(37,52,71,.5);vertical-align:middle;}
+.tbl tr:hover td{background:rgba(255,255,255,.015);}
+.tbl-empty{text-align:center;padding:30px;color:var(--text3);font-size:13px;}
+
+.badge{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;white-space:nowrap;}
+.bg-green{background:rgba(34,197,94,.14);color:var(--green);border:1px solid rgba(34,197,94,.22);}
+.bg-amber{background:rgba(245,166,35,.14);color:var(--amber);border:1px solid rgba(245,166,35,.22);}
+.bg-blue{background:rgba(59,130,246,.14);color:var(--blue);border:1px solid rgba(59,130,246,.22);}
+.bg-teal{background:rgba(13,207,180,.14);color:var(--teal);border:1px solid rgba(13,207,180,.22);}
+.bg-red{background:rgba(239,68,68,.14);color:var(--red);border:1px solid rgba(239,68,68,.22);}
+
+.form-grid{display:grid;gap:10px;margin-bottom:12px;}
+.fg2{grid-template-columns:1fr 1fr;}
+.fg3{grid-template-columns:1fr 1fr 1fr;}
+.fld{display:flex;flex-direction:column;gap:4px;}
+.fld label{font-size:11px;color:var(--text2);font-weight:500;}
+.fld input,.fld select,.fld textarea{background:#fff;border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-family:inherit;font-size:12px;transition:border-color .18s;}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(10,170,147,.1);}
+.fld input.filled{border-color:var(--green);background:rgba(22,163,74,.04);}
+.fld textarea{resize:vertical;min-height:56px;}
+
+.btn{padding:7px 14px;border-radius:7px;border:none;cursor:pointer;font-size:12px;font-family:inherit;font-weight:600;transition:all .18s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
+.btn-teal{background:var(--teal);color:#0f1419;}
+.btn-teal:hover{background:var(--teal2);}
+.btn-teal:disabled{background:var(--bg3);color:var(--text3);cursor:not-allowed;}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border);}
+.btn-outline:hover{border-color:var(--teal);color:var(--teal);}
+.btn-ghost{background:var(--bg3);color:var(--text);border:1px solid var(--border);}
+.btn-ghost:hover{border-color:var(--text3);background:#e8ecf2;}
+.btn-red{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.22);}
+.btn-red:hover{background:rgba(239,68,68,.22);}
+.btn-sm{padding:4px 10px;font-size:11px;}
+.btn-xs{padding:3px 8px;font-size:10px;}
+.w100{width:100%;}
+
+.search-row{display:flex;gap:8px;margin-bottom:12px;}
+.search-inp{flex:1;background:#fff;border:1px solid var(--border);border-radius:7px;padding:8px 12px;color:var(--text);font-family:inherit;font-size:12px;}
+.search-inp:focus{outline:none;border-color:var(--teal);}
+
+.tab-bar{display:flex;gap:3px;border-bottom:1px solid var(--border);margin-bottom:14px;}
+.tab-btn{padding:7px 14px;font-size:12px;cursor:pointer;color:var(--text2);background:transparent;border:none;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .14s;}
+.tab-btn:hover{color:var(--text);}
+.tab-btn.active{color:var(--teal);border-bottom-color:var(--teal);font-weight:600;}
+
+/* DIST */
+.dist-panel{background:rgba(13,207,180,.05);border:1px solid rgba(13,207,180,.2);border-radius:10px;padding:14px;margin-bottom:14px;}
+.dist-header{font-size:12px;font-weight:600;color:var(--teal);margin-bottom:10px;}
+.addr-wrap{position:relative;}
+.sug-box{position:absolute;top:100%;left:0;right:0;background:var(--bg2);border:1px solid var(--border);border-radius:7px;z-index:99;display:none;max-height:150px;overflow-y:auto;}
+.sug-item{padding:7px 10px;font-size:11px;cursor:pointer;border-bottom:1px solid rgba(37,52,71,.5);color:var(--text);}
+.sug-item:hover{background:var(--bg3);}
+.dist-result{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--bg3);border-radius:7px;margin-top:8px;}
+.dist-km{font-size:22px;font-weight:700;color:var(--teal);font-family:'IBM Plex Mono';}
+.dist-meta{font-size:11px;color:var(--text2);}
+.dist-status{font-size:11px;color:var(--text2);min-height:16px;margin-top:6px;}
+.dist-status.err{color:var(--red);}
+.dist-status.ok{color:var(--green);}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--text2);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:3px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* MONTH CHIPS */
+.month-chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;}
+.mchip{padding:5px 11px;border-radius:20px;border:1px solid var(--border);font-size:11px;cursor:pointer;color:var(--text2);font-family:'IBM Plex Mono';transition:all .14s;}
+.mchip:hover{border-color:var(--teal);color:var(--teal);}
+.mchip.active{background:var(--teal);color:#0f1419;border-color:var(--teal);font-weight:600;}
+
+/* NOTE */
+.note-box{background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.18);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--amber);margin-bottom:10px;}
+.note-box b{display:block;margin-bottom:3px;font-size:10px;text-transform:uppercase;letter-spacing:.5px;}
+.info-box{background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.18);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--blue);margin-bottom:10px;}
+.info-box b{display:block;margin-bottom:3px;font-size:10px;text-transform:uppercase;}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center;}
+.modal-bg.show{display:flex;}
+.modal{background:#fff;border:1px solid var(--border);border-radius:12px;width:96%;max-width:760px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.15);}
+.modal-top{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;background:var(--bg3);}
+.modal-body{overflow-y:auto;flex:1;padding:18px;}
+.modal-foot{padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;flex-shrink:0;background:var(--bg3);}
+
+/* CSV IMPORT */
+.drop-zone{border:2px dashed var(--border);border-radius:10px;padding:32px;text-align:center;cursor:pointer;transition:all .2s;}
+.drop-zone:hover,.drop-zone.drag{border-color:var(--teal);background:rgba(13,207,180,.04);}
+.drop-icon{font-size:36px;margin-bottom:8px;}
+.drop-text{font-size:13px;color:var(--text2);}
+.drop-sub{font-size:11px;color:var(--text3);margin-top:4px;}
+.import-preview{max-height:200px;overflow-y:auto;background:var(--bg3);border-radius:8px;padding:10px;font-size:11px;font-family:'IBM Plex Mono';color:var(--text2);white-space:pre;margin-top:10px;}
+
+/* CASE */
+.case-row{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all .14s;margin-bottom:6px;}
+.case-row:hover{border-color:var(--teal);background:rgba(13,207,180,.04);}
+.case-row.selected{border-color:var(--teal);background:rgba(13,207,180,.07);}
+.avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
+
+/* DA01 */
+.da01{background:#fff;color:#000;font-family:'Noto Sans TC','Arial',sans-serif;font-size:11px;padding:14px;border:1px solid #ccc;border-radius:4px;line-height:1.5;}
+.da01 .org{text-align:center;font-size:11.5px;font-weight:700;border-bottom:2px solid #000;padding-bottom:7px;margin-bottom:7px;}
+.da01 .ftitle{text-align:center;font-size:13px;font-weight:700;margin-bottom:10px;}
+.da01 .fl{border-bottom:1px solid #333;min-width:70px;display:inline-block;padding:0 3px;}
+.da01 .fr{display:flex;gap:6px;align-items:baseline;margin-bottom:5px;flex-wrap:wrap;}
+.da01 .cb{display:flex;gap:12px;}.da01 .cbi{display:flex;align-items:center;gap:3px;}
+.da01 .slbl{writing-mode:vertical-rl;border:1px solid #666;padding:6px 3px;font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center;}
+.da01 .ftbl{width:100%;border-collapse:collapse;font-size:10px;}
+.da01 .ftbl th,.da01 .ftbl td{border:1px solid #666;padding:3px 4px;text-align:center;}
+.da01 .ftbl th{background:#eee;}.da01 .ftbl td{height:18px;}
+.da01 .pb{border-top:3px dashed #ccc;margin:14px 0;text-align:center;font-size:9px;color:#aaa;padding-top:3px;}
+.da01 .btbl{width:100%;border-collapse:collapse;}
+.da01 .btbl th,.da01 .btbl td{border:1px solid #333;padding:2px 3px;text-align:center;font-size:9px;}
+.da01 .btbl th{background:#eee;}
+
+/* TOAST */
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--panel);border:1px solid var(--teal);color:var(--text);padding:8px 18px;border-radius:8px;font-size:12px;z-index:400;transition:transform .28s;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* CONFIRM MODAL */
+.confirm-modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;width:92%;max-width:400px;overflow:hidden;}
+
+.flex{display:flex;}.items-center{align-items:center;}.gap-8{gap:8px;}.gap-12{gap:12px;}
+.mb-8{margin-bottom:8px;}.mb-12{margin-bottom:12px;}.mb-16{margin-bottom:16px;}
+.mt-8{margin-top:8px;}.mt-12{margin-top:12px;}
+.mono{font-family:'IBM Plex Mono';}
+.text-teal{color:var(--teal);}.text-green{color:var(--green);}
+.text-amber{color:var(--amber);}.text-muted{color:var(--text2);}
+::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+/* ════ 已移除手機版響應式樣式（桌面專用版） ════ */
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div style="margin-right:14px">
+    <div class="logo-main">春社 DA01 交通接送管理</div>
+    <div class="logo-sub">全成社會福利基金會 · ☁ Google Drive 雲端版</div>
+  </div>
+  <button class="nav-btn active" onclick="switchView('dispatch',this)">🚐 派車紀錄</button>
+  <button class="nav-btn" onclick="switchView('case',this)">🔍 個案查詢</button>
+  <button class="nav-btn" onclick="switchView('form',this)">🖨 DA01 表單</button>
+  <button class="nav-btn" onclick="switchView('import',this)">📂 匯入資料</button>
+  <button class="nav-btn" onclick="switchView('settings',this)">⚙️ 設定</button>
+  <div class="ml-auto flex items-center gap-8">
+    <div id="online-badge" style="display:flex;align-items:center;gap:4px"></div>
+    <span id="cloud-badge" style="font-size:11px;font-family:'IBM Plex Mono';color:var(--text3)"></span>
+    <button class="btn btn-ghost btn-sm" onclick="manualSync()" title="從雲端重新載入最新資料">🔄 同步</button>
+    <button class="btn btn-ghost btn-sm" onclick="forceUpload()" title="強制把本機資料上傳到雲端（同步失敗時使用）">⬆ 上傳</button>
+    <span id="current-user-badge" style="font-size:11px;color:var(--teal);font-family:'IBM Plex Mono'"></span>
+    <button class="btn btn-ghost btn-sm" id="accounts-btn" onclick="openModal('modal-accounts')" style="display:none">👥 帳號</button>
+    <button class="btn btn-ghost btn-sm" id="pending-btn" onclick="openPendingModal()" style="display:none">⏳ 待審核 <span id="pending-count" style="background:var(--red);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;margin-left:2px">0</span></button>
+    <button class="btn btn-ghost btn-sm" onclick="openDeletedRecords()">🗂 已刪除</button>
+    <button class="btn btn-outline btn-sm" onclick="doLogout()">登出</button>
+    <div class="store-badge">💾 <span id="record-count">0</span> 筆</div>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ══════════ 派車紀錄 ══════════ -->
+<div class="view active" id="view-dispatch" style="flex-direction:column">
+  <div class="content">
+
+    <!-- 本機開啟警告 -->
+    <div id="local-file-warning" style="display:none;margin-bottom:12px;background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.3);border-radius:10px;padding:12px 16px">
+      <div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:4px">⚠️ 您正從本機檔案開啟（C://...）</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.8">
+        每台電腦的本機資料各自獨立，<strong>雲端同步可能失敗</strong>。<br>
+        建議改用 Google Apps Script 網址開啟，所有人共用同一份資料：<br>
+        <a href="https://script.google.com/macros/s/AKfycbxWumgG4LEIxFIER0T1skC1WFv69puaPm2e1FRFXVYYIbIhJGt1o5Wj75p4CTh5ysX0/exec"
+           target="_blank" style="color:var(--teal);font-weight:600;word-break:break-all">
+          https://script.google.com/macros/s/AKfycbxWumgG4LEIxFIER0T1skC1WFv69puaPm2e1FRFXVYYIbIhJGt1o5Wj75p4CTh5ysX0/exec
+        </a>
+      </div>
+    </div>
+
+    <!-- 今日＋明日派車提醒（並排） -->
+    <div id="day-reminders" style="display:none;margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap">
+      <!-- 今日 -->
+      <div style="flex:1;min-width:300px;background:rgba(10,170,147,.06);border:1px solid rgba(10,170,147,.22);border-radius:10px;padding:12px 16px">
+        <div style="font-size:12px;font-weight:700;color:var(--teal);margin-bottom:8px">🚌 今日派車 <span id="today-date-label" style="font-weight:400;color:var(--text3)"></span></div>
+        <div id="today-trips" style="display:flex;flex-wrap:wrap;gap:8px">
+          <span style="font-size:12px;color:var(--text3)">今日無派車</span>
+        </div>
+      </div>
+      <!-- 明日 -->
+      <div style="flex:1;min-width:300px;background:rgba(37,99,235,.05);border:1px solid rgba(37,99,235,.18);border-radius:10px;padding:12px 16px">
+        <div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:8px">📅 明日派車 <span id="tomorrow-date-label" style="font-weight:400;color:var(--text3)"></span></div>
+        <div id="tomorrow-trips" style="display:flex;flex-wrap:wrap;gap:8px">
+          <span style="font-size:12px;color:var(--text3)">明日無派車</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 舊的 today-reminder（保留 id 避免 JS 錯誤，隱藏不用） -->
+    <div id="today-reminder" style="display:none"></div>
+    <!-- 我的待審班次（預約人員才看得到） -->
+    <div id="my-pending-panel" style="display:none;margin-bottom:14px">
+      <div style="background:rgba(37,99,235,.05);border:1px solid rgba(37,99,235,.2);border-radius:10px;padding:12px 16px">
+        <div style="font-size:12px;font-weight:600;color:var(--blue);margin-bottom:8px">📤 我送審的班次（等待管理員核准）</div>
+        <div id="my-pending-list"></div>
+      </div>
+    </div>
+
+    <!-- 待審核班次（管理員才看得到） -->
+    <div id="pending-panel" style="display:none;margin-bottom:14px">
+      <div style="background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.25);border-radius:10px;padding:12px 16px">
+        <div style="font-size:12px;font-weight:600;color:var(--blue);margin-bottom:10px">
+          ⏳ 待審核班次 <span id="pending-count" class="badge bg-blue" style="margin-left:6px"></span>
+        </div>
+        <div id="pending-list"></div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-8 mb-12">
+      <div><div class="page-title">派車紀錄</div><div class="page-sub">所有班次資料 · 自動儲存於本機</div></div>
+      <div class="ml-auto flex gap-8">
+        <button class="btn btn-outline btn-sm" onclick="batchCalcMissing()">⚡ 批次補里程</button>
+        <button class="btn btn-teal btn-sm" onclick="openAddModal()">＋ 新增班次</button>
+      </div>
+    </div>
+
+    <div class="stats-grid" style="grid-template-columns:repeat(5,1fr)">
+      <div class="stat"><div class="stat-lbl">總筆數</div><div class="stat-val text-teal" id="s-total">0</div><div class="stat-note">所有紀錄</div></div>
+      <div class="stat"><div class="stat-lbl">AWQ-7565</div><div class="stat-val" style="color:var(--blue)" id="s-awq">0</div><div class="stat-note">筆</div></div>
+      <div class="stat"><div class="stat-lbl">BYH-3308</div><div class="stat-val" style="color:var(--purple)" id="s-byh">0</div><div class="stat-note">筆</div></div>
+      <div class="stat"><div class="stat-lbl">缺里程數</div><div class="stat-val" style="color:var(--amber)" id="s-missing">0</div><div class="stat-note">筆待補</div></div>
+      <div class="stat"><div class="stat-lbl">尚未照會</div><div class="stat-val" style="color:var(--red)" id="s-noref">0</div><div class="stat-note">筆無法派車</div></div>
+    </div>
+
+    <div class="flex gap-8 mb-12 items-center" style="flex-wrap:wrap">
+      <input class="search-inp" style="max-width:200px;margin:0" id="d-search" placeholder="搜尋個案姓名…" oninput="renderDispatch()">
+      <select class="search-inp" style="max-width:160px;margin:0;flex:none" id="d-vehicle" onchange="renderDispatch()">
+        <option value="">全部車輛</option>
+        <option value="AWQ7565">AWQ-7565</option>
+        <option value="BYH3308">BYH-3308</option>
+      </select>
+      <select class="search-inp" style="max-width:160px;margin:0;flex:none" id="d-month" onchange="renderDispatch()">
+        <option value="">全部月份</option>
+      </select>
+      <select class="search-inp" style="max-width:160px;margin:0;flex:none" id="d-km-filter" onchange="renderDispatch()">
+        <option value="">全部</option>
+        <option value="missing">缺里程數</option>
+        <option value="ok">有里程數</option>
+      </select>
+      <button class="btn btn-outline btn-sm" id="sort-btn" onclick="toggleSort()" title="切換日期排序">📅 日期 ↓</button>
+      <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 匯出CSV</button>
+    </div>
+
+    <!-- 選取工具列（有勾選才出現） -->
+    <div id="sel-toolbar" style="display:none;align-items:center;gap:10px;padding:8px 14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;margin-bottom:12px;">
+      <span style="font-size:13px;font-weight:600;color:var(--red)" id="sel-count">已選取 0 筆</span>
+      <button class="btn btn-red btn-sm" onclick="deleteSelected()">🗑 刪除選取</button>
+      <button class="btn btn-ghost btn-sm" onclick="clearSelection()">✕ 取消選取</button>
+    </div>
+
+    <div class="card">
+      <div style="overflow-x:auto">
+        <table class="tbl">
+          <thead><tr>
+            <th style="width:36px;text-align:center">
+              <input type="checkbox" id="select-all-cb" onchange="toggleSelectAll(this.checked)"
+                style="width:15px;height:15px;accent-color:var(--red);cursor:pointer" title="全選／取消全選">
+            </th>
+            <th>接送日期</th><th>接送時間</th><th>個案姓名</th><th>身分證</th><th>身份別</th>
+            <th>出發地址</th><th>目的地址</th>
+            <th>公里數</th><th>載客數</th><th>自付額</th>
+            <th>服務需求</th><th>註記</th><th>照會</th><th>收費</th><th>車輛</th><th>司機</th><th></th>
+          </tr></thead>
+          <tbody id="dispatch-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 個案查詢 ══════════ -->
+<div class="view" id="view-case" style="flex-direction:row">
+  <div style="width:240px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;padding:12px 10px;">
+    <div class="flex items-center gap-8 mb-8">
+      <div style="font-size:12px;font-weight:600;color:var(--text2)">個案列表</div>
+      <button class="btn btn-teal btn-xs ml-auto" onclick="openCaseProfileModal(null)">＋ 新增</button>
+    </div>
+    <div class="search-row" style="margin-bottom:8px"><input class="search-inp" id="case-search" placeholder="搜尋姓名…" oninput="renderCaseList()"></div>
+    <div style="overflow-y:auto;flex:1" id="case-list"></div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:18px" id="case-detail">
+    <div style="display:flex;align-items:center;justify-content:center;height:200px;color:var(--text3)">← 請選擇個案</div>
+  </div>
+</div>
+
+<!-- ══════════ DA01 表單 ══════════ -->
+<div class="view" id="view-form" style="flex-direction:row">
+  <div class="sidebar">
+    <div class="side-lbl">步驟</div>
+    <div class="side-item active" id="s1nav"><span class="side-icon">1️⃣</span>選個案</div>
+    <div class="side-item" id="s2nav"><span class="side-icon">2️⃣</span>選月份</div>
+    <div class="side-item" id="s3nav"><span class="side-icon">3️⃣</span>預覽列印</div>
+    <div class="side-divider"></div>
+    <div style="padding:8px 9px;font-size:11px;color:var(--text2);line-height:1.85" id="form-info">尚未選擇個案</div>
+  </div>
+  <div class="content">
+    <div id="fstep1">
+      <div class="page-title mb-8">DA01 表單印製</div>
+      <div class="page-sub">選個案 → 選月份 → 自動套入資料 → 列印正反面</div>
+      <div class="search-row"><input class="search-inp" id="form-search" placeholder="搜尋個案…" oninput="renderFormCaseList()"></div>
+      <div id="form-case-list"></div>
+    </div>
+    <div id="fstep2" style="display:none">
+      <div class="page-title mb-8">選擇月份與列印設定</div>
+      <div class="month-chips" id="month-chips"></div>
+      <div class="card" style="max-width:500px">
+        <div class="card-head"><span class="card-title">⚙️ 列印設定</span></div>
+        <div class="card-body">
+          <div class="form-grid fg2">
+            <div class="fld"><label>列印車號</label>
+              <select id="print-veh"><option value="AWQ-7565">AWQ-7565</option><option value="BYH-3308">BYH-3308</option></select>
+            </div>
+            <div class="fld"><label>檢核人員</label><input type="text" id="print-checker" placeholder="督導姓名"></div>
+          </div>
+          <div class="fld mb-12"><label>備用備註</label><textarea id="print-note" placeholder="選填"></textarea></div>
+          <div class="flex gap-8">
+            <button class="btn btn-ghost" onclick="goFormStep(1)">← 返回</button>
+            <button class="btn btn-teal" style="flex:1" onclick="goFormStep(3)">➡ 預覽表單</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="fstep3" style="display:none">
+      <div class="flex items-center gap-8 mb-12">
+        <div class="page-title" style="margin:0">表單預覽</div>
+        <div class="ml-auto flex gap-8">
+          <button class="btn btn-ghost" onclick="goFormStep(2)">← 返回</button>
+          <button class="btn btn-outline btn-sm" onclick="downloadDocx()">📄 下載 Word</button>
+          <button class="btn btn-teal" onclick="printForm()">🖨 列印 / 存PDF</button>
+        </div>
+      </div>
+      <div class="note-box"><b>⚠ 列印說明</b>派案單（正面）＋ 交通接送表（背面），建議雙面列印。體溫、簽章請手填。</div>
+      <div id="form-preview"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 匯入資料 ══════════ -->
+<div class="view" id="view-import" style="flex-direction:column">
+  <div class="content" style="max-width:760px">
+    <div class="page-title mb-8">📂 匯入 Google Sheet 資料</div>
+    <div class="page-sub">直接上傳 Google Sheet 的 <strong>.xlsx</strong> 檔案，一次匯入兩個分頁</div>
+
+    <div class="info-box mb-12">
+      <b>📋 匯出步驟（每月一次，超簡單）</b>
+      <div style="line-height:2.2;margin-top:6px">
+        <div>① 開啟你的 Google Sheet</div>
+        <div>② 點上方選單 → <strong>檔案 → 下載 → Microsoft Excel（.xlsx）</strong></div>
+        <div>③ 把下載的 .xlsx 檔案上傳到下方</div>
+        <div>④ 系統自動讀取 <strong>AWQ7565</strong> 和 <strong>BYH3308</strong> 兩個分頁</div>
+      </div>
+    </div>
+
+    <div class="card mb-12">
+      <div class="card-head"><span class="card-title">📊 上傳 Excel 檔案（.xlsx）</span><span id="xlsx-badge"></span></div>
+      <div class="card-body">
+        <div class="drop-zone" id="drop-xlsx" onclick="document.getElementById('file-xlsx').click()"
+          ondragover="dragOver(event,'drop-xlsx')" ondragleave="dragLeave('drop-xlsx')" ondrop="dropXlsx(event)">
+          <div class="drop-icon">📊</div>
+          <div class="drop-text">點擊或拖曳 Google Sheet 匯出的 .xlsx 檔案</div>
+          <div class="drop-sub">系統自動識別 AWQ7565 / BYH3308 分頁並匯入</div>
+        </div>
+        <input type="file" id="file-xlsx" accept=".xlsx,.xls" style="display:none" onchange="handleXlsx(event)">
+        <div id="preview-xlsx"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="card-title">⚠️ 危險區域</span></div>
+      <div class="card-body">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:10px">清除所有本機儲存的資料（無法復原）</div>
+        <button class="btn btn-red" onclick="clearAllData()">🗑 清除所有資料</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 設定 ══════════ -->
+<div class="view" id="view-settings" style="flex-direction:column">
+  <div class="content" style="max-width:760px">
+    <div class="page-title mb-8">⚙️ 系統設定</div>
+
+    <!-- 修改我的密碼（所有人都看得到） -->
+    <div class="card mb-12" id="settings-my-password">
+      <div class="card-head"><span class="card-title">🔑 修改我的密碼</span></div>
+      <div class="card-body">
+        <div class="form-grid fg2">
+          <div class="fld"><label>新密碼</label><input type="password" id="my-new-pass" placeholder="輸入新密碼"></div>
+          <div class="fld"><label>確認新密碼</label><input type="password" id="my-confirm-pass" placeholder="再次輸入新密碼"></div>
+        </div>
+        <button class="btn btn-teal" onclick="changeMyPassword()">✓ 更新密碼</button>
+      </div>
+    </div>
+
+    <!-- 以下只有管理員看得到 -->
+    <div id="settings-admin-only">
+      <!-- 不得約車日期 -->
+      <div class="card mb-12">
+        <div class="card-head"><span class="card-title">🚫 不得約車日期設定</span><button class="btn btn-teal btn-sm" onclick="openBlockedModal()">＋ 新增</button></div>
+        <div class="card-body">
+          <div style="font-size:12px;color:var(--text2);margin-bottom:10px">設定後，在此期間的班次將以警示標示（司機休假、車輛保養、國定假日等）</div>
+          <div id="blocked-list"></div>
+        </div>
+      </div>
+
+      <!-- 司機輪班表 -->
+      <div class="card mb-12">
+        <div class="card-head"><span class="card-title">🚌 司機輪班表</span><button class="btn btn-teal btn-sm" onclick="openRosterModal()">✏ 編輯</button></div>
+        <div class="card-body">
+          <div id="roster-preview" style="font-size:12px;color:var(--text2)">點「編輯」設定每月司機班別</div>
+        </div>
+      </div>
+
+      <!-- 帳號管理 -->
+      <div class="card mb-12">
+        <div class="card-head"><span class="card-title">👥 帳號管理</span></div>
+        <div class="card-body">
+          <div id="settings-accounts-list" style="margin-bottom:14px"></div>
+          <div style="border-top:1px solid var(--border);padding-top:12px;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px">新增帳號</div>
+          <div class="form-grid fg2">
+            <div class="fld"><label>帳號</label><input type="text" id="s-new-user" placeholder="帳號名稱"></div>
+            <div class="fld"><label>密碼</label><input type="password" id="s-new-pass" placeholder="密碼"></div>
+          </div>
+          <div class="form-grid fg2">
+            <div class="fld"><label>顯示名稱</label><input type="text" id="s-new-display" placeholder="如：王小明"></div>
+            <div class="fld"><label>角色</label>
+              <select id="s-new-role">
+                <option value="admin">管理員（全功能）</option>
+                <option value="staff">預約人員</option>
+                <option value="driver">司機</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-teal" onclick="addAccountFromSettings()">＋ 新增帳號</button>
+        </div>
+      </div>
+
+      <!-- 強制登出 -->
+      <div class="card mb-12">
+        <div class="card-head"><span class="card-title">🔴 強制登出其他帳號</span></div>
+        <div class="card-body">
+          <div style="font-size:12px;color:var(--text2);margin-bottom:10px">強制特定帳號在下次操作時被要求重新登入</div>
+          <div id="force-logout-list"></div>
+        </div>
+      </div>
+
+      <!-- 操作紀錄 -->
+      <div class="card mb-12">
+        <div class="card-head">
+          <span class="card-title">📋 操作紀錄</span>
+          <button class="btn btn-red btn-sm" onclick="clearAuditLog()">清除紀錄</button>
+        </div>
+        <div class="card-body" style="max-height:320px;overflow-y:auto;padding:0">
+          <div id="audit-log-list" style="font-size:11px"></div>
+        </div>
+      </div>
+
+    </div><!-- /settings-admin-only -->
+
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- ══════ 不得約車日期 Modal ══════ -->
+<div class="modal-bg" id="modal-blocked">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-top">
+      <span style="font-size:14px;font-weight:700">🚫 新增不得約車日期</span>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-blocked')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid fg2">
+        <div class="fld"><label>開始日期</label><input type="date" id="bl-start"></div>
+        <div class="fld"><label>結束日期</label><input type="date" id="bl-end"></div>
+      </div>
+      <div class="fld mb-12"><label>原因說明</label><input type="text" id="bl-reason" placeholder="如：司機休假、車輛保養、國定假日…"></div>
+      <div class="fld mb-12"><label>影響車輛</label>
+        <select id="bl-vehicle">
+          <option value="ALL">全部車輛</option>
+          <option value="AWQ7565">AWQ-7565</option>
+          <option value="BYH3308">BYH-3308</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modal-blocked')">取消</button>
+      <button class="btn btn-teal" onclick="saveBlockedDate()">✓ 儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 司機輪班表 Modal ══════ -->
+<div class="modal-bg" id="modal-roster">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-top">
+      <span style="font-size:14px;font-weight:700">🚌 司機輪班表設定</span>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-roster')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:12px">
+        設定每位司機每月的班別（b班小灰/2班小白/t班小紅）
+      </div>
+      <div style="overflow-x:auto">
+        <table class="tbl" style="font-size:12px" id="roster-table">
+          <thead><tr>
+            <th style="min-width:80px">司機</th>
+            <th>1月</th><th>2月</th><th>3月</th><th>4月</th><th>5月</th><th>6月</th>
+            <th>7月</th><th>8月</th><th>9月</th><th>10月</th><th>11月</th><th>12月</th>
+          </tr></thead>
+          <tbody id="roster-body"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+        <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px">新增司機</div>
+        <div class="flex gap-8">
+          <input type="text" id="roster-new-name" placeholder="司機姓名" style="max-width:160px">
+          <button class="btn btn-teal btn-sm" onclick="addRosterDriver()">＋ 新增</button>
+        </div>
+      </div>
+      <div style="margin-top:10px;font-size:11px;color:var(--text3)">
+        班別說明：b班（小灰）AWQ-7565 | 2班（小白）BYH-3308 | t班（小紅）BES-0752
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modal-roster')">取消</button>
+      <button class="btn btn-teal" onclick="saveRoster()">✓ 儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 修改密碼 Modal ══════ -->
+<div class="modal-bg" id="modal-edit-account">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-top">
+      <span style="font-size:14px;font-weight:700" id="edit-account-title">修改帳號</span>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-edit-account')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-account-idx">
+      <div class="fld mb-12"><label>顯示名稱</label><input type="text" id="edit-display"></div>
+      <div class="fld mb-12"><label>新密碼 <span style="color:var(--text3);font-size:10px">（留空則不變更）</span></label><input type="password" id="edit-pass" placeholder="輸入新密碼"></div>
+      <div class="fld mb-12"><label>角色</label>
+        <select id="edit-role">
+          <option value="admin">管理員</option>
+          <option value="staff">預約人員</option>
+          <option value="driver">司機</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit-account')">取消</button>
+      <button class="btn btn-teal" onclick="saveEditAccount()">✓ 儲存</button>
+    </div>
+  </div>
+</div>
+<!-- ══════ 待審核班次 Modal ══════ -->
+<div class="modal-bg" id="modal-pending">
+  <div class="modal" style="max-width:820px">
+    <div class="modal-top">
+      <span style="font-size:14px;font-weight:700">⏳ 待審核班次</span>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-pending')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:12px">以下班次由預約人員提交，請審核是否可接送</div>
+      <div id="pending-list"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modal-pending')">關閉</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 刪除原因 Modal ══════ -->
+<div class="modal-bg" id="modal-delete-reason">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-top">
+      <span style="font-size:14px;font-weight:700">🗑 請選擇刪除原因</span>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-delete-reason')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:12px" id="delete-reason-desc">刪除後資料將移至「已刪除紀錄」，可隨時查閱</div>
+      <div class="fld mb-12">
+        <label>刪除原因</label>
+        <select id="delete-reason-select" style="font-size:13px" onchange="document.getElementById('delete-other-row').style.display=this.value==='其他原因'?'':'none'">
+          <option value="取消車趟">取消車趟</option>
+          <option value="服務未遇">服務未遇</option>
+          <option value="中心取消">中心取消</option>
+          <option value="登入錯誤">登入錯誤（資料輸入錯誤）</option>
+          <option value="其他原因">其他原因</option>
+        </select>
+      </div>
+      <div class="fld" id="delete-other-row" style="display:none">
+        <label>請說明原因</label>
+        <input type="text" id="delete-other-text" placeholder="請輸入原因">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modal-delete-reason')">取消</button>
+      <button class="btn btn-red" onclick="confirmDeleteWithReason()">確認刪除</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 已刪除紀錄 Modal ══════ -->
+<div class="modal-bg" id="modal-deleted-records">
+  <div class="modal" style="max-width:820px">
+    <div class="modal-top">
+      <span style="font-size:14px;font-weight:700">🗂 已刪除紀錄</span>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-deleted-records')">✕</button>
+    </div>
+    <div class="modal-body" style="max-height:500px;overflow-y:auto">
+      <div id="deleted-records-list"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modal-deleted-records')">關閉</button>
+    </div>
+  </div>
+</div>
+
+<div id="login-screen" style="display:none;position:fixed;inset:0;background:linear-gradient(135deg,#e8f4f1 0%,#f0f7ff 100%);z-index:500;flex-direction:column;align-items:center;justify-content:center">
+  <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:36px 44px;width:380px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.08)">
+    <div style="font-size:32px;margin-bottom:8px">🚌</div>
+    <div style="font-size:22px;font-weight:700;color:var(--teal);margin-bottom:4px">春社 DA01</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:28px">全成社會福利基金會 · 交通接送管理系統</div>
+    <div class="fld mb-12">
+      <label style="text-align:left">帳號</label>
+      <input type="text" id="login-user" placeholder="輸入帳號" autocomplete="username">
+    </div>
+    <div class="fld mb-12">
+      <label style="text-align:left">密碼</label>
+      <input type="password" id="login-pass" placeholder="輸入密碼" autocomplete="current-password">
+    </div>
+    <!-- 數學驗證碼 -->
+    <div class="fld mb-16">
+      <label style="text-align:left">驗證碼 <span style="color:var(--text3);font-size:10px">（請計算下方算式）</span></label>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div id="captcha-display" style="flex:1;background:linear-gradient(135deg,#e8f4f1,#dde8f5);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:20px;font-weight:700;font-family:'IBM Plex Mono';letter-spacing:3px;color:var(--text);user-select:none;text-align:center"></div>
+        <button type="button" onclick="refreshCaptcha()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;cursor:pointer;font-size:16px;color:var(--text2)" title="換一題">🔄</button>
+      </div>
+      <input type="text" id="login-captcha" placeholder="輸入答案" style="margin-top:8px" onkeydown="if(event.key==='Enter')doLogin()" autocomplete="off" inputmode="numeric">
+    </div>
+    <button class="btn btn-teal w100" style="padding:10px;font-size:14px" onclick="doLogin()">登入</button>
+    <div id="login-err" style="font-size:12px;color:var(--red);margin-top:10px;min-height:18px"></div>
+    <div id="lockout-timer" style="display:none;font-size:12px;color:var(--red);margin-top:6px"></div>
+  </div>
+</div>
+
+<!-- ══════ 個案基本資料 Modal ══════ -->
+<div class="modal-bg" id="modal-case-profile">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-top">
+      <span style="font-size:14px;font-weight:700" id="case-profile-title">個案基本資料</span>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-case-profile')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid fg2">
+        <div class="fld"><label>個案姓名 *</label><input type="text" id="cp-name" placeholder="姓名"></div>
+        <div class="fld"><label>長照案號</label><input type="text" id="cp-ltcid" placeholder="長照案號"></div>
+      </div>
+      <div class="form-grid fg2">
+        <div class="fld"><label>性別</label>
+          <select id="cp-gender"><option value="">請選擇</option><option value="男">男</option><option value="女">女</option></select>
+        </div>
+        <div class="fld"><label>生日</label><input type="text" id="cp-birth" placeholder="如 1950/01/01 或 民國50年"></div>
+      </div>
+      <div class="form-grid fg2">
+        <div class="fld"><label>身分證字號</label><input type="text" id="cp-pid" placeholder="A123456789"></div>
+        <div class="fld"><label>聯絡電話</label><input type="text" id="cp-phone" placeholder="0912-345-678"></div>
+      </div>
+      <div class="fld mb-12"><label>地址</label><input type="text" id="cp-addr" placeholder="完整居住地址"></div>
+      <div class="fld mb-12"><label>緊急聯絡人</label><input type="text" id="cp-emergency" placeholder="姓名 關係 電話"></div>
+      <div class="form-grid fg2">
+        <div class="fld"><label>年齡層</label>
+          <select id="cp-age-cat">
+            <option value="">請選擇</option>
+            <option value="65歲以上老人">65歲以上老人</option>
+            <option value="55歲-64歲原住民">55-64歲原住民</option>
+            <option value="64歲以下身障">64歲以下身障</option>
+            <option value="失智者">失智者</option>
+          </select>
+        </div>
+        <div class="fld"><label>經濟別</label>
+          <select id="cp-identity">
+            <option value="">請選擇</option>
+            <option value="一般戶">一般戶</option>
+            <option value="中低收入戶">中低收入戶</option>
+            <option value="低收入戶">低收入戶</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid fg2">
+        <div class="fld"><label>失能等級</label>
+          <select id="cp-disability">
+            <option value="">請選擇</option>
+            <option value="2">第2級</option><option value="3">第3級</option>
+            <option value="4">第4級</option><option value="5">第5級</option>
+            <option value="6">第6級</option><option value="7">第7級</option>
+            <option value="8">第8級</option>
+          </select>
+        </div>
+        <div class="fld"><label>個管單位</label><input type="text" id="cp-unit" placeholder="個管單位名稱"></div>
+      </div>
+      <div class="fld mb-12"><label>備註（特殊需求、輔具等）</label><textarea id="cp-note" style="min-height:56px" placeholder="如：使用輪椅、需陪同、失智、注意事項…"></textarea></div>
+      <div class="form-grid fg2">
+        <div class="fld"><label>常用出發地址</label><input type="text" id="cp-default-from" placeholder="通常從哪裡出發"></div>
+        <div class="fld"><label>常用目的地址</label><input type="text" id="cp-default-to" placeholder="通常去哪裡"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-red btn-sm" id="cp-delete-btn" onclick="deleteCaseProfile()" style="margin-right:auto;display:none">🗑 刪除個案</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-case-profile')">取消</button>
+      <button class="btn btn-teal" onclick="saveCaseProfile()">✓ 儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 帳號管理 Modal ══════ -->
+<div class="modal-bg" id="modal-accounts">
+  <div class="modal" style="max-width:580px">
+    <div class="modal-top">
+      <span style="font-size:14px;font-weight:700">👥 帳號管理</span>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-accounts')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="accounts-list" style="margin-bottom:16px"></div>
+      <div style="border-top:1px solid var(--border);padding-top:14px;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px">新增帳號</div>
+      <div class="form-grid fg2">
+        <div class="fld"><label>帳號</label><input type="text" id="new-user" placeholder="帳號名稱"></div>
+        <div class="fld"><label>密碼</label><input type="password" id="new-pass" placeholder="密碼"></div>
+      </div>
+      <div class="fld mb-12"><label>角色</label>
+        <select id="new-role">
+          <option value="admin">管理員（全功能）</option>
+          <option value="staff">預約人員（可新增/編輯派車）</option>
+          <option value="driver">司機（只能查看今日行程）</option>
+        </select>
+      </div>
+      <div class="fld mb-12"><label>顯示名稱</label><input type="text" id="new-display" placeholder="如：王小明"></div>
+      <button class="btn btn-teal" onclick="addAccount()">＋ 新增帳號</button>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modal-accounts')">關閉</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 新增/編輯班次 MODAL ══════════ -->
+<div class="modal-bg" id="modal-trip">
+  <div class="modal">
+    <div class="modal-top">
+      <span style="font-size:14px;font-weight:700" id="modal-title">＋ 新增班次</span>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-trip')">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <input type="hidden" id="m-edit-id">
+
+      <!-- 依照 Google Sheet 欄位順序 -->
+
+      <!-- 註記 -->
+      <div class="fld mb-12">
+        <label>註記 <span style="color:var(--text3);font-size:10px">（取消、服務未遇等突發狀況）</span></label>
+        <input type="text" id="m-remark" placeholder="例：個案取消、服務未遇、天候因素…">
+      </div>
+
+      <!-- 接送日期 / 接送時間 / 車輛 -->
+      <div class="form-grid fg3">
+        <div class="fld"><label>接送日期 <span style="color:var(--red)">*</span></label><input type="date" id="m-date"></div>
+        <div class="fld"><label>接送時間 <span style="color:var(--red)">*</span></label><input type="time" id="m-time"></div>
+        <div class="fld"><label>搭乘車輛 <span style="color:var(--red)">*</span></label>
+          <select id="m-vehicle"><option value="AWQ7565">AWQ-7565</option><option value="BYH3308">BYH-3308</option></select>
+        </div>
+      </div>
+
+      <!-- 個案姓名 / 個案身分證 -->
+      <div class="form-grid fg2">
+        <div class="fld"><label>個案姓名 <span style="color:var(--red)">*</span></label><input type="text" id="m-name" placeholder="個案姓名"></div>
+        <div class="fld"><label>個案身分證</label><input type="text" id="m-pid" placeholder="A123456789"></div>
+      </div>
+
+      <!-- 出發地址 / 目的地址 -->
+      <div class="form-grid fg2">
+        <div class="fld"><label>出發地址 <span style="color:var(--red)">*</span></label><input type="text" id="m-from" placeholder="完整地址"></div>
+        <div class="fld"><label>目的地址 <span style="color:var(--red)">*</span></label><input type="text" id="m-to" placeholder="完整地址或機構名稱"></div>
+      </div>
+
+      <!-- 載客人數 / 陪同者姓名 / 陪同者電話 -->
+      <div class="form-grid fg3">
+        <div class="fld"><label>載客人數 <span style="color:var(--red)">*</span> <span style="color:var(--text3);font-size:10px">（含陪同者）</span></label><input type="number" id="m-passengers" placeholder="1" min="1"></div>
+        <div class="fld"><label>陪同者姓名</label><input type="text" id="m-companion" placeholder="選填"></div>
+        <div class="fld"><label>陪同者電話</label><input type="text" id="m-companion-tel" placeholder="選填"></div>
+      </div>
+
+      <!-- 服務需求 -->
+      <div class="fld mb-12">
+        <label>服務需求</label>
+        <textarea id="m-note" placeholder="特殊需求、輔具、注意事項…" style="min-height:48px"></textarea>
+      </div>
+
+      <!-- 公里數 / 總額度 / 自付額 -->
+      <div class="form-grid fg3">
+        <div class="fld"><label>公里數 <span style="color:var(--text3);font-size:10px">（只車趟公里數）</span></label><input type="number" id="m-km" placeholder="自動計算或手動輸入" step="0.1"></div>
+        <div class="fld"><label>總額度 <span style="color:var(--text3);font-size:10px">（車趟總金額）</span></label><input type="number" id="m-total" placeholder="0" step="1"></div>
+        <div class="fld"><label>自付額 <span style="color:var(--text3);font-size:10px">（部分負擔）</span></label><input type="number" id="m-copay" placeholder="0" step="1"></div>
+      </div>
+
+      <!-- 身份別 -->
+      <div class="fld mb-12">
+        <label>身份別</label>
+        <select id="m-identity" style="max-width:200px">
+          <option value="">請選擇</option>
+          <option value="一般戶">一般戶</option>
+          <option value="中低收入戶">中低收入戶（中低收）</option>
+          <option value="低收入戶">低收入戶（低收）</option>
+        </select>
+      </div>
+
+      <!-- 收費 & 照會（僅管理員） -->
+      <div class="form-grid fg2" id="m-fee-referral-section">
+        <div class="fld">
+          <label>收費確認 <span style="color:var(--text3);font-size:10px">（確認已向司機收到代收款）</span></label>
+          <div id="m-fee-box" onclick="toggleFee()" style="display:flex;align-items:center;gap:10px;height:48px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:0 14px;cursor:pointer;transition:all .18s">
+            <input type="checkbox" id="m-fee" style="width:17px;height:17px;accent-color:var(--green);cursor:pointer;pointer-events:none">
+            <div>
+              <div style="font-size:12px;font-weight:600" id="m-fee-main">尚未確認收費</div>
+              <div style="font-size:10px;color:var(--text3)" id="m-fee-sub">點擊確認已收到代收款</div>
+            </div>
+          </div>
+        </div>
+        <div class="fld">
+          <label>照會 <span style="color:var(--red);font-size:10px">★ 未照會無法產出派車單</span></label>
+          <div id="m-referral-box" onclick="toggleReferral()" style="display:flex;align-items:center;gap:10px;height:48px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:0 14px;cursor:pointer;transition:all .18s">
+            <input type="checkbox" id="m-referral" style="width:17px;height:17px;accent-color:var(--teal);cursor:pointer;pointer-events:none">
+            <div>
+              <div style="font-size:12px;font-weight:600" id="m-referral-main">尚未照會</div>
+              <div style="font-size:10px;color:var(--text3)" id="m-referral-sub">個管需先照會，才可派車</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 資料異動紀錄（編輯時才顯示） -->
+    <div id="m-audit-section" style="display:none;margin:0 18px 14px;border:1px solid var(--border);border-radius:8px;overflow:hidden">
+      <div style="background:var(--bg3);padding:7px 12px;font-size:11px;font-weight:600;color:var(--text2);border-bottom:1px solid var(--border)">📋 資料異動紀錄</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;font-size:12px">
+        <div style="padding:8px 12px;background:#f8fafc;color:var(--text3);border-right:1px solid var(--border);border-bottom:1px solid var(--border)">建檔日期</div>
+        <div style="padding:8px 12px;background:#f8fafc;color:var(--text3);border-bottom:1px solid var(--border)">建檔人員</div>
+        <div id="m-audit-created-at" style="padding:8px 12px;font-family:'IBM Plex Mono';border-right:1px solid var(--border)" class="m-audit-row-1">—</div>
+        <div id="m-audit-created-by" style="padding:8px 12px" class="m-audit-row-1">—</div>
+        <div style="padding:8px 12px;background:#f8fafc;color:var(--text3);border-right:1px solid var(--border);border-top:1px solid var(--border)" id="m-audit-upd-lbl-l">最後修改日期</div>
+        <div style="padding:8px 12px;background:#f8fafc;color:var(--text3);border-top:1px solid var(--border)" id="m-audit-upd-lbl-r">最後修改人員</div>
+        <div id="m-audit-updated-at" style="padding:8px 12px;font-family:'IBM Plex Mono';border-right:1px solid var(--border);border-top:1px solid var(--border)">—</div>
+        <div id="m-audit-updated-by" style="padding:8px 12px;border-top:1px solid var(--border)">—</div>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modal-trip')">取消</button>
+      <button class="btn btn-teal" onclick="saveTrip()">✓ 儲存</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════
+// STORAGE — Google Drive 雲端 + localStorage 備份
+// ═══════════════════════════════════
+const GAS_STORE = 'https://script.google.com/macros/s/AKfycbwtnEjcQdGoqI-kkSKxzWJfRzL2qyUqnkz0KA0awwfxuhbVdtdQXsS3o74FO2NYbHAadA/exec';
+const LOCAL_KEY = 'chun_da01_records';
+let cloudSyncTimer = null;
+let isSyncing = false;
+
+// 從 localStorage 讀取（立即可用）
+function loadLocal() {
+  try { return JSON.parse(localStorage.getItem(LOCAL_KEY)) || []; }
+  catch(e) { return []; }
+}
+
+// 存到 localStorage（立即）+ 排程上傳到雲端
+function saveData(records) {
+  localStorage.setItem(LOCAL_KEY, JSON.stringify(records));
+  document.getElementById('record-count').textContent = records.length;
+  updateCloudBadge('pending');
+  clearTimeout(cloudSyncTimer);
+  cloudSyncTimer = setTimeout(() => uploadToCloud(records), 1500);
+}
+
+// 上傳到 Google Drive（用 POST 避免 GET URL 長度限制）
+async function uploadToCloud(records) {
+  if (isSyncing) return;
+  isSyncing = true;
+  updateCloudBadge('syncing');
+  try {
+    const data = { records, updated: new Date().toISOString() };
+    const body = JSON.stringify({ action: 'save', data });
+
+    // 嘗試 POST（資料量大時 GET URL 會被截斷）
+    let result;
+    try {
+      const r = await fetch(GAS_STORE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' }, // text/plain 不觸發 CORS preflight
+        body
+      });
+      result = await r.json();
+    } catch(postErr) {
+      // POST 失敗時 fallback 到 GET（資料量小時）
+      const encoded = encodeURIComponent(JSON.stringify(data));
+      const r = await fetch(GAS_STORE + '?action=save&data=' + encoded);
+      result = await r.json();
+    }
+
+    if (result && result.success) {
+      updateCloudBadge('ok');
+    } else {
+      console.warn('Cloud save result:', result);
+      updateCloudBadge('error');
+    }
+  } catch(e) {
+    console.warn('Cloud upload error:', e);
+    updateCloudBadge('error');
+  }
+  isSyncing = false;
+}
+
+// 從 Google Drive 載入
+async function loadFromCloud() {
+  updateCloudBadge('syncing');
+  try {
+    const r = await fetch(GAS_STORE + '?action=load');
+    const result = await r.json();
+    if (result.records) {
+      if (result.records.length > 0) {
+        // 合併：雲端為主，保留本機有而雲端沒有的新紀錄
+        const cloudIds = new Set(result.records.map(r => r.id));
+        const localOnly = loadLocal().filter(r => !cloudIds.has(r.id));
+        RECORDS = [...result.records, ...localOnly];
+      } else {
+        // 雲端是空的，也要更新（新電腦第一次開啟）
+        RECORDS = loadLocal();
+      }
+      localStorage.setItem(LOCAL_KEY, JSON.stringify(RECORDS));
+      updateCloudBadge('ok');
+      return true;
+    } else {
+      updateCloudBadge('ok');
+      return false;
+    }
+  } catch(e) {
+    console.warn('Cloud load error:', e);
+    updateCloudBadge('error');
+    return false;
+  }
+}
+
+function loadLocal() {
+  try { return JSON.parse(localStorage.getItem(LOCAL_KEY)) || []; }
+  catch(e) { return []; }
+}
+
+function updateCloudBadge(status) {
+  const el = document.getElementById('cloud-badge');
+  if (!el) return;
+  const icons = { ok:'☁️ 已同步', syncing:'⏳ 同步中…', pending:'💾 待同步', error:'⚠️ 同步失敗' };
+  const colors = { ok:'var(--green)', syncing:'var(--amber)', pending:'var(--text3)', error:'var(--red)' };
+  el.textContent = icons[status] || '';
+  el.style.color = colors[status] || 'var(--text3)';
+}
+
+// 強制把本機所有資料上傳到雲端
+async function forceUpload() {
+  if (!confirm(`確定將本機 ${RECORDS.length} 筆資料強制上傳到雲端？\n（這會覆蓋雲端現有資料）`)) return;
+  isSyncing = false; // 解除鎖定
+  toast('⬆ 上傳中…');
+  await uploadToCloud(RECORDS);
+  toast(`✅ 已上傳 ${RECORDS.length} 筆到雲端`);
+}
+
+// 手動同步
+async function manualSync() {
+  toast('⏳ 從雲端同步中…');
+  const loaded = await loadFromCloud();
+  updateStats();
+  renderDispatch();
+  populateMonthFilter();
+  renderCaseList();
+  renderFormCaseList();
+  toast(loaded ? `✅ 雲端同步完成，共 ${RECORDS.length} 筆` : '☁️ 雲端無資料，使用本機資料');
+}
+
+function loadData() {
+  try { return JSON.parse(localStorage.getItem(LOCAL_KEY)) || []; }
+  catch(e) { return []; }
+}
+
+let RECORDS = loadData();
+
+// ═══════════════════════════════════
+// UTILS
+// ═══════════════════════════════════
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function rowDate(r) { return String(r.date || ''); }
+function mobileNav(v, el) {
+  document.querySelectorAll('.mnav').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  // Also sync desktop nav
+  const navBtns = document.querySelectorAll('.nav-btn');
+  const viewMap = ['dispatch','case','form','import','settings'];
+  navBtns.forEach((btn,i) => btn.classList.toggle('active', viewMap[i]===v));
+  // Switch view
+  document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
+  const vEl = document.getElementById('view-'+v);
+  if (vEl) vEl.classList.add('active');
+  // Trigger data load
+  if (v==='dispatch') { updateStats(); renderDispatch(); populateMonthFilter(); renderTodayReminder(); }
+  if (v==='case') renderCaseList();
+  if (v==='form') { renderFormCaseList(); goFormStep(1); }
+  if (v==='settings') {
+    const user = getCurrentUser();
+    if (user && user.role==='admin') { renderBlockedList(); renderRosterPreview(); renderSettingsAccountsList(); renderForceLogoutList(); renderAuditLog(); }
+    else renderSettingsNonAdmin(user);
+  }
+  // Scroll to top on mobile
+  window.scrollTo(0,0);
+}
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+// ═══════════════════════════════════
+// STATS
+// ═══════════════════════════════════
+function updateStats() {
+  const awq = RECORDS.filter(r => r.vehicle === 'AWQ7565').length;
+  const byh = RECORDS.filter(r => r.vehicle === 'BYH3308').length;
+  const missing = RECORDS.filter(r => !r.km && r.from && r.to).length;
+  const noRef = RECORDS.filter(r => !r.referral && !r.remark).length;
+  document.getElementById('s-total').textContent = RECORDS.length;
+  document.getElementById('s-awq').textContent = awq;
+  document.getElementById('s-byh').textContent = byh;
+  document.getElementById('s-missing').textContent = missing;
+  const missingEl = document.getElementById('s-noref');
+  if (missingEl) missingEl.textContent = noRef;
+  document.getElementById('record-count').textContent = RECORDS.length;
+}
+
+function populateMonthFilter() {
+  const months = [...new Set(RECORDS.map(r => rowDate(r).slice(0, 7)).filter(Boolean))].sort().reverse();
+  const sel = document.getElementById('d-month');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">全部月份</option>' +
+    months.map(m => `<option value="${m}" ${m === cur ? 'selected' : ''}>${m}</option>`).join('');
+}
+
+// ═══════════════════════════════════
+// ACCOUNT MANAGEMENT
+// ═══════════════════════════════════
+const ACCOUNTS_KEY = 'chun_accounts';
+const SESSION_KEY = 'chun_session';
+
+function getAccounts() {
+  try { return JSON.parse(localStorage.getItem(ACCOUNTS_KEY)) || getDefaultAccounts(); }
+  catch(e) { return getDefaultAccounts(); }
+}
+function getDefaultAccounts() {
+  return [
+    { user:'admin', pass:'admin123', role:'admin', display:'管理員' },
+    { user:'staff', pass:'staff123', role:'staff', display:'預約人員' },
+    { user:'driver', pass:'driver123', role:'driver', display:'司機' },
+  ];
+}
+function saveAccounts(accounts) { localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts)); }
+function getCurrentUser() {
+  try { return JSON.parse(sessionStorage.getItem(SESSION_KEY)); }
+  catch(e) { return null; }
+}
+
+function formatAuditDt(iso) {
+  if (!iso) return '';
+  try {
+    const d = new Date(iso);
+    return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  } catch(e) { return iso.slice(0,16).replace('T',' '); }
+}
+
+// ═══════════════════════════════════
+// IDLE TIMEOUT (閒置自動登出)
+// ═══════════════════════════════════
+const IDLE_MINUTES = 15;
+let _idleTimer = null;
+let _idleWarnTimer = null;
+
+function resetIdleTimer() {
+  clearTimeout(_idleTimer);
+  clearTimeout(_idleWarnTimer);
+  const user = getCurrentUser();
+  if (!user) return;
+  // Warn at 13 minutes
+  _idleWarnTimer = setTimeout(() => {
+    toast('⚠️ 閒置超過 13 分鐘，即將自動登出…');
+  }, 13 * 60 * 1000);
+  // Logout at 15 minutes
+  _idleTimer = setTimeout(() => {
+    auditLog('自動登出', '閒置超過 ' + IDLE_MINUTES + ' 分鐘');
+    doLogout();
+    toast('🔒 已因閒置自動登出');
+  }, IDLE_MINUTES * 60 * 1000);
+}
+
+function startIdleWatcher() {
+  ['mousemove','keydown','click','touchstart','scroll'].forEach(ev => {
+    document.addEventListener(ev, resetIdleTimer, { passive: true });
+  });
+  resetIdleTimer();
+}
+
+// ═══════════════════════════════════
+// AUDIT LOG (操作紀錄)
+// ═══════════════════════════════════
+const AUDIT_KEY = 'chun_audit_log';
+const AUDIT_MAX = 200;
+
+function auditLog(action, detail) {
+  const user = getCurrentUser();
+  const entry = {
+    ts: new Date().toISOString(),
+    user: user ? user.display : '未登入',
+    role: user ? user.role : '',
+    action,
+    detail: detail || ''
+  };
+  try {
+    const log = JSON.parse(localStorage.getItem(AUDIT_KEY) || '[]');
+    log.unshift(entry);
+    if (log.length > AUDIT_MAX) log.splice(AUDIT_MAX);
+    localStorage.setItem(AUDIT_KEY, JSON.stringify(log));
+  } catch(e) {}
+}
+
+function renderAuditLog() {
+  const el = document.getElementById('audit-log-list');
+  if (!el) return;
+  try {
+    const log = JSON.parse(localStorage.getItem(AUDIT_KEY) || '[]');
+    if (!log.length) {
+      el.innerHTML = '<div style="color:var(--text3);padding:16px;text-align:center">尚無操作紀錄</div>';
+      return;
+    }
+    const roleColors = { admin:'var(--teal)', staff:'var(--blue)', driver:'var(--amber)' };
+    el.innerHTML = log.map(e => {
+      const dt = new Date(e.ts);
+      const dtStr = `${dt.getFullYear()}/${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+      return `<div style="display:flex;align-items:baseline;gap:8px;padding:7px 14px;border-bottom:1px solid var(--border)">
+        <span style="color:var(--text3);white-space:nowrap;font-family:'IBM Plex Mono';font-size:10px">${dtStr}</span>
+        <span style="color:${roleColors[e.role]||'var(--text2)'};font-weight:600;white-space:nowrap">${e.user}</span>
+        <span style="color:var(--text);white-space:nowrap">${e.action}</span>
+        <span style="color:var(--text3);font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.detail}</span>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div style="color:var(--text3);padding:16px">讀取失敗</div>';
+  }
+}
+
+function clearAuditLog() {
+  if (!confirm('確定清除所有操作紀錄？')) return;
+  localStorage.removeItem(AUDIT_KEY);
+  renderAuditLog();
+  toast('已清除操作紀錄');
+}
+
+// ═══════════════════════════════════
+// PASSWORD STRENGTH
+// ═══════════════════════════════════
+function checkPasswordStrength(pass) {
+  if (pass.length < 6) return { ok: false, msg: '密碼至少需要 6 個字元' };
+  if (pass.length < 8) return { ok: true, level: 'weak', msg: '密碼強度：弱（建議加上數字或英文）' };
+  const hasNum = /\d/.test(pass);
+  const hasAlpha = /[a-zA-Z]/.test(pass);
+  const hasSpecial = /[^a-zA-Z0-9]/.test(pass);
+  if (hasNum && hasAlpha && hasSpecial) return { ok: true, level: 'strong', msg: '密碼強度：強 ✓' };
+  if (hasNum && hasAlpha) return { ok: true, level: 'medium', msg: '密碼強度：中（可加入特殊符號更安全）' };
+  return { ok: true, level: 'weak', msg: '密碼強度：弱（建議混合英數字）' };
+}
+
+// ═══════════════════════════════════
+// FORCE LOGOUT
+// ═══════════════════════════════════
+const FORCE_LOGOUT_KEY = 'chun_force_logout';
+
+function renderForceLogoutList() {
+  const el = document.getElementById('force-logout-list');
+  if (!el) return;
+  const accounts = getAccounts();
+  const currentUser = getCurrentUser();
+  const forced = JSON.parse(localStorage.getItem(FORCE_LOGOUT_KEY) || '[]');
+  const roleLabels = { admin:'管理員', staff:'預約人員', driver:'司機' };
+  el.innerHTML = accounts.filter(a => a.user !== (currentUser?.user||'')).map(a => {
+    const isForcedOut = forced.includes(a.user);
+    return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
+      <div style="flex:1;font-size:12px">
+        <span style="font-weight:600">${a.display}</span>
+        <span style="font-size:11px;color:var(--text3);margin-left:6px">${roleLabels[a.role]||''}</span>
+        ${isForcedOut ? '<span style="font-size:10px;color:var(--red);margin-left:6px;font-weight:600">⚠ 已標記強制登出</span>' : ''}
+      </div>
+      ${isForcedOut
+        ? `<button class="btn btn-outline btn-xs" onclick="cancelForceLogout('${a.user}')">解除</button>`
+        : `<button class="btn btn-red btn-xs" onclick="forceLogoutUser('${a.user}','${a.display}')">強制登出</button>`
+      }
+    </div>`;
+  }).join('') || '<div style="color:var(--text3);font-size:12px">沒有其他帳號</div>';
+}
+
+function forceLogoutUser(username, display) {
+  if (!confirm(`確定強制登出「${display}」？對方下次操作時將被要求重新登入。`)) return;
+  const forced = JSON.parse(localStorage.getItem(FORCE_LOGOUT_KEY) || '[]');
+  if (!forced.includes(username)) forced.push(username);
+  localStorage.setItem(FORCE_LOGOUT_KEY, JSON.stringify(forced));
+  auditLog('強制登出', `管理員強制登出 ${display}`);
+  renderForceLogoutList();
+  toast(`已標記強制登出：${display}`);
+}
+
+function cancelForceLogout(username) {
+  const forced = JSON.parse(localStorage.getItem(FORCE_LOGOUT_KEY) || '[]');
+  const updated = forced.filter(u => u !== username);
+  localStorage.setItem(FORCE_LOGOUT_KEY, JSON.stringify(updated));
+  renderForceLogoutList();
+  toast('已解除強制登出標記');
+}
+
+function checkForceLogout() {
+  const user = getCurrentUser();
+  if (!user) return;
+  const forced = JSON.parse(localStorage.getItem(FORCE_LOGOUT_KEY) || '[]');
+  if (forced.includes(user.user)) {
+    // Remove from forced list then logout
+    const updated = forced.filter(u => u !== user.user);
+    localStorage.setItem(FORCE_LOGOUT_KEY, JSON.stringify(updated));
+    auditLog('被強制登出', `帳號 ${user.user} 被管理員強制登出`);
+    doLogout();
+    toast('🔒 您已被管理員強制登出，請重新登入');
+  }
+}
+
+// ═══════════════════════════════════
+// CAPTCHA & LOCKOUT
+// ═══════════════════════════════════
+let _captchaAnswer = 0;
+let _failCount = 0;
+let _lockUntil = 0;
+let _lockTimer = null;
+
+function refreshCaptcha() {
+  const ops = ['+', '+', '+', '-', '×'];
+  const op = ops[Math.floor(Math.random() * ops.length)];
+  let a, b, answer;
+  if (op === '+') {
+    a = Math.floor(Math.random() * 20) + 1;
+    b = Math.floor(Math.random() * 20) + 1;
+    answer = a + b;
+  } else if (op === '-') {
+    a = Math.floor(Math.random() * 20) + 10;
+    b = Math.floor(Math.random() * a) + 1;
+    answer = a - b;
+  } else {
+    a = Math.floor(Math.random() * 9) + 2;
+    b = Math.floor(Math.random() * 9) + 2;
+    answer = a * b;
+  }
+  _captchaAnswer = answer;
+  const el = document.getElementById('captcha-display');
+  if (el) el.textContent = `${a}  ${op}  ${b}  =  ?`;
+  const inp = document.getElementById('login-captcha');
+  if (inp) inp.value = '';
+}
+
+function startLockoutTimer(seconds) {
+  const btn = document.querySelector('#login-screen .btn-teal');
+  const timerEl = document.getElementById('lockout-timer');
+  if (btn) btn.disabled = true;
+  let remaining = seconds;
+  if (_lockTimer) clearInterval(_lockTimer);
+  _lockTimer = setInterval(() => {
+    remaining--;
+    if (timerEl) timerEl.textContent = `⏳ 帳號已鎖定，請等候 ${remaining} 秒後再試`;
+    if (remaining <= 0) {
+      clearInterval(_lockTimer);
+      _lockTimer = null;
+      _lockUntil = 0;
+      _failCount = 0;
+      if (btn) btn.disabled = false;
+      if (timerEl) { timerEl.textContent = ''; timerEl.style.display = 'none'; }
+      refreshCaptcha();
+    }
+  }, 1000);
+  if (timerEl) timerEl.style.display = '';
+}
+
+function doLogin() {
+  const errEl = document.getElementById('login-err');
+
+  // Check lockout
+  if (_lockUntil > Date.now()) {
+    errEl.textContent = '帳號已鎖定，請稍後再試';
+    return;
+  }
+
+  const user = document.getElementById('login-user').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const captchaInput = parseInt(document.getElementById('login-captcha').value);
+
+  // Validate captcha first
+  if (isNaN(captchaInput) || captchaInput !== _captchaAnswer) {
+    errEl.textContent = '驗證碼錯誤，請重新計算';
+    refreshCaptcha();
+    return;
+  }
+
+  const accounts = getAccounts();
+  const found = accounts.find(a => a.user === user && a.pass === pass);
+
+  if (!found) {
+    _failCount++;
+    refreshCaptcha();
+    if (_failCount >= 5) {
+      // Lock for 30 seconds after 5 failures
+      const lockSecs = 30 * _failCount; // escalating: 30s, 60s, 90s...
+      _lockUntil = Date.now() + lockSecs * 1000;
+      errEl.textContent = `登入失敗 ${_failCount} 次，帳號鎖定 ${lockSecs} 秒`;
+      startLockoutTimer(lockSecs);
+    } else {
+      errEl.textContent = `帳號或密碼錯誤（第 ${_failCount} 次，${5 - _failCount} 次後鎖定）`;
+    }
+    return;
+  }
+
+  // Success — reset counters
+  _failCount = 0;
+  _lockUntil = 0;
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(found));
+  document.getElementById('login-screen').style.display = 'none';
+  applyRoleUI(found);
+  initAfterLogin();
+  startHeartbeat();
+  startIdleWatcher();
+  auditLog('登入', `帳號 ${found.user} 登入成功`);
+}
+
+function doLogout() {
+  const user = getCurrentUser();
+  if (user) auditLog('登出', `帳號 ${user.user} 手動登出`);
+  sessionStorage.removeItem(SESSION_KEY);
+  showLogin();
+}
+
+function showLogin() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-err').textContent = '';
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+  const timerEl = document.getElementById('lockout-timer');
+  if (timerEl) timerEl.style.display = 'none';
+  refreshCaptcha();
+}
+
+function applyRoleUI(user) {
+  const badge = document.getElementById('current-user-badge');
+  const accountsBtn = document.getElementById('accounts-btn');
+  const roleColors = { admin:'var(--teal)', staff:'var(--blue)', driver:'var(--amber)' };
+  const roleLabels = { admin:'管理員', staff:'預約人員', driver:'司機' };
+  badge.textContent = `${user.display}（${roleLabels[user.role]}）`;
+  badge.style.color = roleColors[user.role] || 'var(--text2)';
+
+  // Driver: only see dispatch (read-only)
+  if (user.role === 'driver') {
+    const addBtn = document.querySelector('[onclick="openAddModal()"]');
+    const batchBtn = document.querySelector('[onclick="batchCalcMissing()"]');
+    const importBtn = document.querySelector('[onclick="switchView(\'import\',this)"]');
+    const formBtn = document.querySelector('[onclick="switchView(\'form\',this)"]');
+    if (addBtn) addBtn.style.display = 'none';
+    if (batchBtn) batchBtn.style.display = 'none';
+    if (importBtn) importBtn.style.display = 'none';
+    if (formBtn) formBtn.style.display = 'none';
+  }
+
+  // Staff: show notice that trips go to pending
+  if (user.role === 'staff') {
+    // Will be shown via toast when saving
+  }
+
+  // Admin: show accounts button + pending button
+  if (user.role === 'admin') {
+    if (accountsBtn) accountsBtn.style.display = '';
+  }
+
+  updatePendingBadge();
+}
+
+function changeMyPassword() {
+  const np = document.getElementById('my-new-pass').value;
+  const cp = document.getElementById('my-confirm-pass').value;
+  if (!np) { toast('⚠️ 請輸入新密碼'); return; }
+  if (np !== cp) { toast('⚠️ 兩次密碼不一致'); return; }
+  const user = getCurrentUser();
+  if (!user) return;
+  const accounts = getAccounts();
+  const idx = accounts.findIndex(a => a.user === user.user);
+  if (idx < 0) { toast('⚠️ 找不到帳號'); return; }
+  accounts[idx].pass = np;
+  saveAccounts(accounts);
+  // Update session
+  const updated = { ...accounts[idx] };
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(updated));
+  document.getElementById('my-new-pass').value = '';
+  document.getElementById('my-confirm-pass').value = '';
+  toast('✅ 密碼已更新');
+}
+
+function renderSettingsNonAdmin(user) {
+  // Hide admin-only sections
+  const adminOnly = document.getElementById('settings-admin-only');
+  if (adminOnly) adminOnly.style.display = 'none';
+}
+
+function initAfterLogin() {
+  updateStats();
+  renderDispatch();
+  populateMonthFilter();
+  updateCloudBadge('syncing');
+  renderTodayReminder();
+  renderPendingPanel();
+  // Apply admin-only visibility
+  const user = getCurrentUser();
+  const adminOnly = document.getElementById('settings-admin-only');
+  if (adminOnly) adminOnly.style.display = (user && user.role === 'admin') ? '' : 'none';
+  if (user && user.role === 'admin') { renderBlockedList(); renderRosterPreview(); renderSettingsAccountsList(); renderForceLogoutList(); renderAuditLog(); }
+  (async () => {
+    try {
+      await loadFromCloud();
+      // Always re-render after cloud sync attempt (even if cloud empty)
+      updateStats(); renderDispatch(); populateMonthFilter();
+      renderCaseList(); renderFormCaseList(); renderTodayReminder();
+      renderPendingPanel();
+      const rcEl = document.getElementById('record-count');
+      if (rcEl) rcEl.textContent = RECORDS.length;
+    } catch(e) { updateCloudBadge('error'); }
+  })();
+}
+
+// Render accounts list in modal
+function renderAccountsList() {
+  const accounts = getAccounts();
+  const roleLabels = { admin:'管理員', staff:'預約人員', driver:'司機' };
+  document.getElementById('accounts-list').innerHTML = accounts.map((a,i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div style="flex:1">
+        <span style="font-weight:600">${a.display}</span>
+        <span class="badge ${a.role==='admin'?'bg-teal':a.role==='staff'?'bg-blue':'bg-amber'}" style="margin-left:6px">${roleLabels[a.role]}</span>
+        <span style="font-size:11px;color:var(--text3);margin-left:6px">帳號：${a.user}</span>
+      </div>
+      ${i>0?`<button class="btn btn-red btn-xs" onclick="removeAccount(${i})">刪除</button>`:'<span style="font-size:11px;color:var(--text3)">預設</span>'}
+    </div>`).join('');
+}
+
+function openModal(id) { document.getElementById(id).classList.add('show'); if(id==='modal-accounts') renderAccountsList(); }
+
+// ── 重要：switchView 主導覽切換 ──
+function switchView(v, el) {
+  document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active'));
+  const vEl = document.getElementById('view-'+v);
+  if (vEl) vEl.classList.add('active');
+  if (el) el.classList.add('active');
+  if (v==='dispatch') { updateStats(); renderDispatch(); populateMonthFilter(); renderTodayReminder(); }
+  if (v==='case') renderCaseList();
+  if (v==='form') { renderFormCaseList(); goFormStep(1); }
+  if (v==='settings') {
+    const user = getCurrentUser();
+    if (user && user.role!=='admin') renderSettingsNonAdmin(user);
+    else { renderBlockedList(); renderRosterPreview(); renderSettingsAccountsList(); renderForceLogoutList(); renderAuditLog(); }
+  }
+}
+
+function addAccount() {
+  const user = document.getElementById('new-user').value.trim();
+  const pass = document.getElementById('new-pass').value.trim();
+  const role = document.getElementById('new-role').value;
+  const display = document.getElementById('new-display').value.trim() || user;
+  if (!user||!pass) { toast('⚠️ 請填寫帳號和密碼'); return; }
+  const accounts = getAccounts();
+  if (accounts.find(a=>a.user===user)) { toast('⚠️ 帳號已存在'); return; }
+  accounts.push({ user, pass, role, display });
+  saveAccounts(accounts);
+  renderAccountsList();
+  ['new-user','new-pass','new-display'].forEach(id=>document.getElementById(id).value='');
+  toast('✅ 帳號已新增');
+}
+
+function removeAccount(idx) {
+  if (!confirm('確定刪除此帳號？')) return;
+  const accounts = getAccounts();
+  accounts.splice(idx,1);
+  saveAccounts(accounts);
+  renderAccountsList();
+  toast('已刪除帳號');
+}
+
+// ═══════════════════════════════════
+// CASE PROFILES (基本資料)
+// ═══════════════════════════════════
+const PROFILES_KEY = 'chun_case_profiles';
+
+function getProfiles() {
+  try { return JSON.parse(localStorage.getItem(PROFILES_KEY)) || {}; }
+  catch(e) { return {}; }
+}
+function saveProfiles(profiles) { localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles)); }
+
+function openCaseProfileModal(name) {
+  const profiles = getProfiles();
+  const p = name ? (profiles[name] || {}) : {};
+  document.getElementById('case-profile-title').textContent = name ? `個案資料：${name}` : '新增個案基本資料';
+  document.getElementById('cp-name').value = name || '';
+  document.getElementById('cp-name').readOnly = !!name;
+  document.getElementById('cp-ltcid').value = p.ltcid || '';
+  document.getElementById('cp-gender').value = p.gender || '';
+  document.getElementById('cp-birth').value = p.birth || '';
+  document.getElementById('cp-pid').value = p.pid || '';
+  document.getElementById('cp-addr').value = p.addr || '';
+  document.getElementById('cp-phone').value = p.phone || '';
+  document.getElementById('cp-emergency').value = p.emergency || '';
+  document.getElementById('cp-age-cat').value = p.ageCat || '';
+  document.getElementById('cp-identity').value = p.identity || '';
+  document.getElementById('cp-disability').value = p.disability || '';
+  document.getElementById('cp-unit').value = p.unit || '';
+  document.getElementById('cp-note').value = p.note || '';
+  document.getElementById('cp-default-from').value = p.defaultFrom || '';
+  document.getElementById('cp-default-to').value = p.defaultTo || '';
+  document.getElementById('cp-delete-btn').style.display = name ? '' : 'none';
+  document.getElementById('modal-case-profile').classList.add('show');
+}
+
+function saveCaseProfile() {
+  const name = document.getElementById('cp-name').value.trim();
+  if (!name) { toast('⚠️ 請填寫個案姓名'); return; }
+  const profiles = getProfiles();
+  profiles[name] = {
+    ltcid: document.getElementById('cp-ltcid').value,
+    gender: document.getElementById('cp-gender').value,
+    birth: document.getElementById('cp-birth').value,
+    pid: document.getElementById('cp-pid').value,
+    addr: document.getElementById('cp-addr').value,
+    phone: document.getElementById('cp-phone').value,
+    emergency: document.getElementById('cp-emergency').value,
+    ageCat: document.getElementById('cp-age-cat').value,
+    identity: document.getElementById('cp-identity').value,
+    disability: document.getElementById('cp-disability').value,
+    unit: document.getElementById('cp-unit').value,
+    note: document.getElementById('cp-note').value,
+    defaultFrom: document.getElementById('cp-default-from').value,
+    defaultTo: document.getElementById('cp-default-to').value,
+  };
+  saveProfiles(profiles);
+  closeModal('modal-case-profile');
+  renderCaseList();
+  if (selectedCaseName === name) selectCase(name);
+  toast(`✅ ${name} 的基本資料已儲存`);
+}
+
+function deleteCaseProfile() {
+  const name = document.getElementById('cp-name').value;
+  if (!confirm(`確定刪除 ${name} 的基本資料？`)) return;
+  const profiles = getProfiles();
+  delete profiles[name];
+  saveProfiles(profiles);
+  closeModal('modal-case-profile');
+  renderCaseList();
+  document.getElementById('case-detail').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:200px;color:var(--text3)">← 請選擇個案</div>';
+  toast('已刪除個案資料');
+}
+
+// ═══════════════════════════════════
+// TODAY'S DISPATCH REMINDER
+// ═══════════════════════════════════
+function getTodayRoc() {
+  const now = new Date();
+  return `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}`;
+}
+
+function getDateStr(offsetDays) {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function renderTodayReminder() {
+  // 本機 file:// 警告
+  const warnEl = document.getElementById('local-file-warning');
+  if (warnEl) {
+    const isLocal = window.location && window.location.protocol === 'file:';
+    warnEl.style.display = isLocal ? '' : 'none';
+  }
+
+  const todayStr = getDateStr(0);
+  const tomorrowStr = getDateStr(1);
+
+  const makeCard = (r) => {
+    const vehLabel = v => v==='AWQ7565'?'AWQ-7565':'BYH-3308';
+    const refColor = r.referral ? 'var(--teal)' : 'var(--red)';
+    return `<div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px 12px;min-width:160px;max-width:220px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.05)" onclick="editTrip('${r.id}')">
+      <div style="font-weight:700;font-size:13px">${r.name||'—'}</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:2px">${r.time||'—'} · ${vehLabel(r.vehicle)}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.to||'—'}</div>
+      <div style="margin-top:4px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <span style="font-size:10px;color:${refColor}">${r.referral?'✓ 已照會':'✗ 未照會'}</span>
+        ${r.remark?`<span style="font-size:10px;color:var(--amber)">⚠ ${r.remark}</span>`:''}
+      </div>
+    </div>`;
+  };
+
+  const todayTrips = RECORDS.filter(r => rowDate(r) === todayStr)
+    .sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  const tomorrowTrips = RECORDS.filter(r => rowDate(r) === tomorrowStr)
+    .sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+
+  const panel = document.getElementById('day-reminders');
+  if (!panel) return;
+
+  // Always show the panel
+  panel.style.display = 'flex';
+
+  const todayLabel = document.getElementById('today-date-label');
+  const tomorrowLabel = document.getElementById('tomorrow-date-label');
+  if (todayLabel) todayLabel.textContent = todayStr;
+  if (tomorrowLabel) tomorrowLabel.textContent = tomorrowStr;
+
+  const todayContainer = document.getElementById('today-trips');
+  const tomorrowContainer = document.getElementById('tomorrow-trips');
+
+  if (todayContainer) {
+    todayContainer.innerHTML = todayTrips.length
+      ? todayTrips.map(makeCard).join('')
+      : '<span style="font-size:12px;color:var(--text3)">今日無派車</span>';
+  }
+  if (tomorrowContainer) {
+    tomorrowContainer.innerHTML = tomorrowTrips.length
+      ? tomorrowTrips.map(makeCard).join('')
+      : '<span style="font-size:12px;color:var(--text3)">明日無派車</span>';
+  }
+}
+// ═══════════════════════════════════
+// APPROVAL WORKFLOW
+// ═══════════════════════════════════
+const PENDING_KEY = 'chun_pending_trips';
+function getPending() { try { return JSON.parse(localStorage.getItem(PENDING_KEY)) || []; } catch(e) { return []; } }
+function savePending(list) { localStorage.setItem(PENDING_KEY, JSON.stringify(list)); }
+
+function renderPendingPanel() {
+  updatePendingBadge();
+  renderMyPendingPanel();
+  const user = getCurrentUser();
+  const panel = document.getElementById('pending-panel');
+  const listEl = document.getElementById('pending-list');
+  if (!listEl) return;
+  const pending = getPending();
+
+  // Admin: show panel with all pending trips
+  if (user && user.role === 'admin' && pending.length > 0) {
+    if (panel) panel.style.display = '';
+    const vehLabel = v => v==='AWQ7565'?'AWQ-7565':'BYH-3308';
+    listEl.innerHTML = pending.map((r,i) => `
+      <div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;background:#fff">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <span style="font-size:15px;font-weight:700">${r.name||'—'}</span>
+          <span style="font-size:12px;color:var(--text2)">${r.date||''} ${r.time||''} · ${vehLabel(r.vehicle)}</span>
+          <span style="font-size:11px;color:var(--text3);margin-left:auto">提交者：${r._submittedBy||'預約人員'}</span>
+        </div>
+        <div style="font-size:12px;color:var(--text2);line-height:2;display:grid;grid-template-columns:1fr 1fr;gap:0 20px">
+          <div>出發：${r.from||'—'}</div>
+          <div>目的：${r.to||'—'}</div>
+          <div>車輛：${vehLabel(r.vehicle)}</div>
+          <div>身份別：${r.identity||'—'}</div>
+          ${r.note?`<div style="grid-column:1/-1">服務需求：${r.note}</div>`:''}
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-teal btn-sm" onclick="approveTrip(${i})">✓ 核准接送</button>
+          <button class="btn btn-outline btn-sm" onclick="editPendingTrip(${i})">✏ 編輯後核准</button>
+          <button class="btn btn-red btn-sm" onclick="rejectTrip(${i})">✕ 退回</button>
+        </div>
+      </div>`).join('');
+  } else {
+    if (panel) panel.style.display = 'none';
+    listEl.innerHTML = '<div style="color:var(--text3);text-align:center;padding:16px">目前沒有待審核班次</div>';
+  }
+}
+
+function approveTrip(idx) {
+  const pending = getPending();
+  const trip = { ...pending[idx] };
+  if (!trip) return;
+  const approver = getCurrentUser();
+  const now = new Date().toISOString();
+  // Set creator = submitter, approver = current admin
+  trip._createdBy  = trip._submittedBy || '預約人員';
+  trip._createdAt  = trip._submittedAt || now;
+  trip._updatedBy  = approver ? approver.display : '管理員';
+  trip._updatedAt  = now;
+  trip._approvedBy = approver ? approver.display : '管理員';
+  delete trip._submittedBy; delete trip._submittedAt; delete trip._status;
+  trip.id = trip.id || uid();
+  RECORDS.push(trip);
+  pending.splice(idx, 1);
+  savePending(pending);
+  saveData(RECORDS);
+  updateStats(); renderDispatch(); populateMonthFilter(); renderPendingPanel();
+  renderTodayReminder();
+  closeModal('modal-pending');
+  toast(`✅ 已核准 ${trip.name} 的班次`);
+}
+
+function editPendingTrip(idx) {
+  const pending = getPending();
+  const r = pending[idx];
+  if (!r) return;
+  document.getElementById('m-edit-id').value = 'PENDING:' + idx;
+  document.getElementById('m-name').value = r.name||'';
+  document.getElementById('m-pid').value = r.pid||'';
+  document.getElementById('m-date').value = rocToIso(r.date)||new Date().toISOString().split('T')[0];
+  document.getElementById('m-time').value = r.time||'';
+  document.getElementById('m-vehicle').value = r.vehicle||'AWQ7565';
+  document.getElementById('m-from').value = r.from||'';
+  document.getElementById('m-to').value = r.to||'';
+  document.getElementById('m-km').value = r.km||'';
+  document.getElementById('m-passengers').value = r.passengers||'';
+  document.getElementById('m-identity').value = r.identity||'';
+  document.getElementById('m-total').value = r.total!=null?r.total:'';
+  document.getElementById('m-copay').value = r.copay!=null?r.copay:'';
+  document.getElementById('m-companion').value = r.companion||'';
+  document.getElementById('m-companion-tel').value = r.companionTel||'';
+  document.getElementById('m-note').value = r.note||'';
+  document.getElementById('m-remark').value = r.remark||'';
+  setReferral(!!r.referral); setFee(!!r.fee);
+  document.getElementById('modal-title').textContent = `✏️ 審核：${r.name}（${r._submittedBy||''}提交）`;
+  document.getElementById('modal-trip').classList.add('show');
+}
+
+function rejectTrip(idx) {
+  const pending = getPending();
+  if (!confirm(`確定退回 ${pending[idx].name} 的班次申請？`)) return;
+  pending.splice(idx, 1);
+  savePending(pending);
+  renderPendingPanel();
+  closeModal('modal-pending');
+  toast('已退回班次申請');
+}
+
+// 預約人員查看自己送審的班次
+function renderMyPendingPanel() {
+  const user = getCurrentUser();
+  const panel = document.getElementById('my-pending-panel');
+  const listEl = document.getElementById('my-pending-list');
+  if (!panel || !listEl) return;
+  if (!user || user.role !== 'staff') { panel.style.display = 'none'; return; }
+
+  const pending = getPending().filter(r => r._submittedBy === user.display);
+  if (!pending.length) { panel.style.display = 'none'; return; }
+
+  panel.style.display = '';
+  const vehLabel = v => v==='AWQ7565'?'AWQ-7565':'BYH-3308';
+  listEl.innerHTML = pending.map(r => `
+    <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;background:#fff;border-radius:7px;margin-bottom:5px;border:1px solid var(--border)">
+      <div style="flex:1;font-size:12px">
+        <span style="font-weight:600">${r.name||'—'}</span>
+        <span style="color:var(--text3);margin-left:8px">${r.date||''} ${r.time||''} · ${vehLabel(r.vehicle)}</span>
+        <span style="margin-left:6px;color:var(--amber);font-size:11px">⏳ 等待審核</span>
+      </div>
+    </div>`).join('');
+}
+
+function updatePendingBadge() {
+  const list = getPending();
+  const btn = document.getElementById('pending-btn');
+  const cnt = document.getElementById('pending-count');
+  if (!btn) return;
+  const user = getCurrentUser();
+  if (user && user.role === 'admin' && list.length > 0) {
+    btn.style.display = '';
+    if (cnt) cnt.textContent = list.length;
+  } else {
+    btn.style.display = 'none';
+  }
+}
+
+function openPendingModal() {
+  renderPendingPanel();
+  document.getElementById('modal-pending').classList.add('show');
+}
+
+// ═══════════════════════════════════
+let selectedIds = new Set();
+let filteredRows = [];
+
+let sortAsc = false; // 預設由新到舊
+
+function toggleSort() {
+  sortAsc = !sortAsc;
+  const btn = document.getElementById('sort-btn');
+  if (btn) btn.textContent = `📅 日期 ${sortAsc?'↑':'↓'}`;
+  renderDispatch();
+}
+
+function getFilteredRows() {
+  const q = (document.getElementById('d-search').value || '').toLowerCase();
+  const veh = document.getElementById('d-vehicle').value;
+  const month = document.getElementById('d-month').value;
+  const kmFilter = document.getElementById('d-km-filter').value;
+  let rows = RECORDS.filter(r => {
+    if (q && !String(r.name || '').toLowerCase().includes(q)) return false;
+    if (veh && r.vehicle !== veh) return false;
+    if (month && !rowDate(r).startsWith(month)) return false;
+    if (kmFilter === 'missing' && (r.km || !r.from || !r.to)) return false;
+    if (kmFilter === 'ok' && !r.km) return false;
+    return true;
+  });
+  return [...rows].sort((a, b) => {
+    const cmp = rowDate(a).localeCompare(rowDate(b));
+    return sortAsc ? cmp : -cmp;
+  });
+}
+
+function renderDispatch() {
+  filteredRows = getFilteredRows();
+  // Clean up selectedIds — remove any that are no longer in filtered rows
+  const visibleIds = new Set(filteredRows.map(r => r.id));
+  selectedIds.forEach(id => { if (!visibleIds.has(id)) selectedIds.delete(id); });
+
+  const tbody = document.getElementById('dispatch-body');
+  const selToolbar = document.getElementById('sel-toolbar');
+
+  if (!filteredRows.length) {
+    tbody.innerHTML = `<tr><td colspan="18" class="tbl-empty">${RECORDS.length ? '無符合條件的資料' : '尚無資料，請先至「匯入資料」上傳 xlsx，或點右上角「新增班次」'}</td></tr>`;
+    updateSelToolbar();
+    updateSelectAllBox();
+    return;
+  }
+
+  const idBadge = id => {
+    if (!id) return '';
+    if (id.includes('低收入') || id === '低收') return 'bg-red';
+    if (id.includes('中低') || id === '中低收') return 'bg-amber';
+    return 'bg-green'; // 一般戶
+  };
+  const idLabel = id => {
+    if (!id) return '—';
+    if (id.includes('低收入') || id === '低收') return '低收';
+    if (id.includes('中低') || id === '中低收') return '中低收';
+    if (id.includes('一般')) return '一般戶';
+    return id;
+  };
+  const vehLabel = v => v === 'AWQ7565' ? 'AWQ-7565' : 'BYH-3308';
+
+  tbody.innerHTML = filteredRows.map(r => {
+    const checked = selectedIds.has(r.id) ? 'checked' : '';
+    const isSelBg = selectedIds.has(r.id) ? 'rgba(239,68,68,.06)' : '';
+    const isWarnBg = (!r.referral && !r.remark) ? 'rgba(239,68,68,.02)' : '';
+    const rowBg = isSelBg || isWarnBg;
+
+    // 取得當月司機（從輪班表）
+    const rDateStr = String(r.date||'');
+    const rParts = rDateStr.split('/');
+    // date is AD format: 2026/04/23 → month = 4
+    const rMonth = rParts.length >= 2 ? parseInt(rParts[1]) : 0;
+    const roster = getRoster();
+    const shiftMap = { 'b':'AWQ7565', '2':'BYH3308', 't':'BES0752' };
+    const driverForVeh = roster.drivers.find(dname => {
+      const shift = (roster.schedule[dname]||{})[rMonth] || '';
+      return shiftMap[shift] === r.vehicle;
+    }) || '—';
+
+    // 照會：inline toggle checkbox
+    const refCell = `<label style="display:flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap">
+      <input type="checkbox" ${r.referral?'checked':''} onchange="toggleReferralInline('${r.id}',this.checked)"
+        style="width:14px;height:14px;accent-color:var(--teal);cursor:pointer">
+      <span style="font-size:11px;color:${r.referral?'var(--teal)':'var(--red)'}">${r.referral?'已照會':'未照會'}</span>
+    </label>`;
+
+    const feeBadge = r.fee
+      ? `<span class="badge bg-green" style="font-size:10px">✓</span>`
+      : `<span style="color:var(--text3);font-size:11px">—</span>`;
+
+    const remarkTip = r.remark ? ` title="${r.remark}"` : '';
+    const noteTip = r.note ? ` title="${r.note}"` : '';
+
+    return `<tr style="background:${rowBg};transition:background .1s" id="tr-${r.id}">
+      <td style="text-align:center;padding:4px 6px;width:32px">
+        <input type="checkbox" ${checked} onchange="toggleSelect('${r.id}',this.checked)"
+          style="width:14px;height:14px;accent-color:var(--red);cursor:pointer">
+      </td>
+      <td class="mono" style="white-space:nowrap;width:88px">${r.date||'—'}</td>
+      <td class="mono" style="white-space:nowrap;width:50px">${r.time||'—'}</td>
+      <td style="width:70px">
+        <span class="name-link" onclick="quickViewCase('${(r.name||'').replace(/'/g,"\\'")}');event.stopPropagation()"
+          style="font-weight:600;cursor:pointer;color:var(--teal);text-decoration:underline;text-underline-offset:2px"
+          title="點擊查看 ${r.name||''} 資料">
+          ${r.name||'—'}
+        </span>
+      </td>
+      <td class="mono" style="font-size:10px;width:80px;white-space:nowrap">${r.pid||'—'}</td>
+      <td style="width:52px">${r.identity ? `<span class="badge ${idBadge(r.identity)}">${idLabel(r.identity)}</span>` : '—'}</td>
+      <td style="font-size:11px;min-width:140px;max-width:220px;white-space:normal;word-break:break-all;line-height:1.4"${remarkTip}>${r.from||'—'}</td>
+      <td style="font-size:11px;min-width:120px;max-width:200px;white-space:normal;word-break:break-all;line-height:1.4"${noteTip}>${r.to||'—'}</td>
+      <td style="width:60px">${r.km ? `<span class="mono text-teal">${r.km}</span>` : '<span style="color:var(--amber)">待補</span>'}</td>
+      <td style="text-align:center;width:36px">${r.passengers||'—'}</td>
+      <td class="mono" style="width:40px">${r.copay!=null&&r.copay!==''?r.copay:'—'}</td>
+      <td style="font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"${noteTip}>${r.note||'—'}</td>
+      <td style="font-size:11px;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--amber)">${r.remark||'—'}</td>
+      <td style="width:78px">${refCell}</td>
+      <td style="width:36px">${feeBadge}</td>
+      <td style="width:60px"><span class="badge bg-teal" style="font-size:10px">${vehLabel(r.vehicle)}</span></td>
+      <td style="width:60px;font-size:11px;color:var(--text2)">${driverForVeh}</td>
+      <td style="width:100px">
+        <div class="flex gap-8">
+          <button class="btn btn-outline btn-xs" onclick="editTrip('${r.id}')" title="編輯">✏</button>
+          <button class="btn btn-ghost btn-xs" onclick="duplicateTrip('${r.id}')" title="複製建立相同班次">⧉</button>
+          <button class="btn btn-red btn-xs" onclick="deleteSingle('${r.id}')" title="刪除">✕</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  updateSelToolbar();
+  updateSelectAllBox();
+}
+
+function toggleSelect(id, checked) {
+  if (checked) selectedIds.add(id);
+  else selectedIds.delete(id);
+  // Update row highlight
+  const tr = document.getElementById('tr-' + id);
+  if (tr) tr.style.background = checked ? 'rgba(239,68,68,.06)' : '';
+  updateSelToolbar();
+  updateSelectAllBox();
+}
+
+function toggleSelectAll(checked) {
+  filteredRows.forEach(r => {
+    if (checked) selectedIds.add(r.id);
+    else selectedIds.delete(r.id);
+    const tr = document.getElementById('tr-' + r.id);
+    if (tr) {
+      const cb = tr.querySelector('input[type=checkbox]');
+      if (cb) cb.checked = checked;
+      tr.style.background = checked ? 'rgba(239,68,68,.06)' : '';
+    }
+  });
+  updateSelToolbar();
+}
+
+function updateSelectAllBox() {
+  const box = document.getElementById('select-all-cb');
+  if (!box) return;
+  const total = filteredRows.length;
+  const selCount = filteredRows.filter(r => selectedIds.has(r.id)).length;
+  box.checked = total > 0 && selCount === total;
+  box.indeterminate = selCount > 0 && selCount < total;
+}
+
+function updateSelToolbar() {
+  const bar = document.getElementById('sel-toolbar');
+  if (!bar) return;
+  const n = selectedIds.size;
+  if (n === 0) {
+    bar.style.display = 'none';
+  } else {
+    bar.style.display = 'flex';
+    document.getElementById('sel-count').textContent = `已選取 ${n} 筆`;
+  }
+}
+
+// ═══════════════════════════════════
+// DELETE WITH REASON (資源回收筒)
+// ═══════════════════════════════════
+const DELETED_KEY = 'chun_deleted_records';
+let _pendingDeleteIds = [];
+let _pendingDeleteCount = 0;
+
+function getDeletedRecords() { try { return JSON.parse(localStorage.getItem(DELETED_KEY)) || []; } catch(e) { return []; } }
+function saveDeletedRecords(list) { localStorage.setItem(DELETED_KEY, JSON.stringify(list)); }
+
+function deleteSingle(id) {
+  _pendingDeleteIds = [id];
+  _pendingDeleteCount = 1;
+  const r = RECORDS.find(x => x.id === id);
+  document.getElementById('delete-reason-desc').textContent = r ? `刪除「${r.name} ${r.date}」` : '刪除此筆紀錄';
+  document.getElementById('delete-reason-select').value = '取消車趟';
+  document.getElementById('delete-other-row').style.display = 'none';
+  document.getElementById('delete-other-text').value = '';
+  document.getElementById('modal-delete-reason').classList.add('show');
+}
+
+function deleteSelected() {
+  const n = selectedIds.size;
+  if (n === 0) return;
+  _pendingDeleteIds = [...selectedIds];
+  _pendingDeleteCount = n;
+  document.getElementById('delete-reason-desc').textContent = `刪除選取的 ${n} 筆紀錄`;
+  document.getElementById('delete-reason-select').value = '取消車趟';
+  document.getElementById('delete-other-row').style.display = 'none';
+  document.getElementById('delete-other-text').value = '';
+  document.getElementById('modal-delete-reason').classList.add('show');
+}
+
+function confirmDeleteWithReason() {
+  let reason = document.getElementById('delete-reason-select').value;
+  if (reason === '其他原因') {
+    const other = document.getElementById('delete-other-text').value.trim();
+    if (!other) { toast('⚠️ 請填寫原因'); return; }
+    reason = '其他：' + other;
+  }
+  const now = new Date().toISOString();
+  const user = getCurrentUser();
+  const deletedList = getDeletedRecords();
+
+  _pendingDeleteIds.forEach(id => {
+    const rec = RECORDS.find(r => r.id === id);
+    if (rec) {
+      deletedList.push({ ...rec, _deletedAt: now, _deletedBy: user?.display || '系統', _deleteReason: reason });
+    }
+  });
+  RECORDS = RECORDS.filter(r => !_pendingDeleteIds.includes(r.id));
+  selectedIds.clear();
+  _pendingDeleteIds = [];
+
+  saveDeletedRecords(deletedList);
+  saveData(RECORDS);
+  updateStats();
+  renderDispatch();
+  populateMonthFilter();
+  closeModal('modal-delete-reason');
+  toast(`🗑 已刪除 ${_pendingDeleteCount} 筆（原因：${reason}）`);
+}
+
+function openDeletedRecords() {
+  const list = getDeletedRecords().sort((a,b) => (b._deletedAt||'').localeCompare(a._deletedAt||''));
+  const el = document.getElementById('deleted-records-list');
+  if (!list.length) {
+    el.innerHTML = '<div style="color:var(--text3);text-align:center;padding:24px">尚無已刪除紀錄</div>';
+  } else {
+    const byReason = {};
+    list.forEach(r => {
+      const key = r._deleteReason || '未知';
+      if (!byReason[key]) byReason[key] = [];
+      byReason[key].push(r);
+    });
+    el.innerHTML = Object.entries(byReason).map(([reason, records]) => `
+      <div style="margin-bottom:16px">
+        <div style="font-size:12px;font-weight:600;color:var(--amber);margin-bottom:8px;padding:6px 10px;background:rgba(245,166,35,.1);border-radius:6px">
+          ${reason}（${records.length} 筆）
+        </div>
+        <table class="tbl" style="font-size:11px">
+          <tr><th>刪除時間</th><th>刪除者</th><th>個案</th><th>日期</th><th>出發地</th><th>目的地</th><th>里程</th><th>建檔人</th></tr>
+          ${records.map(r=>`<tr>
+            <td class="mono" style="font-size:10px">${formatAuditDt(r._deletedAt)}</td>
+            <td>${r._deletedBy||'—'}</td>
+            <td style="font-weight:600">${r.name||'—'}</td>
+            <td class="mono">${r.date||'—'}</td>
+            <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.from||'—'}</td>
+            <td style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.to||'—'}</td>
+            <td>${r.km||'—'}</td>
+            <td style="font-size:10px;color:var(--text3)">${r._createdBy||'—'} ${r._createdAt?formatAuditDt(r._createdAt):''}</td>
+          </tr>`).join('')}
+        </table>
+      </div>`).join('');
+  }
+  document.getElementById('modal-deleted-records').classList.add('show');
+}
+
+function clearSelection() {
+  selectedIds.clear();
+  renderDispatch();
+}
+
+// ── 照會：直接在表格切換 ──
+function toggleReferralInline(id, val) {
+  const rec = RECORDS.find(r => r.id === id);
+  if (!rec) return;
+  rec.referral = val;
+  saveData(RECORDS);
+  updateStats();
+  // Update just this row's ref cell without full re-render
+  const tr = document.getElementById('tr-' + id);
+  if (tr) {
+    const span = tr.querySelector('label span');
+    if (span) {
+      span.style.color = val ? 'var(--teal)' : 'var(--red)';
+      span.textContent = val ? '已照會' : '未照會';
+    }
+    tr.style.background = (!val && !rec.remark) ? 'rgba(239,68,68,.02)' : '';
+  }
+  toast(val ? '✓ 已標記照會' : '已取消照會');
+}
+
+// ── 點姓名快速看個案資料（側邊抽屜） ──
+function quickViewCase(name) {
+  // Switch to case view and select
+  document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active'));
+  document.getElementById('view-case').classList.add('active');
+  document.querySelectorAll('.nav-btn')[1].classList.add('active');
+  renderCaseList();
+  setTimeout(() => selectCase(name), 50);
+}
+
+// ── 複製班次（同個案，日期改今天，其他全複製）──
+function duplicateTrip(id) {
+  const src = RECORDS.find(r => r.id === id);
+  if (!src) return;
+  const newRec = { ...src, id: uid() };
+  // Show modal pre-filled so user can change the date
+  clearDist();
+  document.getElementById('m-edit-id').value = '';  // new record
+  document.getElementById('m-name').value = newRec.name || '';
+  document.getElementById('m-pid').value = newRec.pid || '';
+  document.getElementById('m-date').value = new Date().toISOString().split('T')[0]; // today
+  document.getElementById('m-time').value = newRec.time || '';
+  document.getElementById('m-vehicle').value = newRec.vehicle || 'AWQ7565';
+  document.getElementById('m-from').value = newRec.from || '';
+  document.getElementById('m-to').value = newRec.to || '';
+  document.getElementById('m-km').value = newRec.km || '';
+  if (newRec.km) document.getElementById('m-km').classList.add('filled');
+  document.getElementById('m-passengers').value = newRec.passengers || '';
+  document.getElementById('m-identity').value = newRec.identity || '';
+  document.getElementById('m-total').value = newRec.total != null ? newRec.total : '';
+  document.getElementById('m-copay').value = newRec.copay != null ? newRec.copay : '';
+  document.getElementById('m-companion').value = newRec.companion || '';
+  document.getElementById('m-companion-tel').value = newRec.companionTel || '';
+  document.getElementById('m-note').value = newRec.note || '';
+  document.getElementById('m-remark').value = '';  // clear remark for new trip
+  setReferral(newRec.referral || false);
+  setFee(false); // new trip = not yet collected
+  document.getElementById('modal-title').textContent = `⧉ 複製班次（${newRec.name}）— 請確認日期後儲存`;
+  document.getElementById('modal-trip').classList.add('show');
+  toast(`📋 已複製 ${newRec.name} 的班次，請調整日期後儲存`);
+}
+
+// ═══════════════════════════════════
+// ADD / EDIT TRIP
+// ═══════════════════════════════════
+function openAddModal() {
+  clearDist();
+  ['m-edit-id','m-name','m-pid','m-time','m-from','m-to','m-note',
+   'm-companion','m-companion-tel','m-remark'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  ['m-km','m-passengers','m-total','m-copay'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  const kmEl = document.getElementById('m-km');
+  if (kmEl) kmEl.classList.remove('filled');
+  document.getElementById('m-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('m-vehicle').value = 'AWQ7565';
+  document.getElementById('m-identity').value = '';
+  setReferral(false);
+  setFee(false);
+  // 新增時隱藏異動紀錄
+  const auditSecAdd = document.getElementById('m-audit-section');
+  if (auditSecAdd) auditSecAdd.style.display = 'none';
+  // 收費/照會只有管理員才顯示
+  const feeSection = document.getElementById('m-fee-referral-section');
+  const user = getCurrentUser();
+  if (feeSection) feeSection.style.display = (user && user.role === 'admin') ? '' : 'none';
+  document.getElementById('modal-title').textContent = user && user.role === 'staff'
+    ? '📤 新增班次（將送交管理員審核）' : '＋ 新增班次';
+  document.getElementById('modal-trip').classList.add('show');
+}
+
+function toggleReferral() {
+  setReferral(!document.getElementById('m-referral').checked);
+}
+function setReferral(val) {
+  const cb = document.getElementById('m-referral');
+  const box = document.getElementById('m-referral-box');
+  const main = document.getElementById('m-referral-main');
+  const sub = document.getElementById('m-referral-sub');
+  cb.checked = val;
+  if (val) {
+    box.style.borderColor = 'var(--teal)';
+    box.style.background = 'rgba(13,207,180,.07)';
+    main.textContent = '✓ 已照會';
+    main.style.color = 'var(--teal)';
+    sub.textContent = '個管已照會，可正常派車';
+  } else {
+    box.style.borderColor = 'var(--border)';
+    box.style.background = 'var(--bg3)';
+    main.textContent = '尚未照會';
+    main.style.color = 'var(--text)';
+    sub.textContent = '個管需先照會，才可派車';
+  }
+}
+
+function toggleFee() {
+  setFee(!document.getElementById('m-fee').checked);
+}
+function setFee(val) {
+  const cb = document.getElementById('m-fee');
+  const box = document.getElementById('m-fee-box');
+  const main = document.getElementById('m-fee-main');
+  const sub = document.getElementById('m-fee-sub');
+  cb.checked = val;
+  if (val) {
+    box.style.borderColor = 'var(--green)';
+    box.style.background = 'rgba(34,197,94,.07)';
+    main.textContent = '✓ 已確認收費';
+    main.style.color = 'var(--green)';
+    sub.textContent = '已向司機收到代收款';
+  } else {
+    box.style.borderColor = 'var(--border)';
+    box.style.background = 'var(--bg3)';
+    main.textContent = '尚未確認收費';
+    main.style.color = 'var(--text)';
+    sub.textContent = '點擊確認已收到代收款';
+  }
+}
+
+function editTrip(id) {
+  const r = RECORDS.find(x => x.id === id);
+  if (!r) return;
+  clearDist();
+  document.getElementById('m-edit-id').value = id;
+  document.getElementById('m-name').value = r.name || '';
+  document.getElementById('m-pid').value = r.pid || '';
+  document.getElementById('m-date').value = rocToIso(r.date) || new Date().toISOString().split('T')[0];
+  document.getElementById('m-time').value = r.time || '';
+  document.getElementById('m-vehicle').value = r.vehicle || 'AWQ7565';
+  document.getElementById('m-from').value = r.from || '';
+  document.getElementById('m-to').value = r.to || '';
+  document.getElementById('m-km').value = r.km || '';
+  document.getElementById('m-passengers').value = r.passengers || '';
+  document.getElementById('m-identity').value = r.identity || '';
+  document.getElementById('m-total').value = r.total != null ? r.total : '';
+  document.getElementById('m-copay').value = r.copay != null ? r.copay : '';
+  document.getElementById('m-companion').value = r.companion || '';
+  document.getElementById('m-companion-tel').value = r.companionTel || '';
+  document.getElementById('m-note').value = r.note || '';
+  document.getElementById('m-remark').value = r.remark || '';
+  setReferral(!!r.referral);
+  setFee(!!r.fee);
+  // 收費/照會只有管理員才顯示
+  const feeSection = document.getElementById('m-fee-referral-section');
+  const _user = getCurrentUser();
+  if (feeSection) feeSection.style.display = (_user && _user.role === 'admin') ? '' : 'none';
+  // 資料異動紀錄
+  const auditSec = document.getElementById('m-audit-section');
+  if (auditSec) {
+    auditSec.style.display = '';
+    document.getElementById('m-audit-created-at').textContent = r._createdAt ? formatAuditDt(r._createdAt) : '—';
+    document.getElementById('m-audit-created-by').textContent = r._createdBy || '—';
+    const hasUpdate = !!r._updatedBy;
+    ['m-audit-upd-lbl-l','m-audit-upd-lbl-r','m-audit-updated-at','m-audit-updated-by'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = hasUpdate ? '' : 'none';
+    });
+    if (hasUpdate) {
+      document.getElementById('m-audit-updated-at').textContent = formatAuditDt(r._updatedAt);
+      document.getElementById('m-audit-updated-by').textContent = r._updatedBy;
+    }
+  }
+  document.getElementById('modal-title').textContent = `✏️ 編輯班次　${r.name||''} ${r.date||''}`;
+  document.getElementById('modal-trip').classList.add('show');
+}
+
+function saveTrip() {
+  const name = document.getElementById('m-name').value.trim();
+  const dateRaw = document.getElementById('m-date').value;
+  const time = document.getElementById('m-time').value;
+  const from = document.getElementById('m-from').value.trim();
+  const to = document.getElementById('m-to').value.trim();
+  const passengers = document.getElementById('m-passengers').value;
+
+  // 必填驗證
+  const missing = [];
+  if (!name) missing.push('個案姓名');
+  if (!dateRaw) missing.push('接送日期');
+  if (!time) missing.push('接送時間');
+  if (!from) missing.push('出發地址');
+  if (!to) missing.push('目的地址');
+  if (!passengers) missing.push('載客人數');
+  if (missing.length) { toast(`⚠️ 請填寫必填欄位：${missing.join('、')}`); return; }
+
+  const d = new Date(dateRaw);
+  const rocDate = `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+  const editId = document.getElementById('m-edit-id').value;
+  const user = getCurrentUser();
+
+  const now = new Date().toISOString();
+  const userName = user ? user.display : '系統';
+
+  const record = {
+    id: (editId && !editId.startsWith('PENDING:')) ? editId : uid(),
+    remark:       document.getElementById('m-remark').value,
+    date:         rocDate,
+    time:         document.getElementById('m-time').value,
+    name,
+    pid:          document.getElementById('m-pid').value,
+    vehicle:      document.getElementById('m-vehicle').value,
+    from:         document.getElementById('m-from').value,
+    to:           document.getElementById('m-to').value,
+    passengers:   document.getElementById('m-passengers').value || '',
+    companion:    document.getElementById('m-companion').value,
+    companionTel: document.getElementById('m-companion-tel').value,
+    note:         document.getElementById('m-note').value,
+    km:           document.getElementById('m-km').value ? parseFloat(document.getElementById('m-km').value) : null,
+    total:        document.getElementById('m-total').value !== '' ? parseFloat(document.getElementById('m-total').value) : '',
+    copay:        document.getElementById('m-copay').value !== '' ? parseFloat(document.getElementById('m-copay').value) : '',
+    identity:     document.getElementById('m-identity').value,
+    fee:          document.getElementById('m-fee').checked,
+    referral:     document.getElementById('m-referral').checked,
+  };
+
+  // 保留建檔資訊，更新異動資訊
+  if (editId && !editId.startsWith('PENDING:')) {
+    const orig = RECORDS.find(r => r.id === editId);
+    record._createdBy  = orig?._createdBy  || userName;
+    record._createdAt  = orig?._createdAt  || now;
+    record._updatedBy  = userName;
+    record._updatedAt  = now;
+  } else {
+    record._createdBy  = userName;
+    record._createdAt  = now;
+    record._updatedBy  = null;
+    record._updatedAt  = null;
+  }
+
+  // ── 待審核班次編輯後核准（管理員）──
+  if (editId && editId.startsWith('PENDING:')) {
+    const idx = parseInt(editId.replace('PENDING:',''));
+    const pending = getPending();
+    pending.splice(idx, 1);
+    savePending(pending);
+    RECORDS.push(record);
+    saveData(RECORDS);
+    closeModal('modal-trip');
+    updateStats(); renderDispatch(); populateMonthFilter(); renderPendingPanel(); renderTodayReminder();
+    toast(`✅ 已核准並儲存：${name} ${rocDate}`);
+    return;
+  }
+
+  // ── 預約人員新增 → 送審 ──
+  if (!editId && user && user.role === 'staff') {
+    const pending = getPending();
+    record._submittedBy = user.display;
+    record._submittedAt = new Date().toISOString();
+    record._status = 'pending';
+    pending.push(record);
+    savePending(pending);
+    closeModal('modal-trip');
+    toast(`📤 已提交審核，等待管理員核准：${name} ${rocDate}`);
+    return;
+  }
+
+  // ── 管理員直接儲存 ──
+  if (editId) {
+    const idx = RECORDS.findIndex(r => r.id === editId);
+    if (idx >= 0) RECORDS[idx] = record;
+  } else {
+    RECORDS.push(record);
+  }
+  saveData(RECORDS);
+  closeModal('modal-trip');
+  updateStats(); renderDispatch(); populateMonthFilter(); renderTodayReminder();
+  auditLog(editId ? '編輯班次' : '新增班次', `${name} ${rocDate}`);
+  toast(editId ? `✅ 已更新：${name}` : `✅ 已新增：${name} ${rocDate}`);
+}
+
+// ═══════════════════════════════════
+// DATE HELPERS
+// ═══════════════════════════════════
+function rocToIso(rocDate) {
+  if (!rocDate) return '';
+  // handles 115/04/01 or 115/4/1 or 2026/04/01
+  const parts = String(rocDate).split('/');
+  if (parts.length !== 3) return '';
+  let yr = parseInt(parts[0]);
+  if (yr < 1911) yr += 1911; // ROC to AD
+  const mo = String(parts[1]).padStart(2, '0');
+  const dy = String(parts[2]).padStart(2, '0');
+  return `${yr}-${mo}-${dy}`;
+}
+
+// ═══════════════════════════════════
+// XLSX IMPORT (SheetJS)
+// ═══════════════════════════════════
+function dragOver(e, id) { e.preventDefault(); document.getElementById(id).classList.add('drag'); }
+function dragLeave(id) { document.getElementById(id).classList.remove('drag'); }
+
+function dropXlsx(e) {
+  e.preventDefault();
+  dragLeave('drop-xlsx');
+  const file = e.dataTransfer.files[0];
+  if (file) processXlsx(file);
+}
+function handleXlsx(e) {
+  const file = e.target.files[0];
+  if (file) processXlsx(file);
+}
+
+// Map sheet name → vehicle key
+function sheetNameToVehicle(name) {
+  const n = name.replace(/[-\s]/g,'').toUpperCase();
+  if (n.includes('AWQ') || n.includes('AWQ7565')) return 'AWQ7565';
+  if (n.includes('BYH') || n.includes('BYH3308')) return 'BYH3308';
+  return null;
+}
+
+function processXlsx(file) {
+  const preview = document.getElementById('preview-xlsx');
+  preview.innerHTML = `<div style="margin-top:10px;font-size:12px;color:var(--text2)"><span class="spinner"></span> 讀取 Excel 檔案中…</div>`;
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, { type: 'array', cellDates: true });
+
+      const sheetNames = wb.SheetNames;
+      let totalAdded = 0, totalSkipped = 0;
+      const results = [];
+
+      // Try to match each sheet to a vehicle
+      for (const sheetName of sheetNames) {
+        const vehicle = sheetNameToVehicle(sheetName);
+        if (!vehicle) {
+          results.push(`<div style="color:var(--text3);font-size:11px">略過分頁「${sheetName}」（非 AWQ/BYH）</div>`);
+          continue;
+        }
+
+        const ws = wb.Sheets[sheetName];
+        // Get data as array of arrays
+        const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, dateNF: 'yyyy/mm/dd' });
+        if (rows.length < 2) {
+          results.push(`<div style="color:var(--text3);font-size:11px">分頁「${sheetName}」無資料</div>`);
+          continue;
+        }
+
+        const rawHeaders = rows[0].map(h => String(h || '').trim());
+
+        // Map columns
+        const colMapping = {};
+        const unmapped = [];
+        rawHeaders.forEach((h, i) => {
+          const key = matchHeader(h);
+          if (key) colMapping[i] = key;
+          else if (h) unmapped.push(h);
+        });
+
+        const mappedCount = Object.keys(colMapping).length;
+        const newRecords = [];
+
+        for (let i = 1; i < rows.length; i++) {
+          const row = rows[i];
+          if (!row || row.every(v => !v)) continue;
+
+          const rec = { id: uid(), vehicle };
+          Object.entries(colMapping).forEach(([idx, key]) => {
+            rec[key] = row[+idx] !== undefined && row[+idx] !== null ? String(row[+idx]).trim() : '';
+          });
+
+          if (!rec.date && !rec.name) continue;
+          if (rec.date === '接送日期') continue;
+
+          rec.date = normalizeDate(rec.date);
+
+          ['km','total','copay','passengers'].forEach(k => {
+            if (rec[k] !== undefined && rec[k] !== '') {
+              const n = parseFloat(String(rec[k]).replace(/,/g,''));
+              rec[k] = isNaN(n) ? rec[k] : n;
+            }
+          });
+          ['fee','referral'].forEach(k => {
+            if (rec[k] !== undefined) {
+              const v = String(rec[k]).trim().toLowerCase();
+              rec[k] = ['1','true','v','✓','是','已照會','已收費','y','yes'].includes(v);
+            }
+          });
+
+          newRecords.push(rec);
+        }
+
+        let added = 0, skipped = 0;
+        newRecords.forEach(nr => {
+          const dup = RECORDS.find(r => r.date === nr.date && r.name === nr.name && r.vehicle === vehicle);
+          if (dup) skipped++; else { RECORDS.push(nr); added++; }
+        });
+        totalAdded += added;
+        totalSkipped += skipped;
+
+        const mappedCols = rawHeaders.map((h,i) =>
+          colMapping[i]
+            ? `<span style="color:var(--green);margin-right:6px">✓ ${h}</span>`
+            : (h ? `<span style="color:var(--text3);margin-right:6px">✗ ${h}</span>` : '')
+        ).join('');
+
+        const vLabel = vehicle === 'AWQ7565' ? 'AWQ-7565' : 'BYH-3308';
+        results.push(`
+          <div style="margin-bottom:10px;padding:10px 12px;background:var(--bg3);border-radius:8px;font-size:11px">
+            <div style="font-weight:600;margin-bottom:6px;color:var(--teal)">🚌 ${vLabel}（${sheetName}）：新增 ${added} 筆，略過重複 ${skipped} 筆</div>
+            <div style="line-height:2;flex-wrap:wrap;display:flex">${mappedCols}</div>
+            ${unmapped.length ? `<div style="color:var(--amber);margin-top:4px">⚠ 未識別：${unmapped.join('、')}</div>` : '<div style="color:var(--green);margin-top:4px">✓ 所有欄位均已識別</div>'}
+            <div style="color:var(--text3);margin-top:4px;font-size:10px">共識別 ${mappedCount}/${rawHeaders.length} 個欄位，共 ${newRecords.length} 筆資料</div>
+          </div>`);
+      }
+
+      saveData(RECORDS);
+      updateStats();
+      renderDispatch();
+      populateMonthFilter();
+
+      preview.innerHTML = `
+        <div style="margin-top:10px;padding:12px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:8px;font-size:13px;color:var(--green);margin-bottom:10px">
+          ✅ 匯入完成！共新增 <strong>${totalAdded}</strong> 筆，略過重複 <strong>${totalSkipped}</strong> 筆
+        </div>
+        ${results.join('')}`;
+      toast(`✅ Excel 匯入完成，新增 ${totalAdded} 筆`);
+
+    } catch(err) {
+      preview.innerHTML = `<div style="margin-top:10px;padding:10px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;font-size:12px;color:var(--red)">❌ 讀取失敗：${err.message}<br><small style="color:var(--text3)">請確認是 .xlsx 格式，且從 Google Sheet 正確匯出</small></div>`;
+      toast('⚠️ Excel 讀取失敗');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// Fuzzy column matching — 完全對應你的 Google Sheet 欄位名稱
+const COL_FUZZY = [
+  { key: 'remark',      patterns: ['註記','remark','note_remark'] },
+  { key: 'date',        patterns: ['接送日期','日期','date'] },
+  { key: 'time',        patterns: ['接送時間','時間','time'] },
+  { key: 'name',        patterns: ['個案姓名','姓名','name'] },
+  { key: 'pid',         patterns: ['個案身分證','身分證','身份證','pid','個案身份證'] },
+  { key: 'from',        patterns: ['出發地址','出發地','起點','出發','from','出發地址(由案家出發)'] },
+  { key: 'to',          patterns: ['目的地址','目的地','終點','目的','to','目的地址(送往機構)'] },
+  { key: 'unit',        patterns: ['個管單位','單位','unit','個管','管理單位'] },
+  { key: 'passengers',  patterns: ['載客人數','載客數','人數','passengers','載客人數(含陪同者)'] },
+  { key: 'companion',   patterns: ['陪同者姓名','陪同者','companion','陪同姓名'] },
+  { key: 'companionTel',patterns: ['陪同者電話','陪同電話','companiontel'] },
+  { key: 'note',        patterns: ['服務需求','服務需求/備註','備註','note','服務內容'] },
+  { key: 'km',          patterns: ['公里數','里程','公里','km','里程數','公里數(只車趟公里數)'] },
+  { key: 'total',       patterns: ['總額度','總額','total','總額度(只車趟總金額)'] },
+  { key: 'copay',       patterns: ['自付額','自費','copay','部分負擔','自付額(服務使用者部分負擔金額)'] },
+  { key: 'identity',    patterns: ['身份別','身分別','身份','identity','身份別(一般戶、中低收、低收)'] },
+  { key: 'fee',         patterns: ['收費','fee','收費確認'] },
+  { key: 'referral',    patterns: ['照會','referral','照會確認'] },
+];
+
+function matchHeader(headerName) {
+  // 清理：去空白、去括號內容、統一簡繁
+  const clean = s => s.trim()
+    .replace(/（[^）]*）/g,'').replace(/\([^)]*\)/g,'')
+    .replace(/\s+/g,'')
+    .replace(/臺/g,'台')
+    .toLowerCase();
+
+  const h = clean(headerName);
+  for (const col of COL_FUZZY) {
+    for (const p of col.patterns) {
+      if (h === clean(p)) return col.key;
+    }
+  }
+  // Second pass: partial match (header starts with pattern)
+  for (const col of COL_FUZZY) {
+    for (const p of col.patterns) {
+      const cp = clean(p);
+      if (h.startsWith(cp) || cp.startsWith(h)) return col.key;
+    }
+  }
+  return null;
+}
+
+// Parse date — handles ROC (115/04/01) and AD (2026/04/01 or 2026-04-01)
+function normalizeDate(raw) {
+  if (!raw) return '';
+  const s = String(raw).trim();
+  const m = s.match(/^(\d{2,4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+  if (m) {
+    let yr = parseInt(m[1]);
+    const mo = String(m[2]).padStart(2,'0');
+    const dy = String(m[3]).padStart(2,'0');
+    if (yr < 1911) yr += 1911; // ROC → AD
+    return `${yr}/${mo}/${dy}`;
+  }
+  return s;
+}
+
+// 解析 formMonth → { yr: ROC年字串, mo: 月數字 }
+function parseFormMonth(fm) {
+  const clean = fm.replace(/-/,'/');
+  const parts = clean.split('/');
+  let yr = parseInt(parts[0]);
+  const mo = parseInt(parts[1]) || 0;
+  if (yr < 1911) yr += 1911; // ROC → AD
+  return { yr: String(yr), mo };
+}
+
+function detectDelimiter(line) {
+  // Count each candidate delimiter outside quotes
+  const cands = [',', '\t', ';', '|'];
+  let best = ',', bestCount = 0;
+  for (const d of cands) {
+    let count = 0, inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === '"') inQ = !inQ;
+      else if (!inQ && line[i] === d) count++;
+    }
+    if (count > bestCount) { bestCount = count; best = d; }
+  }
+  return best;
+}
+
+function splitLine(line, delim) {
+  const result = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQ && line[i+1] === '"') { cur += '"'; i++; }
+      else inQ = !inQ;
+    } else if (ch === delim && !inQ) {
+      result.push(cur.trim()); cur = '';
+    } else cur += ch;
+  }
+  result.push(cur.trim());
+  return result;
+}
+
+// Keep parseCSVLine as alias for backward compat
+function parseCSVLine(line) { return splitLine(line, detectDelimiter(line)); }
+
+function parseCSV(file, vehicle) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    let text = e.target.result;
+    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1); // strip BOM
+
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    if (lines.length < 2) { toast('CSV 檔案內容為空'); return; }
+
+    // Auto-detect delimiter from header row
+    const delim = detectDelimiter(lines[0]);
+    const delimLabel = {',':`逗號`,'\t':'Tab',';':'分號','|':'直線'}[delim] || delim;
+
+    const rawHeaders = splitLine(lines[0], delim);
+    const previewId = vehicle === 'AWQ7565' ? 'preview-awq' : 'preview-byh';
+
+    // Map each column index → internal field key
+    const colMapping = {};
+    const unmapped = [];
+    rawHeaders.forEach((h, i) => {
+      const key = matchHeader(h);
+      if (key) colMapping[i] = key;
+      else if (h.trim()) unmapped.push(h.trim());
+    });
+
+    const newRecords = [];
+    for (let i = 1; i < lines.length; i++) {
+      const vals = splitLine(lines[i], delim);
+      if (vals.every(v => !v)) continue;
+
+      const rec = { id: uid(), vehicle };
+      Object.entries(colMapping).forEach(([idx, key]) => {
+        rec[key] = vals[+idx] !== undefined ? vals[+idx] : '';
+      });
+
+      if (!rec.date && !rec.name) continue;
+      if (rec.date === '接送日期' || rec.date === 'date') continue;
+
+      rec.date = normalizeDate(rec.date);
+
+      ['km','total','copay','passengers'].forEach(k => {
+        if (rec[k] !== undefined && rec[k] !== '') {
+          const n = parseFloat(String(rec[k]).replace(/,/g,''));
+          rec[k] = isNaN(n) ? rec[k] : n;
+        }
+      });
+      ['fee','referral'].forEach(k => {
+        if (rec[k] !== undefined) {
+          const v = String(rec[k]).trim().toLowerCase();
+          rec[k] = ['1','true','v','✓','是','已照會','已收費','y','yes','true'].includes(v);
+        }
+      });
+
+      newRecords.push(rec);
+    }
+
+    let added = 0, skipped = 0;
+    newRecords.forEach(nr => {
+      const dup = RECORDS.find(r => r.date === nr.date && r.name === nr.name && r.vehicle === vehicle);
+      if (dup) skipped++; else { RECORDS.push(nr); added++; }
+    });
+    saveData(RECORDS);
+    updateStats();
+    renderDispatch();
+    populateMonthFilter();
+
+    const mappedCount = Object.keys(colMapping).length;
+    const mappedCols = rawHeaders.map((h,i) =>
+      colMapping[i]
+        ? `<span style="color:var(--green);margin-right:8px">✓ ${h.trim()}</span>`
+        : `<span style="color:var(--text3);margin-right:8px">✗ ${h.trim()}</span>`
+    ).join('');
+
+    document.getElementById(previewId).innerHTML = `
+      <div style="margin-top:10px;padding:12px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:8px;font-size:12px;color:var(--green)">
+        ✅ 匯入完成：新增 <strong>${added}</strong> 筆，略過重複 <strong>${skipped}</strong> 筆（共 ${newRecords.length} 筆）
+      </div>
+      <div style="margin-top:8px;padding:10px 12px;background:var(--bg3);border-radius:8px;font-size:11px;line-height:2.2">
+        <div style="color:var(--text3);margin-bottom:4px;font-size:10px">偵測分隔符：${delimLabel}，共找到 ${rawHeaders.length} 個欄位</div>
+        <div style="color:var(--text2);margin-bottom:6px;font-size:10px;text-transform:uppercase;letter-spacing:.5px">欄位對應（${mappedCount}/${rawHeaders.length} 識別成功）</div>
+        ${mappedCols}
+        ${unmapped.length
+          ? `<div style="margin-top:6px;color:var(--amber);font-size:11px">⚠ 未識別：${unmapped.join('、')}</div>`
+          : '<div style="color:var(--green);font-size:11px;margin-top:4px">✓ 所有欄位均已識別</div>'}
+      </div>`;
+    toast(`✅ ${vehicle === 'AWQ7565' ? 'AWQ-7565' : 'BYH-3308'} 匯入 ${added} 筆`);
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+// ═══════════════════════════════════
+// EXPORT CSV
+// ═══════════════════════════════════
+function exportCSV() {
+  const headers = ['接送日期','接送時間','個案姓名','身份別','出發地址','目的地址','公里數','載客人數','總額度','自付額','陪同者姓名','服務需求','車輛'];
+  const keys =    ['date','time','name','identity','from','to','km','passengers','total','copay','companion','note','vehicle'];
+  const vehLabel = v => v === 'AWQ7565' ? 'AWQ-7565' : 'BYH-3308';
+  const rows = [...RECORDS].sort((a,b) => rowDate(b).localeCompare(rowDate(a)));
+  const csv = [headers.join(','), ...rows.map(r =>
+    keys.map(k => {
+      const v = k === 'vehicle' ? vehLabel(r[k]) : (r[k] != null ? r[k] : '');
+      return `"${String(v).replace(/"/g,'""')}"`;
+    }).join(',')
+  )].join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = '春社DA01交通紀錄.csv'; a.click();
+  URL.revokeObjectURL(url);
+  toast('📥 已匯出 CSV');
+}
+
+// ═══════════════════════════════════
+// CLEAR ALL DATA
+// ═══════════════════════════════════
+function clearAllData() {
+  if (!confirm('⚠️ 確定要清除所有資料嗎？此操作將同時清除本機和 Google Drive 的資料，無法復原！')) return;
+  if (!confirm('再次確認：清除後所有紀錄將消失，請確保已備份。')) return;
+  RECORDS = [];
+  saveData(RECORDS); // 會自動同步到雲端
+  updateStats();
+  renderDispatch();
+  toast('已清除所有資料（含雲端）');
+}
+
+// ═══════════════════════════════════
+// CASE QUERY
+// ═══════════════════════════════════
+const COLORS = ['#0dcfb4','#3b82f6','#a78bfa','#f5a623','#22c55e','#ef4444','#e879f9','#fb923c'];
+let selectedCaseName = null;
+
+function getCaseNames() {
+  const q = (document.getElementById('case-search').value || '').toLowerCase();
+  return [...new Set(RECORDS.map(r => r.name).filter(Boolean))].sort()
+    .filter(n => n.toLowerCase().includes(q));
+}
+
+function renderCaseList() {
+  const names = getCaseNames();
+  document.getElementById('case-list').innerHTML = names.map((n, i) => `
+    <div class="case-row ${selectedCaseName === n ? 'selected' : ''}" onclick="selectCase('${n.replace(/'/g,"\\'")}')">
+      <div class="avatar" style="background:${COLORS[i%COLORS.length]}22;color:${COLORS[i%COLORS.length]}">${n[0]}</div>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:13px">${n}</div>
+        <div style="font-size:11px;color:var(--text2)">${RECORDS.filter(r=>r.name===n).length} 筆紀錄</div>
+      </div>
+    </div>`).join('') || '<div style="color:var(--text3);font-size:12px;padding:16px;text-align:center">尚無個案資料</div>';
+}
+
+function selectCase(name) {
+  selectedCaseName = name;
+  renderCaseList();
+  const profiles = getProfiles();
+  const p = profiles[name] || {};
+  const rows = RECORDS.filter(r => r.name === name).sort((a,b) => rowDate(b).localeCompare(rowDate(a)));
+  const months = [...new Set(rows.map(r => rowDate(r).slice(0,7)).filter(Boolean))].sort().reverse();
+  const colorIdx = [...new Set(RECORDS.map(r=>r.name).filter(Boolean))].sort().indexOf(name);
+  const color = COLORS[colorIdx % COLORS.length];
+
+  const idBadgeColor = id => {
+    if(!id) return 'var(--text3)';
+    if(id.includes('低收入')) return 'var(--red)';
+    if(id.includes('中低')) return 'var(--amber)';
+    return 'var(--green)';
+  };
+
+  const profileHtml = `
+    <div class="card mb-12">
+      <div class="card-head">
+        <span class="card-title">📋 個案基本資料</span>
+        <button class="btn btn-outline btn-xs" onclick="openCaseProfileModal('${name.replace(/'/g,"\\'")}')">✏ 編輯</button>
+      </div>
+      <div class="card-body" style="font-size:12px;line-height:2.2">
+        <div class="form-grid fg2" style="gap:4px 20px">
+          ${p.ltcid?`<div style="grid-column:1/-1"><span style="color:var(--text3)">長照案號：</span><span class="mono" style="color:var(--teal);font-weight:600">${p.ltcid}</span></div>`:''}
+          <div><span style="color:var(--text3)">性別：</span>${p.gender||'—'}</div>
+          <div><span style="color:var(--text3)">生日：</span>${p.birth||'—'}</div>
+          <div><span style="color:var(--text3)">身分證：</span><span class="mono">${p.pid||'—'}</span></div>
+          <div><span style="color:var(--text3)">聯絡電話：</span>${p.phone||'—'}</div>
+          <div style="grid-column:1/-1"><span style="color:var(--text3)">地址：</span>${p.addr||'—'}</div>
+          <div style="grid-column:1/-1"><span style="color:var(--text3)">緊急聯絡：</span>${p.emergency||'—'}</div>
+          <div><span style="color:var(--text3)">年齡層：</span>${p.ageCat||'—'}</div>
+          <div><span style="color:var(--text3)">經濟別：</span><span style="color:${idBadgeColor(p.identity)};font-weight:600">${p.identity||'—'}</span></div>
+          <div><span style="color:var(--text3)">失能等級：</span>${p.disability?'第'+p.disability+'級':'—'}</div>
+          <div><span style="color:var(--text3)">個管單位：</span>${p.unit||'—'}</div>
+          ${p.note?`<div style="grid-column:1/-1"><span style="color:var(--text3)">備註：</span><span style="color:var(--amber)">${p.note}</span></div>`:''}
+          ${p.defaultFrom?`<div style="grid-column:1/-1"><span style="color:var(--text3)">常用出發：</span>${p.defaultFrom}</div>`:''}
+          ${p.defaultTo?`<div style="grid-column:1/-1"><span style="color:var(--text3)">常用目的：</span>${p.defaultTo}</div>`:''}
+        </div>
+        ${!p.pid&&!p.phone&&!p.addr?`<div style="color:var(--text3);font-size:11px;margin-top:4px">尚未填寫基本資料 <button class="btn btn-outline btn-xs" onclick="openCaseProfileModal('${name.replace(/'/g,"\\'")}')">立即填寫</button></div>`:''}
+      </div>
+    </div>`;
+
+  document.getElementById('case-detail').innerHTML = `
+    <div class="flex items-center gap-12 mb-12">
+      <div class="avatar" style="width:44px;height:44px;font-size:18px;background:${color}22;color:${color}">${name[0]}</div>
+      <div>
+        <div style="font-size:16px;font-weight:700">${name}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">共 ${rows.length} 筆 · ${months.length} 個月份</div>
+      </div>
+      <div class="ml-auto flex gap-8">
+        <button class="btn btn-outline btn-sm" onclick="openCaseProfileModal('${name.replace(/'/g,"\\'")}')">✏ 編輯基本資料</button>
+        <button class="btn btn-teal btn-sm" onclick="goToForm('${name.replace(/'/g,"\\'")}')">🖨 印製DA01</button>
+      </div>
+    </div>
+    ${profileHtml}
+    ${months.map(m => {
+      const mRows = rows.filter(r => rowDate(r).startsWith(m));
+      const totalKm = mRows.filter(r=>r.km).reduce((s,r)=>s+parseFloat(r.km||0),0);
+      const totalAmt = mRows.filter(r=>r.total!=null&&r.total!=='').reduce((s,r)=>s+parseFloat(r.total||0),0);
+      const over1840 = totalAmt > 1840;
+      return `<div style="margin-bottom:16px">
+        <div class="flex items-center gap-8 mb-8">
+          <span style="font-size:13px;font-weight:600;color:var(--teal)">${m}
+            <span style="font-size:11px;color:var(--text3);font-weight:400">
+              共${mRows.length}趟${totalKm?' · '+totalKm.toFixed(1)+'km':''}${totalAmt?' · 總額$'+totalAmt:''}
+            </span>
+          </span>
+          ${over1840?`<span style="font-size:11px;font-weight:700;color:var(--red);background:rgba(239,68,68,.1);padding:3px 8px;border-radius:5px">⚠ 超過$1840（已達$${totalAmt}）</span>`:''}
+        </div>
+        <table class="tbl" style="font-size:11px">
+          <tr><th>日期</th><th>時間</th><th>出發地</th><th>目的地</th><th>里程</th><th>身份別</th><th>自付額</th><th>照會</th></tr>
+          ${mRows.map(r=>`<tr>
+            <td class="mono">${r.date||'—'}</td><td class="mono">${r.time||'—'}</td>
+            <td style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.from||'—'}</td>
+            <td style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.to||'—'}</td>
+            <td class="mono ${r.km?'text-teal':'text-amber'}">${r.km?r.km+' km':'待補'}</td>
+            <td>${r.identity||'—'}</td>
+            <td class="mono">${r.copay!=null&&r.copay!==''?r.copay:'—'}</td>
+            <td style="color:${r.referral?'var(--teal)':'var(--red)'}">${r.referral?'✓':'✗'}</td>
+          </tr>`).join('')}
+        </table>
+      </div>`;
+    }).join('')}
+    ${rows.length===0?'<div style="color:var(--text3);text-align:center;padding:24px">尚無紀錄</div>':''}`;
+}
+
+// ═══════════════════════════════════
+// DISTANCE CALCULATOR
+// 使用台灣政府免費地址 API + OpenStreetMap
+// 完全免費，不需要任何 API Key
+// ═══════════════════════════════════
+let geoCache = {};
+let sugAddrTimer = null;
+let calcKmVal = null;
+let calcCoords = { origin: null, dest: null };
+
+// ── 解析台灣地址結構 ──
+function parseTwAddr(addr) {
+  addr = addr.trim()
+    .replace(/^臺/,'台')
+    .replace(/台灣/g,'')
+    .trim();
+
+  const m = addr.match(
+    /^(台[北中南東高基新桃竹苗彰投嘉屏宜花東澎金連][市縣]|新北市|新竹[市縣]|嘉義[市縣])?([^\d路街巷弄]+[區鄉鎮市])?([^\d]+[路街道大](?:段)?)?(.*)$/
+  );
+  if (!m) return null;
+  return {
+    city: m[1] || '',
+    district: m[2] || '',
+    road: m[3] || '',
+    num: m[4] || '',
+    full: addr,
+  };
+}
+
+// ── 方法一：Nominatim 結構化查詢（免費，對台灣地址更準確）──
+async function nominatimStructured(parts) {
+  const params = new URLSearchParams({
+    format: 'json', limit: '5',
+    countrycodes: 'tw', 'accept-language': 'zh-TW',
+  });
+  if (parts.city) params.set('state', parts.city);
+  if (parts.district) params.set('county', parts.district);
+  if (parts.road || parts.num) params.set('street', (parts.road + parts.num).trim());
+  const url = `https://nominatim.openstreetmap.org/search?${params}`;
+  try {
+    const r = await fetch(url, {headers:{'Accept-Language':'zh-TW'}});
+    const data = await r.json();
+    return data.filter(d => {
+      const lat=parseFloat(d.lat), lon=parseFloat(d.lon);
+      return lat>21&&lat<26&&lon>119&&lon<123;
+    });
+  } catch(e) { return []; }
+}
+
+// ── 方法二：Nominatim 全文查詢 ──
+async function nominatimFreetext(q) {
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q+' 台灣')}&format=json&limit=5&countrycodes=tw&accept-language=zh-TW`;
+  try {
+    const r = await fetch(url, {headers:{'Accept-Language':'zh-TW'}});
+    const data = await r.json();
+    return data.filter(d => {
+      const lat=parseFloat(d.lat), lon=parseFloat(d.lon);
+      return lat>21&&lat<26&&lon>119&&lon<123;
+    });
+  } catch(e) { return []; }
+}
+
+// ── 方法三：內政部 TGOS 地址解析（台灣政府免費 API）──
+async function tgosGeocode(addr) {
+  // TGOS 地址坐標查詢（內政部國土測繪中心，完全免費）
+  const encoded = encodeURIComponent(addr);
+  const url = `https://api.nlsc.gov.tw/other/TownVillagePointQuery/${encoded}/4326`;
+  try {
+    const r = await fetch(url, {headers:{'Accept':'application/json'}});
+    if (!r.ok) return [];
+    const data = await r.json();
+    if (data && data.x && data.y) {
+      return [{ lat: String(data.y), lon: String(data.x), display_name: addr, name: addr }];
+    }
+    return [];
+  } catch(e) { return []; }
+}
+
+// ── 方法四：Photon 免費服務（對醫院、機構名稱很好用）──
+async function photonGeocode(q) {
+  const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q+' Taiwan')}&bbox=119.0,21.5,122.5,25.5&limit=5&lang=zh`;
+  try {
+    const r = await fetch(url);
+    const data = await r.json();
+    return (data.features||[]).map(f => ({
+      lat: String(f.geometry.coordinates[1]),
+      lon: String(f.geometry.coordinates[0]),
+      display_name: [f.properties.name, f.properties.street, f.properties.city].filter(Boolean).join(', '),
+      name: f.properties.name || q,
+      type: f.properties.type,
+    }));
+  } catch(e) { return []; }
+}
+
+// ── 主 geocode：多策略依序嘗試 ──
+async function geocodeTw(addr) {
+  const key = addr.trim();
+  if (geoCache[key]) return geoCache[key];
+
+  // 1. 結構化 Nominatim（最準確的台灣地址）
+  const parts = parseTwAddr(key);
+  if (parts && (parts.city || parts.district)) {
+    const r = await nominatimStructured(parts);
+    if (r.length) { geoCache[key]=r; return r; }
+  }
+
+  // 2. 全文 Nominatim
+  const r2 = await nominatimFreetext(key);
+  if (r2.length) { geoCache[key]=r2; return r2; }
+
+  // 3. Photon（機構名稱，如醫院）
+  const r3 = await photonGeocode(key);
+  if (r3.length) { geoCache[key]=r3; return r3; }
+
+  // 4. 只取機構/地標名稱再試
+  if (parts && parts.road) {
+    const landmark = key.replace(/^台[^市縣]+[市縣][^區鄉鎮]*[區鄉鎮]/,'').trim();
+    if (landmark && landmark !== key) {
+      const r4 = await photonGeocode(landmark);
+      if (r4.length) { geoCache[key]=r4; return r4; }
+    }
+  }
+
+  geoCache[key] = [];
+  return [];
+}
+
+// ── 自動建議下拉 ──
+function suggestAddr(inputId, sugId, field) {
+  clearTimeout(sugAddrTimer);
+  const val = document.getElementById(inputId).value.trim();
+  const box = document.getElementById(sugId);
+  if (val.length < 2) { box.style.display='none'; return; }
+
+  sugAddrTimer = setTimeout(async () => {
+    try {
+      // Try structured first for quick results
+      const parts = parseTwAddr(val);
+      let results = [];
+      if (parts && (parts.city || parts.district)) {
+        results = await nominatimStructured(parts);
+      }
+      if (!results.length) results = await nominatimFreetext(val);
+      if (!results.length) results = await photonGeocode(val);
+
+      if (!results.length) { box.style.display='none'; return; }
+
+      box.innerHTML = results.slice(0,5).map(item => {
+        const parts2 = (item.display_name||'').split(', ')
+          .filter(p => p!=='台灣'&&p!=='Taiwan'&&p!=='Republic of China'&&p!=='ROC');
+        const name = item.name && item.name !== item.display_name
+          ? `<strong>${item.name}</strong>，${parts2.slice(1,3).join('，')}`
+          : parts2.slice(0,4).join('，');
+        const safeAddr = (item.display_name||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+        return `<div class="sug-item" onclick="pickSug('${inputId}','${sugId}','${field}','${safeAddr}','${item.lat}','${item.lon}')">${name}</div>`;
+      }).join('');
+      box.style.display = 'block';
+    } catch(e) { box.style.display='none'; }
+  }, 500);
+}
+
+function pickSug(inputId, sugId, field, fullName, lat, lon) {
+  const parts = fullName.split(', ').filter(p=>p!=='台灣'&&p!=='Taiwan'&&p!=='Republic of China'&&p!=='ROC');
+  const shortName = parts.slice(0,3).join(', ');
+  document.getElementById(inputId).value = shortName;
+  document.getElementById(sugId).style.display = 'none';
+  calcCoords[field] = { lat: parseFloat(lat), lon: parseFloat(lon), name: shortName };
+  if (field==='origin' && !document.getElementById('m-from').value) document.getElementById('m-from').value = shortName;
+  if (field==='dest' && !document.getElementById('m-to').value) document.getElementById('m-to').value = shortName;
+}
+
+function setDistStatus(msg, cls) {
+  const el = document.getElementById('dist-status');
+  if (!el) return;
+  el.innerHTML = msg;
+  el.className = 'dist-status'+(cls?' '+cls:'');
+}
+
+async function calcDist() {
+  const ov = document.getElementById('m-origin').value.trim();
+  const dv = document.getElementById('m-dest').value.trim();
+  if (!ov||!dv) { setDistStatus('請輸入起點與終點','err'); return; }
+  const btn = document.getElementById('calc-btn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>計算中';
+  document.getElementById('dist-result').style.display='none';
+
+  try {
+    let o = calcCoords.origin;
+    let d = calcCoords.dest;
+
+    if (!o || !o.lat) {
+      setDistStatus('<span class="spinner"></span>查詢起點地址…');
+      const r = await geocodeTw(ov);
+      if (!r.length) throw new Error(`找不到起點「${ov}」，請確認地址格式（縣市+區+路+號）`);
+      o = { lat: parseFloat(r[0].lat), lon: parseFloat(r[0].lon) };
+      calcCoords.origin = o;
+    }
+    if (!d || !d.lat) {
+      setDistStatus('<span class="spinner"></span>查詢終點地址…');
+      const r = await geocodeTw(dv);
+      if (!r.length) throw new Error(`找不到終點「${dv}」，請確認地址或機構名稱`);
+      d = { lat: parseFloat(r[0].lat), lon: parseFloat(r[0].lon) };
+      calcCoords.dest = d;
+    }
+
+    setDistStatus('<span class="spinner"></span>計算行車路徑…');
+    const rr = await fetch(`https://router.project-osrm.org/route/v1/driving/${o.lon},${o.lat};${d.lon},${d.lat}?overview=false`);
+    const rd = await rr.json();
+    if (rd.code!=='Ok') throw new Error('路徑計算失敗，請確認地址是否在可行車範圍');
+    const km = (rd.routes[0].distance/1000).toFixed(1);
+    const mins = Math.round(rd.routes[0].duration/60);
+    calcKmVal = km;
+    document.getElementById('dist-km-val').textContent = km;
+    document.getElementById('dist-time-val').textContent = `預計行車時間：約 ${mins} 分鐘`;
+    document.getElementById('dist-result').style.display = '';
+    setDistStatus('✓ 計算完成（免費 OpenStreetMap）','ok');
+    if (!document.getElementById('m-from').value) document.getElementById('m-from').value = ov;
+    if (!document.getElementById('m-to').value) document.getElementById('m-to').value = dv;
+  } catch(e) {
+    setDistStatus(e.message||'計算失敗','err');
+  }
+  btn.disabled=false; btn.innerHTML='計算距離';
+}
+
+function applyKm() {
+  if (!calcKmVal) return;
+  const inp = document.getElementById('m-km');
+  inp.value = calcKmVal;
+  inp.classList.add('filled');
+  toast(`✅ 已填入 ${calcKmVal} 公里`);
+}
+
+function clearDist() {
+  ['m-origin','m-dest'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  ['sug-origin','sug-dest'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
+  const dr=document.getElementById('dist-result'); if(dr) dr.style.display='none';
+  calcCoords={origin:null,dest:null};
+  calcKmVal=null;
+  setDistStatus('');
+}
+
+// ── 設定頁（簡化，無需 API Key）──
+function updateMapsBadge() {
+  const el = document.getElementById('maps-badge');
+  if (el) el.innerHTML = '<span style="color:var(--green)">🗺 免費地圖服務</span>';
+}
+function updateKeyStatusBadge() {
+  const el = document.getElementById('key-status-badge');
+  if (el) el.innerHTML = '<span class="badge bg-green">✓ 免費使用中</span>';
+}
+function saveApiKey() { toast('✅ 本系統使用免費地圖服務，不需要 API Key！'); }
+function clearApiKey() {}
+function toggleKeyVis() {}
+function testSearch() {
+  const addr = document.getElementById('test-addr').value.trim();
+  const el = document.getElementById('test-result');
+  if (!addr) return;
+  el.innerHTML = '<span class="spinner"></span> 搜尋中…';
+  geocodeTw(addr).then(results => {
+    if (results.length) {
+      el.innerHTML = `✅ 找到 ${results.length} 個結果：<br>` + results.slice(0,3).map(r=>`・${r.display_name}`).join('<br>');
+    } else {
+      el.innerHTML = '⚠️ 找不到結果，請嘗試更完整的地址（含縣市和區）';
+    }
+  });
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.addr-wrap')) document.querySelectorAll('.sug-box').forEach(b=>b.style.display='none');
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.addr-wrap')) document.querySelectorAll('.sug-box').forEach(b=>b.style.display='none');
+});
+
+// ═══════════════════════════════════
+// BATCH CALC MISSING KM
+// ═══════════════════════════════════
+async function batchCalcMissing() {
+  const missing = RECORDS.filter(r => !r.km && r.from && r.to);
+  if (!missing.length) { toast('✅ 所有里程已齊全！'); return; }
+  toast(`⚡ 開始批次計算 ${missing.length} 筆…`);
+  let done = 0;
+  for (const r of missing) {
+    try {
+      const [oRes, dRes] = await Promise.all([geocode(r.from), geocode(r.to)]);
+      if (!oRes.length || !dRes.length) continue;
+      const o = { lat: parseFloat(oRes[0].lat), lon: parseFloat(oRes[0].lon) };
+      const d = { lat: parseFloat(dRes[0].lat), lon: parseFloat(dRes[0].lon) };
+      const rr = await fetch(`https://router.project-osrm.org/route/v1/driving/${o.lon},${o.lat};${d.lon},${d.lat}?overview=false`);
+      const rd = await rr.json();
+      if (rd.code === 'Ok') { r.km = parseFloat((rd.routes[0].distance / 1000).toFixed(1)); done++; }
+    } catch(e) {}
+    await new Promise(r => setTimeout(r, 350));
+  }
+  saveData(RECORDS);
+  updateStats();
+  renderDispatch();
+  toast(`✅ 批次完成：${done}/${missing.length} 筆`);
+}
+
+// ═══════════════════════════════════
+// FORM PRINTING
+// ═══════════════════════════════════
+let formCaseName = null;
+let formMonth = '';
+
+function renderFormCaseList() {
+  const q = (document.getElementById('form-search').value || '').toLowerCase();
+  const names = [...new Set(RECORDS.map(r=>r.name).filter(Boolean))].sort().filter(n=>n.toLowerCase().includes(q));
+  document.getElementById('form-case-list').innerHTML = names.map((n,i) => `
+    <div class="case-row ${formCaseName===n?'selected':''}" onclick="selectFormCase('${n.replace(/'/g,"\\'")}')">
+      <div class="avatar" style="background:${COLORS[i%COLORS.length]}22;color:${COLORS[i%COLORS.length]}">${n[0]}</div>
+      <div style="flex:1"><div style="font-weight:600">${n}</div><div style="font-size:11px;color:var(--text2)">${RECORDS.filter(r=>r.name===n).length} 筆</div></div>
+    </div>`).join('') || '<div style="color:var(--text3);font-size:12px;padding:16px;text-align:center">尚無個案資料</div>';
+}
+
+function selectFormCase(name) {
+  formCaseName = name;
+  const rows = RECORDS.filter(r => r.name === name);
+  const months = [...new Set(rows.map(r => rowDate(r).slice(0,7)).filter(Boolean))].sort().reverse();
+  formMonth = months[0] || '';
+
+  // Auto detect vehicle
+  const awqCount = rows.filter(r => r.vehicle === 'AWQ7565').length;
+  const byhCount = rows.filter(r => r.vehicle === 'BYH3308').length;
+  document.getElementById('print-veh').value = awqCount >= byhCount ? 'AWQ-7565' : 'BYH-3308';
+
+  document.getElementById('month-chips').innerHTML = months.map(m => {
+    const cnt = rows.filter(r => rowDate(r).startsWith(m)).length;
+    return `<div class="mchip ${m===formMonth?'active':''}" onclick="selMonth('${m}',this)">${m}（${cnt}趟）</div>`;
+  }).join('');
+
+  goFormStep(2);
+  updateFormSidebar();
+}
+
+function selMonth(m, el) {
+  formMonth = m;
+  document.querySelectorAll('.mchip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function goFormStep(step) {
+  [1,2,3].forEach(i => {
+    document.getElementById('fstep'+i).style.display = i===step ? '' : 'none';
+    document.getElementById('s'+i+'nav').classList.toggle('active', i===step);
+  });
+  updateFormSidebar();
+  if (step===3) renderFormPreview();
+}
+
+function updateFormSidebar() {
+  const el = document.getElementById('form-info');
+  if (!formCaseName) { el.textContent = '尚未選擇個案'; return; }
+  el.innerHTML = `<span style="color:var(--teal);font-weight:600">${formCaseName}</span><br>${formMonth||'請選擇月份'}`;
+}
+
+function ecoNum(eco) {
+  if (!eco) return '';
+  if (eco.includes('低收入') || eco==='低收') return '1';
+  if (eco.includes('中低')) return '2';
+  return '3';
+}
+
+function renderFormPreview() {
+  if (!formCaseName||!formMonth) { toast('請先選擇月份'); goFormStep(2); return; }
+  const name = formCaseName;
+  const veh = document.getElementById('print-veh').value;
+  const checker = document.getElementById('print-checker').value;
+  const extraNote = document.getElementById('print-note').value;
+
+  // Robust year/month parsing
+  const { yr, mo } = parseFormMonth(formMonth);
+
+  const vehKey = veh==='AWQ-7565'?'AWQ7565':'BYH3308';
+
+  // Match records by formMonth prefix (handle both ROC and AD stored dates)
+  const allBks = RECORDS.filter(r => {
+    if (r.name !== name || r.vehicle !== vehKey) return false;
+    const d = rowDate(r);
+    const { yr: ry, mo: rm } = parseFormMonth(d.slice(0,7));
+    return ry === yr && rm === mo;
+  }).sort((a,b) => rowDate(a).localeCompare(rowDate(b)));
+
+  // ── 照會擋關 ──
+  const noRefBks = allBks.filter(r => !r.referral && !r.remark);
+  if (noRefBks.length > 0 && allBks.length > 0 && noRefBks.length === allBks.length) {
+    document.getElementById('form-preview').innerHTML = `
+      <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:24px;text-align:center">
+        <div style="font-size:28px;margin-bottom:10px">🚫</div>
+        <div style="font-size:15px;font-weight:700;color:var(--red);margin-bottom:8px">無法產出派車單</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:16px">
+          ${name} ${yr}年${mo}月 的 ${allBks.length} 筆紀錄均尚未照會<br>
+          個管照會後，請至派車紀錄勾選「已照會」，才可列印派案單
+        </div>
+        <button class="btn btn-outline" onclick="goFormStep(1)">← 返回選擇</button>
+      </div>`;
+    return;
+  }
+
+  const bksAll = allBks;
+  const identity = (bksAll[0]||{}).identity||'';
+  const ageCats = ['失智者','64歲以下身障','55歲-64歲原住民','65歲以上老人'];
+  const ecoCats = ['一般戶','中低收入戶','低收入戶'];
+  const ageCBs = ageCats.map(a=>`<div class="cbi"><span>☐</span>${a}</div>`).join('');
+  const ecoCBs = ecoCats.map(a=>`<div class="cbi"><span>${identity===a||identity.includes(a.slice(0,2))?'☑':'☐'}</span>${a}</div>`).join('');
+
+  const pages = [];
+  for (let i = 0; i < Math.max(1, bksAll.length); i += 10) pages.push(bksAll.slice(i, i + 10));
+
+  const warnBanner = noRefBks.length > 0
+    ? `<div style="background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--amber);margin-bottom:12px">
+        ⚠ 注意：本月共 <strong>${noRefBks.length}</strong> 趟尚未照會（以「⚠待照」標示）</div>` : '';
+
+  let html = warnBanner;
+
+  pages.forEach((bks, pageIdx) => {
+    const isLast = pageIdx === pages.length - 1;
+    const pageLabel = pages.length > 1 ? ` (第${pageIdx+1}頁/共${pages.length}頁)` : '';
+
+    // ── 派案單（正面，橫式）──
+    const frontRows = bks.map(b => {
+      const notRef = !b.referral && !b.remark;
+      const dateCell = notRef
+        ? `<td style="white-space:nowrap;color:#c0392b">${b.date||''}<br><span style="font-size:8px">⚠待照</span></td>`
+        : `<td style="white-space:nowrap">${b.date||''}</td>`;
+      return `<tr>${dateCell}<td style="text-align:left;font-size:9.5px">${b.from||''}</td><td style="text-align:left;font-size:9.5px">${b.to||''}</td><td>${b.km!=null&&b.km!==''?b.km:''}${b.km?'km':''}</td><td style="text-align:left;font-size:9px">${b.remark?'['+b.remark+']':b.note||''}</td><td></td></tr>`;
+    }).join('');
+    const fillFront = Array(Math.max(0,10-bks.length)).fill('<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td></tr>').join('');
+
+    // ── 交通接送表（背面，直式）── 完全對照實際表單
+    const backRows = bks.map(b => {
+      // 只取日期最後的「日」數字，相容 115/01/23 或 2026-01-23
+      const dayNum = String(b.date||'').split(/[\/\-]/).pop().replace(/^0/,'');
+      const eco = ecoNum(b.identity||identity);
+      const km = b.km!=null&&b.km!==''?b.km:'';
+      const govSubsidy = b.total!=null&&b.total!==''?b.total:'';
+      const partialBurden = b.copay!=null&&b.copay!==''?b.copay:'';
+      return `<tr>
+        <td>${dayNum}</td>
+        <td>${eco}</td>
+        <td></td>
+        <td>${km}</td>
+        <td></td><td></td>
+        <td></td>
+        <td></td>
+        <td>${govSubsidy}</td>
+        <td>${partialBurden}</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td style="text-align:left;font-size:8px">${b.note||''}</td>
+      </tr>`;
+    }).join('');
+    const fillBack = Array(Math.max(0,10-bks.length)).fill(
+      '<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>'
+    ).join('');
+
+    html += `
+    <div class="da01-page landscape-page" id="da01-front-${pageIdx}">
+      <div class="org">財團法人全成社會福利基金會附設臺中市私立春社社區式服務類長期照顧服務機構</div>
+      <div class="ftitle">交通接送服務 派案單${pageLabel}</div>
+      <div style="display:flex">
+        <div class="slbl" style="border:1px solid #666;min-height:100px">基本資料</div>
+        <div style="flex:1;border:1px solid #666;border-left:none;padding:7px">
+          <div class="fr">姓名：<span class="fl" style="min-width:80px">${name}</span>&emsp;性別：<span class="fl" style="min-width:30px"></span>&emsp;生日：<span class="fl" style="min-width:120px"></span>&emsp;身份證字號：<span class="fl" style="min-width:120px"></span></div>
+          <div class="fr">地址：<span class="fl" style="min-width:300px"></span></div>
+          <div class="fr">年齡層：<div class="cb">${ageCBs}</div></div>
+          <div class="fr">經濟別：<div class="cb">${ecoCBs}</div>&emsp;失能程度：第<span class="fl" style="min-width:20px"></span>級&emsp;核定項目：<strong>DA01</strong>${extraNote?'&emsp;備註：'+extraNote:''}</div>
+        </div>
+      </div>
+      <div style="display:flex;margin-top:5px">
+        <div class="slbl" style="border:1px solid #666;min-height:40px">服務記事</div>
+        <div style="flex:1;border:1px solid #666;border-left:none">
+          <table class="ftbl">
+            <tr><th style="width:90px">服務日期</th><th>起點</th><th>終點</th><th style="width:65px">里程數</th><th>備註</th><th style="width:65px">記錄人</th></tr>
+            ${frontRows}${fillFront}
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="page-break-between"></div>
+    <div class="da01-page portrait-page" id="da01-back-${pageIdx}">
+      <div class="org">財團法人全成社會福利基金會附設臺中市私立春社社區式服務類長期照顧服務機構</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #000;padding-bottom:4px;margin-bottom:4px;font-size:11px">
+        <div>姓名：<span class="fl" style="min-width:70px">${name}</span></div>
+        <div style="font-weight:700;font-size:13px">${yr} 年 ${mo} 月 DA01 交通接送表${pageLabel}</div>
+        <div>車號：<span class="fl" style="min-width:80px">${veh}</span></div>
+      </div>
+      <div style="font-size:10px;margin-bottom:4px">檢核人員：<span class="fl" style="min-width:80px">${checker}</span></div>
+      <table class="btbl">
+        <tr>
+          <th rowspan="3" style="width:26px">日期</th>
+          <th rowspan="3" style="width:38px;font-size:8px">身分別<br>1.低收<br>2.中低<br>3.一般戶</th>
+          <th rowspan="3" style="width:26px">體溫</th>
+          <th rowspan="3" style="width:34px">公里數</th>
+          <th colspan="2">車趟金額</th>
+          <th rowspan="3" style="width:38px;font-size:8px">陪同費<br>（第2人<br>需加收<br>50元）</th>
+          <th rowspan="3" style="width:28px">共乘<br>Y/N</th>
+          <th colspan="3">車趟應收總額</th>
+          <th rowspan="3" style="width:44px">使用者<br>簽章</th>
+          <th rowspan="3" style="width:34px">服務<br>人員</th>
+          <th rowspan="3">備註</th>
+        </tr>
+        <tr>
+          <th colspan="2">補助</th>
+          <th rowspan="2" style="width:38px">政府<br>補助</th>
+          <th rowspan="2" style="width:34px">部分<br>負擔</th>
+          <th rowspan="2" style="width:30px">自費</th>
+        </tr>
+        <tr>
+          <th style="width:34px">政府</th>
+          <th style="width:30px">自費</th>
+        </tr>
+        ${backRows}${fillBack}
+        <tr style="font-size:9px;font-weight:700">
+          <td colspan="2">DA01 總計</td>
+          <td>趟次</td>
+          <td>${bks.length}</td>
+          <td></td><td></td><td></td><td></td>
+          <td>-</td><td>-</td><td>-</td>
+          <td></td><td></td><td></td>
+        </tr>
+      </table>
+      <div style="margin-top:5px;font-size:9px;color:#333">陪同費：第2人需加收50元 ／ ※ 體溫、簽章、服務人員、金額欄請服務當日手填</div>
+    </div>
+    ${!isLast ? '<div class="page-break-between"></div>' : ''}`;
+  });
+
+  document.getElementById('form-preview').innerHTML = `<div id="da01-printable">${html}</div>`;
+}
+
+function printForm() {
+  const el = document.getElementById('da01-printable');
+  if (!el) { toast('請先預覽'); return; }
+  const w = window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Noto Sans TC','Arial',sans-serif;font-size:10px;color:#000;background:#fff;}
+  .org{text-align:center;font-size:11px;font-weight:700;padding-bottom:4px;margin-bottom:5px;border-bottom:2px solid #000;}
+  .ftitle{text-align:center;font-size:14px;font-weight:700;margin-bottom:8px;}
+  .fl{border-bottom:1px solid #333;min-width:60px;display:inline-block;padding:0 3px;}
+  .fr{display:flex;gap:4px;align-items:baseline;margin-bottom:5px;flex-wrap:wrap;font-size:10.5px;}
+  .cb{display:flex;gap:12px;}.cbi{display:flex;align-items:center;gap:3px;}
+  .slbl{writing-mode:vertical-rl;border:1px solid #666;padding:4px 3px;font-weight:700;font-size:10px;display:flex;align-items:center;justify-content:center;min-width:20px;}
+  .ftbl{width:100%;border-collapse:collapse;}
+  .ftbl th,.ftbl td{border:1px solid #555;padding:3px 4px;text-align:center;font-size:10px;}
+  .ftbl th{background:#eee;font-weight:600;}.ftbl td{height:22px;}
+
+  /* 背面：交通接送表 */
+  .btbl{width:100%;border-collapse:collapse;table-layout:fixed;}
+  .btbl th,.btbl td{border:1px solid #333;padding:2px 2px;text-align:center;font-size:9px;height:20px;vertical-align:middle;word-break:break-all;}
+  .btbl th{background:#eee;font-weight:600;line-height:1.3;}
+  .btbl td{height:24px;}
+  .btbl .note-col{text-align:left;font-size:8px;}
+
+  /* 派案單：橫式 A4 */
+  .landscape-page{
+    width:267mm; min-height:188mm;
+    padding:8mm 10mm 6mm;
+    page-break-after:always;
+  }
+  /* 交通接送表：直式 A4 */
+  .portrait-page{
+    width:190mm; min-height:268mm;
+    padding:8mm 10mm 6mm;
+    page-break-after:always;
+  }
+  .page-break-between{ page-break-after:always; }
+  @page{ margin:0; }
+  @media print{
+    .landscape-page{ width:297mm; padding:8mm 12mm; }
+    .portrait-page{ width:210mm; padding:8mm 12mm; }
+    .page-break-between{ display:none; }
+  }
+  </style>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+  </head><body>${el.innerHTML}</body></html>`);
+  w.document.close();
+  setTimeout(()=>w.print(),800);
+}
+
+function goToForm(name) {
+  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-btn')[2].classList.add('active');
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.getElementById('view-form').classList.add('active');
+  renderFormCaseList();
+  setTimeout(()=>selectFormCase(name),50);
+}
+
+// ═══════════════════════════════════
+// ONLINE PRESENCE
+// ═══════════════════════════════════
+let heartbeatTimer = null;
+
+function startHeartbeat() {
+  const user = getCurrentUser();
+  if (!user) return;
+  sendHeartbeat(user);
+  heartbeatTimer = setInterval(() => sendHeartbeat(user), 30000);
+}
+
+async function sendHeartbeat(user) {
+  checkForceLogout(); // check if admin forced us out
+  try {
+    const url = `${GAS_STORE}?action=heartbeat&user=${encodeURIComponent(user.display)}&role=${encodeURIComponent(user.role)}`;
+    const r = await fetch(url);
+    const data = await r.json();
+    if (data.online) renderOnlineBadge(data.online, user.display);
+  } catch(e) {}
+}
+
+async function refreshOnline() {
+  try {
+    const r = await fetch(`${GAS_STORE}?action=online`);
+    const data = await r.json();
+    if (data.online) {
+      const user = getCurrentUser();
+      renderOnlineBadge(data.online, user?.display || '');
+    }
+  } catch(e) {}
+}
+
+function renderOnlineBadge(online, myName) {
+  const el = document.getElementById('online-badge');
+  if (!el) return;
+  const users = Object.entries(online);
+  const others = users.filter(([name]) => name !== myName);
+  const roleColors = { admin:'var(--teal)', staff:'var(--blue)', driver:'var(--amber)' };
+  const roleLabels = { admin:'管', staff:'預', driver:'司' };
+
+  const dots = users.map(([name, info]) => {
+    const isMe = name === myName;
+    const col = roleColors[info.role] || 'var(--text2)';
+    return `<span title="${name}（${isMe?'我':''}${info.role==='admin'?'管理員':info.role==='staff'?'預約人員':'司機'}）"
+      style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:${col}22;border:2px solid ${col};font-size:10px;font-weight:700;color:${col};cursor:default${isMe?';box-shadow:0 0 0 2px var(--bg),0 0 0 3px '+col:''}">
+      ${name[0]}
+    </span>`;
+  }).join('');
+
+  el.innerHTML = `<div style="display:flex;align-items:center;gap:4px">
+    <span style="font-size:10px;color:var(--text3)">在線</span>
+    ${dots}
+    <span style="font-size:10px;color:var(--text3)">${users.length}人</span>
+  </div>`;
+  el.title = users.map(([n,i])=>`${n}（${i.role==='admin'?'管理員':i.role==='staff'?'預約人員':'司機'}）`).join('\n');
+}
+// ═══════════════════════════════════
+const BLOCKED_KEY = 'chun_blocked_dates';
+function getBlocked() { try { return JSON.parse(localStorage.getItem(BLOCKED_KEY)) || []; } catch(e) { return []; } }
+function saveBlocked(list) { localStorage.setItem(BLOCKED_KEY, JSON.stringify(list)); }
+
+function openBlockedModal() {
+  document.getElementById('bl-start').value = new Date().toISOString().split('T')[0];
+  document.getElementById('bl-end').value = new Date().toISOString().split('T')[0];
+  document.getElementById('bl-reason').value = '';
+  document.getElementById('bl-vehicle').value = 'ALL';
+  openModal('modal-blocked');
+}
+
+function saveBlockedDate() {
+  const start = document.getElementById('bl-start').value;
+  const end = document.getElementById('bl-end').value;
+  const reason = document.getElementById('bl-reason').value.trim();
+  if (!start || !end || !reason) { toast('⚠️ 請填寫日期和原因'); return; }
+  const list = getBlocked();
+  list.push({ id: uid(), start, end, reason, vehicle: document.getElementById('bl-vehicle').value });
+  saveBlocked(list);
+  closeModal('modal-blocked');
+  renderBlockedList();
+  toast('✅ 已新增不得約車日期');
+}
+
+function deleteBlocked(id) {
+  const list = getBlocked().filter(b => b.id !== id);
+  saveBlocked(list);
+  renderBlockedList();
+  toast('已刪除');
+}
+
+function renderBlockedList() {
+  const list = getBlocked().sort((a,b)=>a.start.localeCompare(b.start));
+  const el = document.getElementById('blocked-list');
+  if (!el) return;
+  const vLabel = v => v==='ALL'?'全部車輛':v==='AWQ7565'?'AWQ-7565':'BYH-3308';
+  el.innerHTML = list.length ? list.map(b=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div style="flex:1">
+        <span style="font-weight:600;font-size:12px">${b.start===b.end?b.start:b.start+' ~ '+b.end}</span>
+        <span class="badge bg-amber" style="margin-left:6px;font-size:10px">${vLabel(b.vehicle)}</span>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">${b.reason}</div>
+      </div>
+      <button class="btn btn-red btn-xs" onclick="deleteBlocked('${b.id}')">刪除</button>
+    </div>`).join('')
+    : '<div style="color:var(--text3);font-size:12px;padding:10px 0">尚未設定不得約車日期</div>';
+}
+
+// Check if a date falls in blocked range
+function isDateBlocked(dateStr, vehicle) {
+  // dateStr is ROC like 115/01/23, convert to AD
+  const d = rowDate({date:dateStr});
+  const parts = d.split('/');
+  if (parts.length!==3) return null;
+  let yr = parseInt(parts[0]);
+  if (yr < 1911) yr += 1911;
+  const adDate = `${yr}-${parts[1]}-${parts[2]}`;
+  return getBlocked().find(b =>
+    adDate >= b.start && adDate <= b.end &&
+    (b.vehicle==='ALL' || b.vehicle===vehicle)
+  ) || null;
+}
+
+// ═══════════════════════════════════
+// DRIVER ROSTER
+// ═══════════════════════════════════
+const ROSTER_KEY = 'chun_roster';
+function getRoster() { try { return JSON.parse(localStorage.getItem(ROSTER_KEY)) || { drivers:[], schedule:{} }; } catch(e) { return { drivers:[], schedule:{} }; } }
+function saveRosterData(data) { localStorage.setItem(ROSTER_KEY, JSON.stringify(data)); }
+
+const SHIFT_TYPES = ['b','2','t','—'];
+const SHIFT_LABELS = { 'b':'b班(小灰)', '2':'2班(小白)', 't':'t班(小紅)', '—':'—' };
+const SHIFT_COLORS = { 'b':'var(--text3)', '2':'var(--blue)', 't':'var(--red)', '—':'var(--text3)' };
+
+function openRosterModal() {
+  const data = getRoster();
+  renderRosterTable(data);
+  openModal('modal-roster');
+}
+
+function renderRosterTable(data) {
+  const months = [1,2,3,4,5,6,7,8,9,10,11,12];
+  const body = document.getElementById('roster-body');
+  if (!body) return;
+  body.innerHTML = data.drivers.map(name => {
+    const cells = months.map(m => {
+      const val = (data.schedule[name]||{})[m] || '—';
+      return `<td style="padding:2px">
+        <select onchange="updateRosterCell('${name}',${m},this.value)" style="width:60px;font-size:11px;background:var(--bg3);color:${SHIFT_COLORS[val]||'var(--text)'};border:1px solid var(--border);border-radius:4px;padding:2px">
+          ${SHIFT_TYPES.map(s=>`<option value="${s}" ${s===val?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </td>`;
+    }).join('');
+    return `<tr><td style="font-weight:600;padding:4px 8px">${name}</td>${cells}<td><button class="btn btn-red btn-xs" onclick="removeRosterDriver('${name}')">✕</button></td></tr>`;
+  }).join('') || '<tr><td colspan="14" class="tbl-empty">尚未新增司機</td></tr>';
+}
+
+let rosterDraft = null;
+function updateRosterCell(name, month, val) {
+  if (!rosterDraft) rosterDraft = getRoster();
+  if (!rosterDraft.schedule[name]) rosterDraft.schedule[name] = {};
+  rosterDraft.schedule[name][month] = val;
+}
+
+function addRosterDriver() {
+  if (!rosterDraft) rosterDraft = getRoster();
+  const name = document.getElementById('roster-new-name').value.trim();
+  if (!name) { toast('⚠️ 請輸入司機姓名'); return; }
+  if (rosterDraft.drivers.includes(name)) { toast('⚠️ 已有此司機'); return; }
+  rosterDraft.drivers.push(name);
+  document.getElementById('roster-new-name').value = '';
+  renderRosterTable(rosterDraft);
+}
+
+function removeRosterDriver(name) {
+  if (!rosterDraft) rosterDraft = getRoster();
+  rosterDraft.drivers = rosterDraft.drivers.filter(d=>d!==name);
+  delete rosterDraft.schedule[name];
+  renderRosterTable(rosterDraft);
+}
+
+function saveRoster() {
+  if (!rosterDraft) rosterDraft = getRoster();
+  saveRosterData(rosterDraft);
+  rosterDraft = null;
+  renderRosterPreview();
+  closeModal('modal-roster');
+  toast('✅ 輪班表已儲存');
+}
+
+function renderRosterPreview() {
+  const el = document.getElementById('roster-preview');
+  if (!el) return;
+  const data = getRoster();
+  if (!data.drivers.length) { el.textContent = '點「編輯」設定每月司機班別'; return; }
+  const months = [1,2,3,4,5,6,7,8,9,10,11,12];
+  el.innerHTML = `<div style="overflow-x:auto"><table class="tbl" style="font-size:11px">
+    <thead><tr><th>司機</th>${months.map(m=>`<th>${m}月</th>`).join('')}</tr></thead>
+    <tbody>${data.drivers.map(n=>`<tr><td style="font-weight:600">${n}</td>${months.map(m=>{
+      const v=(data.schedule[n]||{})[m]||'—';
+      return `<td style="color:${SHIFT_COLORS[v]||'var(--text)'}">${v}</td>`;
+    }).join('')}</tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+// ═══════════════════════════════════
+// ACCOUNT MANAGEMENT (SETTINGS PAGE)
+// ═══════════════════════════════════
+function renderSettingsAccountsList() {
+  const el = document.getElementById('settings-accounts-list');
+  if (!el) return;
+  const accounts = getAccounts();
+  const roleLabels = { admin:'管理員', staff:'預約人員', driver:'司機' };
+  el.innerHTML = accounts.map((a,i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div style="flex:1">
+        <span style="font-weight:600">${a.display}</span>
+        <span class="badge ${a.role==='admin'?'bg-teal':a.role==='staff'?'bg-blue':'bg-amber'}" style="margin-left:6px">${roleLabels[a.role]}</span>
+        <span style="font-size:11px;color:var(--text3);margin-left:6px">帳號：${a.user}</span>
+      </div>
+      <button class="btn btn-outline btn-xs" onclick="openEditAccount(${i})">✏ 修改</button>
+      ${i>0?`<button class="btn btn-red btn-xs" onclick="removeAccount(${i})">刪除</button>`:''}
+    </div>`).join('');
+}
+
+function openEditAccount(idx) {
+  const accounts = getAccounts();
+  const a = accounts[idx];
+  document.getElementById('edit-account-idx').value = idx;
+  document.getElementById('edit-account-title').textContent = `修改帳號：${a.display}（${a.user}）`;
+  document.getElementById('edit-display').value = a.display;
+  document.getElementById('edit-pass').value = '';
+  document.getElementById('edit-role').value = a.role;
+  openModal('modal-edit-account');
+}
+
+function saveEditAccount() {
+  const idx = parseInt(document.getElementById('edit-account-idx').value);
+  const accounts = getAccounts();
+  const a = accounts[idx];
+  a.display = document.getElementById('edit-display').value.trim() || a.display;
+  const newPass = document.getElementById('edit-pass').value;
+  if (newPass) a.pass = newPass;
+  a.role = document.getElementById('edit-role').value;
+  saveAccounts(accounts);
+  closeModal('modal-edit-account');
+  renderSettingsAccountsList();
+  toast(`✅ ${a.display} 的帳號已更新`);
+}
+
+function addAccountFromSettings() {
+  const user = document.getElementById('s-new-user').value.trim();
+  const pass = document.getElementById('s-new-pass').value.trim();
+  const role = document.getElementById('s-new-role').value;
+  const display = document.getElementById('s-new-display').value.trim() || user;
+  if (!user||!pass) { toast('⚠️ 請填寫帳號和密碼'); return; }
+  const strength = checkPasswordStrength(pass);
+  if (!strength.ok) { toast('⚠️ ' + strength.msg); return; }
+  const accounts = getAccounts();
+  if (accounts.find(a=>a.user===user)) { toast('⚠️ 帳號已存在'); return; }
+  accounts.push({ user, pass, role, display });
+  saveAccounts(accounts);
+  ['s-new-user','s-new-pass','s-new-display'].forEach(id=>document.getElementById(id).value='');
+  renderSettingsAccountsList();
+  auditLog('新增帳號', `新增 ${display}（${user}）角色：${role}`);
+  toast('✅ 帳號已新增' + (strength.level==='weak' ? '（⚠ 密碼強度弱，建議更換）' : ''));
+}
+
+// ═══════════════════════════════════
+// WORD DOC EXPORT (DA01)
+// ═══════════════════════════════════
+async function downloadDocx() {
+  if (!formCaseName||!formMonth) { toast('請先選擇個案和月份'); return; }
+  toast('⏳ 正在產生 Word 檔案…');
+  try {
+    const { yr, mo } = parseFormMonth(formMonth);
+    const name = formCaseName;
+    const veh = document.getElementById('print-veh').value;
+    const checker = document.getElementById('print-checker').value;
+    const vehKey = veh==='AWQ-7565'?'AWQ7565':'BYH3308';
+    const allBks = RECORDS.filter(r => {
+      if (r.name!==name||r.vehicle!==vehKey) return false;
+      const { yr: ry, mo: rm } = parseFormMonth(rowDate(r).slice(0,7));
+      return ry===yr && rm===mo;
+    }).sort((a,b)=>rowDate(a).localeCompare(rowDate(b)));
+
+    const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+            AlignmentType, PageOrientation, WidthType, BorderStyle, VerticalAlign,
+            ShadingType, HeadingLevel } = window.docx;
+
+    const bdr = (clr='000000') => ({ style: BorderStyle.SINGLE, size: 4, color: clr });
+    const borders = { top:bdr(), bottom:bdr(), left:bdr(), right:bdr(), insideH:bdr(), insideV:bdr() };
+    const noBorder = { top:{style:BorderStyle.NONE,size:0}, bottom:{style:BorderStyle.NONE,size:0}, left:{style:BorderStyle.NONE,size:0}, right:{style:BorderStyle.NONE,size:0} };
+    const cell = (text, opts={}) => new TableCell({
+      borders: opts.noBorder ? noBorder : borders,
+      verticalAlign: VerticalAlign.CENTER,
+      shading: opts.shade ? { fill: opts.shade, type: ShadingType.CLEAR } : undefined,
+      columnSpan: opts.colSpan,
+      rowSpan: opts.rowSpan,
+      width: opts.width ? { size: opts.width, type: WidthType.DXA } : undefined,
+      margins: { top:40, bottom:40, left:80, right:80 },
+      children: [new Paragraph({
+        alignment: opts.align || AlignmentType.CENTER,
+        children: [new TextRun({ text: String(text||''), font:'標楷體', size: opts.size||18, bold:!!opts.bold, color:'000000' })]
+      })]
+    });
+    const p = (text, opts={}) => new Paragraph({
+      alignment: opts.align || AlignmentType.CENTER,
+      spacing: { before:0, after:0 },
+      children: [new TextRun({ text: String(text||''), font:'標楷體', size: opts.size||20, bold:!!opts.bold, color:'000000' })]
+    });
+
+    const profiles = getProfiles();
+    const prof = profiles[name] || {};
+
+    // ── 派案單 (Page 1, landscape A4) ──
+    const totalW = 13680;
+    const infoCell = new TableCell({
+      borders,
+      verticalAlign: VerticalAlign.CENTER,
+      width: { size: totalW, type: WidthType.DXA },
+      margins: { top:60, bottom:60, left:100, right:100 },
+      children: [
+        p(`姓名：${name}　　性別：${prof.gender||''}　　生日：${prof.birth||''}　　身份證字號：${prof.pid||''}`, {align:AlignmentType.LEFT, size:18}),
+        p(`地址：${prof.addr||''}`, {align:AlignmentType.LEFT, size:18}),
+        p('年齡層：□失智者　□64歲以下身障　□55-64歲原住民　□65歲以上老人', {align:AlignmentType.LEFT, size:18}),
+        p(`經濟別：□一般戶　□中低收入戶　□低收入戶　失能程度：第　　級　核定項目：DA01`, {align:AlignmentType.LEFT, size:18}),
+      ]
+    });
+
+    const frontRows = allBks.slice(0,10).map(b => new TableRow({ children:[
+      cell(b.date||'', {width:1500}), cell(b.from||'',{align:AlignmentType.LEFT,width:3800}),
+      cell(b.to||'',{align:AlignmentType.LEFT,width:3800}), cell(b.km?b.km+'km':'',{width:800}),
+      cell(b.remark?'['+b.remark+']':b.note||'',{align:AlignmentType.LEFT,width:2980}), cell('',{width:800})
+    ]}));
+    const emptyFront = Array(Math.max(0,10-allBks.length)).fill(null).map(()=>new TableRow({children:[
+      cell('',{width:1500}),cell('',{width:3800}),cell('',{width:3800}),cell('',{width:800}),cell('',{width:2980}),cell('',{width:800})
+    ]}));
+
+    // ── DA01 背面 (Page 2, portrait A4) ──
+    const identity = (allBks[0]||{}).identity||'';
+    const backRows = allBks.map(b => {
+      const dayNum = String(b.date||'').split('/').pop().replace(/^0/,'');
+      return new TableRow({ children:[
+        cell(dayNum,{width:350}), cell(ecoNum(b.identity||identity),{width:380}), cell('',{width:380}),
+        cell(b.km||'',{width:450}), cell('',{width:450}), cell('',{width:420}), cell('',{width:500}), cell('',{width:420}),
+        cell(b.total||'',{width:500}), cell(b.copay||'',{width:480}), cell('',{width:380}),
+        cell('',{width:600}), cell('',{width:480}), cell(b.note||'',{align:AlignmentType.LEFT,width:800})
+      ]});
+    });
+    const emptyBack = Array(Math.max(0,10-allBks.length)).fill(null).map(()=>new TableRow({children:
+      [350,380,380,450,450,420,500,420,500,480,380,600,480,800].map(w=>cell('',{width:w}))
+    }));
+
+    const doc = new Document({
+      sections: [
+        // Page 1: 派案單 (landscape)
+        {
+          properties: { page: { size: { width:11906, height:16838, orientation:PageOrientation.LANDSCAPE }, margin:{top:720,bottom:720,left:900,right:900} } },
+          children: [
+            p('財團法人全成社會福利基金會附設臺中市私立春社社區式服務類長期照顧服務機構',{size:22,bold:true}),
+            p('交通接送服務 派案單',{size:28,bold:true}),
+            new Table({ width:{size:totalW,type:WidthType.DXA}, columnWidths:[totalW], rows:[
+              new TableRow({ children:[ infoCell ] })
+            ]}),
+            new Table({ width:{size:totalW,type:WidthType.DXA}, columnWidths:[1500,3800,3800,800,2980,800], rows:[
+              new TableRow({ children:[
+                cell('服務日期',{width:1500,bold:true,shade:'EEEEEE'}), cell('起點',{width:3800,bold:true,shade:'EEEEEE'}),
+                cell('終點',{width:3800,bold:true,shade:'EEEEEE'}), cell('里程數',{width:800,bold:true,shade:'EEEEEE'}),
+                cell('備註',{width:2980,bold:true,shade:'EEEEEE'}), cell('記錄人',{width:800,bold:true,shade:'EEEEEE'}),
+              ]}),
+              ...frontRows, ...emptyFront,
+            ]}),
+          ]
+        },
+        // Page 2: DA01 交通接送表 (portrait)
+        {
+          properties: { page: { size: { width:11906, height:16838 }, margin:{top:720,bottom:720,left:720,right:720} } },
+          children: [
+            p('財團法人全成社會福利基金會附設臺中市私立春社社區式服務類長期照顧服務機構',{size:20,bold:true}),
+            p(`姓名：${name}　　${yr}年${mo}月　DA01交通接送表　　車號：${veh}`,{size:20,bold:true}),
+            p(`檢核人員：${checker||''}`,{align:AlignmentType.LEFT,size:18}),
+            new Table({ width:{size:10466,type:WidthType.DXA}, columnWidths:[350,380,380,450,450,420,500,420,500,480,380,600,480,800], rows:[
+              // Header row 1
+              new TableRow({ children:[
+                cell('日期',{width:350,bold:true,shade:'EEEEEE',rowSpan:3}),
+                cell('身分別\n1.低收\n2.中低\n3.一般戶',{width:380,bold:true,shade:'EEEEEE',rowSpan:3}),
+                cell('體溫',{width:380,bold:true,shade:'EEEEEE',rowSpan:3}),
+                cell('公里數',{width:450,bold:true,shade:'EEEEEE',rowSpan:3}),
+                cell('車趟金額',{width:870,bold:true,shade:'EEEEEE',colSpan:2}),
+                cell('陪同費\n(第2人\n需加收\n50元)',{width:500,bold:true,shade:'EEEEEE',rowSpan:3}),
+                cell('共乘\nY/N',{width:420,bold:true,shade:'EEEEEE',rowSpan:3}),
+                cell('車趟應收總額',{width:1460,bold:true,shade:'EEEEEE',colSpan:3}),
+                cell('使用者\n簽章',{width:600,bold:true,shade:'EEEEEE',rowSpan:3}),
+                cell('服務\n人員',{width:480,bold:true,shade:'EEEEEE',rowSpan:3}),
+                cell('備註',{width:800,bold:true,shade:'EEEEEE',rowSpan:3}),
+              ]}),
+              new TableRow({ children:[
+                cell('補助',{width:870,bold:true,shade:'EEEEEE',colSpan:2}),
+                cell('政府\n補助',{width:500,bold:true,shade:'EEEEEE'}),
+                cell('部分\n負擔',{width:480,bold:true,shade:'EEEEEE'}),
+                cell('自費',{width:380,bold:true,shade:'EEEEEE'}),
+              ]}),
+              new TableRow({ children:[
+                cell('政府',{width:450,bold:true,shade:'EEEEEE'}), cell('自費',{width:420,bold:true,shade:'EEEEEE'}),
+              ]}),
+              ...backRows, ...emptyBack,
+              // Total row
+              new TableRow({ children:[
+                cell('DA01總計',{width:730,bold:true,colSpan:2}), cell('趟次',{width:380,bold:true}),
+                cell(String(allBks.length),{width:450,bold:true}),
+                cell('',{width:450}),cell('',{width:420}),cell('',{width:500}),cell('',{width:420}),
+                cell('-',{width:500}),cell('-',{width:480}),cell('-',{width:380}),
+                cell('',{width:600}),cell('',{width:480}),cell('',{width:800}),
+              ]}),
+            ]}),
+            p('陪同費：第2人需加收50元 ／ ※ 體溫、簽章、服務人員、金額欄請服務當日手填',{align:AlignmentType.LEFT,size:16}),
+          ]
+        }
+      ]
+    });
+
+    const blob = await Packer.toBlob(doc);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href=url; a.download=`DA01_${name}_${yr}年${mo}月.docx`; a.click();
+    URL.revokeObjectURL(url);
+    toast('✅ Word 檔案已下載！');
+  } catch(e) {
+    console.error(e);
+    toast('❌ 產生失敗：'+e.message);
+  }
+}
+
+// ═══════════════════════════════════
+// CLOSE SUGGESTIONS
+// ═══════════════════════════════════
+document.addEventListener('click', e => {
+  if (!e.target.closest('.addr-wrap')) document.querySelectorAll('.sug-box').forEach(b=>b.style.display='none');
+});
+// ═══════════════════════════════════
+// INIT
+// ═══════════════════════════════════
+updateCloudBadge('syncing');
+
+const _session = getCurrentUser();
+if (_session) {
+  applyRoleUI(_session);
+  initAfterLogin();
+  startHeartbeat();
+  startIdleWatcher();
+  auditLog('恢復登入', `帳號 ${_session.user} 恢復工作階段`);
+} else {
+  refreshCaptcha();
+  showLogin();
+}
+</script>
+</body>
+</html>

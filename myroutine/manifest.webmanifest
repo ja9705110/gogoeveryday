@@ -1,0 +1,16 @@
+{
+  "name": "MyRoutine 我的例行程序",
+  "short_name": "MyRoutine",
+  "description": "每日例行程序與習慣養成 App：任務計時、連續天數、統計紀錄",
+  "lang": "zh-TW",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f2f3f8",
+  "theme_color": "#6c5ce7",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

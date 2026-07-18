@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#6c5ce7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MyRoutine">
+<title>MyRoutine 我的例行程序</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{
+  --bg:#f2f3f8;--card:#ffffff;--card2:#f7f8fc;
+  --text:#1f2233;--text2:#6b7085;--text3:#a3a8bd;
+  --border:#e6e8f0;
+  --accent:#6c5ce7;--accent2:#8f7ff0;
+  --green:#22b573;--red:#ff5e6c;--amber:#f5a623;--blue:#3d8bfd;
+  --shadow:0 2px 12px rgba(40,45,80,.08);
+  --nav-h:62px;
+}
+html[data-theme="dark"]{
+  --bg:#12131c;--card:#1c1e2c;--card2:#242637;
+  --text:#eceef6;--text2:#9aa0b8;--text3:#5d6278;
+  --border:#2b2e42;
+  --shadow:0 2px 14px rgba(0,0,0,.35);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  font-family:'Noto Sans TC',-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei",sans-serif;
+  background:var(--bg);color:var(--text);font-size:15px;
+  overscroll-behavior:none;-webkit-font-smoothing:antialiased;
+  transition:background .25s,color .25s;
+}
+button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit;}
+input,select,textarea{font-family:inherit;font-size:15px;}
+
+#app{max-width:480px;margin:0 auto;min-height:100%;position:relative;}
+
+/* ===== Views ===== */
+.view{display:none;padding:calc(14px + env(safe-area-inset-top)) 16px calc(var(--nav-h) + 24px + env(safe-area-inset-bottom));min-height:100vh;}
+.view.active{display:block;animation:fadeIn .22s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+/* ===== Header ===== */
+.hdr{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:16px;}
+.hdr-date{font-size:12px;color:var(--text2);letter-spacing:.5px;margin-bottom:2px;}
+.hdr-title{font-size:24px;font-weight:800;line-height:1.2;}
+.hdr-streak{display:flex;align-items:center;gap:4px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:6px 12px;font-weight:700;font-size:14px;box-shadow:var(--shadow);}
+
+/* ===== Cards ===== */
+.rt-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px;margin-bottom:12px;display:flex;align-items:center;gap:13px;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:transform .12s;}
+.rt-card:active{transform:scale(.98);}
+.rt-icon{width:50px;height:50px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
+.rt-info{flex:1;min-width:0;}
+.rt-name{font-weight:700;font-size:16px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rt-meta{font-size:12px;color:var(--text2);display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.rt-right{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;}
+.rt-streak{font-size:11px;color:var(--text2);font-weight:600;}
+.play-btn{width:44px;height:44px;border-radius:50%;background:var(--accent);color:#fff;font-size:17px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(108,92,231,.35);}
+.play-btn.done{background:var(--green);box-shadow:0 3px 10px rgba(34,181,115,.3);}
+.rt-progressbar{position:absolute;left:0;bottom:0;height:3px;background:var(--accent);transition:width .3s;border-radius:0 3px 3px 0;}
+
+.empty{padding:52px 20px;text-align:center;color:var(--text2);}
+.empty-icon{font-size:52px;margin-bottom:12px;opacity:.85;}
+.empty p{font-size:14px;line-height:1.7;}
+
+.section-lbl{font-size:12px;font-weight:700;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin:20px 4px 10px;}
+
+/* Today summary */
+.today-sum{background:linear-gradient(135deg,var(--accent),#a06cf0 90%);border-radius:20px;padding:18px;color:#fff;margin-bottom:18px;box-shadow:0 6px 20px rgba(108,92,231,.32);}
+.today-sum-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.today-sum-title{font-size:14px;font-weight:600;opacity:.92;}
+.today-sum-count{font-size:13px;font-weight:700;background:rgba(255,255,255,.2);border-radius:14px;padding:3px 11px;}
+.today-bar{height:9px;background:rgba(255,255,255,.25);border-radius:6px;overflow:hidden;}
+.today-bar-fill{height:100%;background:#fff;border-radius:6px;transition:width .5s cubic-bezier(.22,1,.36,1);}
+.today-sum-msg{font-size:12.5px;margin-top:9px;opacity:.9;}
+
+/* ===== Manage list ===== */
+.mg-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:13px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);}
+.mg-days{font-size:11px;color:var(--text3);letter-spacing:1px;}
+.icon-btn{width:38px;height:38px;border-radius:12px;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--text2);flex-shrink:0;}
+.icon-btn:active{transform:scale(.92);}
+
+.fab{position:fixed;right:calc(50% - 240px + 18px);bottom:calc(var(--nav-h) + 18px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;font-size:26px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(108,92,231,.45);z-index:40;}
+@media (max-width:480px){.fab{right:18px;}}
+.fab:active{transform:scale(.93);}
+
+/* ===== Bottom nav ===== */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--card);border-top:1px solid var(--border);display:flex;height:calc(var(--nav-h) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);z-index:50;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10.5px;color:var(--text3);font-weight:600;}
+.nav-item .ni{font-size:21px;line-height:1;filter:grayscale(1) opacity(.55);transition:filter .15s;}
+.nav-item.active{color:var(--accent);}
+.nav-item.active .ni{filter:none;}
+
+/* ===== Sheet (modal) ===== */
+.sheet-mask{position:fixed;inset:0;background:rgba(10,12,25,.5);z-index:90;opacity:0;pointer-events:none;transition:opacity .22s;backdrop-filter:blur(2px);}
+.sheet-mask.open{opacity:1;pointer-events:auto;}
+.sheet{position:fixed;left:50%;transform:translate(-50%,105%);bottom:0;width:100%;max-width:480px;background:var(--card);border-radius:22px 22px 0 0;z-index:95;max-height:92vh;display:flex;flex-direction:column;transition:transform .28s cubic-bezier(.22,1,.36,1);box-shadow:0 -8px 40px rgba(0,0,0,.25);}
+.sheet.open{transform:translate(-50%,0);}
+.sheet-head{padding:14px 18px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-shrink:0;}
+.sheet-title{font-size:17px;font-weight:800;}
+.sheet-body{padding:16px 18px calc(20px + env(safe-area-inset-bottom));overflow-y:auto;}
+.sheet-grab{width:40px;height:4px;border-radius:3px;background:var(--border);margin:9px auto 0;flex-shrink:0;}
+
+.fld{margin-bottom:15px;}
+.fld>label{display:block;font-size:12.5px;font-weight:700;color:var(--text2);margin-bottom:7px;}
+.fld input[type=text],.fld input[type=time],.fld input[type=number],.fld select{width:100%;background:var(--card2);border:1.5px solid var(--border);border-radius:12px;padding:11px 13px;color:var(--text);outline:none;transition:border-color .15s;}
+.fld input:focus,.fld select:focus{border-color:var(--accent);}
+
+.emoji-row{display:flex;gap:8px;flex-wrap:wrap;}
+.emoji-opt{width:42px;height:42px;border-radius:12px;background:var(--card2);border:2px solid var(--border);font-size:21px;display:flex;align-items:center;justify-content:center;}
+.emoji-opt.sel{border-color:var(--accent);background:rgba(108,92,231,.12);}
+.color-row{display:flex;gap:10px;flex-wrap:wrap;}
+.color-opt{width:34px;height:34px;border-radius:50%;border:3px solid transparent;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35);}
+.color-opt.sel{border-color:var(--text);}
+
+.day-row{display:flex;gap:6px;}
+.day-opt{flex:1;padding:9px 0;border-radius:11px;background:var(--card2);border:1.5px solid var(--border);text-align:center;font-size:13px;font-weight:700;color:var(--text2);}
+.day-opt.sel{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+.task-row{display:flex;align-items:center;gap:9px;background:var(--card2);border:1px solid var(--border);border-radius:13px;padding:9px 11px;margin-bottom:8px;}
+.task-row input[type=text]{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:14.5px;min-width:0;}
+.task-dur{display:flex;align-items:center;gap:3px;font-size:13px;color:var(--text2);flex-shrink:0;}
+.task-dur input{width:46px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:5px 4px;text-align:center;color:var(--text);outline:none;font-size:13px;}
+.task-mini{width:29px;height:29px;border-radius:9px;background:var(--card);border:1px solid var(--border);font-size:13px;color:var(--text2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.add-task-btn{width:100%;padding:11px;border:1.5px dashed var(--border);border-radius:13px;color:var(--accent);font-weight:700;font-size:14px;margin-bottom:6px;}
+
+.btn-primary{width:100%;padding:14px;border-radius:14px;background:var(--accent);color:#fff;font-size:16px;font-weight:800;box-shadow:0 4px 14px rgba(108,92,231,.35);}
+.btn-primary:active{transform:scale(.98);}
+.btn-danger-line{width:100%;padding:12px;border-radius:14px;background:none;color:var(--red);font-size:14px;font-weight:700;margin-top:10px;}
+.btn-line{width:100%;padding:13px;border-radius:14px;background:var(--card2);border:1.5px solid var(--border);color:var(--text);font-size:15px;font-weight:700;margin-top:10px;}
+
+/* ===== Player ===== */
+.player{position:fixed;inset:0;z-index:200;display:none;flex-direction:column;align-items:center;color:#fff;padding:calc(18px + env(safe-area-inset-top)) 22px calc(26px + env(safe-area-inset-bottom));transition:background .4s;}
+.player.open{display:flex;animation:fadeIn .25s ease;}
+.pl-top{width:100%;max-width:480px;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.pl-close{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;font-size:17px;display:flex;align-items:center;justify-content:center;}
+.pl-routine-name{font-size:14px;font-weight:700;opacity:.9;}
+.pl-step{font-size:12px;background:rgba(255,255,255,.18);padding:4px 12px;border-radius:14px;font-weight:700;}
+.pl-mid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;max-width:480px;}
+.pl-task-name{font-size:25px;font-weight:800;text-align:center;margin-bottom:22px;padding:0 10px;line-height:1.35;}
+.ring-wrap{position:relative;width:min(64vw,250px);height:min(64vw,250px);}
+.ring-wrap svg{transform:rotate(-90deg);width:100%;height:100%;}
+.ring-bg{fill:none;stroke:rgba(255,255,255,.18);stroke-width:11;}
+.ring-fg{fill:none;stroke:#fff;stroke-width:11;stroke-linecap:round;transition:stroke-dashoffset .5s linear;}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ring-time{font-size:46px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:1px;}
+.ring-sub{font-size:12.5px;opacity:.8;margin-top:2px;}
+.pl-next{margin-top:22px;font-size:13.5px;opacity:.85;background:rgba(255,255,255,.14);padding:8px 16px;border-radius:16px;max-width:90%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pl-controls{display:flex;gap:18px;align-items:center;margin-top:10px;width:100%;max-width:480px;justify-content:center;}
+.pl-btn{width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;font-size:21px;display:flex;align-items:center;justify-content:center;flex-direction:column;}
+.pl-btn small{font-size:9px;margin-top:1px;opacity:.85;}
+.pl-btn.big{width:76px;height:76px;background:#fff;color:#333;font-size:28px;box-shadow:0 6px 22px rgba(0,0,0,.3);}
+.pl-btn:active{transform:scale(.93);}
+
+/* Done screen */
+.done-screen{position:fixed;inset:0;z-index:210;background:linear-gradient(160deg,#22b573,#159f81);display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:30px;}
+.done-screen.open{display:flex;animation:fadeIn .3s ease;}
+.done-big{font-size:80px;animation:pop .5s cubic-bezier(.22,1.6,.36,1);}
+@keyframes pop{from{transform:scale(.3);opacity:0;}to{transform:scale(1);opacity:1;}}
+.done-title{font-size:26px;font-weight:800;margin:14px 0 6px;}
+.done-sub{font-size:15px;opacity:.92;margin-bottom:6px;}
+.done-streak{font-size:17px;font-weight:800;background:rgba(255,255,255,.18);padding:9px 20px;border-radius:20px;margin:14px 0 30px;}
+.done-btn{padding:14px 44px;border-radius:16px;background:#fff;color:#159f81;font-weight:800;font-size:16px;}
+
+/* ===== Stats ===== */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.stat-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:var(--shadow);}
+.stat-num{font-size:26px;font-weight:800;line-height:1.15;}
+.stat-lbl{font-size:12px;color:var(--text2);margin-top:2px;}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow);}
+.chart-title{font-size:14px;font-weight:800;margin-bottom:14px;}
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:120px;}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;}
+.bar{width:100%;max-width:30px;border-radius:7px 7px 3px 3px;background:linear-gradient(180deg,var(--accent2),var(--accent));min-height:3px;transition:height .4s;}
+.bar.zero{background:var(--card2);border:1px solid var(--border);}
+.bar-lbl{font-size:10.5px;color:var(--text2);font-weight:600;}
+.bar-val{font-size:10px;color:var(--text3);}
+.heat-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+.heat-cell{aspect-ratio:1;border-radius:7px;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9.5px;color:var(--text3);}
+.heat-cell.h1{background:rgba(108,92,231,.25);border-color:transparent;color:var(--text2);}
+.heat-cell.h2{background:rgba(108,92,231,.55);border-color:transparent;color:#fff;}
+.heat-cell.h3{background:var(--accent);border-color:transparent;color:#fff;font-weight:700;}
+.heat-cell.future{opacity:.35;}
+.heat-cell.today-cell{outline:2px solid var(--accent);outline-offset:1px;}
+.heat-dow{font-size:10px;color:var(--text3);text-align:center;margin-bottom:2px;}
+
+/* ===== Settings ===== */
+.set-card{background:var(--card);border:1px solid var(--border);border-radius:16px;margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow);}
+.set-row{display:flex;align-items:center;gap:12px;padding:14px 15px;border-bottom:1px solid var(--border);font-size:14.5px;font-weight:600;}
+.set-row:last-child{border-bottom:none;}
+.set-row .grow{flex:1;}
+.set-icon{font-size:19px;width:26px;text-align:center;}
+.set-note{font-size:11.5px;color:var(--text3);font-weight:400;margin-top:1px;}
+.toggle{width:48px;height:28px;border-radius:15px;background:var(--border);position:relative;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:var(--accent);}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.25);}
+.toggle.on::after{left:23px;}
+.about{text-align:center;color:var(--text3);font-size:12px;margin-top:22px;line-height:1.8;}
+
+/* toast */
+#toast{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);bottom:calc(var(--nav-h) + 30px);background:var(--text);color:var(--bg);padding:11px 20px;border-radius:14px;font-size:13.5px;font-weight:700;opacity:0;pointer-events:none;transition:all .25s;z-index:300;max-width:88%;text-align:center;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ 今日 ============ -->
+  <div class="view active" id="view-today">
+    <div class="hdr">
+      <div>
+        <div class="hdr-date" id="today-date"></div>
+        <div class="hdr-title" id="today-greet">早安 👋</div>
+      </div>
+      <div class="hdr-streak">🔥 <span id="global-streak">0</span> 天</div>
+    </div>
+    <div class="today-sum" id="today-sum" style="display:none">
+      <div class="today-sum-top">
+        <div class="today-sum-title">今日進度</div>
+        <div class="today-sum-count" id="sum-count">0 / 0</div>
+      </div>
+      <div class="today-bar"><div class="today-bar-fill" id="sum-bar" style="width:0%"></div></div>
+      <div class="today-sum-msg" id="sum-msg"></div>
+    </div>
+    <div id="today-list"></div>
+  </div>
+
+  <!-- ============ 例行程序管理 ============ -->
+  <div class="view" id="view-manage">
+    <div class="hdr">
+      <div><div class="hdr-title">例行程序</div></div>
+    </div>
+    <div id="manage-list"></div>
+  </div>
+
+  <!-- ============ 統計 ============ -->
+  <div class="view" id="view-stats">
+    <div class="hdr"><div><div class="hdr-title">統計</div></div></div>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-num" id="st-cur">0 🔥</div><div class="stat-lbl">目前連續天數</div></div>
+      <div class="stat-box"><div class="stat-num" id="st-best">0 🏆</div><div class="stat-lbl">最佳連續紀錄</div></div>
+      <div class="stat-box"><div class="stat-num" id="st-total">0</div><div class="stat-lbl">累計完成次數</div></div>
+      <div class="stat-box"><div class="stat-num" id="st-week">0%</div><div class="stat-lbl">近 7 天完成率</div></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">近 7 天完成次數</div>
+      <div class="bar-chart" id="week-chart"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title" id="heat-title">本月紀錄</div>
+      <div class="heat-grid" id="heat-dow"></div>
+      <div class="heat-grid" id="heat-grid" style="margin-top:5px"></div>
+    </div>
+  </div>
+
+  <!-- ============ 設定 ============ -->
+  <div class="view" id="view-settings">
+    <div class="hdr"><div><div class="hdr-title">設定</div></div></div>
+    <div class="set-card">
+      <div class="set-row" onclick="toggleTheme()">
+        <div class="set-icon">🌙</div><div class="grow">深色模式</div>
+        <div class="toggle" id="theme-toggle"></div>
+      </div>
+      <div class="set-row" onclick="toggleSound()">
+        <div class="set-icon">🔔</div><div class="grow">提示音與震動<div class="set-note">任務倒數結束時提醒</div></div>
+        <div class="toggle" id="sound-toggle"></div>
+      </div>
+    </div>
+    <div class="set-card">
+      <div class="set-row" onclick="exportData()">
+        <div class="set-icon">📤</div><div class="grow">匯出備份<div class="set-note">下載 JSON 備份檔</div></div>
+        <div style="color:var(--text3)">›</div>
+      </div>
+      <div class="set-row" onclick="document.getElementById('import-file').click()">
+        <div class="set-icon">📥</div><div class="grow">匯入備份<div class="set-note">從 JSON 備份檔還原</div></div>
+        <div style="color:var(--text3)">›</div>
+      </div>
+      <div class="set-row" onclick="resetAll()">
+        <div class="set-icon">🗑️</div><div class="grow" style="color:var(--red)">清除所有資料</div>
+        <div style="color:var(--text3)">›</div>
+      </div>
+    </div>
+    <input type="file" id="import-file" accept=".json,application/json" style="display:none" onchange="importData(this)">
+    <div class="about">MyRoutine 我的例行程序 v1.0<br>資料僅儲存於此裝置 · 可加入主畫面離線使用</div>
+  </div>
+
+  <!-- ============ 底部導覽 ============ -->
+  <div class="nav">
+    <button class="nav-item active" data-tab="today" onclick="switchTab('today')"><span class="ni">🏠</span>今日</button>
+    <button class="nav-item" data-tab="manage" onclick="switchTab('manage')"><span class="ni">📋</span>例行程序</button>
+    <button class="nav-item" data-tab="stats" onclick="switchTab('stats')"><span class="ni">📊</span>統計</button>
+    <button class="nav-item" data-tab="settings" onclick="switchTab('settings')"><span class="ni">⚙️</span>設定</button>
+  </div>
+  <button class="fab" id="fab" onclick="openEditor()">＋</button>
+
+  <!-- ============ 編輯 Sheet ============ -->
+  <div class="sheet-mask" id="sheet-mask" onclick="closeEditor()"></div>
+  <div class="sheet" id="editor-sheet">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <div class="sheet-title" id="editor-title">新增例行程序</div>
+      <button class="icon-btn" onclick="closeEditor()">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div class="fld">
+        <label>名稱</label>
+        <input type="text" id="ed-name" placeholder="例如：晨間例行程序" maxlength="30">
+      </div>
+      <div class="fld">
+        <label>圖示</label>
+        <div class="emoji-row" id="ed-emoji"></div>
+      </div>
+      <div class="fld">
+        <label>顏色</label>
+        <div class="color-row" id="ed-color"></div>
+      </div>
+      <div class="fld">
+        <label>重複（星期）</label>
+        <div class="day-row" id="ed-days"></div>
+      </div>
+      <div class="fld">
+        <label>任務清單（每項含時長・分:秒）</label>
+        <div id="ed-tasks"></div>
+        <button class="add-task-btn" onclick="addTaskRow()">＋ 新增任務</button>
+      </div>
+      <button class="btn-primary" onclick="saveRoutine()">儲存</button>
+      <button class="btn-danger-line" id="ed-delete" style="display:none" onclick="deleteRoutine()">刪除此例行程序</button>
+    </div>
+  </div>
+
+  <!-- ============ 執行畫面 ============ -->
+  <div class="player" id="player">
+    <div class="pl-top">
+      <button class="pl-close" onclick="quitPlayer()">✕</button>
+      <div class="pl-routine-name" id="pl-rname"></div>
+      <div class="pl-step" id="pl-step">1/1</div>
+    </div>
+    <div class="pl-mid">
+      <div class="pl-task-name" id="pl-task"></div>
+      <div class="ring-wrap">
+        <svg viewBox="0 0 100 100">
+          <circle class="ring-bg" cx="50" cy="50" r="44"></circle>
+          <circle class="ring-fg" id="ring-fg" cx="50" cy="50" r="44"></circle>
+        </svg>
+        <div class="ring-center">
+          <div class="ring-time" id="pl-time">0:00</div>
+          <div class="ring-sub" id="pl-sub">剩餘時間</div>
+        </div>
+      </div>
+      <div class="pl-next" id="pl-next"></div>
+    </div>
+    <div class="pl-controls">
+      <button class="pl-btn" onclick="addThirty()">+30<small>秒</small></button>
+      <button class="pl-btn big" id="pl-pause" onclick="togglePause()">⏸</button>
+      <button class="pl-btn" onclick="nextTask(true)">⏭<small>完成</small></button>
+    </div>
+  </div>
+
+  <!-- ============ 完成畫面 ============ -->
+  <div class="done-screen" id="done-screen">
+    <div class="done-big">🎉</div>
+    <div class="done-title">太棒了！</div>
+    <div class="done-sub" id="done-sub">你完成了今天的例行程序</div>
+    <div class="done-streak" id="done-streak">🔥 連續 1 天</div>
+    <button class="done-btn" onclick="closeDone()">完成</button>
+  </div>
+
+  <div id="toast"></div>
+</div>
+
+<script>
+/* ================= 資料層 ================= */
+const KEY='myroutine.v1';
+const EMOJIS=['🌅','🌙','💪','📖','🧘','🍳','🚿','💼','🏃','🎯','✍️','🦷'];
+const COLORS=['#6c5ce7','#3d8bfd','#22b573','#f5a623','#ff5e6c','#e84393','#00b8d4','#8d6e63'];
+const DAY_NAMES=['日','一','二','三','四','五','六'];
+
+let db=load();
+function load(){
+  try{
+    const raw=localStorage.getItem(KEY);
+    if(raw){const d=JSON.parse(raw);if(d&&Array.isArray(d.routines))return d;}
+  }catch(e){}
+  return seed();
+}
+function seed(){
+  return {
+    settings:{theme:'light',sound:true},
+    routines:[{
+      id:uid(),name:'晨間例行程序',emoji:'🌅',color:'#6c5ce7',days:[0,1,2,3,4,5,6],
+      tasks:[
+        {id:uid(),name:'喝一杯水',dur:60},
+        {id:uid(),name:'伸展運動',dur:300},
+        {id:uid(),name:'冥想',dur:300},
+        {id:uid(),name:'規劃今天',dur:180},
+      ]
+    },{
+      id:uid(),name:'睡前放鬆',emoji:'🌙',color:'#3d8bfd',days:[0,1,2,3,4,5,6],
+      tasks:[
+        {id:uid(),name:'收拾房間',dur:300},
+        {id:uid(),name:'閱讀',dur:600},
+        {id:uid(),name:'深呼吸練習',dur:120},
+      ]
+    }],
+    history:{}  // {'YYYY-MM-DD':{routineId:true}}
+  };
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(db));}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function todayKey(d){d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function fmtDur(sec){const m=Math.floor(sec/60),s=sec%60;if(m&&s)return m+'分'+s+'秒';if(m)return m+'分鐘';return s+'秒';}
+function fmtClock(sec){const m=Math.floor(sec/60),s=sec%60;return m+':'+String(s).padStart(2,'0');}
+function routineTotal(r){return r.tasks.reduce((a,t)=>a+t.dur,0);}
+function isDoneToday(rid){const h=db.history[todayKey()];return !!(h&&h[rid]);}
+function todaysRoutines(){const dow=new Date().getDay();return db.routines.filter(r=>r.days.includes(dow));}
+
+/* ---- 連續天數 ---- */
+function dayHasCompletion(key){const h=db.history[key];return h&&Object.keys(h).length>0;}
+function currentStreak(){
+  let n=0;const d=new Date();
+  if(!dayHasCompletion(todayKey(d))){d.setDate(d.getDate()-1);} // 今天還沒完成不中斷，從昨天往回算
+  while(dayHasCompletion(todayKey(d))){n++;d.setDate(d.getDate()-1);}
+  return n;
+}
+function bestStreak(){
+  const keys=Object.keys(db.history).filter(dayHasCompletion).sort();
+  let best=0,run=0,prev=null;
+  for(const k of keys){
+    if(prev){const p=new Date(prev),c=new Date(k);run=((c-p)/86400000===1)?run+1:1;}
+    else run=1;
+    if(run>best)best=run;prev=k;
+  }
+  return best;
+}
+function routineStreak(rid){
+  let n=0;const d=new Date();
+  const done=k=>{const h=db.history[k];return !!(h&&h[rid]);};
+  if(!done(todayKey(d)))d.setDate(d.getDate()-1);
+  while(done(todayKey(d))){n++;d.setDate(d.getDate()-1);}
+  return n;
+}
+
+/* ================= 分頁切換 ================= */
+function switchTab(tab){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+tab).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.tab===tab));
+  document.getElementById('fab').style.display=(tab==='manage'||tab==='today')?'flex':'none';
+  if(tab==='today')renderToday();
+  if(tab==='manage')renderManage();
+  if(tab==='stats')renderStats();
+  window.scrollTo(0,0);
+}
+
+/* ================= 今日 ================= */
+function renderToday(){
+  const now=new Date();
+  document.getElementById('today-date').textContent=
+    now.getFullYear()+'年'+(now.getMonth()+1)+'月'+now.getDate()+'日 星期'+DAY_NAMES[now.getDay()];
+  const h=now.getHours();
+  document.getElementById('today-greet').textContent=h<5?'夜深了 🌙':h<11?'早安 ☀️':h<14?'午安 🍚':h<18?'下午好 ☕':'晚上好 🌆';
+  document.getElementById('global-streak').textContent=currentStreak();
+
+  const list=todaysRoutines();
+  const doneCount=list.filter(r=>isDoneToday(r.id)).length;
+  const sum=document.getElementById('today-sum');
+  if(list.length){
+    sum.style.display='block';
+    document.getElementById('sum-count').textContent=doneCount+' / '+list.length;
+    document.getElementById('sum-bar').style.width=(list.length?Math.round(doneCount/list.length*100):0)+'%';
+    document.getElementById('sum-msg').textContent=
+      doneCount===list.length?'今天全部完成，太厲害了！🎉':
+      doneCount>0?'很好，繼續保持！':'開始你今天的第一個例行程序吧';
+  }else sum.style.display='none';
+
+  const box=document.getElementById('today-list');
+  if(!list.length){
+    box.innerHTML='<div class="empty"><div class="empty-icon">🗓️</div><p>今天沒有排定的例行程序<br>點右下角「＋」建立一個吧！</p></div>';
+    return;
+  }
+  box.innerHTML=list.map(r=>{
+    const done=isDoneToday(r.id);
+    const stk=routineStreak(r.id);
+    return `<div class="rt-card" onclick="startRoutine('${r.id}')">
+      <div class="rt-icon" style="background:${r.color}22">${r.emoji}</div>
+      <div class="rt-info">
+        <div class="rt-name">${esc(r.name)}</div>
+        <div class="rt-meta"><span>📝 ${r.tasks.length} 項任務</span><span>⏱ ${fmtDur(routineTotal(r))}</span></div>
+      </div>
+      <div class="rt-right">
+        <div class="play-btn ${done?'done':''}" style="${done?'':'background:'+r.color+';box-shadow:0 3px 10px '+r.color+'55'}">${done?'✓':'▶'}</div>
+        ${stk>0?`<div class="rt-streak">🔥${stk}</div>`:''}
+      </div>
+      ${done?`<div class="rt-progressbar" style="width:100%;background:${r.color}"></div>`:''}
+    </div>`;
+  }).join('');
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+/* ================= 管理 ================= */
+function renderManage(){
+  const box=document.getElementById('manage-list');
+  if(!db.routines.length){
+    box.innerHTML='<div class="empty"><div class="empty-icon">📋</div><p>還沒有任何例行程序<br>點右下角「＋」開始建立</p></div>';
+    return;
+  }
+  box.innerHTML=db.routines.map(r=>`
+    <div class="mg-card">
+      <div class="rt-icon" style="background:${r.color}22;width:44px;height:44px;font-size:22px">${r.emoji}</div>
+      <div class="rt-info" onclick="openEditor('${r.id}')">
+        <div class="rt-name">${esc(r.name)}</div>
+        <div class="rt-meta">
+          <span>${r.tasks.length} 項 · ${fmtDur(routineTotal(r))}</span>
+        </div>
+        <div class="mg-days">${r.days.length===7?'每天':r.days.map(d=>DAY_NAMES[d]).join(' ')}</div>
+      </div>
+      <button class="icon-btn" onclick="openEditor('${r.id}')">✏️</button>
+      <button class="icon-btn" onclick="startRoutine('${r.id}')" style="color:${r.color}">▶</button>
+    </div>`).join('');
+}
+
+/* ================= 編輯器 ================= */
+let editing=null; // routine id or null
+let edState={emoji:EMOJIS[0],color:COLORS[0],days:[0,1,2,3,4,5,6],tasks:[]};
+
+function openEditor(id){
+  editing=id||null;
+  if(id){
+    const r=db.routines.find(x=>x.id===id);if(!r)return;
+    edState={emoji:r.emoji,color:r.color,days:[...r.days],tasks:r.tasks.map(t=>({...t}))};
+    document.getElementById('ed-name').value=r.name;
+    document.getElementById('editor-title').textContent='編輯例行程序';
+    document.getElementById('ed-delete').style.display='block';
+  }else{
+    edState={emoji:EMOJIS[Math.floor(Math.random()*EMOJIS.length)],color:COLORS[Math.floor(Math.random()*COLORS.length)],days:[0,1,2,3,4,5,6],
+      tasks:[{id:uid(),name:'',dur:300}]};
+    document.getElementById('ed-name').value='';
+    document.getElementById('editor-title').textContent='新增例行程序';
+    document.getElementById('ed-delete').style.display='none';
+  }
+  renderEditorPickers();renderTaskRows();
+  document.getElementById('sheet-mask').classList.add('open');
+  document.getElementById('editor-sheet').classList.add('open');
+}
+function closeEditor(){
+  document.getElementById('sheet-mask').classList.remove('open');
+  document.getElementById('editor-sheet').classList.remove('open');
+}
+function renderEditorPickers(){
+  document.getElementById('ed-emoji').innerHTML=EMOJIS.map(e=>
+    `<button class="emoji-opt ${e===edState.emoji?'sel':''}" onclick="edState.emoji='${e}';renderEditorPickers()">${e}</button>`).join('');
+  document.getElementById('ed-color').innerHTML=COLORS.map(c=>
+    `<button class="color-opt ${c===edState.color?'sel':''}" style="background:${c}" onclick="edState.color='${c}';renderEditorPickers()"></button>`).join('');
+  document.getElementById('ed-days').innerHTML=DAY_NAMES.map((d,i)=>
+    `<button class="day-opt ${edState.days.includes(i)?'sel':''}" onclick="toggleDay(${i})">${d}</button>`).join('');
+}
+function toggleDay(i){
+  const idx=edState.days.indexOf(i);
+  if(idx>=0)edState.days.splice(idx,1);else edState.days.push(i);
+  edState.days.sort();renderEditorPickers();
+}
+function renderTaskRows(){
+  document.getElementById('ed-tasks').innerHTML=edState.tasks.map((t,i)=>{
+    const m=Math.floor(t.dur/60),s=t.dur%60;
+    return `<div class="task-row">
+      <button class="task-mini" onclick="moveTask(${i},-1)" ${i===0?'disabled style="opacity:.3"':''}>↑</button>
+      <button class="task-mini" onclick="moveTask(${i},1)" ${i===edState.tasks.length-1?'disabled style="opacity:.3"':''}>↓</button>
+      <input type="text" placeholder="任務名稱" value="${esc(t.name)}" oninput="edState.tasks[${i}].name=this.value" maxlength="30">
+      <div class="task-dur">
+        <input type="number" min="0" max="180" value="${m}" oninput="setDur(${i},this.value,null)">分
+        <input type="number" min="0" max="59" value="${s}" oninput="setDur(${i},null,this.value)">秒
+      </div>
+      <button class="task-mini" style="color:var(--red)" onclick="removeTaskRow(${i})">✕</button>
+    </div>`;
+  }).join('');
+}
+function setDur(i,m,s){
+  const t=edState.tasks[i];
+  const cm=Math.floor(t.dur/60),cs=t.dur%60;
+  const nm=m===null?cm:Math.max(0,parseInt(m)||0);
+  const ns=s===null?cs:Math.min(59,Math.max(0,parseInt(s)||0));
+  t.dur=nm*60+ns;
+}
+function addTaskRow(){edState.tasks.push({id:uid(),name:'',dur:300});renderTaskRows();}
+function removeTaskRow(i){edState.tasks.splice(i,1);renderTaskRows();}
+function moveTask(i,dir){
+  const j=i+dir;if(j<0||j>=edState.tasks.length)return;
+  [edState.tasks[i],edState.tasks[j]]=[edState.tasks[j],edState.tasks[i]];
+  renderTaskRows();
+}
+function saveRoutine(){
+  const name=document.getElementById('ed-name').value.trim();
+  if(!name){toast('請輸入名稱');return;}
+  const tasks=edState.tasks.filter(t=>t.name.trim()).map(t=>({...t,name:t.name.trim(),dur:Math.max(5,t.dur)}));
+  if(!tasks.length){toast('至少需要一項任務');return;}
+  if(!edState.days.length){toast('請選擇至少一天');return;}
+  if(editing){
+    const r=db.routines.find(x=>x.id===editing);
+    Object.assign(r,{name,emoji:edState.emoji,color:edState.color,days:[...edState.days],tasks});
+  }else{
+    db.routines.push({id:uid(),name,emoji:edState.emoji,color:edState.color,days:[...edState.days],tasks});
+  }
+  save();closeEditor();renderToday();renderManage();toast('已儲存 ✓');
+}
+function deleteRoutine(){
+  if(!editing)return;
+  if(!confirm('確定要刪除這個例行程序嗎？'))return;
+  db.routines=db.routines.filter(r=>r.id!==editing);
+  save();closeEditor();renderToday();renderManage();toast('已刪除');
+}
+
+/* ================= 執行 Player ================= */
+let pl={routine:null,idx:0,remain:0,timer:null,paused:false};
+
+function startRoutine(id){
+  const r=db.routines.find(x=>x.id===id);if(!r||!r.tasks.length)return;
+  if(isDoneToday(id)&&!confirm('今天已完成過，要再執行一次嗎？'))return;
+  pl={routine:r,idx:0,remain:r.tasks[0].dur,timer:null,paused:false};
+  document.getElementById('player').style.background=
+    `linear-gradient(165deg,${r.color},${shade(r.color,-35)})`;
+  document.getElementById('pl-rname').textContent=r.emoji+' '+r.name;
+  document.getElementById('player').classList.add('open');
+  renderPlayerTask();resumeTimer();
+  if(navigator.wakeLock)navigator.wakeLock.request('screen').then(w=>pl.wake=w).catch(()=>{});
+}
+function shade(hex,amt){
+  const n=parseInt(hex.slice(1),16);
+  let r=(n>>16)+amt,g=((n>>8)&255)+amt,b=(n&255)+amt;
+  r=Math.max(0,Math.min(255,r));g=Math.max(0,Math.min(255,g));b=Math.max(0,Math.min(255,b));
+  return '#'+((r<<16)|(g<<8)|b).toString(16).padStart(6,'0');
+}
+const RING_C=2*Math.PI*44;
+function renderPlayerTask(){
+  const r=pl.routine,t=r.tasks[pl.idx];
+  document.getElementById('pl-task').textContent=t.name;
+  document.getElementById('pl-step').textContent=(pl.idx+1)+' / '+r.tasks.length;
+  const next=r.tasks[pl.idx+1];
+  document.getElementById('pl-next').textContent=next?('下一項：'+next.name):'這是最後一項 💪';
+  const ring=document.getElementById('ring-fg');
+  ring.style.strokeDasharray=RING_C;
+  updateRing();
+}
+function updateRing(){
+  const t=pl.routine.tasks[pl.idx];
+  document.getElementById('pl-time').textContent=fmtClock(pl.remain);
+  const frac=t.dur?pl.remain/t.dur:0;
+  document.getElementById('ring-fg').style.strokeDashoffset=RING_C*(1-Math.min(1,frac));
+}
+function resumeTimer(){
+  clearInterval(pl.timer);
+  pl.paused=false;
+  document.getElementById('pl-pause').textContent='⏸';
+  pl.timer=setInterval(()=>{
+    pl.remain--;
+    if(pl.remain<=0){beep();nextTask(false);}
+    else updateRing();
+  },1000);
+}
+function togglePause(){
+  if(pl.paused){resumeTimer();}
+  else{clearInterval(pl.timer);pl.paused=true;document.getElementById('pl-pause').textContent='▶';}
+}
+function addThirty(){pl.remain+=30;updateRing();}
+function nextTask(manual){
+  if(manual)beep(true);
+  if(pl.idx>=pl.routine.tasks.length-1){finishRoutine();return;}
+  pl.idx++;pl.remain=pl.routine.tasks[pl.idx].dur;
+  renderPlayerTask();
+  if(!pl.paused)resumeTimer();else updateRing();
+}
+function quitPlayer(){
+  if(!confirm('要中途離開嗎？此次不會計入完成紀錄'))return;
+  stopPlayer();
+}
+function stopPlayer(){
+  clearInterval(pl.timer);
+  if(pl.wake){pl.wake.release().catch(()=>{});pl.wake=null;}
+  document.getElementById('player').classList.remove('open');
+}
+function finishRoutine(){
+  const rid=pl.routine.id;
+  stopPlayer();
+  const k=todayKey();
+  if(!db.history[k])db.history[k]={};
+  db.history[k][rid]=Date.now();
+  save();
+  const stk=currentStreak();
+  document.getElementById('done-sub').textContent='你完成了「'+pl.routine.name+'」';
+  document.getElementById('done-streak').textContent='🔥 連續 '+Math.max(1,stk)+' 天';
+  document.getElementById('done-screen').classList.add('open');
+  beep(true);vibrate([80,60,80,60,160]);
+}
+function closeDone(){
+  document.getElementById('done-screen').classList.remove('open');
+  renderToday();
+}
+
+/* ---- 音效與震動 ---- */
+let audioCtx=null;
+function beep(short){
+  if(!db.settings.sound)return;
+  try{
+    audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+    const times=short?[0]:[0,.25,.5];
+    times.forEach(dt=>{
+      const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+      o.connect(g);g.connect(audioCtx.destination);
+      o.frequency.value=880;o.type='sine';
+      const t0=audioCtx.currentTime+dt;
+      g.gain.setValueAtTime(.001,t0);
+      g.gain.exponentialRampToValueAtTime(.28,t0+.02);
+      g.gain.exponentialRampToValueAtTime(.001,t0+.18);
+      o.start(t0);o.stop(t0+.2);
+    });
+  }catch(e){}
+  vibrate(short?[60]:[120,80,120]);
+}
+function vibrate(pat){if(db.settings.sound&&navigator.vibrate)navigator.vibrate(pat);}
+
+/* ================= 統計 ================= */
+function renderStats(){
+  document.getElementById('st-cur').textContent=currentStreak()+' 🔥';
+  document.getElementById('st-best').textContent=bestStreak()+' 🏆';
+  let total=0;
+  for(const k in db.history)total+=Object.keys(db.history[k]).length;
+  document.getElementById('st-total').textContent=total;
+
+  // 近7天
+  const counts=[],labels=[];
+  let weekDone=0,weekPlanned=0;
+  for(let i=6;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const k=todayKey(d);
+    const c=db.history[k]?Object.keys(db.history[k]).length:0;
+    counts.push(c);labels.push(i===0?'今天':DAY_NAMES[d.getDay()]);
+    weekDone+=c;
+    weekPlanned+=db.routines.filter(r=>r.days.includes(d.getDay())).length;
+  }
+  document.getElementById('st-week').textContent=(weekPlanned?Math.round(weekDone/weekPlanned*100):0)+'%';
+  const max=Math.max(1,...counts);
+  document.getElementById('week-chart').innerHTML=counts.map((c,i)=>`
+    <div class="bar-col">
+      <div class="bar-val">${c||''}</div>
+      <div class="bar ${c?'':'zero'}" style="height:${Math.max(4,c/max*88)}%"></div>
+      <div class="bar-lbl">${labels[i]}</div>
+    </div>`).join('');
+
+  // 月曆熱力圖
+  const now=new Date(),y=now.getFullYear(),m=now.getMonth();
+  document.getElementById('heat-title').textContent=y+'年'+(m+1)+'月紀錄';
+  document.getElementById('heat-dow').innerHTML=DAY_NAMES.map(d=>`<div class="heat-dow">${d}</div>`).join('');
+  const first=new Date(y,m,1).getDay();
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  let cells='';
+  for(let i=0;i<first;i++)cells+='<div></div>';
+  for(let d=1;d<=daysInMonth;d++){
+    const k=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const c=db.history[k]?Object.keys(db.history[k]).length:0;
+    const cls=c>=3?'h3':c===2?'h2':c===1?'h1':'';
+    const isToday=d===now.getDate();
+    const future=d>now.getDate();
+    cells+=`<div class="heat-cell ${cls} ${isToday?'today-cell':''} ${future?'future':''}">${d}</div>`;
+  }
+  document.getElementById('heat-grid').innerHTML=cells;
+}
+
+/* ================= 設定 ================= */
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme',db.settings.theme);
+  document.getElementById('theme-toggle').classList.toggle('on',db.settings.theme==='dark');
+  document.getElementById('sound-toggle').classList.toggle('on',!!db.settings.sound);
+  const meta=document.querySelector('meta[name=theme-color]');
+  if(meta)meta.content=db.settings.theme==='dark'?'#12131c':'#6c5ce7';
+}
+function toggleTheme(){db.settings.theme=db.settings.theme==='dark'?'light':'dark';save();applyTheme();}
+function toggleSound(){db.settings.sound=!db.settings.sound;save();applyTheme();if(db.settings.sound)beep(true);}
+function exportData(){
+  const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='myroutine-backup-'+todayKey()+'.json';
+  a.click();URL.revokeObjectURL(a.href);
+  toast('已匯出備份 ✓');
+}
+function importData(inp){
+  const f=inp.files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const d=JSON.parse(rd.result);
+      if(!d||!Array.isArray(d.routines))throw 0;
+      db=d;if(!db.settings)db.settings={theme:'light',sound:true};if(!db.history)db.history={};
+      save();applyTheme();renderToday();renderManage();toast('匯入成功 ✓');
+    }catch(e){toast('檔案格式不正確');}
+  };
+  rd.readAsText(f);inp.value='';
+}
+function resetAll(){
+  if(!confirm('確定要清除所有資料嗎？此動作無法復原！'))return;
+  if(!confirm('再次確認：所有例行程序與紀錄將被刪除'))return;
+  localStorage.removeItem(KEY);db=seed();save();applyTheme();
+  renderToday();renderManage();toast('已重設');
+  switchTab('today');
+}
+
+/* ================= 其他 ================= */
+let toastTimer=null;
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+/* 頁面重新可見時刷新（跨日） */
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden){renderToday();}
+});
+
+/* Service Worker（離線） */
+if('serviceWorker' in navigator&&location.protocol==='https:'){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+/* 初始化 */
+applyTheme();
+renderToday();
+renderManage();
+</script>
+</body>
+</html>
