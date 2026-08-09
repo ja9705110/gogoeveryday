@@ -44,6 +44,9 @@ const slides = await page.evaluate((BAKED) => {
     const all = pg.querySelectorAll('*');
     for (const el of all) {
       if (el.closest(BAKED)) continue;
+      /* 只取最外層的文字元素。行內的 <b>、<span class="hl">、小字級的單位詞
+         已經被父層當成 run 收進去了，再獨立成一個文字框就會重複疊字。 */
+      if (el.parentElement && el.parentElement.closest('.__notext')) continue;
       const hasOwnText = [...el.childNodes].some(
         n => n.nodeType === 3 && n.textContent.trim().length
       );
