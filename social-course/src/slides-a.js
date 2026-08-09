@@ -51,26 +51,20 @@ S({ part:'開場', time:'09:00', kind:'cover', title:'封面：社群平台操�
    ========================================================================= */
 S({ part:'開場', time:'09:00', kind:'std', title:'今天的流程',
   html:`
-  <div class="split w-left">
-    <div class="col">
-      <p class="eyebrow" data-r>TODAY&nbsp;09:00–16:00</p>
-      <h2 class="h" data-r>今天會走過的路</h2>
-      <p class="lead" data-r style="margin-bottom:26px">
-        上午把<span class="mark">觀念與平台</span>搞清楚，<br>
-        下午全部都是<span class="mark">動手做</span>。
-      </p>
-      <div class="cards c1" style="gap:14px" data-r>
-        <div class="card tint" style="padding:20px 22px">
-          <p class="v" style="font-weight:700">每 10–20 分鐘就有一次<b class="hl">提問、觀察或手機操作</b>，
-          不會只有講師一直講。</p>
-        </div>
+  <div class="stack gap-m pad-tight">
+    <div class="row" style="align-items:flex-end;gap:32px">
+      <div style="flex:1">
+        <p class="eyebrow" data-r>TODAY&nbsp;09:00–16:00</p>
+        <h2 class="h" data-r style="font-size:38px;margin-bottom:6px">今天會走過的路</h2>
+        <p class="lead" data-r style="margin:0">
+          上午把<span class="mark">觀念與平台</span>搞清楚，下午全部都是<span class="mark">動手做</span>。</p>
       </div>
-      <div style="display:flex;gap:14px;margin-top:20px" data-r>
+      <div data-r style="display:flex;gap:12px;flex:none">
         ${platPill('fb')}${platPill('ig')}${platPill('ln')}
       </div>
     </div>
-    <div class="col">
-      <div class="agenda" style="grid-template-columns:1fr" data-r>
+    <div>
+      <div class="agenda" data-r>
         <div class="ag"><span class="t">09:00–09:30</span><span class="n">社群不是只有發文：先搞懂經營邏輯</span></div>
         <div class="ag"><span class="t">09:30–10:10</span><span class="n">FB、IG、LINE 官方帳號怎麼選</span></div>
         <div class="ag rest"><span class="t">10:10–10:20</span><span class="n">休息</span></div>
@@ -147,44 +141,49 @@ S({ part:'PART 1', time:'09:05', kind:'std', title:'Slide 3｜大家是不是都
   html:`
   <div class="split art">
     <div class="col">
-      <p class="eyebrow" data-r>課前需求調查</p>
-      <h2 class="h" data-r style="font-size:40px;margin-bottom:26px">這些困擾，<br>是不是你也有？</h2>
+      <p class="eyebrow" data-r>課前需求調查 · 有效樣本 30 人</p>
+      <h2 class="h" data-r style="font-size:40px;margin-bottom:24px">這些困擾，<br>是不是你也有？</h2>
       <div class="stack gap-s">
         ${[
-          ['我有東西，但不知道怎麼介紹',88],
-          ['我不知道 FB、IG 到底差在哪',74],
-          ['發文不知道要寫多少字',66],
-          ['發了都沒有人看',81],
-          ['Reels、限動看過但不會用',70],
-          ['LINE 每天用，但不知道什麼是官方 LINE',59]
-        ].map(([t,p])=>`
-        <div data-r style="display:flex;align-items:center;gap:16px">
-          <span style="font-size:17.5px;font-weight:700;color:${C.ink2};width:290px;flex:none">${t}</span>
-          <span style="flex:1;height:12px;border-radius:99px;background:${C.paper3};overflow:hidden">
+          ['不懂如何進行社群經營',24,'80.0',true],
+          ['不會拍攝商品照片與影音',22,'73.3',false],
+          ['不知道該怎麼賣、怎麼行銷',22,'73.3',false],
+          ['不會寫介紹文案與內容',18,'60.0',false],
+          ['不會使用 AI 工具',16,'53.3',false],
+          ['完全不知道怎麼開始',14,'46.7',false]
+        ].map(([t,n,p,hot])=>`
+        <div data-r style="display:flex;align-items:center;gap:14px">
+          <span style="font-size:21px;font-weight:${hot?850:700};
+            color:${hot?C.clay:C.ink2};width:300px;flex:none">${t}</span>
+          <span style="flex:1;height:14px;border-radius:99px;background:${C.paper3};overflow:hidden">
             <span style="display:block;height:100%;width:${p}%;border-radius:99px;
-              background:linear-gradient(90deg,${C.gold},${C.clay})"></span></span>
-          <span style="font-size:14.5px;font-weight:850;color:${C.clay};width:38px;text-align:right">${p}%</span>
+              background:${hot?`linear-gradient(90deg,${C.gold},${C.clay})`:C.sage}"></span></span>
+          <span style="font-size:20px;font-weight:850;color:${hot?C.clay:C.ink3};
+            width:168px;text-align:right;white-space:nowrap;
+            font-variant-numeric:tabular-nums">${n} 人｜${p}%</span>
         </div>`).join('')}
       </div>
-      <p class="tiny" data-r style="margin-top:18px">＊示意數據，上課前請替換為本班實際調查結果。</p>
     </div>
     <div class="col center" data-r>
-      ${ART.people(230)}
-      <div style="margin-top:-18px">
-        <div class="card" style="max-width:300px;border-radius:20px 20px 20px 6px">
-          <p class="v" style="font-size:18px;font-weight:700">
-            「我東西做得很好啊，<br>可是……都沒有人知道。」</p>
-        </div>
+      ${ART.people(190)}
+      <div class="card" style="max-width:330px;border-radius:20px 20px 20px 6px">
+        <p class="v" style="font-weight:700">
+          「把手作品分享出去、<br>增加一份收入。」</p>
       </div>
-      <p class="cap-t">最常聽到的一句話</p>
+      <p class="cap-t">學員原話</p>
+      <div class="callout" style="margin-top:18px;max-width:330px;padding:18px 22px;text-align:left">
+        <span class="txt">排第一名的困難，<br><b class="hl">就是今天這堂課</b>。</span>
+      </div>
     </div>
   </div>`,
   notes:{
-    say:['用調查數據讓學員知道「不是只有我不會」，降低心理門檻。',
-         '上課前請把百分比換成本班真實的調查結果，效果差很多。'],
-    ask:['問：還有沒有沒被列到的困擾？（記在白板，課程結束前回來確認有沒有解決）'],
+    say:['這是本班 30 人的真實課前調查，不是示意數據。念出第一名「不懂如何進行社群經營 24 人、80%」，讓學員知道大家都一樣。',
+         '第 2、4、5 名（拍照、文案、AI）是後面幾堂課的內容，這裡先預告，讓學員安心：不是今天學不完，是本來就分開教。',
+         '今天要解決的就是第一名那一項。'],
+    ask:['問：這六項裡，你自己勾了哪幾個？（舉手統計，跟調查結果對照）',
+         '問：還有沒有沒被列到的困擾？（記在白板，最後一節回來確認有沒有解決）'],
     do:[]
-  }, tag:{type:'ask', label:'現場提問'}});
+  }, tag:{type:'ask', label:'舉手對照'}});
 
 S({ part:'PART 1', time:'09:10', kind:'std', title:'Slide 4｜社群不是「一直賣東西」',
   html:`
@@ -472,6 +471,62 @@ S({ part:'PART 2', time:'09:52', kind:'std', title:'Slide 11｜LINE 官方帳號
     do:[]
   }});
 
+S({ part:'PART 2', time:'09:58', kind:'std', title:'Slide 11-2｜你們已經在用什麼？',
+  html:`
+  <div class="stack gap-m">
+    <div>
+      <p class="eyebrow" data-r>課前調查 · 曾使用過的數位工具 · 30 人</p>
+      <h2 class="h" data-r style="font-size:38px">好消息：<span class="hl">你們已經天天在用了</span></h2>
+    </div>
+    <div class="split" data-r style="gap:44px;align-items:start">
+      <div class="stack gap-s">
+        ${[['LINE',30,'100.0',C.ln],
+           ['Facebook',28,'93.3',C.fb],
+           ['ChatGPT',17,'56.7',C.ink3]].map(([t,n,p,c])=>`
+        <div style="display:flex;align-items:center;gap:14px">
+          <span style="font-size:22px;font-weight:800;color:${C.ink};width:120px;flex:none">${t}</span>
+          <span style="flex:1;height:16px;border-radius:99px;background:${C.paper3};overflow:hidden">
+            <span style="display:block;height:100%;width:${p}%;border-radius:99px;background:${c}"></span></span>
+          <span style="font-size:20px;font-weight:850;color:${C.ink2};width:150px;text-align:right;
+            white-space:nowrap;font-variant-numeric:tabular-nums">${n} 人｜${p}%</span>
+        </div>`).join('')}
+      </div>
+      <div class="stack gap-s">
+        ${[['Instagram',13,'43.3',C.plum],
+           ['Gemini',9,'30.0',C.ink3],
+           ['Canva',4,'13.3',C.muted]].map(([t,n,p,c])=>`
+        <div style="display:flex;align-items:center;gap:14px">
+          <span style="font-size:22px;font-weight:800;color:${C.ink};width:120px;flex:none">${t}</span>
+          <span style="flex:1;height:16px;border-radius:99px;background:${C.paper3};overflow:hidden">
+            <span style="display:block;height:100%;width:${p}%;border-radius:99px;background:${c}"></span></span>
+          <span style="font-size:20px;font-weight:850;color:${C.ink2};width:150px;text-align:right;
+            white-space:nowrap;font-variant-numeric:tabular-nums">${n} 人｜${p}%</span>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="cards c2" data-r style="gap:24px;margin-top:4px">
+      <div class="callout sage" style="padding:20px 24px">
+        ${ART.hands(40,C.sage)}
+        <span class="txt">
+          <b>LINE 100%、Facebook 93%</b><br>
+          你要用的工具，早就在你手機裡了。</span>
+      </div>
+      <div class="callout gold" style="padding:20px 24px">
+        ${ART.bulb(40,C.gold)}
+        <span class="txt">
+          <b>Instagram 只有 43%</b><br>
+          所以先把 FB＋LINE 練熟，IG 之後再說。</span>
+      </div>
+    </div>
+  </div>`,
+  notes:{
+    say:['這頁是用學員自己的數據替下一頁的建議鋪路：不是我叫你們做 Facebook，是因為你們本來就都在用。',
+         'LINE 30 人全部都有、Facebook 28 人——這兩個是最省力的起點；Instagram 只有 13 人用過，對多數人是全新工具。',
+         'Canva 只有 4 人用過，所以今天完全不碰 Canva 操作；那是後面「商品視覺設計」課程的內容。'],
+    ask:['問：有用過 Instagram 的請舉手？（對照 43% 這個數字，讓現場自己確認）'],
+    do:[]
+  }, tag:{type:'ask', label:'舉手對照'}});
+
 S({ part:'PART 2', time:'10:00', kind:'std', title:'Slide 12｜所以我三個都要做嗎？',
   html:`
   <div class="stack gap-l center" style="text-align:center">
@@ -640,9 +695,9 @@ S({ part:'PART 3', time:'10:26', kind:'std', title:'Slide 15｜一個好的粉�
                   text-align:center;padding:7px;border-radius:7px">傳送訊息</span></div>
             </div>
           </div>`)}
-        ${[['③ 封面','left:-88px;top:102px'],['② 大頭貼','left:-104px;top:148px'],
-           ['① 名稱','right:-88px;top:180px'],['④ 一句話','right:-104px;top:226px'],
-           ['⑤ 聯絡方式','right:-116px;top:256px']]
+        ${[['③ 封面','left:-88px;top:99px'],['② 大頭貼','left:-104px;top:148px'],
+           ['① 名稱','right:-88px;top:181px'],['④ 一句話','right:-104px;top:244px'],
+           ['⑤ 聯絡方式','right:-116px;top:297px']]
           .map(([t,pos])=>`<span style="position:absolute;${pos};background:${C.ink};color:${C.paper};
             font-size:12.5px;font-weight:800;padding:6px 12px;border-radius:99px;white-space:nowrap">${t}</span>`).join('')}
       </div>
@@ -843,8 +898,8 @@ S({ part:'PART 4', time:'11:05', kind:'std', title:'Slide 20｜打開 IG，先�
     <div class="col center" data-r>
       <div class="anchor">
         ${igProfile({bio:'手工果醬 · 小批製作<br>當季水果，一次只煮一鍋'})}
-        ${[['①','left:-50px;top:104px'],['②','left:-50px;top:44px'],['③','left:-50px;top:164px'],
-           ['④','left:-50px;top:236px'],['⑤','right:-50px;top:196px']]
+        ${[['②','left:-50px;top:37px'],['①','left:-50px;top:98px'],['③','left:-50px;top:175px'],
+           ['④','left:-50px;top:340px'],['⑤','right:-50px;top:204px']]
           .map(([t,pos])=>`<span style="position:absolute;${pos};width:34px;height:34px;
             display:grid;place-items:center;background:${C.plum};color:#fff;border-radius:99px;
             font-size:15px;font-weight:800">${t}</span>`).join('')}
@@ -1259,18 +1314,18 @@ S({ part:'PART 5', time:'13:22', kind:'std', title:'Slide 30｜LINE 官方帳號
 
 S({ part:'PART 5', time:'13:28', kind:'std', title:'Slide 31｜一個商品，三種呈現',
   html:`
-  <div class="stack gap-m pad-tight">
+  <div class="stack gap-s pad-tight">
     <div class="row" style="align-items:flex-end;gap:24px">
       <div style="flex:1">
-        <p class="eyebrow" data-r>同一件事，三種寫法</p>
-        <h2 class="h" data-r style="font-size:36px;margin-bottom:0">手工草莓果醬</h2>
+        <p class="eyebrow" data-r style="margin-bottom:10px">同一件事，三種寫法</p>
+        <h2 class="h" data-r style="font-size:34px;margin-bottom:0">手工草莓果醬</h2>
       </div>
-      <div data-r>${ART.jar(96)}</div>
+      <div data-r>${ART.jar(70)}</div>
     </div>
-    <div class="cards c3" data-r style="gap:20px">
-      <div class="card top-accent a-fb" style="padding:22px">
+    <div class="cards c3" data-r style="gap:16px">
+      <div class="card top-accent a-fb" style="padding:18px 20px">
         <span class="badge b-fb">FACEBOOK</span>
-        <p class="v" style="margin-top:14px;font-size:15px;line-height:1.75">
+        <p class="v" style="margin-top:12px;line-height:1.62">
           今天早上到大湖收了一批草莓，紅得發亮。<br><br>
           草莓果醬很花時間，要一顆一顆去蒂，小火慢慢熬，一鍋大概只能做 20 瓶。
           有客人問為什麼不做多一點，因為煮太多鍋，味道就跑掉了。<br><br>
@@ -1278,9 +1333,9 @@ S({ part:'PART 5', time:'13:28', kind:'std', title:'Slide 31｜一個商品，�
         <div class="rule"></div>
         <p class="tiny" style="font-weight:800">約 130 字 · 講過程與原因</p>
       </div>
-      <div class="card top-accent a-ig" style="padding:22px">
+      <div class="card top-accent a-ig" style="padding:18px 20px">
         <span class="badge b-ig">INSTAGRAM</span>
-        <p class="v" style="margin-top:14px;font-size:16.5px;line-height:1.8">
+        <p class="v" style="margin-top:12px;line-height:1.66">
           把春天裝進一瓶草莓果醬裡 🍓<br><br>
           一鍋只煮 20 瓶，<br>因為煮太多，味道就跑掉了。<br><br>
           週三 · 西屯市集見</p>
@@ -1289,9 +1344,9 @@ S({ part:'PART 5', time:'13:28', kind:'std', title:'Slide 31｜一個商品，�
         <div class="rule"></div>
         <p class="tiny" style="font-weight:800">約 60 字 · 圖片是主角</p>
       </div>
-      <div class="card top-accent a-ln" style="padding:22px">
+      <div class="card top-accent a-ln" style="padding:18px 20px">
         <span class="badge b-ln">LINE</span>
-        <p class="v" style="margin-top:14px;font-size:16.5px;line-height:1.8;font-weight:700">
+        <p class="v" style="margin-top:12px;line-height:1.66;font-weight:700">
           🍓 草莓果醬本週開放預訂<br><br>
           每瓶 250 元<br><br>
           想預訂請直接回覆<br>「草莓＋數量」</p>
@@ -1299,8 +1354,8 @@ S({ part:'PART 5', time:'13:28', kind:'std', title:'Slide 31｜一個商品，�
         <p class="tiny" style="font-weight:800">約 40 字 · 直接說怎麼買</p>
       </div>
     </div>
-    <div class="callout gold" data-r style="padding:16px 24px">${ART.bulb(32,C.gold)}
-      <span class="txt" style="font-size:18px">
+    <div class="callout gold" data-r style="padding:13px 22px">${ART.bulb(30,C.gold)}
+      <span class="txt" style="font-size:20px;line-height:1.45">
         寫法不同，但講的是<b>同一件事</b>：一鍋只煮 20 瓶。<br>
         <b>先寫最長的那一篇，再刪成短的</b>，是最省力的做法。</span></div>
   </div>`,
@@ -1359,7 +1414,7 @@ S({ part:'PART 5', time:'13:39', kind:'std', title:'Slide 33｜圖片不是傳�
           在手機上，這種圖<b class="hl">縮成一格就什麼都看不到了</b>。</span></div>
     </div>
     <div class="col center" data-r>
-      <div style="width:300px;height:300px;border-radius:18px;background:linear-gradient(145deg,#f6d9c5,#eab08c);
+      <div class="baked" style="width:300px;height:300px;border-radius:18px;background:linear-gradient(145deg,#f6d9c5,#eab08c);
         padding:14px;position:relative;overflow:hidden;box-shadow:var(--shadow-m);border:1px solid rgba(0,0,0,.08)">
         <div style="background:#fff;height:100%;border-radius:10px;padding:9px;display:flex;
           flex-direction:column;gap:4px;overflow:hidden">
@@ -1385,7 +1440,7 @@ S({ part:'PART 5', time:'13:39', kind:'std', title:'Slide 33｜圖片不是傳�
       </div>
       <div style="display:flex;align-items:center;gap:16px;margin-top:18px">
         <span style="font-size:13px;font-weight:800;color:${C.muted}">在 IG 九宮格裡長這樣 →</span>
-        <div style="width:74px;height:74px;border-radius:8px;overflow:hidden;filter:blur(.4px);
+        <div class="baked" style="width:74px;height:74px;border-radius:8px;overflow:hidden;filter:blur(.4px);
           background:linear-gradient(145deg,#f6d9c5,#eab08c);display:grid;place-items:center">
           <div style="width:64px;height:64px;background:#fff;border-radius:4px;padding:3px">
             <div style="font-size:3px;line-height:1.3;color:#999">超級好吃手工草莓果醬 限時優惠 每瓶250元 買三送一
@@ -1438,7 +1493,7 @@ S({ part:'PART 5', time:'13:42', kind:'std', title:'Slide 34｜圖片上留什�
       </div>
       <div style="display:flex;align-items:center;gap:16px;margin-top:18px">
         <span style="font-size:13px;font-weight:800;color:${C.muted}">縮成一格還是看得懂 →</span>
-        <div style="width:74px;height:74px;border-radius:8px;overflow:hidden;position:relative;
+        <div class="baked" style="width:74px;height:74px;border-radius:8px;overflow:hidden;position:relative;
           background:linear-gradient(150deg,#f7dfc8,#e9ab7f);display:grid;place-items:center">
           ${ART.jar(46)}
           <div style="position:absolute;left:0;right:0;bottom:0;padding:5px;

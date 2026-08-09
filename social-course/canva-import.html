@@ -117,7 +117,7 @@ body{
 .ch-top{
   position:absolute; top:26px; left:84px; right:84px;
   display:flex; align-items:center; justify-content:flex-start; gap:14px;
-  font-size:13px; letter-spacing:.14em; color:var(--muted); font-weight:700;
+  font-size:20px; letter-spacing:.08em; color:var(--muted); font-weight:700;
 }
 .ch-sep{ opacity:.45 }
 .ch-part{ display:flex; align-items:center; gap:10px; }
@@ -127,7 +127,7 @@ body{
 .ch-foot{
   position:absolute; bottom:24px; left:84px; right:84px;
   display:flex; align-items:center; justify-content:space-between;
-  font-size:12.5px; color:var(--muted); font-weight:600; letter-spacing:.06em;
+  font-size:20px; color:var(--muted); font-weight:600; letter-spacing:.04em;
 }
 .ch-brand{ display:flex; align-items:center; gap:9px; opacity:.9; }
 .ch-brand b{ color:var(--ink-3); font-weight:800; letter-spacing:.02em; }
@@ -145,7 +145,7 @@ body.hide-chrome #chrome{ opacity:0; }
 
 /* ── 文字階層 ────────────────────────────────────────────────────────── */
 .eyebrow{
-  font-size:15px; font-weight:800; letter-spacing:.2em; color:var(--clay);
+  font-size:20px; font-weight:800; letter-spacing:.1em; color:var(--clay);
   margin:0 0 16px; display:flex; align-items:center; gap:12px;
 }
 .eyebrow::after{ content:""; height:1px; flex:1; background:linear-gradient(90deg,var(--clay-soft),transparent); }
@@ -157,9 +157,9 @@ h2.h{ font-size:44px; line-height:1.22; letter-spacing:-.02em; font-weight:800; 
 h3.h{ font-size:29px; line-height:1.3;  letter-spacing:-.012em; font-weight:800; margin:0 0 12px; }
 .mega{ font-size:82px; line-height:1.24; letter-spacing:-.03em; font-weight:850; margin:0; }
 .mega.sm{ font-size:58px; }
-.lead{ font-size:24px; line-height:1.62; color:var(--ink-2); font-weight:500; margin:0; }
-.sub{ font-size:19px; line-height:1.6; color:var(--ink-3); font-weight:500; margin:0; }
-.tiny{ font-size:15.5px; line-height:1.55; color:var(--muted); font-weight:600; }
+.lead{ font-size:25px; line-height:1.62; color:var(--ink-2); font-weight:500; margin:0; }
+.sub{ font-size:21px; line-height:1.6; color:var(--ink-3); font-weight:500; margin:0; }
+.tiny{ font-size:20px; line-height:1.55; color:var(--muted); font-weight:600; }
 .hl{ color:var(--clay); }
 .hl-s{ color:var(--sage); }
 .mark{
@@ -204,10 +204,10 @@ h3.h{ font-size:29px; line-height:1.3;  letter-spacing:-.012em; font-weight:800;
 .card.sage{ background:var(--sage-soft); border-color:transparent; box-shadow:none; }
 .card.gold{ background:var(--gold-soft); border-color:transparent; box-shadow:none; }
 .card.plum{ background:var(--plum-soft); border-color:transparent; box-shadow:none; }
-.card .k{ font-size:20.5px; font-weight:800; margin:0 0 8px; letter-spacing:-.01em; }
-.card .v{ font-size:17px; line-height:1.62; color:var(--ink-2); margin:0; font-weight:500; }
+.card .k{ font-size:24px; font-weight:800; margin:0 0 8px; letter-spacing:-.01em; }
+.card .v{ font-size:21px; line-height:1.62; color:var(--ink-2); margin:0; font-weight:500; }
 .card .ico{ margin-bottom:14px; display:block; }
-.card .cap{ font-size:13px; font-weight:800; letter-spacing:.14em; color:var(--muted); margin:0 0 10px; }
+.card .cap{ font-size:20px; font-weight:800; letter-spacing:.08em; color:var(--muted); margin:0 0 10px; }
 .card .rule{ height:1px; background:var(--line); margin:16px 0 14px; }
 .card.top-accent::before{
   content:""; position:absolute; top:0; left:0; right:0; height:4px;
@@ -223,7 +223,7 @@ h3.h{ font-size:29px; line-height:1.3;  letter-spacing:-.012em; font-weight:800;
 /* ── 條列（節制使用） ────────────────────────────────────────────────── */
 ul.list{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:13px; }
 ul.list li{
-  font-size:19.5px; line-height:1.5; color:var(--ink-2); font-weight:600;
+  font-size:21px; line-height:1.5; color:var(--ink-2); font-weight:600;
   display:flex; gap:13px; align-items:flex-start;
 }
 ul.list li::before{
@@ -231,12 +231,12 @@ ul.list li::before{
   margin-top:9px; flex:none;
 }
 ul.list.sage li::before{ background:var(--sage) }
-ul.list.dense li{ font-size:17.5px; gap:11px }
+ul.list.dense li{ font-size:20px; gap:11px }
 ul.list.dense li::before{ width:6px; height:6px; margin-top:8px }
 
-.yes,.no{ display:flex; gap:12px; align-items:flex-start; font-size:19px; font-weight:650;
+.yes,.no{ display:flex; gap:12px; align-items:flex-start; font-size:21px; font-weight:650;
           line-height:1.5; color:var(--ink-2); }
-.yes i,.no i{ font-style:normal; font-size:19px; font-weight:900; flex:none; line-height:1.45 }
+.yes i,.no i{ font-style:normal; font-size:21px; font-weight:900; flex:none; line-height:1.45 }
 .yes i{ color:var(--sage) } .no i{ color:var(--clay) }
 
 /* ── 打勾清單（學員實作） ────────────────────────────────────────────── */
@@ -244,7 +244,7 @@ ul.list.dense li::before{ width:6px; height:6px; margin-top:8px }
 .check{
   display:flex; align-items:center; gap:14px; padding:13px 18px;
   background:var(--white); border:1px solid var(--line); border-radius:14px;
-  font-size:18.5px; font-weight:700; color:var(--ink-2); box-shadow:var(--shadow-s);
+  font-size:21px; font-weight:700; color:var(--ink-2); box-shadow:var(--shadow-s);
 }
 .check .box{
   width:24px; height:24px; border-radius:7px; border:2.5px solid var(--clay);
@@ -259,13 +259,13 @@ ul.list.dense li::before{ width:6px; height:6px; margin-top:8px }
 /* ── 流程 / 漏斗 ─────────────────────────────────────────────────────── */
 .funnel{ display:flex; flex-direction:column; align-items:center; gap:9px; }
 .funnel .f{
-  display:grid; place-items:center; height:52px; border-radius:13px; color:#fff;
-  font-size:21px; font-weight:800; letter-spacing:.02em; box-shadow:var(--shadow-s);
+  display:grid; place-items:center; height:54px; border-radius:13px; color:#fff;
+  font-size:22px; font-weight:800; letter-spacing:.02em; box-shadow:var(--shadow-s);
 }
 .chain{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
 .chain .node{
   padding:12px 20px; border-radius:99px; background:var(--white);
-  border:1px solid var(--line); font-size:18px; font-weight:800; color:var(--ink-2);
+  border:1px solid var(--line); font-size:21px; font-weight:800; color:var(--ink-2);
   box-shadow:var(--shadow-s); white-space:nowrap;
 }
 .chain .node.on{ background:var(--clay); color:#fff; border-color:transparent; }
@@ -273,15 +273,15 @@ ul.list.dense li::before{ width:6px; height:6px; margin-top:8px }
 .steps{ display:flex; gap:0; align-items:stretch; }
 .steps .st{ flex:1; padding:0 20px; position:relative; }
 .steps .st + .st{ border-left:1px dashed var(--line); }
-.steps .st .n{ font-size:13px; font-weight:900; letter-spacing:.18em; color:var(--clay); margin-bottom:9px }
-.steps .st .t{ font-size:19.5px; font-weight:800; line-height:1.35; margin-bottom:6px }
-.steps .st .d{ font-size:15.5px; color:var(--ink-3); line-height:1.55; font-weight:500 }
+.steps .st .n{ font-size:20px; font-weight:900; letter-spacing:.08em; color:var(--clay); margin-bottom:9px }
+.steps .st .t{ font-size:22px; font-weight:800; line-height:1.35; margin-bottom:6px }
+.steps .st .d{ font-size:20px; color:var(--ink-3); line-height:1.55; font-weight:500 }
 
 /* ── 比較表 ──────────────────────────────────────────────────────────── */
-.tbl{ width:100%; border-collapse:separate; border-spacing:0; font-size:18.5px; }
+.tbl{ width:100%; border-collapse:separate; border-spacing:0; font-size:21px; }
 .tbl th,.tbl td{ padding:15px 20px; text-align:left; }
 .tbl thead th{
-  font-size:14px; letter-spacing:.14em; font-weight:900; color:var(--muted);
+  font-size:20px; letter-spacing:.06em; font-weight:900; color:var(--muted);
   border-bottom:1px solid var(--line); padding-bottom:11px;
 }
 .tbl tbody td{ border-bottom:1px solid var(--line-2); color:var(--ink-2); font-weight:600; }
@@ -291,9 +291,9 @@ ul.list.dense li::before{ width:6px; height:6px; margin-top:8px }
 /* ── 時間表 ──────────────────────────────────────────────────────────── */
 .agenda{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px 40px; }
 .ag{ display:flex; gap:14px; align-items:center; padding:7px 12px; border-radius:11px; }
-.ag .t{ font-size:15.5px; font-weight:800; color:var(--clay); font-variant-numeric:tabular-nums;
+.ag .t{ font-size:20px; font-weight:800; color:var(--clay); font-variant-numeric:tabular-nums;
         letter-spacing:.01em; width:104px; flex:none }
-.ag .n{ font-size:16px; font-weight:650; color:var(--ink-2); line-height:1.4 }
+.ag .n{ font-size:20px; font-weight:650; color:var(--ink-2); line-height:1.4 }
 .ag.rest{ background:var(--paper-2) } .ag.rest .t,.ag.rest .n{ color:var(--muted) }
 
 /* ── 手機模擬 ────────────────────────────────────────────────────────── */
@@ -314,7 +314,7 @@ ul.list.dense li::before{ width:6px; height:6px; margin-top:8px }
   width:86px; height:20px; background:#17110d; border-radius:0 0 13px 13px; z-index:4;
 }
 .phone .stat{
-  height:26px; display:flex; align-items:center; justify-content:space-between;
+  height:24px; display:flex; align-items:center; justify-content:space-between;
   padding:0 15px; font-size:10.5px; font-weight:800; color:#1b1b1b; flex:none;
 }
 .phone .stat .r{ display:flex; gap:4px; align-items:center; opacity:.75 }
@@ -322,7 +322,7 @@ ul.list.dense li::before{ width:6px; height:6px; margin-top:8px }
   height:42px; display:flex; align-items:center; justify-content:space-between;
   padding:0 13px; border-bottom:1px solid #eceef1; flex:none;
 }
-.app-bar .ttl{ font-size:14.5px; font-weight:900; letter-spacing:-.01em }
+.app-bar .ttl{ font-size:16px; font-weight:900; letter-spacing:-.01em }
 .app-bar .ic{ display:flex; gap:11px; color:#3d3d3d }
 .app-body{ flex:1; overflow:hidden; background:#fff }
 .app-body.grey{ background:#f2f3f5 }
@@ -332,11 +332,11 @@ ul.list.dense li::before{ width:6px; height:6px; margin-top:8px }
 .fb-bar .ttl{ color:var(--fb); font-size:17px; letter-spacing:-.02em }
 .fb-post{ padding:12px 13px; background:#fff; border-bottom:8px solid #f0f2f5 }
 .fb-head{ display:flex; gap:9px; align-items:center; margin-bottom:9px }
-.fb-name{ font-size:12.5px; font-weight:800; line-height:1.25 }
-.fb-meta{ font-size:10px; color:#8a8d91; font-weight:600 }
-.fb-text{ font-size:11.5px; line-height:1.62; color:#1c1e21; font-weight:500 }
+.fb-name{ font-size:14px; font-weight:800; line-height:1.25 }
+.fb-meta{ font-size:11.5px; color:#8a8d91; font-weight:600 }
+.fb-text{ font-size:13.5px; line-height:1.62; color:#1c1e21; font-weight:500 }
 .fb-acts{ display:flex; justify-content:space-around; padding:8px 0 2px; margin-top:9px;
-          border-top:1px solid #eceef1; font-size:10.5px; color:#65676b; font-weight:750 }
+          border-top:1px solid #eceef1; font-size:12px; color:#65676b; font-weight:750 }
 
 /* Instagram 版 */
 .ig-bar{ border-bottom:1px solid #efefef }
@@ -345,9 +345,9 @@ ul.list.dense li::before{ width:6px; height:6px; margin-top:8px }
 .ig-top{ display:flex; gap:16px; align-items:center; margin-bottom:11px }
 .ig-stats{ display:flex; gap:17px; flex:1; justify-content:space-around }
 .ig-stats div{ text-align:center }
-.ig-stats b{ display:block; font-size:12.5px; font-weight:900 }
-.ig-stats span{ font-size:9.5px; color:#737373; font-weight:650 }
-.ig-bio{ font-size:11px; line-height:1.55; font-weight:600; color:#1a1a1a }
+.ig-stats b{ display:block; font-size:14px; font-weight:900 }
+.ig-stats span{ font-size:11px; color:#737373; font-weight:650 }
+.ig-bio{ font-size:12.5px; line-height:1.55; font-weight:600; color:#1a1a1a }
 .ig-bio .lk{ color:#00376b; font-weight:700 }
 .ig-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:2px; margin-top:12px }
 .ig-cell{ aspect-ratio:1; position:relative; overflow:hidden }
@@ -368,7 +368,7 @@ ul.list.dense li::before{ width:6px; height:6px; margin-top:8px }
 .ln-day span{ background:rgba(0,0,0,.16); color:#fff; font-size:9.5px; font-weight:750;
               padding:3px 11px; border-radius:99px }
 .bub{
-  max-width:80%; padding:10px 13px; border-radius:16px; font-size:11.5px; line-height:1.6;
+  max-width:82%; padding:10px 13px; border-radius:16px; font-size:13.5px; line-height:1.55;
   font-weight:600; margin-bottom:9px; box-shadow:0 1px 2px rgba(0,0,0,.12);
 }
 .bub.in{ background:#fff; color:#1a1a1a; border-top-left-radius:4px }
@@ -390,13 +390,13 @@ ul.list.dense li::before{ width:6px; height:6px; margin-top:8px }
 }
 .post .ph{ display:flex; align-items:center; gap:10px; padding:13px 15px; border-bottom:1px solid var(--line-2) }
 .post .ph .av{ width:32px; height:32px; border-radius:99px; flex:none; overflow:hidden }
-.post .ph .nm{ font-size:14px; font-weight:850 }
-.post .ph .mt{ font-size:11px; color:var(--muted); font-weight:650 }
-.post .pb{ padding:14px 16px; font-size:15px; line-height:1.72; color:var(--ink-2); font-weight:550 }
-.post .pb .cnt{ float:right; font-size:11.5px; color:var(--muted); font-weight:800 }
+.post .ph .nm{ font-size:17px; font-weight:850 }
+.post .ph .mt{ font-size:14px; color:var(--muted); font-weight:650 }
+.post .pb{ padding:14px 16px; font-size:18px; line-height:1.72; color:var(--ink-2); font-weight:550 }
+.post .pb .cnt{ float:right; font-size:14px; color:var(--muted); font-weight:800 }
 .post .badge{
-  display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:900;
-  letter-spacing:.1em; padding:5px 11px; border-radius:99px;
+  display:inline-flex; align-items:center; gap:6px; font-size:15px; font-weight:900;
+  letter-spacing:.06em; padding:5px 11px; border-radius:99px;
 }
 .b-fb{ background:#e7f0fe; color:var(--fb) }
 .b-ig{ background:#fdeaf1; color:var(--ig-b) }
@@ -405,7 +405,7 @@ ul.list.dense li::before{ width:6px; height:6px; margin-top:8px }
 /* ── Hashtag ─────────────────────────────────────────────────────────── */
 .tags{ display:flex; flex-wrap:wrap; gap:10px }
 .tag{
-  padding:9px 16px; border-radius:99px; font-size:17px; font-weight:750;
+  padding:9px 16px; border-radius:99px; font-size:20px; font-weight:750;
   background:var(--white); border:1px solid var(--line); color:var(--ink-2);
   box-shadow:var(--shadow-s);
 }
@@ -414,20 +414,20 @@ ul.list.dense li::before{ width:6px; height:6px; margin-top:8px }
 .tag.y{ background:var(--gold-soft); border-color:transparent; color:#8a5f1c }
 .tag.p{ background:var(--plum-soft); border-color:transparent; color:#6d4356 }
 .tag.dim{ background:transparent; border-style:dashed; color:var(--muted); box-shadow:none }
-.tag.sm{ font-size:14.5px; padding:7px 13px }
+.tag.sm{ font-size:20px; padding:7px 14px }
 
 /* ── 螢光標記／提示條 ────────────────────────────────────────────────── */
 .callout{
   display:flex; gap:16px; align-items:center; padding:20px 26px; border-radius:18px;
   background:var(--clay-tint); border-left:5px solid var(--clay);
 }
-.callout .txt{ font-size:20px; font-weight:750; line-height:1.55; color:var(--ink-2) }
+.callout .txt{ font-size:21px; font-weight:750; line-height:1.55; color:var(--ink-2) }
 .callout.sage{ background:var(--sage-soft); border-left-color:var(--sage) }
 .callout.gold{ background:var(--gold-soft); border-left-color:var(--gold) }
 
 .pill{
   display:inline-flex; align-items:center; gap:8px; padding:8px 15px; border-radius:99px;
-  font-size:14.5px; font-weight:800; letter-spacing:.04em;
+  font-size:20px; font-weight:800; letter-spacing:.02em;
   background:var(--white); border:1px solid var(--line); color:var(--ink-3);
   box-shadow:var(--shadow-s);
 }
@@ -449,10 +449,10 @@ ul.list.dense li::before{ width:6px; height:6px; margin-top:8px }
   color:rgba(255,255,255,.11); margin:0 0 -22px;
 }
 .slide.divider h2{ font-size:56px; font-weight:850; letter-spacing:-.03em; margin:0 0 18px; color:#fff }
-.slide.divider .d-sub{ font-size:21px; color:rgba(255,255,255,.72); font-weight:550; line-height:1.6; max-width:660px }
+.slide.divider .d-sub{ font-size:23px; color:rgba(255,255,255,.72); font-weight:550; line-height:1.6; max-width:660px }
 .slide.divider .d-time{
   display:inline-flex; align-items:center; gap:10px; margin-bottom:26px;
-  font-size:14px; font-weight:800; letter-spacing:.18em; color:var(--gold);
+  font-size:20px; font-weight:800; letter-spacing:.08em; color:var(--gold);
 }
 .slide.divider .d-art{
   position:absolute; right:74px; bottom:0; top:0; width:420px;
@@ -470,18 +470,18 @@ ul.list.dense li::before{ width:6px; height:6px; margin-top:8px }
 .cover-r{ position:relative; display:grid; place-items:center }
 .cover .kicker{
   display:inline-flex; align-items:center; gap:11px; align-self:flex-start;
-  font-size:14px; font-weight:850; letter-spacing:.2em; color:var(--clay);
+  font-size:20px; font-weight:850; letter-spacing:.1em; color:var(--clay);
   background:var(--clay-tint); padding:9px 18px; border-radius:99px; margin-bottom:26px;
 }
 .cover h1{ font-size:74px; line-height:1.1; letter-spacing:-.04em; font-weight:900; margin:0 0 22px }
-.cover .cs{ font-size:25px; line-height:1.55; color:var(--ink-2); font-weight:550; max-width:460px; margin:0 0 34px }
+.cover .cs{ font-size:26px; line-height:1.55; color:var(--ink-2); font-weight:550; max-width:460px; margin:0 0 34px }
 .cover .meta{ display:flex; gap:14px; flex-wrap:wrap }
 
 /* ── 觀察／實作 標籤 ─────────────────────────────────────────────────── */
 .act-tag{
   position:absolute; top:24px; right:84px; z-index:8;
   display:inline-flex; align-items:center; gap:9px; padding:9px 17px; border-radius:99px;
-  font-size:13.5px; font-weight:900; letter-spacing:.14em;
+  font-size:20px; font-weight:900; letter-spacing:.06em;
   background:var(--ink); color:var(--paper); box-shadow:var(--shadow-m);
 }
 .act-tag.ask{ background:var(--sage) } .act-tag.do{ background:var(--clay) }
@@ -491,11 +491,11 @@ ul.list.dense li::before{ width:6px; height:6px; margin-top:8px }
   border:2px dashed var(--clay); border-radius:18px; background:var(--clay-tint);
   display:grid; place-items:center; text-align:center; padding:22px; gap:8px;
 }
-.slot .st{ font-size:16.5px; font-weight:850; color:var(--clay-2) }
-.slot .sd{ font-size:13.5px; color:var(--ink-3); font-weight:600; line-height:1.5 }
+.slot .st{ font-size:20px; font-weight:850; color:var(--clay-2) }
+.slot .sd{ font-size:17px; color:var(--ink-3); font-weight:600; line-height:1.5 }
 
 /* ── 圖說 ────────────────────────────────────────────────────────────── */
-.cap-t{ font-size:14px; font-weight:800; letter-spacing:.1em; color:var(--muted);
+.cap-t{ font-size:20px; font-weight:800; letter-spacing:.1em; color:var(--muted);
         text-align:center; margin-top:14px }
 
 /* ── 進場動畫（逐項浮現） ────────────────────────────────────────────── */
@@ -676,7 +676,7 @@ body{ margin:0; padding:0; }
 .pg .pg-foot{
   position:absolute; bottom:24px; left:84px; right:84px; z-index:9;
   display:flex; justify-content:space-between;
-  font-size:12.5px; color:var(--muted); font-weight:650; letter-spacing:.06em;
+  font-size:20px; color:var(--muted); font-weight:650; letter-spacing:.04em;
 }
 .pg.dark .pg-foot{ color:rgba(255,255,255,.5); }
 .pg .pg-defs{ position:absolute; width:0; height:0; }
@@ -847,7 +847,7 @@ body{ margin:0; padding:0; }
   <path d="M23.6 20.6h3.2l.6-4.2h-3.8v-2.6c0-1.2.4-2 2-2h2V8.1c-.4 0-1.6-.2-3-.2-3 0-5 1.8-5 5.2v3.3H16v4.2h3.6V32h4v-11.4Z" fill="#fff"/></svg></div>
         <div style="position:absolute;left:-92px;top:224px"><svg viewBox="0 0 40 40" width="56" height="56" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
-  <defs><linearGradient id="igza4yf" x1="0" y1="1" x2="1" y2="0">
+  <defs><linearGradient id="ig5fa6y" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".45" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs>
   <rect width="40" height="40" rx="12" fill="url(#ig)" style="fill:#e1306c"/>
@@ -870,7 +870,7 @@ body{ margin:0; padding:0; }
       </div>
     </div>
   </div></section>
-  <div class="pg-foot"><span>開場　·　09:00</span><span>1 / 75</span></div>
+  <div class="pg-foot"><span>開場　·　09:00</span><span>1 / 76</span></div>
 </div>
 
 <div class="pg"
@@ -886,28 +886,22 @@ body{ margin:0; padding:0; }
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".28" stop-color="#f9a03f"/>
     <stop offset=".62" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs></svg></div>
-  <section class="slide">
-  <div class="split w-left">
-    <div class="col">
-      <p class="eyebrow" data-r>TODAY&nbsp;09:00–16:00</p>
-      <h2 class="h" data-r>今天會走過的路</h2>
-      <p class="lead" data-r style="margin-bottom:26px">
-        上午把<span class="mark">觀念與平台</span>搞清楚，<br>
-        下午全部都是<span class="mark">動手做</span>。
-      </p>
-      <div class="cards c1" style="gap:14px" data-r>
-        <div class="card tint" style="padding:20px 22px">
-          <p class="v" style="font-weight:700">每 10–20 分鐘就有一次<b class="hl">提問、觀察或手機操作</b>，
-          不會只有講師一直講。</p>
-        </div>
+  <section class="slide pad-tight">
+  <div class="stack gap-m pad-tight">
+    <div class="row" style="align-items:flex-end;gap:32px">
+      <div style="flex:1">
+        <p class="eyebrow" data-r>TODAY&nbsp;09:00–16:00</p>
+        <h2 class="h" data-r style="font-size:38px;margin-bottom:6px">今天會走過的路</h2>
+        <p class="lead" data-r style="margin:0">
+          上午把<span class="mark">觀念與平台</span>搞清楚，下午全部都是<span class="mark">動手做</span>。</p>
       </div>
-      <div style="display:flex;gap:14px;margin-top:20px" data-r>
+      <div data-r style="display:flex;gap:12px;flex:none">
         <span class="pill fb"><svg viewBox="0 0 40 40" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
   <circle cx="20" cy="20" r="20" fill="#1877f2"/>
   <path d="M23.6 20.6h3.2l.6-4.2h-3.8v-2.6c0-1.2.4-2 2-2h2V8.1c-.4 0-1.6-.2-3-.2-3 0-5 1.8-5 5.2v3.3H16v4.2h3.6V32h4v-11.4Z" fill="#fff"/></svg> Facebook</span><span class="pill ig"><svg viewBox="0 0 40 40" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
-  <defs><linearGradient id="igp2ulq" x1="0" y1="1" x2="1" y2="0">
+  <defs><linearGradient id="igwah0c" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".45" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs>
   <rect width="40" height="40" rx="12" fill="url(#ig)" style="fill:#e1306c"/>
@@ -919,8 +913,8 @@ body{ margin:0; padding:0; }
   <path d="M20 9c-6.6 0-12 4.2-12 9.4 0 4.6 4.3 8.5 10 9.3.4.1 1 .3 1.1.6.1.3.1.7 0 1l-.2 1c-.1.3-.3 1.2 1.1.7 1.4-.6 7.4-4.4 10.1-7.5 1.9-2 2.8-4.1 2.8-6.4C32.8 13.2 27.4 9 20 9Z" fill="#fff"/></svg> LINE 官方帳號</span>
       </div>
     </div>
-    <div class="col">
-      <div class="agenda" style="grid-template-columns:1fr" data-r>
+    <div>
+      <div class="agenda" data-r>
         <div class="ag"><span class="t">09:00–09:30</span><span class="n">社群不是只有發文：先搞懂經營邏輯</span></div>
         <div class="ag"><span class="t">09:30–10:10</span><span class="n">FB、IG、LINE 官方帳號怎麼選</span></div>
         <div class="ag rest"><span class="t">10:10–10:20</span><span class="n">休息</span></div>
@@ -936,7 +930,7 @@ body{ margin:0; padding:0; }
       </div>
     </div>
   </div></section>
-  <div class="pg-foot"><span>開場　·　09:00</span><span>2 / 75</span></div>
+  <div class="pg-foot"><span>開場　·　09:00</span><span>2 / 76</span></div>
 </div>
 
 <div class="pg dark"
@@ -970,7 +964,7 @@ body{ margin:0; padding:0; }
   <circle cx="216" cy="172" r="11" fill="#8a5a6d"/><path d="M205 190a11 11 0 0 1 22 0" fill="#8a5a6d"/>
   <circle cx="112" cy="172" r="10" fill="#d99a4e"/><path d="M102 190a10 10 0 0 1 20 0" fill="#d99a4e"/>
 </svg></div></section>
-  <div class="pg-foot"><span>PART 1　·　09:00–09:30</span><span>3 / 75</span></div>
+  <div class="pg-foot"><span>PART 1　·　09:00–09:30</span><span>3 / 76</span></div>
 </div>
 
 <div class="pg"
@@ -1016,15 +1010,15 @@ body{ margin:0; padding:0; }
       <span class="txt">不用學會全部功能。<b class="hl">會用得到的那幾個</b>，就足以開始。</span>
     </div>
   </div><span class="act-tag ask">舉手調查</span></section>
-  <div class="pg-foot"><span>PART 1　·　09:00</span><span>4 / 75</span></div>
+  <div class="pg-foot"><span>PART 1　·　09:00</span><span>4 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
      data-label="05｜大家是不是都有這些困擾"
-     data-speaker-notes="講師說明：用調查數據讓學員知道「不是只有我不會」，降低心理門檻。 上課前請把百分比換成本班真實的調查結果，效果差很多。
+     data-speaker-notes="講師說明：這是本班 30 人的真實課前調查，不是示意數據。念出第一名「不懂如何進行社群經營 24 人、80%」，讓學員知道大家都一樣。 第 2、4、5 名（拍照、文案、AI）是後面幾堂課的內容，這裡先預告，讓學員安心：不是今天學不完，是本來就分開教。 今天要解決的就是第一名那一項。
 
-互動提問：問：還有沒有沒被列到的困擾？（記在白板，課程結束前回來確認有沒有解決）">
+互動提問：問：這六項裡，你自己勾了哪幾個？（舉手統計，跟調查結果對照） 問：還有沒有沒被列到的困擾？（記在白板，最後一節回來確認有沒有解決）">
   <div class="pg-defs"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
   <linearGradient id="igGrad" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".28" stop-color="#f9a03f"/>
@@ -1033,72 +1027,90 @@ body{ margin:0; padding:0; }
   <section class="slide">
   <div class="split art">
     <div class="col">
-      <p class="eyebrow" data-r>課前需求調查</p>
-      <h2 class="h" data-r style="font-size:40px;margin-bottom:26px">這些困擾，<br>是不是你也有？</h2>
+      <p class="eyebrow" data-r>課前需求調查 · 有效樣本 30 人</p>
+      <h2 class="h" data-r style="font-size:40px;margin-bottom:24px">這些困擾，<br>是不是你也有？</h2>
       <div class="stack gap-s">
         
-        <div data-r style="display:flex;align-items:center;gap:16px">
-          <span style="font-size:17.5px;font-weight:700;color:#4a3c33;width:290px;flex:none">我有東西，但不知道怎麼介紹</span>
-          <span style="flex:1;height:12px;border-radius:99px;background:#ece0d1;overflow:hidden">
-            <span style="display:block;height:100%;width:88%;border-radius:99px;
+        <div data-r style="display:flex;align-items:center;gap:14px">
+          <span style="font-size:21px;font-weight:850;
+            color:#c05f3c;width:300px;flex:none">不懂如何進行社群經營</span>
+          <span style="flex:1;height:14px;border-radius:99px;background:#ece0d1;overflow:hidden">
+            <span style="display:block;height:100%;width:80.0%;border-radius:99px;
               background:linear-gradient(90deg,#d99a4e,#c05f3c)"></span></span>
-          <span style="font-size:14.5px;font-weight:850;color:#c05f3c;width:38px;text-align:right">88%</span>
+          <span style="font-size:20px;font-weight:850;color:#c05f3c;
+            width:168px;text-align:right;white-space:nowrap;
+            font-variant-numeric:tabular-nums">24 人｜80.0%</span>
         </div>
-        <div data-r style="display:flex;align-items:center;gap:16px">
-          <span style="font-size:17.5px;font-weight:700;color:#4a3c33;width:290px;flex:none">我不知道 FB、IG 到底差在哪</span>
-          <span style="flex:1;height:12px;border-radius:99px;background:#ece0d1;overflow:hidden">
-            <span style="display:block;height:100%;width:74%;border-radius:99px;
-              background:linear-gradient(90deg,#d99a4e,#c05f3c)"></span></span>
-          <span style="font-size:14.5px;font-weight:850;color:#c05f3c;width:38px;text-align:right">74%</span>
+        <div data-r style="display:flex;align-items:center;gap:14px">
+          <span style="font-size:21px;font-weight:700;
+            color:#4a3c33;width:300px;flex:none">不會拍攝商品照片與影音</span>
+          <span style="flex:1;height:14px;border-radius:99px;background:#ece0d1;overflow:hidden">
+            <span style="display:block;height:100%;width:73.3%;border-radius:99px;
+              background:#5f7a63"></span></span>
+          <span style="font-size:20px;font-weight:850;color:#7a6a5d;
+            width:168px;text-align:right;white-space:nowrap;
+            font-variant-numeric:tabular-nums">22 人｜73.3%</span>
         </div>
-        <div data-r style="display:flex;align-items:center;gap:16px">
-          <span style="font-size:17.5px;font-weight:700;color:#4a3c33;width:290px;flex:none">發文不知道要寫多少字</span>
-          <span style="flex:1;height:12px;border-radius:99px;background:#ece0d1;overflow:hidden">
-            <span style="display:block;height:100%;width:66%;border-radius:99px;
-              background:linear-gradient(90deg,#d99a4e,#c05f3c)"></span></span>
-          <span style="font-size:14.5px;font-weight:850;color:#c05f3c;width:38px;text-align:right">66%</span>
+        <div data-r style="display:flex;align-items:center;gap:14px">
+          <span style="font-size:21px;font-weight:700;
+            color:#4a3c33;width:300px;flex:none">不知道該怎麼賣、怎麼行銷</span>
+          <span style="flex:1;height:14px;border-radius:99px;background:#ece0d1;overflow:hidden">
+            <span style="display:block;height:100%;width:73.3%;border-radius:99px;
+              background:#5f7a63"></span></span>
+          <span style="font-size:20px;font-weight:850;color:#7a6a5d;
+            width:168px;text-align:right;white-space:nowrap;
+            font-variant-numeric:tabular-nums">22 人｜73.3%</span>
         </div>
-        <div data-r style="display:flex;align-items:center;gap:16px">
-          <span style="font-size:17.5px;font-weight:700;color:#4a3c33;width:290px;flex:none">發了都沒有人看</span>
-          <span style="flex:1;height:12px;border-radius:99px;background:#ece0d1;overflow:hidden">
-            <span style="display:block;height:100%;width:81%;border-radius:99px;
-              background:linear-gradient(90deg,#d99a4e,#c05f3c)"></span></span>
-          <span style="font-size:14.5px;font-weight:850;color:#c05f3c;width:38px;text-align:right">81%</span>
+        <div data-r style="display:flex;align-items:center;gap:14px">
+          <span style="font-size:21px;font-weight:700;
+            color:#4a3c33;width:300px;flex:none">不會寫介紹文案與內容</span>
+          <span style="flex:1;height:14px;border-radius:99px;background:#ece0d1;overflow:hidden">
+            <span style="display:block;height:100%;width:60.0%;border-radius:99px;
+              background:#5f7a63"></span></span>
+          <span style="font-size:20px;font-weight:850;color:#7a6a5d;
+            width:168px;text-align:right;white-space:nowrap;
+            font-variant-numeric:tabular-nums">18 人｜60.0%</span>
         </div>
-        <div data-r style="display:flex;align-items:center;gap:16px">
-          <span style="font-size:17.5px;font-weight:700;color:#4a3c33;width:290px;flex:none">Reels、限動看過但不會用</span>
-          <span style="flex:1;height:12px;border-radius:99px;background:#ece0d1;overflow:hidden">
-            <span style="display:block;height:100%;width:70%;border-radius:99px;
-              background:linear-gradient(90deg,#d99a4e,#c05f3c)"></span></span>
-          <span style="font-size:14.5px;font-weight:850;color:#c05f3c;width:38px;text-align:right">70%</span>
+        <div data-r style="display:flex;align-items:center;gap:14px">
+          <span style="font-size:21px;font-weight:700;
+            color:#4a3c33;width:300px;flex:none">不會使用 AI 工具</span>
+          <span style="flex:1;height:14px;border-radius:99px;background:#ece0d1;overflow:hidden">
+            <span style="display:block;height:100%;width:53.3%;border-radius:99px;
+              background:#5f7a63"></span></span>
+          <span style="font-size:20px;font-weight:850;color:#7a6a5d;
+            width:168px;text-align:right;white-space:nowrap;
+            font-variant-numeric:tabular-nums">16 人｜53.3%</span>
         </div>
-        <div data-r style="display:flex;align-items:center;gap:16px">
-          <span style="font-size:17.5px;font-weight:700;color:#4a3c33;width:290px;flex:none">LINE 每天用，但不知道什麼是官方 LINE</span>
-          <span style="flex:1;height:12px;border-radius:99px;background:#ece0d1;overflow:hidden">
-            <span style="display:block;height:100%;width:59%;border-radius:99px;
-              background:linear-gradient(90deg,#d99a4e,#c05f3c)"></span></span>
-          <span style="font-size:14.5px;font-weight:850;color:#c05f3c;width:38px;text-align:right">59%</span>
+        <div data-r style="display:flex;align-items:center;gap:14px">
+          <span style="font-size:21px;font-weight:700;
+            color:#4a3c33;width:300px;flex:none">完全不知道怎麼開始</span>
+          <span style="flex:1;height:14px;border-radius:99px;background:#ece0d1;overflow:hidden">
+            <span style="display:block;height:100%;width:46.7%;border-radius:99px;
+              background:#5f7a63"></span></span>
+          <span style="font-size:20px;font-weight:850;color:#7a6a5d;
+            width:168px;text-align:right;white-space:nowrap;
+            font-variant-numeric:tabular-nums">14 人｜46.7%</span>
         </div>
       </div>
-      <p class="tiny" data-r style="margin-top:18px">＊示意數據，上課前請替換為本班實際調查結果。</p>
     </div>
     <div class="col center" data-r>
-      <svg viewBox="0 0 80 64" width="230"  fill="none" xmlns="http://www.w3.org/2000/svg"
+      <svg viewBox="0 0 80 64" width="190"  fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
   <circle cx="22" cy="22" r="10" fill="#5f7a63" opacity=".2"/><circle cx="22" cy="22" r="10" stroke="#5f7a63" stroke-width="4"/>
   <path d="M6 54a16 16 0 0 1 32 0" stroke="#5f7a63" stroke-width="4" stroke-linecap="round"/>
   <circle cx="56" cy="26" r="9" fill="#5f7a63" opacity=".2"/><circle cx="56" cy="26" r="9" stroke="#5f7a63" stroke-width="4"/>
   <path d="M42 54a14 14 0 0 1 28 0" stroke="#5f7a63" stroke-width="4" stroke-linecap="round"/></svg>
-      <div style="margin-top:-18px">
-        <div class="card" style="max-width:300px;border-radius:20px 20px 20px 6px">
-          <p class="v" style="font-size:18px;font-weight:700">
-            「我東西做得很好啊，<br>可是……都沒有人知道。」</p>
-        </div>
+      <div class="card" style="max-width:330px;border-radius:20px 20px 20px 6px">
+        <p class="v" style="font-weight:700">
+          「把手作品分享出去、<br>增加一份收入。」</p>
       </div>
-      <p class="cap-t">最常聽到的一句話</p>
+      <p class="cap-t">學員原話</p>
+      <div class="callout" style="margin-top:18px;max-width:330px;padding:18px 22px;text-align:left">
+        <span class="txt">排第一名的困難，<br><b class="hl">就是今天這堂課</b>。</span>
+      </div>
     </div>
-  </div><span class="act-tag ask">現場提問</span></section>
-  <div class="pg-foot"><span>PART 1　·　09:05</span><span>5 / 75</span></div>
+  </div><span class="act-tag ask">舉手對照</span></section>
+  <div class="pg-foot"><span>PART 1　·　09:05</span><span>5 / 76</span></div>
 </div>
 
 <div class="pg"
@@ -1180,7 +1192,7 @@ body{ margin:0; padding:0; }
   <path d="M32 54S6 38 6 22a14 14 0 0 1 26-7 14 14 0 0 1 26 7c0 16-26 32-26 32Z" stroke="#5f7a63" stroke-width="4" stroke-linejoin="round"/></svg>
       <span class="txt">沒有人喜歡天天被推銷，<br>但大家都喜歡看「有人正在認真做一件事」。</span></div>
   </div></section>
-  <div class="pg-foot"><span>PART 1　·　09:10</span><span>6 / 75</span></div>
+  <div class="pg-foot"><span>PART 1　·　09:10</span><span>6 / 76</span></div>
 </div>
 
 <div class="pg"
@@ -1217,7 +1229,7 @@ body{ margin:0; padding:0; }
       <p class="cap-t">被看見 → 被認識 → 被喜歡 → 被信任 → 詢問 → 購買</p>
     </div>
   </div></section>
-  <div class="pg-foot"><span>PART 1　·　09:15</span><span>7 / 75</span></div>
+  <div class="pg-foot"><span>PART 1　·　09:15</span><span>7 / 76</span></div>
 </div>
 
 <div class="pg"
@@ -1261,7 +1273,7 @@ body{ margin:0; padding:0; }
       </div>
     </div>
   </div><span class="act-tag ask">生活經驗連結</span></section>
-  <div class="pg-foot"><span>PART 1　·　09:20</span><span>8 / 75</span></div>
+  <div class="pg-foot"><span>PART 1　·　09:20</span><span>8 / 76</span></div>
 </div>
 
 <div class="pg"
@@ -1310,7 +1322,7 @@ body{ margin:0; padding:0; }
     <p class="lead" data-r style="max-width:760px">
       今天所有的操作、字數、Hashtag、Reels，<br>都只是為了完成上面這三件事。</p>
   </div></section>
-  <div class="pg-foot"><span>PART 1　·　09:25</span><span>9 / 75</span></div>
+  <div class="pg-foot"><span>PART 1　·　09:25</span><span>9 / 76</span></div>
 </div>
 
 <div class="pg dark"
@@ -1335,7 +1347,7 @@ body{ margin:0; padding:0; }
   <circle cx="20" cy="20" r="20" fill="#1877f2"/>
   <path d="M23.6 20.6h3.2l.6-4.2h-3.8v-2.6c0-1.2.4-2 2-2h2V8.1c-.4 0-1.6-.2-3-.2-3 0-5 1.8-5 5.2v3.3H16v4.2h3.6V32h4v-11.4Z" fill="#fff"/></svg><svg viewBox="0 0 40 40" width="78" height="78" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
-  <defs><linearGradient id="igd5yrb" x1="0" y1="1" x2="1" y2="0">
+  <defs><linearGradient id="ig8mdc7" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".45" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs>
   <rect width="40" height="40" rx="12" fill="url(#ig)" style="fill:#e1306c"/>
@@ -1345,7 +1357,7 @@ body{ margin:0; padding:0; }
     style="" class="" aria-hidden="true">
   <rect width="40" height="40" rx="10" fill="#06c755"/>
   <path d="M20 9c-6.6 0-12 4.2-12 9.4 0 4.6 4.3 8.5 10 9.3.4.1 1 .3 1.1.6.1.3.1.7 0 1l-.2 1c-.1.3-.3 1.2 1.1.7 1.4-.6 7.4-4.4 10.1-7.5 1.9-2 2.8-4.1 2.8-6.4C32.8 13.2 27.4 9 20 9Z" fill="#fff"/></svg></div></div></section>
-  <div class="pg-foot"><span>PART 2　·　09:30–10:10</span><span>10 / 75</span></div>
+  <div class="pg-foot"><span>PART 2　·　09:30–10:10</span><span>10 / 76</span></div>
 </div>
 
 <div class="pg"
@@ -1433,7 +1445,7 @@ body{ margin:0; padding:0; }
       </div>
     </div>
   </div></section>
-  <div class="pg-foot"><span>PART 2　·　09:30</span><span>11 / 75</span></div>
+  <div class="pg-foot"><span>PART 2　·　09:30</span><span>11 / 76</span></div>
 </div>
 
 <div class="pg"
@@ -1524,7 +1536,7 @@ body{ margin:0; padding:0; }
       <p class="cap-t">Facebook 可以講比較完整的事</p>
     </div>
   </div></section>
-  <div class="pg-foot"><span>PART 2　·　09:38</span><span>12 / 75</span></div>
+  <div class="pg-foot"><span>PART 2　·　09:38</span><span>12 / 76</span></div>
 </div>
 
 <div class="pg"
@@ -1547,7 +1559,7 @@ body{ margin:0; padding:0; }
       <h2 class="h" data-r style="font-size:40px;display:flex;align-items:center;gap:14px">
         <svg viewBox="0 0 40 40" width="42" height="42" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
-  <defs><linearGradient id="ig7cpgc" x1="0" y1="1" x2="1" y2="0">
+  <defs><linearGradient id="ig0295y" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".45" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs>
   <rect width="40" height="40" rx="12" fill="url(#ig)" style="fill:#e1306c"/>
@@ -1702,7 +1714,7 @@ body{ margin:0; padding:0; }
       <p class="cap-t">九宮格＝別人對你的第一印象</p>
     </div>
   </div><span class="act-tag ask">舉手調查</span></section>
-  <div class="pg-foot"><span>PART 2　·　09:45</span><span>13 / 75</span></div>
+  <div class="pg-foot"><span>PART 2　·　09:45</span><span>13 / 76</span></div>
 </div>
 
 <div class="pg"
@@ -1763,12 +1775,105 @@ body{ margin:0; padding:0; }
       <p class="cap-t">真正成交，多半發生在這裡</p>
     </div>
   </div></section>
-  <div class="pg-foot"><span>PART 2　·　09:52</span><span>14 / 75</span></div>
+  <div class="pg-foot"><span>PART 2　·　09:52</span><span>14 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="15｜所以我三個都要做嗎？"
+     data-label="15｜Slide 11-2｜你們已經在用什麼？"
+     data-speaker-notes="講師說明：這頁是用學員自己的數據替下一頁的建議鋪路：不是我叫你們做 Facebook，是因為你們本來就都在用。 LINE 30 人全部都有、Facebook 28 人——這兩個是最省力的起點；Instagram 只有 13 人用過，對多數人是全新工具。 Canva 只有 4 人用過，所以今天完全不碰 Canva 操作；那是後面「商品視覺設計」課程的內容。
+
+互動提問：問：有用過 Instagram 的請舉手？（對照 43% 這個數字，讓現場自己確認）">
+  <div class="pg-defs"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="igGrad" x1="0" y1="1" x2="1" y2="0">
+    <stop offset="0" stop-color="#fdcb5c"/><stop offset=".28" stop-color="#f9a03f"/>
+    <stop offset=".62" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
+  </linearGradient></defs></svg></div>
+  <section class="slide">
+  <div class="stack gap-m">
+    <div>
+      <p class="eyebrow" data-r>課前調查 · 曾使用過的數位工具 · 30 人</p>
+      <h2 class="h" data-r style="font-size:38px">好消息：<span class="hl">你們已經天天在用了</span></h2>
+    </div>
+    <div class="split" data-r style="gap:44px;align-items:start">
+      <div class="stack gap-s">
+        
+        <div style="display:flex;align-items:center;gap:14px">
+          <span style="font-size:22px;font-weight:800;color:#241c17;width:120px;flex:none">LINE</span>
+          <span style="flex:1;height:16px;border-radius:99px;background:#ece0d1;overflow:hidden">
+            <span style="display:block;height:100%;width:100.0%;border-radius:99px;background:#06c755"></span></span>
+          <span style="font-size:20px;font-weight:850;color:#4a3c33;width:150px;text-align:right;
+            white-space:nowrap;font-variant-numeric:tabular-nums">30 人｜100.0%</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <span style="font-size:22px;font-weight:800;color:#241c17;width:120px;flex:none">Facebook</span>
+          <span style="flex:1;height:16px;border-radius:99px;background:#ece0d1;overflow:hidden">
+            <span style="display:block;height:100%;width:93.3%;border-radius:99px;background:#1877f2"></span></span>
+          <span style="font-size:20px;font-weight:850;color:#4a3c33;width:150px;text-align:right;
+            white-space:nowrap;font-variant-numeric:tabular-nums">28 人｜93.3%</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <span style="font-size:22px;font-weight:800;color:#241c17;width:120px;flex:none">ChatGPT</span>
+          <span style="flex:1;height:16px;border-radius:99px;background:#ece0d1;overflow:hidden">
+            <span style="display:block;height:100%;width:56.7%;border-radius:99px;background:#7a6a5d"></span></span>
+          <span style="font-size:20px;font-weight:850;color:#4a3c33;width:150px;text-align:right;
+            white-space:nowrap;font-variant-numeric:tabular-nums">17 人｜56.7%</span>
+        </div>
+      </div>
+      <div class="stack gap-s">
+        
+        <div style="display:flex;align-items:center;gap:14px">
+          <span style="font-size:22px;font-weight:800;color:#241c17;width:120px;flex:none">Instagram</span>
+          <span style="flex:1;height:16px;border-radius:99px;background:#ece0d1;overflow:hidden">
+            <span style="display:block;height:100%;width:43.3%;border-radius:99px;background:#8a5a6d"></span></span>
+          <span style="font-size:20px;font-weight:850;color:#4a3c33;width:150px;text-align:right;
+            white-space:nowrap;font-variant-numeric:tabular-nums">13 人｜43.3%</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <span style="font-size:22px;font-weight:800;color:#241c17;width:120px;flex:none">Gemini</span>
+          <span style="flex:1;height:16px;border-radius:99px;background:#ece0d1;overflow:hidden">
+            <span style="display:block;height:100%;width:30.0%;border-radius:99px;background:#7a6a5d"></span></span>
+          <span style="font-size:20px;font-weight:850;color:#4a3c33;width:150px;text-align:right;
+            white-space:nowrap;font-variant-numeric:tabular-nums">9 人｜30.0%</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <span style="font-size:22px;font-weight:800;color:#241c17;width:120px;flex:none">Canva</span>
+          <span style="flex:1;height:16px;border-radius:99px;background:#ece0d1;overflow:hidden">
+            <span style="display:block;height:100%;width:13.3%;border-radius:99px;background:#9c8b7c"></span></span>
+          <span style="font-size:20px;font-weight:850;color:#4a3c33;width:150px;text-align:right;
+            white-space:nowrap;font-variant-numeric:tabular-nums">4 人｜13.3%</span>
+        </div>
+      </div>
+    </div>
+    <div class="cards c2" data-r style="gap:24px;margin-top:4px">
+      <div class="callout sage" style="padding:20px 24px">
+        <svg viewBox="0 0 64 64" width="40" height="40" fill="none" xmlns="http://www.w3.org/2000/svg"
+    style="" class="" aria-hidden="true">
+  <path d="M6 34l12-10 14 8 14-8 12 10" stroke="#5f7a63" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M18 24l10 12a6 6 0 0 0 8 0l10-12" fill="#5f7a63" opacity=".16"/>
+  <path d="M22 40l8 8a6 6 0 0 0 8 0l8-8" stroke="#5f7a63" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="txt">
+          <b>LINE 100%、Facebook 93%</b><br>
+          你要用的工具，早就在你手機裡了。</span>
+      </div>
+      <div class="callout gold" style="padding:20px 24px">
+        <svg viewBox="0 0 64 64" width="40" height="40" fill="none" xmlns="http://www.w3.org/2000/svg"
+    style="" class="" aria-hidden="true">
+  <path d="M32 6a18 18 0 0 1 11 32v6H21v-6A18 18 0 0 1 32 6Z" fill="#d99a4e" opacity=".18"/>
+  <path d="M32 6a18 18 0 0 1 11 32v6H21v-6A18 18 0 0 1 32 6Z" stroke="#d99a4e" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M25 52h14M27 58h10" stroke="#d99a4e" stroke-width="4" stroke-linecap="round"/></svg>
+        <span class="txt">
+          <b>Instagram 只有 43%</b><br>
+          所以先把 FB＋LINE 練熟，IG 之後再說。</span>
+      </div>
+    </div>
+  </div><span class="act-tag ask">舉手對照</span></section>
+  <div class="pg-foot"><span>PART 2　·　09:58</span><span>15 / 76</span></div>
+</div>
+
+<div class="pg"
+     data-document-role="page"
+     data-label="16｜所以我三個都要做嗎？"
      data-speaker-notes="講師說明：這頁要講得很肯定：三個都開但都不更新，比只做好一個還糟。 公式：曝光平台（FB 或 IG）＋ 聯絡平台（LINE）＝ 兩個就夠。
 
 學員實作：請學員在講義 1 勾選：主要曝光平台是 FB 還是 IG。現在就決定，不要拖到下課。">
@@ -1795,7 +1900,7 @@ body{ margin:0; padding:0; }
   <path d="M23.6 20.6h3.2l.6-4.2h-3.8v-2.6c0-1.2.4-2 2-2h2V8.1c-.4 0-1.6-.2-3-.2-3 0-5 1.8-5 5.2v3.3H16v4.2h3.6V32h4v-11.4Z" fill="#fff"/></svg> Facebook</span>
           <span class="pill ig"><svg viewBox="0 0 40 40" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
-  <defs><linearGradient id="igso480" x1="0" y1="1" x2="1" y2="0">
+  <defs><linearGradient id="igwkspa" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".45" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs>
   <rect width="40" height="40" rx="12" fill="url(#ig)" style="fill:#e1306c"/>
@@ -1819,12 +1924,12 @@ body{ margin:0; padding:0; }
     </div>
     <p class="lead" data-r><b>一個曝光平台 ＋ 一個聯絡平台</b>，就是最好的起點。</p>
   </div><span class="act-tag do">講義 1</span></section>
-  <div class="pg-foot"><span>PART 2　·　10:00</span><span>15 / 75</span></div>
+  <div class="pg-foot"><span>PART 2　·　10:00</span><span>16 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="16｜案例：這三個人該選哪個？"
+     data-label="17｜案例：這三個人該選哪個？"
      data-speaker-notes="講師說明：先蓋住答案，讓學員自己講，再一個一個掀開。這裡是上午互動的重點。 講完後把邏輯講白：選平台不是看「哪個比較紅」，是看「我的客人在哪裡」。
 
 互動提問：問：A 阿姨如果想賣到全台灣，答案會不會改變？（會，就要加上 IG 或宅配社團） 問：現場有沒有人的情況跟這三個很像？
@@ -1909,12 +2014,12 @@ body{ margin:0; padding:0; }
   <path d="M25 52h14M27 58h10" stroke="#d99a4e" stroke-width="4" stroke-linecap="round"/></svg>
       <span class="txt">判斷方式只有一個：<b>我的客人年紀多大、住在哪裡、平常在滑什麼？</b></span></div>
   </div><span class="act-tag ask">全班討論</span></section>
-  <div class="pg-foot"><span>PART 2　·　10:04</span><span>16 / 75</span></div>
+  <div class="pg-foot"><span>PART 2　·　10:04</span><span>17 / 76</span></div>
 </div>
 
 <div class="pg dark"
      data-document-role="page"
-     data-label="17｜PART 3｜Facebook 粉絲專頁操作"
+     data-label="18｜PART 3｜Facebook 粉絲專頁操作"
      data-speaker-notes="講師說明：休息回來先確認全班手機都在手上。這一段是今天第一次大量操作，速度要放慢，寧可少做兩項也不要有人掉隊。 建議安排 1–2 位志工或助教在教室走動協助。">
   <div class="pg-defs"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
   <linearGradient id="igGrad" x1="0" y1="1" x2="1" y2="0">
@@ -1932,12 +2037,12 @@ body{ margin:0; padding:0; }
     style="" class="" aria-hidden="true">
   <circle cx="20" cy="20" r="20" fill="#1877f2"/>
   <path d="M23.6 20.6h3.2l.6-4.2h-3.8v-2.6c0-1.2.4-2 2-2h2V8.1c-.4 0-1.6-.2-3-.2-3 0-5 1.8-5 5.2v3.3H16v4.2h3.6V32h4v-11.4Z" fill="#fff"/></svg></div></div></section>
-  <div class="pg-foot"><span>PART 3　·　10:20–11:05</span><span>17 / 75</span></div>
+  <div class="pg-foot"><span>PART 3　·　10:20–11:05</span><span>18 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="18｜個人帳號 vs 粉絲專頁"
+     data-label="19｜個人帳號 vs 粉絲專頁"
      data-speaker-notes="講師說明：很多學員會說「我用個人帳號賣就好」。可以，但要說明三個限制：好友上限、沒有數據、朋友會被洗版。 折衷做法：粉專發文 → 分享到個人帳號。兩邊都顧到，下一頁會教。
 
 互動提問：問：現場有誰已經有粉絲專頁？（請他們等一下當小老師）">
@@ -1999,12 +2104,12 @@ body{ margin:0; padding:0; }
       <span class="txt">如果未來要做商品、服務、課程，<b class="hl">建議另外建立粉絲專頁</b>，
       不要全部擠在個人帳號。</span></div>
   </div></section>
-  <div class="pg-foot"><span>PART 3　·　10:20</span><span>18 / 75</span></div>
+  <div class="pg-foot"><span>PART 3　·　10:20</span><span>19 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="19｜一個好的粉專至少要有六件事"
+     data-label="20｜一個好的粉專至少要有六件事"
      data-speaker-notes="講師說明：一項一項對照右邊的手機示意圖講。學員可以邊聽邊看自己的粉專缺哪一項。 最常缺的是第 5 項聯絡方式——很多粉專找不到怎麼買。
 
 互動提問：問：你的粉專缺哪幾項？
@@ -2091,21 +2196,21 @@ body{ margin:0; padding:0; }
             </div>
           </div>
     </div></div>
-        <span style="position:absolute;left:-88px;top:102px;background:#241c17;color:#fbf7f1;
+        <span style="position:absolute;left:-88px;top:99px;background:#241c17;color:#fbf7f1;
             font-size:12.5px;font-weight:800;padding:6px 12px;border-radius:99px;white-space:nowrap">③ 封面</span><span style="position:absolute;left:-104px;top:148px;background:#241c17;color:#fbf7f1;
-            font-size:12.5px;font-weight:800;padding:6px 12px;border-radius:99px;white-space:nowrap">② 大頭貼</span><span style="position:absolute;right:-88px;top:180px;background:#241c17;color:#fbf7f1;
-            font-size:12.5px;font-weight:800;padding:6px 12px;border-radius:99px;white-space:nowrap">① 名稱</span><span style="position:absolute;right:-104px;top:226px;background:#241c17;color:#fbf7f1;
-            font-size:12.5px;font-weight:800;padding:6px 12px;border-radius:99px;white-space:nowrap">④ 一句話</span><span style="position:absolute;right:-116px;top:256px;background:#241c17;color:#fbf7f1;
+            font-size:12.5px;font-weight:800;padding:6px 12px;border-radius:99px;white-space:nowrap">② 大頭貼</span><span style="position:absolute;right:-88px;top:181px;background:#241c17;color:#fbf7f1;
+            font-size:12.5px;font-weight:800;padding:6px 12px;border-radius:99px;white-space:nowrap">① 名稱</span><span style="position:absolute;right:-104px;top:244px;background:#241c17;color:#fbf7f1;
+            font-size:12.5px;font-weight:800;padding:6px 12px;border-radius:99px;white-space:nowrap">④ 一句話</span><span style="position:absolute;right:-116px;top:297px;background:#241c17;color:#fbf7f1;
             font-size:12.5px;font-weight:800;padding:6px 12px;border-radius:99px;white-space:nowrap">⑤ 聯絡方式</span>
       </div>
     </div>
   </div><span class="act-tag do">對照檢查</span></section>
-  <div class="pg-foot"><span>PART 3　·　10:26</span><span>19 / 75</span></div>
+  <div class="pg-foot"><span>PART 3　·　10:26</span><span>20 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="20｜粉專名稱怎麼取"
+     data-label="21｜粉專名稱怎麼取"
      data-speaker-notes="講師說明：刻意不要講「品牌感」「調性」這種詞，中高齡學員只要記住公式：做什麼＋在哪裡。 如果學員已經取了很文青的名字，不用逼他改，建議在名稱後面加上說明即可。
 
 互動提問：問：如果你是客人，在搜尋列會打什麼字找這種東西？
@@ -2161,12 +2266,12 @@ body{ margin:0; padding:0; }
       這樣別人搜尋「台中 果醬」時，才可能找到你。</span></div>
     <p class="tiny" data-r>＊今天不教品牌命名與故事，那是「品牌故事撰寫」課程的內容。這裡只處理「看不看得懂」。</p>
   </div><span class="act-tag do">寫一個名稱</span></section>
-  <div class="pg-foot"><span>PART 3　·　10:32</span><span>20 / 75</span></div>
+  <div class="pg-foot"><span>PART 3　·　10:32</span><span>21 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="21｜Facebook 同步操作"
+     data-label="22｜Facebook 同步操作"
      data-speaker-notes="講師說明：這頁停留最久，預計 12–15 分鐘。講師先示範一次，再讓學員自己做一次。 沒有粉專的人：現場建立。有粉專但很久沒用的人：先更新大頭貼與簡介。
 
 互動提問：問：卡在哪一步？（請卡住的人舉手，助教過去協助）
@@ -2238,12 +2343,12 @@ body{ margin:0; padding:0; }
       <p class="cap-t">講師手機請同步投影</p>
     </div>
   </div><span class="act-tag do">手機實作</span></section>
-  <div class="pg-foot"><span>PART 3　·　10:38</span><span>21 / 75</span></div>
+  <div class="pg-foot"><span>PART 3　·　10:38</span><span>22 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="22｜Facebook 貼文有哪些功能"
+     data-label="23｜Facebook 貼文有哪些功能"
      data-speaker-notes="講師說明：一項一項在投影的手機上點給大家看，不要只念名稱。 「編輯」與「刪除」一定要教——學員最怕發錯，知道可以改就敢發了。
 
 互動提問：問：有沒有人發過文之後想改卻不知道怎麼改？
@@ -2336,12 +2441,12 @@ body{ margin:0; padding:0; }
       <p class="cap-t">發文畫面（示意）</p>
     </div>
   </div><span class="act-tag do">手機實作</span></section>
-  <div class="pg-foot"><span>PART 3　·　10:50</span><span>22 / 75</span></div>
+  <div class="pg-foot"><span>PART 3　·　10:50</span><span>23 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="23｜分享不是亂丟廣告"
+     data-label="24｜分享不是亂丟廣告"
      data-speaker-notes="講師說明：這頁是「免費曝光」與「被討厭」的分界線，講清楚可以省掉學員很多麻煩。 建議提供實際做法：進到社團先看置頂規則，很多社團規定只能週幾發廣告。
 
 互動提問：問：有沒有人被社團退過文或踢出來過？發生什麼事？
@@ -2384,12 +2489,12 @@ body{ margin:0; padding:0; }
       <span class="txt">在社團裡，你是<b class="hl">客人</b>，不是老闆。<br>
       先參與、先幫忙回答問題，再談自己的東西。</span></div>
   </div></section>
-  <div class="pg-foot"><span>PART 3　·　10:58</span><span>23 / 75</span></div>
+  <div class="pg-foot"><span>PART 3　·　10:58</span><span>24 / 76</span></div>
 </div>
 
 <div class="pg dark"
      data-document-role="page"
-     data-label="24｜PART 4｜Instagram 操作＋品牌案例"
+     data-label="25｜PART 4｜Instagram 操作＋品牌案例"
      data-speaker-notes="講師說明：這一段有大量觀察活動，請先分好組（3–4 人一組），並確認每組至少有一支能上網的手機。">
   <div class="pg-defs"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
   <linearGradient id="igGrad" x1="0" y1="1" x2="1" y2="0">
@@ -2405,19 +2510,19 @@ body{ margin:0; padding:0; }
   </div>
   <div class="d-art"><div style="transform:scale(1.05)"><svg viewBox="0 0 40 40" width="120" height="120" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
-  <defs><linearGradient id="igno5bo" x1="0" y1="1" x2="1" y2="0">
+  <defs><linearGradient id="ignllkq" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".45" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs>
   <rect width="40" height="40" rx="12" fill="url(#ig)" style="fill:#e1306c"/>
   <rect width="40" height="40" rx="12" fill="url(#igGrad)"/>
   <rect x="9" y="9" width="22" height="22" rx="7" stroke="#fff" stroke-width="2.6"/>
   <circle cx="20" cy="20" r="5.6" stroke="#fff" stroke-width="2.6"/><circle cx="27" cy="13" r="1.8" fill="#fff"/></svg></div></div></section>
-  <div class="pg-foot"><span>PART 4　·　11:05–12:00</span><span>24 / 75</span></div>
+  <div class="pg-foot"><span>PART 4　·　11:05–12:00</span><span>25 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="25｜打開 IG，先看五個地方"
+     data-label="26｜打開 IG，先看五個地方"
      data-speaker-notes="講師說明：請學員現在就打開自己的 IG（沒有的人看隔壁的），五個地方一個一個對。 強調第 5 項：IG 貼文內文的網址不能點，所以聯絡方式只能放在自我介紹欄。這是最多人踩的坑。
 
 互動提問：問：你的自我介紹現在寫什麼？願意念出來給大家聽嗎？
@@ -2587,26 +2692,26 @@ body{ margin:0; padding:0; }
       </div>
     </div>
     </div></div>
-        <span style="position:absolute;left:-50px;top:104px;width:34px;height:34px;
+        <span style="position:absolute;left:-50px;top:37px;width:34px;height:34px;
             display:grid;place-items:center;background:#8a5a6d;color:#fff;border-radius:99px;
-            font-size:15px;font-weight:800">①</span><span style="position:absolute;left:-50px;top:44px;width:34px;height:34px;
+            font-size:15px;font-weight:800">②</span><span style="position:absolute;left:-50px;top:98px;width:34px;height:34px;
             display:grid;place-items:center;background:#8a5a6d;color:#fff;border-radius:99px;
-            font-size:15px;font-weight:800">②</span><span style="position:absolute;left:-50px;top:164px;width:34px;height:34px;
+            font-size:15px;font-weight:800">①</span><span style="position:absolute;left:-50px;top:175px;width:34px;height:34px;
             display:grid;place-items:center;background:#8a5a6d;color:#fff;border-radius:99px;
-            font-size:15px;font-weight:800">③</span><span style="position:absolute;left:-50px;top:236px;width:34px;height:34px;
+            font-size:15px;font-weight:800">③</span><span style="position:absolute;left:-50px;top:340px;width:34px;height:34px;
             display:grid;place-items:center;background:#8a5a6d;color:#fff;border-radius:99px;
-            font-size:15px;font-weight:800">④</span><span style="position:absolute;right:-50px;top:196px;width:34px;height:34px;
+            font-size:15px;font-weight:800">④</span><span style="position:absolute;right:-50px;top:204px;width:34px;height:34px;
             display:grid;place-items:center;background:#8a5a6d;color:#fff;border-radius:99px;
             font-size:15px;font-weight:800">⑤</span>
       </div>
     </div>
   </div><span class="act-tag do">手機實作</span></section>
-  <div class="pg-foot"><span>PART 4　·　11:05</span><span>25 / 75</span></div>
+  <div class="pg-foot"><span>PART 4　·　11:05</span><span>26 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="26｜第一次進你的 IG"
+     data-label="27｜第一次進你的 IG"
      data-speaker-notes="講師說明：不要批評「分享生活中的幸福」不好，而是說：它適合個人帳號，不適合要接單的帳號。 示範方法：請一位學員念自己的自介，其他人聽完舉手回答「他在賣什麼」，馬上見真章。
 
 互動提問：隨機找 2–3 位學員念自介，全班猜他在做什麼。猜不出來就代表要改。
@@ -2646,12 +2751,12 @@ body{ margin:0; padding:0; }
       ＊今天不深入教文案寫作，那是後面「商品文案設計」課程的內容。<br>
       現在只要做到一件事：讓陌生人三秒內看懂。</p>
   </div><span class="act-tag ask">三秒測試</span></section>
-  <div class="pg-foot"><span>PART 4　·　11:14</span><span>26 / 75</span></div>
+  <div class="pg-foot"><span>PART 4　·　11:14</span><span>27 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="27｜IG 有哪些內容形式"
+     data-label="28｜IG 有哪些內容形式"
      data-speaker-notes="講師說明：先給全貌，讓學員知道 IG 不是只有「發照片」。細節下午 PART 7 會再展開。 順序很重要：叫初學者一開始就拍 Reels，多半會放棄。
 
 互動提問：問：這四個裡面，你用過哪幾個？">
@@ -2732,12 +2837,12 @@ body{ margin:0; padding:0; }
       <span class="txt">初學者建議順序：<b>先把貼文發穩定</b> →
       再試限時動態 → 最後才碰 Reels。</span></div>
   </div></section>
-  <div class="pg-foot"><span>PART 4　·　11:22</span><span>27 / 75</span></div>
+  <div class="pg-foot"><span>PART 4　·　11:22</span><span>28 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="28｜一句話分辨"
+     data-label="29｜一句話分辨"
      data-speaker-notes="講師說明：這是上一頁的濃縮版，請全班一起念一次。 可以做個小活動：講師說「今天在做餅乾的影片」，學員回答該用哪一種。
 
 互動提問：快問快答：① 客人回饋的截圖 → 精選限動；② 今天出爐的餅乾 → 限動；③ 完成的作品照 → 貼文；④ 揉麵到出爐 → Reels。">
@@ -2789,12 +2894,12 @@ body{ margin:0; padding:0; }
     <p class="lead" data-r>四個都可以用，但不用一次全開。<br>
       <b>先選一個你今天做得到的。</b></p>
   </div><span class="act-tag ask">快問快答</span></section>
-  <div class="pg-foot"><span>PART 4　·　11:28</span><span>28 / 75</span></div>
+  <div class="pg-foot"><span>PART 4　·　11:28</span><span>29 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="29｜IG 品牌案例觀察"
+     data-label="30｜IG 品牌案例觀察"
      data-speaker-notes="講師說明：上課前務必先挑好 3–5 個真實帳號，並確認當天網路可連。最好是台中在地的，學員會更有感。 如果現場網路穩定，直接開手機投影比放截圖更好——可以即時滑給大家看。 挑選原則：追蹤數 1,000–20,000、一個人在經營、照片是手機拍的。太專業的會讓學員覺得「我做不到」。
 
 互動提問：問：你們覺得這三個帳號，哪一個你最有可能做到？">
@@ -2847,12 +2952,12 @@ body{ margin:0; padding:0; }
       ＊建議類型：手作飾品、烘焙甜點、農產品、手作工藝、小型個人品牌。
       現場也可以直接用手機投影，即時打開帳號給學員看。</p>
   </div><span class="act-tag ask">案例觀察</span></section>
-  <div class="pg-foot"><span>PART 4　·　11:34</span><span>29 / 75</span></div>
+  <div class="pg-foot"><span>PART 4　·　11:34</span><span>30 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="30｜不要只看「漂不漂亮」"
+     data-label="31｜不要只看「漂不漂亮」"
      data-speaker-notes="講師說明：這八個問題就是講義 2。請學員拿出講義，等一下觀察時直接勾。 重點是把「感覺」變成「可檢查的項目」，學員回家才知道自己該補什麼。
 
 學員實作：發下／確認每人手上有講義 2。">
@@ -2885,12 +2990,12 @@ body{ margin:0; padding:0; }
       <p class="cap-t">＝ 講義 2 的檢查表</p>
     </div>
   </div><span class="act-tag do">講義 2</span></section>
-  <div class="pg-foot"><span>PART 4　·　11:40</span><span>30 / 75</span></div>
+  <div class="pg-foot"><span>PART 4　·　11:40</span><span>31 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="31｜品牌觀察活動"
+     data-label="32｜品牌觀察活動"
      data-speaker-notes="講師說明：活動節奏：分組 2 分鐘 → 觀察討論 10 分鐘 → 每組分享 1 分鐘 × 3–5 組。 講師在各組間走動，把學員說的「做得到的事」記在白板，下午實作時會用到。 如果時間不夠，把分享縮短成「每組講一句：我們決定回去要做的一件事」。
 
 互動提問：收尾時問：有沒有哪一組發現「原來他們也只是用手機拍」？
@@ -2965,12 +3070,12 @@ body{ margin:0; padding:0; }
           一定要問出「我也做得到」的那一件事。</span></div>
     </div>
   </div><span class="act-tag do">小組活動</span></section>
-  <div class="pg-foot"><span>PART 4　·　11:45</span><span>31 / 75</span></div>
+  <div class="pg-foot"><span>PART 4　·　11:45</span><span>32 / 76</span></div>
 </div>
 
 <div class="pg dark"
      data-document-role="page"
-     data-label="32｜午休 12:00–13:00"
+     data-label="33｜午休 12:00–13:00"
      data-speaker-notes="講師說明：午休前先埋伏筆：下午第一件事就是「你要發什麼」，讓學員吃飯時腦袋有東西在轉。 提醒 13:00 準時開始，下午操作很密集。
 
 學員實作：請學員午休時先想好一個要發的主題，並拍一張照片。">
@@ -3000,12 +3105,12 @@ body{ margin:0; padding:0; }
   <circle cx="150" cy="52" r="15" fill="#e0573f"/><path d="M150 40c6-8 14-8 14-8s-2 9-9 11" fill="#5f7a63"/>
   <circle cx="145" cy="49" r="1.8" fill="#fff"/><circle cx="155" cy="56" r="1.8" fill="#fff"/>
 </svg></div></section>
-  <div class="pg-foot"><span>午休　·　12:00–13:00</span><span>32 / 75</span></div>
+  <div class="pg-foot"><span>午休　·　12:00–13:00</span><span>33 / 76</span></div>
 </div>
 
 <div class="pg dark"
      data-document-role="page"
-     data-label="33｜PART 5｜不同平台怎麼發？"
+     data-label="34｜PART 5｜不同平台怎麼發？"
      data-speaker-notes="講師說明：下午第一段。先問午休的作業：你想好要發什麼了嗎？點兩三位學員說說看。">
   <div class="pg-defs"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
   <linearGradient id="igGrad" x1="0" y1="1" x2="1" y2="0">
@@ -3036,7 +3141,7 @@ body{ margin:0; padding:0; }
   <circle cx="20" cy="20" r="20" fill="#1877f2"/>
   <path d="M23.6 20.6h3.2l.6-4.2h-3.8v-2.6c0-1.2.4-2 2-2h2V8.1c-.4 0-1.6-.2-3-.2-3 0-5 1.8-5 5.2v3.3H16v4.2h3.6V32h4v-11.4Z" fill="#fff"/></svg><svg viewBox="0 0 40 40" width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
-  <defs><linearGradient id="ighm7jn" x1="0" y1="1" x2="1" y2="0">
+  <defs><linearGradient id="igydzpj" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".45" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs>
   <rect width="40" height="40" rx="12" fill="url(#ig)" style="fill:#e1306c"/>
@@ -3046,12 +3151,12 @@ body{ margin:0; padding:0; }
     style="" class="" aria-hidden="true">
   <rect width="40" height="40" rx="10" fill="#06c755"/>
   <path d="M20 9c-6.6 0-12 4.2-12 9.4 0 4.6 4.3 8.5 10 9.3.4.1 1 .3 1.1.6.1.3.1.7 0 1l-.2 1c-.1.3-.3 1.2 1.1.7 1.4-.6 7.4-4.4 10.1-7.5 1.9-2 2.8-4.1 2.8-6.4C32.8 13.2 27.4 9 20 9Z" fill="#fff"/></svg></div></div></div></section>
-  <div class="pg-foot"><span>PART 5　·　13:00–13:45</span><span>33 / 75</span></div>
+  <div class="pg-foot"><span>PART 5　·　13:00–13:45</span><span>34 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="34｜可以三個平台全部貼一樣的嗎"
+     data-label="35｜可以三個平台全部貼一樣的嗎"
      data-speaker-notes="講師說明：用「使用情境」解釋，比講演算法容易懂。FB＝坐著看、IG＝滑著看、LINE＝忙著看。 不用叫學員寫三份完全不同的文，只要「同一件事，換三種長度」。
 
 互動提問：問：你自己在滑 IG 的時候，會把長長的文字看完嗎？">
@@ -3081,7 +3186,7 @@ body{ margin:0; padding:0; }
         <div class="card" style="background:#fdeef4;border-color:transparent;box-shadow:none;text-align:center;padding:28px 20px">
           <div style="display:flex;justify-content:center;margin-bottom:14px"><svg viewBox="0 0 40 40" width="40" height="40" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
-  <defs><linearGradient id="igdeen2" x1="0" y1="1" x2="1" y2="0">
+  <defs><linearGradient id="ig36qd5" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".45" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs>
   <rect width="40" height="40" rx="12" fill="url(#ig)" style="fill:#e1306c"/>
@@ -3108,12 +3213,12 @@ body{ margin:0; padding:0; }
       <span class="txt">因為<b class="hl">使用平台時的情境不一樣</b>，<br>
       同一句話在三個地方的效果差很多。</span></div>
   </div></section>
-  <div class="pg-foot"><span>PART 5　·　13:00</span><span>34 / 75</span></div>
+  <div class="pg-foot"><span>PART 5　·　13:00</span><span>35 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="35｜Facebook 貼文怎麼發"
+     data-label="36｜Facebook 貼文怎麼發"
      data-speaker-notes="講師說明：一定要強調：80–200 字是「教學建議」，不是 Facebook 的規定。平台沒有限制字數。 給初學者一個數字，是為了讓他們不會卡在「到底要寫多少」。熟了以後可長可短。 這篇範例的重點是最後兩段：講「為什麼一鍋只做 20 瓶」——這就是信任感的來源。
 
 互動提問：問：這篇裡面，哪一句話會讓你想買？">
@@ -3188,12 +3293,12 @@ body{ margin:0; padding:0; }
       <p class="cap-t">Facebook：可以把「為什麼」講出來</p>
     </div>
   </div></section>
-  <div class="pg-foot"><span>PART 5　·　13:06</span><span>35 / 75</span></div>
+  <div class="pg-foot"><span>PART 5　·　13:06</span><span>36 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="36｜Instagram 貼文怎麼發"
+     data-label="37｜Instagram 貼文怎麼發"
      data-speaker-notes="講師說明：同樣強調：50–150 字是建議值，不是規定。 請學員比較上一頁跟這一頁——同一件事，IG 版只留下最有畫面的那兩句。 Hashtag 下一段（PART 6）會完整教，這裡先讓他們看到長什麼樣子。
 
 互動提問：問：如果只能留一句話，你會留哪一句？">
@@ -3209,7 +3314,7 @@ body{ margin:0; padding:0; }
       <h2 class="h" data-r style="font-size:38px;display:flex;align-items:center;gap:12px">
         <svg viewBox="0 0 40 40" width="38" height="38" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
-  <defs><linearGradient id="ig1lh48" x1="0" y1="1" x2="1" y2="0">
+  <defs><linearGradient id="igen0oo" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".45" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs>
   <rect width="40" height="40" rx="12" fill="url(#ig)" style="fill:#e1306c"/>
@@ -3279,12 +3384,12 @@ body{ margin:0; padding:0; }
       <p class="cap-t">Instagram：圖大、字少、有 Hashtag</p>
     </div>
   </div></section>
-  <div class="pg-foot"><span>PART 5　·　13:14</span><span>36 / 75</span></div>
+  <div class="pg-foot"><span>PART 5　·　13:14</span><span>37 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="37｜LINE 官方帳號訊息怎麼發"
+     data-label="38｜LINE 官方帳號訊息怎麼發"
      data-speaker-notes="講師說明：LINE 是「打擾度最高」的平台——訊息會跳出通知。所以最忌諱長篇大論。 最關鍵的一句是最後一行：「請回覆草莓＋數量」。一定要告訴客人下一步做什麼，否則他看完就關掉了。 補充：官方帳號免費方案每月有訊息則數上限，所以更要每則都有用。
 
 互動提問：問：你收過最討厭的商家 LINE 訊息長什麼樣子？">
@@ -3336,12 +3441,12 @@ body{ margin:0; padding:0; }
       <p class="cap-t">短、清楚、告訴他下一步怎麼做</p>
     </div>
   </div></section>
-  <div class="pg-foot"><span>PART 5　·　13:22</span><span>37 / 75</span></div>
+  <div class="pg-foot"><span>PART 5　·　13:22</span><span>38 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="38｜一個商品，三種呈現"
+     data-label="39｜一個商品，三種呈現"
      data-speaker-notes="講師說明：這是 PART 5 的核心頁，建議停留 5–6 分鐘，三欄逐一念出來讓學員感受差異。 教一個實用技巧：先寫 FB 版（最長）→ 刪成 IG 版 → 再刪成 LINE 版。只要寫一次。 注意三欄講的都是同一個賣點「一鍋只煮 20 瓶」，不要每個平台講不同故事。
 
 互動提問：問：如果你的商品是 ⟨學員的商品⟩，這三段你會怎麼寫？（現場改編一位學員的商品當範例）
@@ -3353,13 +3458,13 @@ body{ margin:0; padding:0; }
     <stop offset=".62" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs></svg></div>
   <section class="slide pad-tight">
-  <div class="stack gap-m pad-tight">
+  <div class="stack gap-s pad-tight">
     <div class="row" style="align-items:flex-end;gap:24px">
       <div style="flex:1">
-        <p class="eyebrow" data-r>同一件事，三種寫法</p>
-        <h2 class="h" data-r style="font-size:36px;margin-bottom:0">手工草莓果醬</h2>
+        <p class="eyebrow" data-r style="margin-bottom:10px">同一件事，三種寫法</p>
+        <h2 class="h" data-r style="font-size:34px;margin-bottom:0">手工草莓果醬</h2>
       </div>
-      <div data-r><svg viewBox="0 0 240 240" width="96" height="96" fill="none" xmlns="http://www.w3.org/2000/svg"
+      <div data-r><svg viewBox="0 0 240 240" width="70" height="70" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
   <circle cx="120" cy="124" r="92" fill="#fbeee6" opacity="1"/>
   <rect x="72" y="86" width="96" height="112" rx="20" fill="#ffffff" stroke="#241c17" stroke-width="3.4"/>
@@ -3372,10 +3477,10 @@ body{ margin:0; padding:0; }
   <circle cx="145" cy="49" r="1.8" fill="#fff"/><circle cx="155" cy="56" r="1.8" fill="#fff"/>
 </svg></div>
     </div>
-    <div class="cards c3" data-r style="gap:20px">
-      <div class="card top-accent a-fb" style="padding:22px">
+    <div class="cards c3" data-r style="gap:16px">
+      <div class="card top-accent a-fb" style="padding:18px 20px">
         <span class="badge b-fb">FACEBOOK</span>
-        <p class="v" style="margin-top:14px;font-size:15px;line-height:1.75">
+        <p class="v" style="margin-top:12px;line-height:1.62">
           今天早上到大湖收了一批草莓，紅得發亮。<br><br>
           草莓果醬很花時間，要一顆一顆去蒂，小火慢慢熬，一鍋大概只能做 20 瓶。
           有客人問為什麼不做多一點，因為煮太多鍋，味道就跑掉了。<br><br>
@@ -3383,9 +3488,9 @@ body{ margin:0; padding:0; }
         <div class="rule"></div>
         <p class="tiny" style="font-weight:800">約 130 字 · 講過程與原因</p>
       </div>
-      <div class="card top-accent a-ig" style="padding:22px">
+      <div class="card top-accent a-ig" style="padding:18px 20px">
         <span class="badge b-ig">INSTAGRAM</span>
-        <p class="v" style="margin-top:14px;font-size:16.5px;line-height:1.8">
+        <p class="v" style="margin-top:12px;line-height:1.66">
           把春天裝進一瓶草莓果醬裡 🍓<br><br>
           一鍋只煮 20 瓶，<br>因為煮太多，味道就跑掉了。<br><br>
           週三 · 西屯市集見</p>
@@ -3393,9 +3498,9 @@ body{ margin:0; padding:0; }
         <div class="rule"></div>
         <p class="tiny" style="font-weight:800">約 60 字 · 圖片是主角</p>
       </div>
-      <div class="card top-accent a-ln" style="padding:22px">
+      <div class="card top-accent a-ln" style="padding:18px 20px">
         <span class="badge b-ln">LINE</span>
-        <p class="v" style="margin-top:14px;font-size:16.5px;line-height:1.8;font-weight:700">
+        <p class="v" style="margin-top:12px;line-height:1.66;font-weight:700">
           🍓 草莓果醬本週開放預訂<br><br>
           每瓶 250 元<br><br>
           想預訂請直接回覆<br>「草莓＋數量」</p>
@@ -3403,21 +3508,21 @@ body{ margin:0; padding:0; }
         <p class="tiny" style="font-weight:800">約 40 字 · 直接說怎麼買</p>
       </div>
     </div>
-    <div class="callout gold" data-r style="padding:16px 24px"><svg viewBox="0 0 64 64" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg"
+    <div class="callout gold" data-r style="padding:13px 22px"><svg viewBox="0 0 64 64" width="30" height="30" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
   <path d="M32 6a18 18 0 0 1 11 32v6H21v-6A18 18 0 0 1 32 6Z" fill="#d99a4e" opacity=".18"/>
   <path d="M32 6a18 18 0 0 1 11 32v6H21v-6A18 18 0 0 1 32 6Z" stroke="#d99a4e" stroke-width="4" stroke-linejoin="round"/>
   <path d="M25 52h14M27 58h10" stroke="#d99a4e" stroke-width="4" stroke-linecap="round"/></svg>
-      <span class="txt" style="font-size:18px">
+      <span class="txt" style="font-size:20px;line-height:1.45">
         寫法不同，但講的是<b>同一件事</b>：一鍋只煮 20 瓶。<br>
         <b>先寫最長的那一篇，再刪成短的</b>，是最省力的做法。</span></div>
   </div><span class="act-tag do">講義 4</span></section>
-  <div class="pg-foot"><span>PART 5　·　13:28</span><span>38 / 75</span></div>
+  <div class="pg-foot"><span>PART 5　·　13:28</span><span>39 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="39｜圖片跟文字怎麼分工"
+     data-label="40｜圖片跟文字怎麼分工"
      data-speaker-notes="講師說明：這是今天第二句要記住的話。跟早上那句「引流／內容／互動」並列。 延伸：所以糊掉的、光線很暗的、看不出主角的照片，第一關就輸了。 ＊不要深入教攝影，後面有「手機商品攝影與影像編修」課程。這裡只講分工觀念。
 
 互動提問：問：你滑手機的時候，是先看圖還是先看字？">
@@ -3455,12 +3560,12 @@ body{ margin:0; padding:0; }
       所以照片不用很美，<br>
       <b>但一定要看得出來那是什麼</b>。</p>
   </div></section>
-  <div class="pg-foot"><span>PART 5　·　13:35</span><span>39 / 75</span></div>
+  <div class="pg-foot"><span>PART 5　·　13:35</span><span>40 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="40｜圖片不是傳單"
+     data-label="41｜圖片不是傳單"
      data-speaker-notes="講師說明：右邊刻意做成「塞爆的傳單」，並在下面示範它縮小成九宮格一格時的樣子——完全看不到。 這一頁很有說服力，讓學員自己看到問題，不用講太多道理。
 
 互動提問：問：你看得清楚右邊那張圖在寫什麼嗎？（大部分人會說看不清楚——這就是重點）">
@@ -3495,7 +3600,7 @@ body{ margin:0; padding:0; }
           在手機上，這種圖<b class="hl">縮成一格就什麼都看不到了</b>。</span></div>
     </div>
     <div class="col center" data-r>
-      <div style="width:300px;height:300px;border-radius:18px;background:linear-gradient(145deg,#f6d9c5,#eab08c);
+      <div class="baked" style="width:300px;height:300px;border-radius:18px;background:linear-gradient(145deg,#f6d9c5,#eab08c);
         padding:14px;position:relative;overflow:hidden;box-shadow:var(--shadow-m);border:1px solid rgba(0,0,0,.08)">
         <div style="background:#fff;height:100%;border-radius:10px;padding:9px;display:flex;
           flex-direction:column;gap:4px;overflow:hidden">
@@ -3539,7 +3644,7 @@ body{ margin:0; padding:0; }
       </div>
       <div style="display:flex;align-items:center;gap:16px;margin-top:18px">
         <span style="font-size:13px;font-weight:800;color:#9c8b7c">在 IG 九宮格裡長這樣 →</span>
-        <div style="width:74px;height:74px;border-radius:8px;overflow:hidden;filter:blur(.4px);
+        <div class="baked" style="width:74px;height:74px;border-radius:8px;overflow:hidden;filter:blur(.4px);
           background:linear-gradient(145deg,#f6d9c5,#eab08c);display:grid;place-items:center">
           <div style="width:64px;height:64px;background:#fff;border-radius:4px;padding:3px">
             <div style="font-size:3px;line-height:1.3;color:#999">超級好吃手工草莓果醬 限時優惠 每瓶250元 買三送一
@@ -3550,12 +3655,12 @@ body{ margin:0; padding:0; }
       </div>
     </div>
   </div></section>
-  <div class="pg-foot"><span>PART 5　·　13:39</span><span>40 / 75</span></div>
+  <div class="pg-foot"><span>PART 5　·　13:39</span><span>41 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="41｜圖片上留什麼"
+     data-label="42｜圖片上留什麼"
      data-speaker-notes="講師說明：跟上一頁對照著看，差別非常明顯。同樣縮成一格，這張還看得懂。 ＊不教 Canva 操作與排版技巧（那是「商品視覺設計」課程）。這裡只講「留多少字」。
 
 互動提問：問：如果只能在圖上留一句話，你的商品要留哪一句？
@@ -3615,7 +3720,7 @@ body{ margin:0; padding:0; }
       </div>
       <div style="display:flex;align-items:center;gap:16px;margin-top:18px">
         <span style="font-size:13px;font-weight:800;color:#9c8b7c">縮成一格還是看得懂 →</span>
-        <div style="width:74px;height:74px;border-radius:8px;overflow:hidden;position:relative;
+        <div class="baked" style="width:74px;height:74px;border-radius:8px;overflow:hidden;position:relative;
           background:linear-gradient(150deg,#f7dfc8,#e9ab7f);display:grid;place-items:center">
           <svg viewBox="0 0 240 240" width="46" height="46" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
@@ -3636,12 +3741,12 @@ body{ margin:0; padding:0; }
       </div>
     </div>
   </div><span class="act-tag do">講義 4</span></section>
-  <div class="pg-foot"><span>PART 5　·　13:42</span><span>41 / 75</span></div>
+  <div class="pg-foot"><span>PART 5　·　13:42</span><span>42 / 76</span></div>
 </div>
 
 <div class="pg dark"
      data-document-role="page"
-     data-label="42｜PART 6｜Hashtag 與十大關鍵字"
+     data-label="43｜PART 6｜Hashtag 與十大關鍵字"
      data-speaker-notes="講師說明：這一段是今天「被陌生人找到」的關鍵。提醒學員：這段的產出（十大關鍵字）要帶回家長期使用。">
   <div class="pg-defs"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
   <linearGradient id="igGrad" x1="0" y1="1" x2="1" y2="0">
@@ -3661,12 +3766,12 @@ body{ margin:0; padding:0; }
     <span class="tag p" style="font-size:24px;padding:12px 24px">#台中伴手禮</span>
     <span class="tag g" style="font-size:24px;padding:12px 24px;margin-left:30px">#下午茶</span>
   </div></div></section>
-  <div class="pg-foot"><span>PART 6　·　13:45–14:25</span><span>42 / 75</span></div>
+  <div class="pg-foot"><span>PART 6　·　13:45–14:25</span><span>43 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="43｜Hashtag 到底是什麼"
+     data-label="44｜Hashtag 到底是什麼"
      data-speaker-notes="講師說明：用「標籤／分類」來解釋最好懂：像去圖書館，書上要貼分類標籤，別人才找得到。 示範：現場在 IG 搜尋列打 #台中伴手禮，把結果投影出來。
 
 互動提問：問：有沒有人曾經用 Hashtag 找過東西？
@@ -3809,12 +3914,12 @@ body{ margin:0; padding:0; }
       <p class="cap-t">別人搜尋標籤時，你的貼文才會出現</p>
     </div>
   </div><span class="act-tag do">手機實作</span></section>
-  <div class="pg-foot"><span>PART 6　·　13:45</span><span>43 / 75</span></div>
+  <div class="pg-foot"><span>PART 6　·　13:45</span><span>44 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="44｜Hashtag 不是越多越好"
+     data-label="45｜Hashtag 不是越多越好"
      data-speaker-notes="講師說明：左邊那些「#愛 #幸福」是很多人真的在用的，不要嘲笑，只要說明「來的人不會買」。 給一個具體數字：5–10 個。初學者最需要的是數字，不是原則。
 
 互動提問：問：如果有人用 #美食 搜尋，跳出幾百萬篇，你的貼文排第幾？（答：看不到。所以要用更精準的字）">
@@ -3856,12 +3961,12 @@ body{ margin:0; padding:0; }
   <path d="M32 6a18 18 0 0 1 11 32v6H21v-6A18 18 0 0 1 32 6Z" stroke="#d99a4e" stroke-width="4" stroke-linejoin="round"/>
   <path d="M25 52h14M27 58h10" stroke="#d99a4e" stroke-width="4" stroke-linecap="round"/></svg>
     <span class="txt">判斷標準只有一個：<b>這個標籤，跟這一篇內容有關嗎？</b></span></div></section>
-  <div class="pg-foot"><span>PART 6　·　13:52</span><span>44 / 75</span></div>
+  <div class="pg-foot"><span>PART 6　·　13:52</span><span>45 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="45｜想「別人會搜尋什麼」"
+     data-label="46｜想「別人會搜尋什麼」"
      data-speaker-notes="講師說明：這是整段最關鍵的觀念轉換：從「我」變成「客人」。 可以現場示範：講師說「我想買伴手禮送人」，然後打開手機打字給大家看。
 
 互動提問：問：如果你要買一個伴手禮送給外縣市的朋友，你會打什麼字去搜尋？（收集 3–5 個答案寫在白板）">
@@ -3898,12 +4003,12 @@ body{ margin:0; padding:0; }
       <span class="txt">練習：<b>把自己想像成客人</b>，<br>
       你想買這個東西的時候，會在搜尋列打什麼？</span></div>
   </div><span class="act-tag ask">全班收集</span></section>
-  <div class="pg-foot"><span>PART 6　·　13:58</span><span>45 / 75</span></div>
+  <div class="pg-foot"><span>PART 6　·　13:58</span><span>46 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="46｜十大關鍵字實作"
+     data-label="47｜十大關鍵字實作"
      data-speaker-notes="講師說明：三個分類是重點：商品／地區／情境。很多人只想得到「商品」，漏掉後面兩類。 「地區」對在地微型創業特別重要——競爭少、找到的人是真的買得到的人。 「情境」是最容易被忽略、但轉換率最高的：#送禮 #彌月禮盒 #伴手禮，都是有明確需求的人在搜。
 
 互動提問：問：你的商品在什麼「情境」下最容易被買走？
@@ -3956,12 +4061,12 @@ body{ margin:0; padding:0; }
       <span class="txt">這 10 個字<b class="hl">寫一次，可以用一整年</b>。<br>
       以後每發一篇，從裡面挑 5–8 個適合的就好。</span></div>
   </div><span class="act-tag do">講義 3</span></section>
-  <div class="pg-foot"><span>PART 6　·　14:04</span><span>46 / 75</span></div>
+  <div class="pg-foot"><span>PART 6　·　14:04</span><span>47 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="47｜範例：手作鳳梨酥"
+     data-label="48｜範例：手作鳳梨酥"
      data-speaker-notes="講師說明：用完整範例把上一頁的三分類具體化。 請學員注意：一篇貼文不用把 10 個都放上去，挑最相關的 5–8 個。
 
 互動提問：問：如果今天發的是「包裝過程」的照片，這 10 個字裡你會挑哪幾個？">
@@ -4036,12 +4141,12 @@ body{ margin:0; padding:0; }
       </div>
     </div>
   </div></section>
-  <div class="pg-foot"><span>PART 6　·　14:09</span><span>47 / 75</span></div>
+  <div class="pg-foot"><span>PART 6　·　14:09</span><span>48 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="48｜關鍵字去哪裡找"
+     data-label="49｜關鍵字去哪裡找"
      data-speaker-notes="講師說明：這三個工具都免費，而且不用註冊。建議現場用講師手機／電腦各示範一次。 Google Trends 示範「手工餅乾 vs 手作餅乾」，比較結果會讓學員很有感——一個字差很多。 如果現場網路不穩，先準備好截圖備用。
 
 互動提問：問：你的商品有沒有兩種以上的叫法？（例如 手工／手作、餅乾／曲奇）
@@ -4063,7 +4168,7 @@ body{ margin:0; padding:0; }
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
           <svg viewBox="0 0 40 40" width="30" height="30" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
-  <defs><linearGradient id="iggagqv" x1="0" y1="1" x2="1" y2="0">
+  <defs><linearGradient id="igwmcxw" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".45" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs>
   <rect width="40" height="40" rx="12" fill="url(#ig)" style="fill:#e1306c"/>
@@ -4124,12 +4229,12 @@ body{ margin:0; padding:0; }
       <span class="txt" style="font-size:18px">
         現在請跟著做一次：<b class="hl">在 IG 搜尋列打進你的商品名稱</b>，看看跳出什麼。</span></div>
   </div><span class="act-tag do">現場示範</span></section>
-  <div class="pg-foot"><span>PART 6　·　14:14</span><span>48 / 75</span></div>
+  <div class="pg-foot"><span>PART 6　·　14:14</span><span>49 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="49｜學員操作：寫下你的十大關鍵字"
+     data-label="50｜學員操作：寫下你的十大關鍵字"
      data-speaker-notes="講師說明：這 8 分鐘講師要在教室走動，個別協助。最常卡住的是「情境」類。 協助技巧：直接問學員「上一個買你東西的人，是買來做什麼的？」答案通常就是情境關鍵字。 一定要請他們存進手機備忘錄——寫在紙上回家就找不到了。
 
 互動提問：請 2–3 位學員念出自己的 10 個字，全班一起看有沒有可以再加的。
@@ -4188,12 +4293,12 @@ body{ margin:0; padding:0; }
       <p class="cap-t">存在手機裡，發文時直接複製</p>
     </div>
   </div><span class="act-tag do">講義 3</span></section>
-  <div class="pg-foot"><span>PART 6　·　14:20</span><span>49 / 75</span></div>
+  <div class="pg-foot"><span>PART 6　·　14:20</span><span>50 / 76</span></div>
 </div>
 
 <div class="pg dark"
      data-document-role="page"
-     data-label="50｜PART 7｜Reels 與限時動態"
+     data-label="51｜PART 7｜Reels 與限時動態"
      data-speaker-notes="講師說明：這一段最容易讓中高齡學員退縮。開場第一句就要先破除「我不會跳舞、我不敢露臉」的恐懼。">
   <div class="pg-defs"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
   <linearGradient id="igGrad" x1="0" y1="1" x2="1" y2="0">
@@ -4212,12 +4317,12 @@ body{ margin:0; padding:0; }
   <circle cx="32" cy="32" r="26" fill="#f0c9a8" opacity=".14"/>
   <circle cx="32" cy="32" r="26" stroke="#f0c9a8" stroke-width="4"/>
   <path d="M26 21l19 11-19 11V21Z" fill="#f0c9a8"/></svg></div></div></section>
-  <div class="pg-foot"><span>PART 7　·　14:35–15:05</span><span>50 / 75</span></div>
+  <div class="pg-foot"><span>PART 7　·　14:35–15:05</span><span>51 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="51｜Reels 不一定要跳舞"
+     data-label="52｜Reels 不一定要跳舞"
      data-speaker-notes="講師說明：這頁請放慢，讓學員真的放下心理負擔。可以直接問：「有誰一聽到短影音就想跳過？」 關鍵句：Reels 只是會動的照片。中高齡學員聽到這句通常表情就鬆了。 補充：Reels 是目前最容易被「還沒追蹤你的人」看到的形式，所以值得試。
 
 互動提問：問：有誰拍過短影片？有誰完全沒拍過？">
@@ -4271,12 +4376,12 @@ body{ margin:0; padding:0; }
       <span class="txt">Reels 只是<b class="hl">「會動的照片」</b>。<br>
       你原本拍照的東西，改成錄 5 秒影片，就是 Reels。</span></div>
   </div></section>
-  <div class="pg-foot"><span>PART 7　·　14:35</span><span>51 / 75</span></div>
+  <div class="pg-foot"><span>PART 7　·　14:35</span><span>52 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="52｜Reels 可以拍什麼"
+     data-label="53｜Reels 可以拍什麼"
      data-speaker-notes="講師說明：六種裡面，②製作過程 跟 ③幕後花絮 是中高齡學員最容易做、效果也最好的。建議直接推薦這兩種。 ④前後對比 很好用而且不用露臉：一開始是麵粉，最後是餅乾，中間不用剪。
 
 互動提問：問：這六種裡，哪一種你明天就可以拍？
@@ -4371,12 +4476,12 @@ body{ margin:0; padding:0; }
         </div>
     </div>
   </div></section>
-  <div class="pg-foot"><span>PART 7　·　14:39</span><span>52 / 75</span></div>
+  <div class="pg-foot"><span>PART 7　·　14:39</span><span>53 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="53｜幕後其實很好看"
+     data-label="54｜幕後其實很好看"
      data-speaker-notes="講師說明：這頁是把「Reels」變成「五張會動的照片」，是這一段最有力的一頁。 強調順序就是自然的工作順序，學員本來就在做這些事，只是把手機架著錄下來。 實用建議：買一個 100–200 元的手機夾／小腳架，架在旁邊錄，雙手可以繼續工作。
 
 互動提問：問：你的工作流程有哪五個步驟？（請兩位學員說說看，講師幫忙拆成五格）
@@ -4513,12 +4618,12 @@ body{ margin:0; padding:0; }
       <span class="txt">每段拍 <b>3–5 秒</b>就好，全部加起來大約 <b>15–25 秒</b>。<br>
       不用配樂、不用字幕，也可以先發出去。</span></div>
   </div><span class="act-tag do">拆五格</span></section>
-  <div class="pg-foot"><span>PART 7　·　14:44</span><span>53 / 75</span></div>
+  <div class="pg-foot"><span>PART 7　·　14:44</span><span>54 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="54｜不用拍得很複雜"
+     data-label="55｜不用拍得很複雜"
      data-speaker-notes="講師說明：這頁的目的是「降低門檻」。請具體說：不用下載任何 App，IG 內建就能接片段。 再次強調：這堂課不教剪輯與攝影技巧，後面有專門的課程。今天只要他們敢按下錄影鍵。
 
 互動提問：問：有誰因為「覺得拍得不夠好」所以一直沒發？
@@ -4582,12 +4687,12 @@ body{ margin:0; padding:0; }
           最常見的失敗原因不是拍得不好，<br>而是「想拍到完美，所以一直沒發」。</p></div>
     </div>
   </div><span class="act-tag do">錄 5 秒</span></section>
-  <div class="pg-foot"><span>PART 7　·　14:50</span><span>54 / 75</span></div>
+  <div class="pg-foot"><span>PART 7　·　14:50</span><span>55 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="55｜限時動態可以發什麼"
+     data-label="56｜限時動態可以發什麼"
      data-speaker-notes="講師說明：限時動態是「養熟客」的工具，看的人多半是已經追蹤你的人。 很實用的一招：「商品剩最後 3 個」——製造即時感，常常真的會有人來問。 提醒：限動可以加「問答貼紙」「投票貼紙」，是最簡單的互動方式，可現場示範一次。
 
 互動提問：問：你今天做了什麼事，其實就可以直接發限動？
@@ -4673,12 +4778,12 @@ body{ margin:0; padding:0; }
       <p class="cap-t">隨手拍、加一句話，就可以發</p>
     </div>
   </div><span class="act-tag do">手機實作</span></section>
-  <div class="pg-foot"><span>PART 7　·　14:55</span><span>55 / 75</span></div>
+  <div class="pg-foot"><span>PART 7　·　14:55</span><span>56 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="56｜限時動態不用太完美"
+     data-label="57｜限時動態不用太完美"
      data-speaker-notes="講師說明：這頁是給完美主義者的解藥。很多學員因為「拍不好」而完全不發。 重點：兩種照片沒有好壞，只是放的位置不同。貼文要精選，限動可以隨便。
 
 互動提問：問：你比較喜歡看哪一種？（通常會有不少人選右邊——這就是答案）">
@@ -4745,12 +4850,12 @@ body{ margin:0; padding:0; }
       <span class="txt">很多人反而更喜歡右邊那種，<br>
       因為<b class="hl-s">看得出來是真的人在做事</b>。</span></div>
   </div></section>
-  <div class="pg-foot"><span>PART 7　·　15:00</span><span>56 / 75</span></div>
+  <div class="pg-foot"><span>PART 7　·　15:00</span><span>57 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="57｜Reels vs 限時動態"
+     data-label="58｜Reels vs 限時動態"
      data-speaker-notes="講師說明：用表格收尾這一段。重點是最後一列「要求」：Reels 要想一下，限動隨手拍。 建議給學員一個可執行的頻率：Reels 一週 1 支，限時動態一週 2–3 則。不要多。
 
 互動提問：問：如果一週只能做一件事，你會選 Reels 還是限動？（沒有標準答案，看他的客人是新的還是舊的）">
@@ -4794,12 +4899,12 @@ body{ margin:0; padding:0; }
       </table>
     </div>
   </div></section>
-  <div class="pg-foot"><span>PART 7　·　15:02</span><span>57 / 75</span></div>
+  <div class="pg-foot"><span>PART 7　·　15:02</span><span>58 / 76</span></div>
 </div>
 
 <div class="pg dark"
      data-document-role="page"
-     data-label="58｜PART 8｜LINE 官方帳號"
+     data-label="59｜PART 8｜LINE 官方帳號"
      data-speaker-notes="講師說明：這一段是「成交」的關鍵，但常被忽略。先問：現場有多少人已經有官方帳號？">
   <div class="pg-defs"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
   <linearGradient id="igGrad" x1="0" y1="1" x2="1" y2="0">
@@ -4817,12 +4922,12 @@ body{ margin:0; padding:0; }
     style="" class="" aria-hidden="true">
   <rect width="40" height="40" rx="10" fill="#06c755"/>
   <path d="M20 9c-6.6 0-12 4.2-12 9.4 0 4.6 4.3 8.5 10 9.3.4.1 1 .3 1.1.6.1.3.1.7 0 1l-.2 1c-.1.3-.3 1.2 1.1.7 1.4-.6 7.4-4.4 10.1-7.5 1.9-2 2.8-4.1 2.8-6.4C32.8 13.2 27.4 9 20 9Z" fill="#fff"/></svg></div></div></section>
-  <div class="pg-foot"><span>PART 8　·　15:05–15:35</span><span>58 / 75</span></div>
+  <div class="pg-foot"><span>PART 8　·　15:05–15:35</span><span>59 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="59｜為什麼不用私人 LINE 就好"
+     data-label="60｜為什麼不用私人 LINE 就好"
      data-speaker-notes="講師說明：用「訊息被家人洗掉」這個例子最有共鳴，幾乎每個用私人 LINE 接單的人都遇過。 要說明：官方帳號是免費開的，不需要公司行號，個人也可以申請。這點很多人不知道。
 
 互動提問：問：有誰漏接過客人的訊息？發生什麼事？">
@@ -4874,12 +4979,12 @@ body{ margin:0; padding:0; }
       </div>
     </div>
   </div></section>
-  <div class="pg-foot"><span>PART 8　·　15:05</span><span>59 / 75</span></div>
+  <div class="pg-foot"><span>PART 8　·　15:05</span><span>60 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="60｜LINE 官方帳號可以做什麼"
+     data-label="61｜LINE 官方帳號可以做什麼"
      data-speaker-notes="講師說明：把功能明確切成兩層：今天要會的 8 個、今天只要知道的 3 個。避免資訊過載。 「歡迎訊息」最值得優先設定——客人一加好友就自動收到，等於 24 小時自動回覆。 ＊不要現場教圖文選單設定，會吃掉太多時間。
 
 互動提問：問：如果客人加了你的 LINE，第一句話你想跟他說什麼？（這就是歡迎訊息）
@@ -4951,12 +5056,12 @@ body{ margin:0; padding:0; }
       </div>
     </div>
   </div><span class="act-tag do">寫歡迎訊息</span></section>
-  <div class="pg-foot"><span>PART 8　·　15:11</span><span>60 / 75</span></div>
+  <div class="pg-foot"><span>PART 8　·　15:11</span><span>61 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="61｜人從哪裡進 LINE"
+     data-label="62｜人從哪裡進 LINE"
      data-speaker-notes="講師說明：這頁把「導流」具體化成五個入口。請學員檢查：這五個地方你放了幾個？ 市集攤位的做法：把 QR Code 印成 A4 立牌放在桌上，比口頭說「加我 LINE」有效十倍。 商品包裝上貼一張小貼紙，是回購率最高的做法。
 
 互動提問：問：你目前有在哪幾個地方放 QR Code？
@@ -4985,7 +5090,7 @@ body{ margin:0; padding:0; }
         <div class="card" style="padding:18px 20px;text-align:center;min-width:150px">
           <div style="display:flex;justify-content:center;margin-bottom:8px;height:38px;align-items:center"><svg viewBox="0 0 40 40" width="34" height="34" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
-  <defs><linearGradient id="igxyrng" x1="0" y1="1" x2="1" y2="0">
+  <defs><linearGradient id="igwi4go" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".45" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs>
   <rect width="40" height="40" rx="12" fill="url(#ig)" style="fill:#e1306c"/>
@@ -5063,12 +5168,12 @@ body{ margin:0; padding:0; }
   <path d="M32 24v14" stroke="#c05f3c" stroke-width="4" stroke-linecap="round"/><circle cx="32" cy="46" r="3" fill="#c05f3c"/></svg>
       <span class="txt">最常見的錯誤：<b class="hl">QR Code 印太小</b>，或是放在客人看不到的地方。</span></div>
   </div></section>
-  <div class="pg-foot"><span>PART 8　·　15:18</span><span>61 / 75</span></div>
+  <div class="pg-foot"><span>PART 8　·　15:18</span><span>62 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="62｜為什麼一定要導到 LINE"
+     data-label="63｜為什麼一定要導到 LINE"
      data-speaker-notes="講師說明：講一個對比：IG 粉絲 1,000 人，一則貼文可能只有 80 人看到；LINE 好友 100 人，群發時 100 人都會收到通知。 結論：粉絲數不是資產，能聯絡到的名單才是。 這也回到早上的漏斗——LINE 負責的是「詢問→購買→回購」。
 
 互動提問：問：你有沒有想過，去年買過你東西的客人，你現在還聯絡得到嗎？">
@@ -5121,12 +5226,12 @@ body{ margin:0; padding:0; }
       <p class="cap-t">半年前加的好友，今天還找得到他</p>
     </div>
   </div></section>
-  <div class="pg-foot"><span>PART 8　·　15:23</span><span>62 / 75</span></div>
+  <div class="pg-foot"><span>PART 8　·　15:23</span><span>63 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="63｜LINE 訊息不要太長"
+     data-label="64｜LINE 訊息不要太長"
      data-speaker-notes="講師說明：右邊那個「👉 回覆我要預訂」是整頁的重點。沒有下一步，客人就算有興趣也不會動。 把四段結構寫在白板上：做什麼→有什麼選擇→到什麼時候→怎麼回我。學員照著填就能寫。
 
 互動提問：問：左邊那則，如果是你收到，你會看完嗎？
@@ -5174,12 +5279,12 @@ body{ margin:0; padding:0; }
       </div>
     </div>
   </div><span class="act-tag do">寫一則訊息</span></section>
-  <div class="pg-foot"><span>PART 8　·　15:27</span><span>63 / 75</span></div>
+  <div class="pg-foot"><span>PART 8　·　15:27</span><span>64 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="64｜LINE 操作實作"
+     data-label="65｜LINE 操作實作"
      data-speaker-notes="講師說明：先示範一次自己的官方帳號後台，再讓學員操作。 如果現場多數人沒有官方帳號，建議至少完成到「建立帳號＋設定大頭貼＋找到 QR Code」三步。 請已經完成的學員互相加好友，馬上就能看到效果，也順便測試 QR Code 有沒有用。
 
 互動提問：問：有誰找到 QR Code 了？（請他舉起手機給大家看）
@@ -5273,12 +5378,12 @@ body{ margin:0; padding:0; }
       <p class="cap-t">「分享我的帳號」裡就有 QR Code</p>
     </div>
   </div><span class="act-tag do">手機實作</span></section>
-  <div class="pg-foot"><span>PART 8　·　15:31</span><span>64 / 75</span></div>
+  <div class="pg-foot"><span>PART 8　·　15:31</span><span>65 / 76</span></div>
 </div>
 
 <div class="pg dark"
      data-document-role="page"
-     data-label="65｜PART 9｜免費曝光＋成果實作"
+     data-label="66｜PART 9｜免費曝光＋成果實作"
      data-speaker-notes="講師說明：最後一段。先講 10 分鐘觀念，剩下 15 分鐘全部給學員做東西。時間一定要守住。">
   <div class="pg-defs"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
   <linearGradient id="igGrad" x1="0" y1="1" x2="1" y2="0">
@@ -5306,12 +5411,12 @@ body{ margin:0; padding:0; }
   <rect x="98" y="156" width="64" height="34" rx="8" fill="#ffffff" stroke="#241c17" stroke-width="3"/>
   <path d="M112 166h36M112 178h22" stroke="#c05f3c" stroke-width="3.2" stroke-linecap="round"/>
 </svg></div></section>
-  <div class="pg-foot"><span>PART 9　·　15:35–16:00</span><span>65 / 75</span></div>
+  <div class="pg-foot"><span>PART 9　·　15:35–16:00</span><span>66 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="66｜沒有廣告費，可以怎麼被看見"
+     data-label="67｜沒有廣告費，可以怎麼被看見"
      data-speaker-notes="講師說明：十個裡面，對中高齡在地創業者最有效的通常是：Facebook 社團、顧客分享、市集 QR Code。 「顧客主動分享」是最被低估的——做法很簡單：出貨時附一張小卡，寫「拍照標註我，下次折 20 元」。
 
 互動提問：問：你上次被朋友介紹去買東西，是什麼情況？
@@ -5418,12 +5523,12 @@ body{ margin:0; padding:0; }
   <path d="M25 52h14M27 58h10" stroke="#d99a4e" stroke-width="4" stroke-linecap="round"/></svg>
       <span class="txt">不用十個都做。<b>挑兩個，做三個月</b>，比十個都做一次有效。</span></div>
   </div></section>
-  <div class="pg-foot"><span>PART 9　·　15:35</span><span>66 / 75</span></div>
+  <div class="pg-foot"><span>PART 9　·　15:35</span><span>67 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="67｜但請記住"
+     data-label="68｜但請記住"
      data-speaker-notes="講師說明：這頁要講得誠實，不要給不切實際的期待。社群不是魔法。 對這群學員特別重要：她們的商品品質通常很好，真正缺的是「被看見」跟「被信任」，而不是行銷技巧。">
   <div class="pg-defs"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
   <linearGradient id="igGrad" x1="0" y1="1" x2="1" y2="0">
@@ -5476,12 +5581,12 @@ body{ margin:0; padding:0; }
       社群只是<b>把好東西讓更多人知道</b>。<br>
       它沒有辦法把不好的東西變好。</p>
   </div></section>
-  <div class="pg-foot"><span>PART 9　·　15:40</span><span>67 / 75</span></div>
+  <div class="pg-foot"><span>PART 9　·　15:40</span><span>68 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="68｜免費宣傳最怕什麼"
+     data-label="69｜免費宣傳最怕什麼"
      data-speaker-notes="講師說明：第五點「發了之後就消失」是最常見的失敗原因，請多花時間講。 給一個具體的期待值：前 3 個月、大約 20–30 篇，才會開始有比較穩定的互動。先講清楚，學員才不會三週就放棄。 「有人留言不回覆」也要強調：留言一定要回，回一句「謝謝」都好。
 
 互動提問：問：有誰發過幾篇之後就放棄了？（多數人會舉手，讓大家知道這很普遍）">
@@ -5533,12 +5638,12 @@ body{ margin:0; padding:0; }
       </div>
     </div>
   </div></section>
-  <div class="pg-foot"><span>PART 9　·　15:43</span><span>68 / 75</span></div>
+  <div class="pg-foot"><span>PART 9　·　15:43</span><span>69 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="69｜可以分享什麼（四大類）"
+     data-label="70｜可以分享什麼（四大類）"
      data-speaker-notes="講師說明：這是解決「不知道要發什麼」最實用的一頁。請學員拍照存起來。 大部分人只會發第一類（商品），所以帳號看起來像廣告傳單。第二、三類才是讓人喜歡你的關鍵。 第四類「有用的內容」對建立專業感特別有效：果醬怎麼保存、開封後放多久。
 
 互動提問：問：你最近三篇貼文，分別是哪一類？（多數人會發現三篇都是第一類）">
@@ -5610,12 +5715,12 @@ body{ margin:0; padding:0; }
   <path d="M12 16H6M12 32H6M12 48H6" stroke="#d99a4e" stroke-width="4" stroke-linecap="round"/></svg>
       <span class="txt">下次不知道要發什麼的時候，<b class="hl">從這四類裡面挑一個</b>就好。</span></div>
   </div></section>
-  <div class="pg-foot"><span>PART 9　·　15:46</span><span>69 / 75</span></div>
+  <div class="pg-foot"><span>PART 9　·　15:46</span><span>70 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="70｜不是每篇都要賣東西"
+     data-label="71｜不是每篇都要賣東西"
      data-speaker-notes="講師說明：一週四篇是建議值，做不到就一週兩篇，但要「固定」。固定比多重要。 比例原則：賣東西的貼文不要超過四分之一。 如果學員說沒時間，教他們：週日花一小時，把四篇的照片一次拍完，之後每天發一篇。
 
 互動提問：問：你一週可以固定發幾篇？（請他們誠實一點，寧可少也不要做不到）
@@ -5792,12 +5897,12 @@ body{ margin:0; padding:0; }
           讓帳號比較像<b>「一個人」</b>，<br>不是「一張廣告傳單」。</span></div>
     </div>
   </div><span class="act-tag do">寫發文計畫</span></section>
-  <div class="pg-foot"><span>PART 9　·　15:49</span><span>70 / 75</span></div>
+  <div class="pg-foot"><span>PART 9　·　15:49</span><span>71 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="71｜最後實作"
+     data-label="72｜最後實作"
      data-speaker-notes="講師說明：這是今天最重要的 12 分鐘。講師與助教要全場走動，一個一個看。 目標不是寫得好，是「真的按下發布」。有按下去的人，回家才會繼續做。 對於真的不敢發的人：讓他存草稿，或設定成只有自己看得到，也算完成。
 
 互動提問：最後請 2–3 位願意的學員，把自己剛剛發的內容投影出來給大家看，全班給掌聲。
@@ -5824,7 +5929,7 @@ body{ margin:0; padding:0; }
         <span style="align-self:center;font-size:15px;font-weight:800;color:#9c8b7c">或</span>
         <span class="pill ig"><svg viewBox="0 0 40 40" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
-  <defs><linearGradient id="igoovu5" x1="0" y1="1" x2="1" y2="0">
+  <defs><linearGradient id="ig4jjz3" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".45" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs>
   <rect width="40" height="40" rx="12" fill="url(#ig)" style="fill:#e1306c"/>
@@ -5867,12 +5972,12 @@ body{ margin:0; padding:0; }
         <span class="txt" style="font-size:16.5px">不用寫得好，<b>寫完就好</b>。</span></div>
     </div>
   </div><span class="act-tag do">講義 4 · 實際發布</span></section>
-  <div class="pg-foot"><span>PART 9　·　15:52</span><span>71 / 75</span></div>
+  <div class="pg-foot"><span>PART 9　·　15:52</span><span>72 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="72｜再做一件事"
+     data-label="73｜再做一件事"
      data-speaker-notes="講師說明：把今天的產出收斂成三張紙，讓學員很清楚「我帶走了什麼」。 建議請學員互相檢查隔壁同學有沒有三項都完成。 如果有後續課程，這裡預告下一堂（品牌故事撰寫／商品文案設計），並說明會用到今天的成果。
 
 互動提問：問：三項都完成的人請舉手。（沒完成的協助他當場補完）
@@ -5928,12 +6033,12 @@ body{ margin:0; padding:0; }
   <path d="M12 16H6M12 32H6M12 48H6" stroke="#d99a4e" stroke-width="4" stroke-linecap="round"/></svg>
       <span class="txt">回家後第一件事：<b class="hl">把 QR Code 印出來</b>，貼在你的商品包裝或攤位上。</span></div>
   </div><span class="act-tag do">成果確認</span></section>
-  <div class="pg-foot"><span>PART 9　·　15:56</span><span>72 / 75</span></div>
+  <div class="pg-foot"><span>PART 9　·　15:56</span><span>73 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="73｜課程總結"
+     data-label="74｜課程總結"
      data-speaker-notes="講師說明：回到早上白板上寫的那句話，請全班再念一次。首尾呼應。 五件事裡，第 5 點「持續出現」最重要也最難。可以邀請學員互相加 LINE 或組成小群組互相督促。
 
 互動提問：問：今天最開始你說最想解決的問題，解決了嗎？（回到 Slide 2 的白板紀錄）">
@@ -5996,12 +6101,12 @@ body{ margin:0; padding:0; }
         <span class="txt" style="font-size:17.5px">持續互動讓人<b>信任</b>你</span></div>
     </div>
   </div></section>
-  <div class="pg-foot"><span>PART 9　·　15:58</span><span>73 / 75</span></div>
+  <div class="pg-foot"><span>PART 9　·　15:58</span><span>74 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="74｜最後一句話"
+     data-label="75｜最後一句話"
      data-speaker-notes="講師說明：慢慢念完這段，停三秒再說「今天辛苦了」。 如果有後續課程，這裡再預告一次時間。 提醒學員填回饋單，並鼓勵大家把今天發的那則內容互相追蹤、互相按讚。
 
 學員實作：發回饋單。鼓勵學員互相追蹤帳號。">
@@ -6033,12 +6138,12 @@ body{ margin:0; padding:0; }
       <span class="pill">西屯婦女培力</span>
     </div>
   </div></section>
-  <div class="pg-foot"><span>PART 9　·　16:00</span><span>74 / 75</span></div>
+  <div class="pg-foot"><span>PART 9　·　16:00</span><span>75 / 76</span></div>
 </div>
 
 <div class="pg"
      data-document-role="page"
-     data-label="75｜附錄｜四張課堂講義"
+     data-label="76｜附錄｜四張課堂講義"
      data-speaker-notes="講師說明：講義檔案：handouts.html，用 Chrome 開啟後按 Ctrl/Cmd + P，選 A4 直式即可列印。 建議每人多印一份講義 3（十大關鍵字），一份留在教室、一份帶回家。">
   <div class="pg-defs"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
   <linearGradient id="igGrad" x1="0" y1="1" x2="1" y2="0">
@@ -6099,7 +6204,7 @@ body{ margin:0; padding:0; }
       <span class="txt">四張講義的完整可列印版本，請開啟同一資料夾中的
       <b class="hl">handouts.html</b>，用瀏覽器直接列印成 A4。</span></div>
   </div></section>
-  <div class="pg-foot"><span>附錄　·　—</span><span>75 / 75</span></div>
+  <div class="pg-foot"><span>附錄　·　—</span><span>76 / 76</span></div>
 </div>
 </body>
 </html>

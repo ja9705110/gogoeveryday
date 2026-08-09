@@ -53,7 +53,7 @@ body{ margin:0; padding:0; }
 .pg .pg-foot{
   position:absolute; bottom:24px; left:84px; right:84px; z-index:9;
   display:flex; justify-content:space-between;
-  font-size:12.5px; color:var(--muted); font-weight:650; letter-spacing:.06em;
+  font-size:20px; color:var(--muted); font-weight:650; letter-spacing:.04em;
 }
 .pg.dark .pg-foot{ color:rgba(255,255,255,.5); }
 .pg .pg-defs{ position:absolute; width:0; height:0; }

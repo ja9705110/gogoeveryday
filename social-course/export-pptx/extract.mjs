@@ -23,7 +23,28 @@ await page.addStyleTag({
 await page.waitForTimeout(1200);
 
 /* 這些容器裡的文字屬於「示意圖」的一部分，烘進背景圖，不做成文字框 */
-const BAKED = '.phone, .post, svg, .thumb, .ig-grid, .richmenu, .slot';
+const BAKED = '.phone, .post, svg, .thumb, .ig-grid, .richmenu, .slot, .baked';
+
+/* 字級下限：PPT 裡的文字一律不小於 15pt（＝ 1280×720 舞台上的 20px）。
+   在瀏覽器裡先把字放大再量測，整頁會跟著重新排版，
+   因此文字框位置與背景圖都取自同一個「放大後」的版面，不會對不上。
+   已烘進背景圖的手機介面、貼文卡、示範傳單不受影響。 */
+const MIN_PX = 20;
+await page.evaluate(({ BAKED, MIN_PX }) => {
+  document.querySelectorAll('.pg *').forEach(el => {
+    if (el.closest(BAKED)) return;
+    const hasOwnText = [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim().length);
+    if (!hasOwnText) return;
+    const cs = getComputedStyle(el);
+    const fs = parseFloat(cs.fontSize);
+    if (!(fs < MIN_PX)) return;
+    const lh = parseFloat(cs.lineHeight);
+    const ratio = Number.isFinite(lh) && fs ? lh / fs : 1.5;
+    el.style.fontSize = MIN_PX + 'px';
+    el.style.lineHeight = (MIN_PX * Math.max(ratio, 1.35)).toFixed(1) + 'px';
+  });
+}, { BAKED, MIN_PX });
+await page.waitForTimeout(500);
 
 const slides = await page.evaluate((BAKED) => {
   const px2pt = v => +(v * 0.75).toFixed(2);
