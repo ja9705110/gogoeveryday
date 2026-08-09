@@ -52,10 +52,23 @@ const slides = await page.evaluate((BAKED) => {
       const cs = getComputedStyle(el);
       if (cs.visibility === 'hidden' || cs.display === 'none' || +cs.opacity === 0) continue;
 
-      /* 用 Range 量真正的文字範圍，才能處理 flex 置中、padding 等情況 */
-      const range = document.createRange();
-      range.selectNodeContents(el);
-      const rects = [...range.getClientRects()].filter(r => r.width > 0.5 && r.height > 0.5);
+      /* 只量「文字節點」本身的範圍：行內的 SVG 圖示（例如標題前的 FB 圖示）
+         會烘進背景圖，不能算進文字框，否則文字會蓋在圖示上。 */
+      const rects = [];
+      const collect = node => {
+        for (const n of node.childNodes) {
+          if (n.nodeType === 3) {
+            if (!n.textContent.trim()) continue;
+            const r = document.createRange();
+            r.selectNodeContents(n);
+            rects.push(...[...r.getClientRects()].filter(q => q.width > 0.5 && q.height > 0.5));
+          } else if (n.nodeType === 1 && n.tagName !== 'BR'
+                     && !n.matches(BAKED) && !n.closest(BAKED)) {
+            collect(n);
+          }
+        }
+      };
+      collect(el);
       if (!rects.length) continue;
       const L = Math.min(...rects.map(r => r.left));
       const R = Math.max(...rects.map(r => r.right));
