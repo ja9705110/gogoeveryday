@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>課堂講義（四張）｜社群平台操作入門</title>
+<style>
+:root{
+  --paper:#fff; --ink:#241c17; --ink2:#4a3c33; --ink3:#7a6a5d; --muted:#9c8b7c;
+  --clay:#c05f3c; --clay-tint:#fbeee6; --sage:#5f7a63; --sage-soft:#eaf0e8;
+  --gold:#d99a4e; --gold-soft:#fbf0dc; --plum:#8a5a6d; --plum-soft:#f6eaef;
+  --line:#ded3c6; --line-2:#efe7dc;
+  --font:"PingFang TC","Noto Sans TC","Hiragino Sans TC","Microsoft JhengHei",
+         "Source Han Sans TC",system-ui,-apple-system,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{ margin:0; background:#e9e2d8; font-family:var(--font); color:var(--ink); }
+
+.sheet{
+  width:210mm; min-height:297mm; background:var(--paper); margin:14mm auto;
+  padding:16mm 16mm 12mm; position:relative;
+  box-shadow:0 10px 40px -14px rgba(60,40,28,.45);
+  display:flex; flex-direction:column;
+}
+
+/* 頁首 */
+.hd{ display:flex; align-items:flex-end; justify-content:space-between;
+     border-bottom:2.5px solid var(--ink); padding-bottom:5mm; margin-bottom:7mm }
+.hd .no{ font-size:11pt; font-weight:900; letter-spacing:.18em; color:var(--clay); margin:0 0 2mm }
+.hd h1{ font-size:22pt; font-weight:900; letter-spacing:-.02em; margin:0; line-height:1.15 }
+.hd .sub{ font-size:9.5pt; color:var(--ink3); font-weight:600; margin:2mm 0 0 }
+.hd .who{ text-align:right; font-size:9pt; color:var(--muted); font-weight:700; white-space:nowrap }
+.hd .who b{ display:block; color:var(--ink3); font-size:8.5pt; letter-spacing:.14em; margin-bottom:2mm }
+.hd .who .ln{ display:inline-block; width:34mm; border-bottom:1.2px solid var(--line) }
+
+/* 區塊 */
+.blk{ margin-bottom:5.2mm }
+.blk > .q{ font-size:12.5pt; font-weight:850; margin:0 0 3mm; display:flex; align-items:center; gap:3mm }
+.blk > .q .dot{ width:3.2mm; height:3.2mm; border-radius:99px; background:var(--clay); flex:none }
+.blk > .q .hint{ font-size:9pt; font-weight:650; color:var(--muted); letter-spacing:0 }
+.blk.sage > .q .dot{ background:var(--sage) }
+.blk.gold > .q .dot{ background:var(--gold) }
+.blk.plum > .q .dot{ background:var(--plum) }
+
+/* 書寫線 */
+.lines{ display:flex; flex-direction:column; gap:8mm; padding-top:2.5mm }
+.lines i{ display:block; border-bottom:1.2px solid var(--line) }
+.lines.tight{ gap:6.5mm }
+.box{ border:1.4px solid var(--line); border-radius:2.5mm; min-height:23mm; padding:4mm 5mm;
+      background:#fffdfa }
+.box.tall{ min-height:38mm }
+.box .ph{ font-size:9pt; color:#c3b6a7; font-weight:600 }
+
+/* 勾選 */
+.opts{ display:flex; flex-wrap:wrap; gap:4mm 8mm; padding-top:1mm }
+.opt{ display:flex; align-items:center; gap:2.5mm; font-size:12pt; font-weight:750 }
+.opt .sq{ width:5mm; height:5mm; border:1.6px solid var(--ink2); border-radius:1.2mm; flex:none }
+.checklist{ display:flex; flex-direction:column; gap:2.8mm; padding-top:1mm }
+.chk{ display:flex; align-items:center; gap:3.5mm; font-size:11.5pt; font-weight:700;
+      border-bottom:1px dashed var(--line-2); padding-bottom:2.2mm }
+.chk .sq{ width:5mm; height:5mm; border:1.6px solid var(--clay); border-radius:1.2mm; flex:none }
+.chk .note{ margin-left:auto; font-size:8.5pt; color:var(--muted); font-weight:650 }
+
+/* 關鍵字格 */
+.kw{ display:grid; grid-template-columns:repeat(2,1fr); gap:3mm 7mm; padding-top:1.5mm }
+.kw .cell{ display:flex; align-items:baseline; gap:3mm }
+.kw .n{ font-size:10pt; font-weight:900; color:var(--clay); width:6mm; flex:none }
+.kw .ln{ flex:1; border-bottom:1.2px solid var(--line); height:8mm }
+.group{ border-radius:3mm; padding:3.5mm 5mm 4mm; margin-bottom:4mm }
+.group.a{ background:var(--clay-tint) } .group.b{ background:var(--sage-soft) }
+.group.c{ background:var(--gold-soft) }
+.group .gh{ display:flex; align-items:baseline; gap:3mm; margin-bottom:1mm }
+.group .gt{ font-size:12pt; font-weight:900 }
+.group .gd{ font-size:9pt; font-weight:650; color:var(--ink3) }
+.group.a .gt{ color:var(--clay) } .group.b .gt{ color:var(--sage) } .group.c .gt{ color:#a9761f }
+
+/* 提示卡 */
+.tip{ background:var(--clay-tint); border-left:1.2mm solid var(--clay); border-radius:0 2.5mm 2.5mm 0;
+      padding:4mm 5mm; font-size:9.5pt; line-height:1.7; color:var(--ink2); font-weight:600 }
+.tip b{ color:var(--clay) }
+.tip.sage{ background:var(--sage-soft); border-left-color:var(--sage) } .tip.sage b{ color:var(--sage) }
+.tip.gold{ background:var(--gold-soft); border-left-color:var(--gold) } .tip.gold b{ color:#a9761f }
+.eg{ font-size:9pt; color:var(--muted); font-weight:650; margin:1.5mm 0 0 }
+
+/* 頁尾 */
+.ft{ margin-top:auto; padding-top:5mm; border-top:1px solid var(--line-2);
+     display:flex; justify-content:space-between; font-size:8.5pt; color:var(--muted); font-weight:650 }
+
+/* 螢幕上的列印提示 */
+.bar{ position:fixed; top:0; left:0; right:0; z-index:9; background:#241c17; color:#f5ede1;
+      font-size:13px; font-weight:700; padding:11px 20px; display:flex; gap:16px;
+      align-items:center; justify-content:center; letter-spacing:.02em }
+.bar b{ color:#e3ab63 }
+body{ padding-top:44px }
+
+@page{ size:A4 portrait; margin:0 }
+@media print{
+  body{ background:#fff; padding-top:0 }
+  .bar{ display:none }
+  .sheet{ margin:0; box-shadow:none; page-break-after:always; break-after:page }
+  .sheet:last-child{ page-break-after:auto; break-after:auto }
+}
+</style>
+</head>
+<body>
+
+<div class="bar">課堂講義（共 4 張，A4 直式）　·　列印：<b>Ctrl / Cmd + P</b> → 紙張 A4、方向直式、邊界「無」</div>
+
+<!-- ══════════════ 講義 1 ══════════════ -->
+<section class="sheet">
+  <div class="hd">
+    <div>
+      <p class="no">講義 1</p>
+      <h1>我的平台選擇</h1>
+      <p class="sub">搭配課程 Slide 12 · 61　｜　上午填前半，下課前完成後半</p>
+    </div>
+    <div class="who"><b>姓名</b><span class="ln"></span></div>
+  </div>
+
+  <div class="blk">
+    <p class="q"><span class="dot"></span>我的商品／技能是什麼？</p>
+    <div class="lines"><i></i><i></i></div>
+    <p class="eg">例：手工果醬、手作耳環、瑜珈課、家常菜外帶、代客送禮包裝</p>
+  </div>
+
+  <div class="blk sage">
+    <p class="q"><span class="dot"></span>我想讓誰看到？<span class="hint">年紀、性別、住哪裡、什麼時候會需要</span></p>
+    <div class="lines"><i></i><i></i></div>
+    <p class="eg">例：住台中西屯、40–60 歲、常買伴手禮送人的女性</p>
+  </div>
+
+  <div class="blk gold">
+    <p class="q"><span class="dot"></span>我的主要曝光平台<span class="hint">只選一個，做熟了再考慮第二個</span></p>
+    <div class="opts">
+      <span class="opt"><span class="sq"></span>Facebook 粉絲專頁</span>
+      <span class="opt"><span class="sq"></span>Instagram</span>
+    </div>
+    <p class="eg">客人年紀偏長、住附近 → Facebook　｜　想接觸年輕客、以照片為主 → Instagram</p>
+  </div>
+
+  <div class="blk plum">
+    <p class="q"><span class="dot"></span>我的顧客聯絡平台<span class="hint">幾乎每個人都需要</span></p>
+    <div class="opts">
+      <span class="opt"><span class="sq"></span>LINE 官方帳號</span>
+    </div>
+    <div class="checklist" style="margin-top:4mm">
+      <span class="chk"><span class="sq"></span>已經建立官方帳號<span class="note">還沒有的人，這週內把它開起來</span></span>
+      <span class="chk"><span class="sq"></span>已經找到我的 QR Code</span>
+      <span class="chk"><span class="sq"></span>已經把 QR Code 印出來，貼在包裝或攤位上</span>
+    </div>
+  </div>
+
+  <div class="blk">
+    <p class="q"><span class="dot"></span>我的歡迎訊息（客人一加好友就會看到）<span class="hint">30 字以內</span></p>
+    <div class="box"><span class="ph">例：謝謝您加入！本週開放預訂草莓果醬，想預訂請直接回覆「草莓＋數量」。</span></div>
+  </div>
+
+  <div class="tip">
+    <b>今天的公式：</b>一個曝光平台（FB 或 IG）＋ 一個聯絡平台（LINE 官方帳號）。
+    三個都開但都不更新，比只做好一個還糟。
+  </div>
+
+  <div class="ft"><span>社群平台操作入門　·　西屯婦女培力</span><span>講義 1 / 4</span></div>
+</section>
+
+<!-- ══════════════ 講義 2 ══════════════ -->
+<section class="sheet">
+  <div class="hd">
+    <div>
+      <p class="no">講義 2</p>
+      <h1>IG 品牌觀察表</h1>
+      <p class="sub">搭配課程 Slide 25 · 26　｜　小組活動，一組看一個帳號</p>
+    </div>
+    <div class="who"><b>姓名</b><span class="ln"></span></div>
+  </div>
+
+  <div class="blk">
+    <p class="q"><span class="dot"></span>我觀察的帳號名稱</p>
+    <div class="lines tight"><i></i></div>
+  </div>
+
+  <div class="blk">
+    <p class="q"><span class="dot"></span>八項檢查<span class="hint">看得懂比漂不漂亮重要　·　五個以上打勾＝值得學的對象</span></p>
+    <div class="checklist">
+      <span class="chk"><span class="sq"></span>一眼就知道在做什麼</span>
+      <span class="chk"><span class="sq"></span>大頭貼清楚（是商品或本人，不是風景）</span>
+      <span class="chk"><span class="sq"></span>自我介紹清楚（做什麼、給誰、在哪裡）</span>
+      <span class="chk"><span class="sq"></span>有商品照</span>
+      <span class="chk"><span class="sq"></span>有幕後／製作過程</span>
+      <span class="chk"><span class="sq"></span>有 Reels</span>
+      <span class="chk"><span class="sq"></span>有精選限動</span>
+      <span class="chk"><span class="sq"></span>找得到購買方式</span>
+    </div>
+  </div>
+
+  <div class="blk sage">
+    <p class="q"><span class="dot"></span>我最喜歡它哪一點？</p>
+    <div class="lines tight"><i></i><i></i></div>
+  </div>
+
+  <div class="blk gold">
+    <p class="q"><span class="dot"></span>哪一篇讓我最想停下來？為什麼？</p>
+    <div class="lines tight"><i></i><i></i></div>
+  </div>
+
+  <div class="blk plum">
+    <p class="q"><span class="dot"></span>有什麼是我也做得到的？<span class="hint">這一題最重要</span></p>
+    <div class="box"><span class="ph">寫下一件明天就可以開始做的事</span></div>
+  </div>
+
+  <div class="tip sage">
+    <b>提醒：</b>觀察的重點不是「拍得多美」，而是「有沒有把該說的說清楚」。
+    很多做得很好的小帳號，照片都只是用手機拍的。
+  </div>
+
+  <div class="ft"><span>社群平台操作入門　·　西屯婦女培力</span><span>講義 2 / 4</span></div>
+</section>
+
+<!-- ══════════════ 講義 3 ══════════════ -->
+<section class="sheet">
+  <div class="hd">
+    <div>
+      <p class="no">講義 3</p>
+      <h1>我的十大關鍵字</h1>
+      <p class="sub">搭配課程 Slide 38 · 41　｜　寫一次，可以用一整年</p>
+    </div>
+    <div class="who"><b>姓名</b><span class="ln"></span></div>
+  </div>
+
+  <div class="tip" style="margin-bottom:6mm">
+    <b>思考方式：</b>不要想「我想寫什麼」，要想「<b>別人會搜尋什麼</b>」。
+    把自己想像成客人，想買這個東西的時候，你會在搜尋列打什麼字？
+  </div>
+
+  <div class="group a">
+    <div class="gh"><span class="gt">商品</span><span class="gd">3–4 個　·　你賣的東西叫什麼？種類、做法、材料</span></div>
+    <div class="kw">
+      <span class="cell"><span class="n">1</span><span class="ln"></span></span>
+      <span class="cell"><span class="n">2</span><span class="ln"></span></span>
+      <span class="cell"><span class="n">3</span><span class="ln"></span></span>
+      <span class="cell"><span class="n">4</span><span class="ln"></span></span>
+    </div>
+    <p class="eg">例：#鳳梨酥　#手工鳳梨酥　#手作烘焙</p>
+  </div>
+
+  <div class="group b">
+    <div class="gh"><span class="gt">地區</span><span class="gd">2–3 個　·　你的客人在哪裡？縣市、區域、常去的市集</span></div>
+    <div class="kw">
+      <span class="cell"><span class="n">5</span><span class="ln"></span></span>
+      <span class="cell"><span class="n">6</span><span class="ln"></span></span>
+    </div>
+    <p class="eg">例：#台中甜點　#台中伴手禮　#西屯市集</p>
+  </div>
+
+  <div class="group c">
+    <div class="gh"><span class="gt">需求／情境</span><span class="gd">3–4 個　·　別人在什麼時候需要它？送誰？什麼場合？</span></div>
+    <div class="kw">
+      <span class="cell"><span class="n">7</span><span class="ln"></span></span>
+      <span class="cell"><span class="n">8</span><span class="ln"></span></span>
+      <span class="cell"><span class="n">9</span><span class="ln"></span></span>
+      <span class="cell"><span class="n">10</span><span class="ln"></span></span>
+    </div>
+    <p class="eg">例：#下午茶　#送禮　#節慶禮盒　#彌月禮盒</p>
+  </div>
+
+  <div class="blk" style="margin-top:2mm">
+    <p class="q"><span class="dot"></span>找不到字的時候，去這三個地方</p>
+    <div class="checklist">
+      <span class="chk"><span class="sq"></span><b>Instagram 搜尋</b>：打進商品名稱，看跳出哪些相關標籤與則數</span>
+      <span class="chk"><span class="sq"></span><b>Google 搜尋</b>：看「自動完成」與頁面最下方的「相關搜尋」</span>
+      <span class="chk"><span class="sq"></span><b>Google Trends</b>：比較兩種講法哪個比較多人搜（手工餅乾 vs 手作餅乾）</span>
+      <span class="chk"><span class="sq"></span>已經存一份到手機備忘錄，取名「我的關鍵字」<span class="note">重要！</span></span>
+    </div>
+  </div>
+
+  <div class="ft"><span>社群平台操作入門　·　西屯婦女培力</span><span>講義 3 / 4</span></div>
+</section>
+
+<!-- ══════════════ 講義 4 ══════════════ -->
+<section class="sheet">
+  <div class="hd">
+    <div>
+      <p class="no">講義 4</p>
+      <h1>我的第一篇社群內容</h1>
+      <p class="sub">搭配課程 Slide 31 · 34 · 60　｜　下課前完成，並實際發布或存成草稿</p>
+    </div>
+    <div class="who"><b>姓名</b><span class="ln"></span></div>
+  </div>
+
+  <div class="blk">
+    <p class="q"><span class="dot"></span>我要發在哪裡？</p>
+    <div class="opts">
+      <span class="opt"><span class="sq"></span>Facebook</span>
+      <span class="opt"><span class="sq"></span>Instagram</span>
+      <span class="opt"><span class="sq"></span>LINE 官方帳號</span>
+    </div>
+    <p class="eg">建議字數　·　Facebook 80–200 字　｜　Instagram 50–150 字　｜　LINE 30–80 字（以上為教學建議，不是平台限制）</p>
+  </div>
+
+  <div class="blk sage">
+    <p class="q"><span class="dot"></span>我要搭配哪一張照片？<span class="hint">圖片負責讓人停下來</span></p>
+    <div class="lines tight"><i></i></div>
+    <p class="eg">如果要在圖上放字：<b>一個主標題 ＋ 一個重點</b>就好（例：手作草莓果醬／本週限量 20 瓶）</p>
+  </div>
+
+  <div class="blk gold">
+    <p class="q"><span class="dot"></span>我要寫什麼？<span class="hint">文字負責讓人看懂</span></p>
+    <div class="box tall">
+      <span class="ph">卡住的時候照這個順序寫：<br>
+      ① 這是什麼？　② 有什麼特別的？　③ 想要的話可以怎麼跟我說</span>
+    </div>
+  </div>
+
+  <div class="blk plum">
+    <p class="q"><span class="dot"></span>我要用哪些關鍵字？<span class="hint">從講義 3 挑 5–8 個，IG 適用</span></p>
+    <div class="lines tight"><i></i><i></i></div>
+  </div>
+
+  <div class="blk">
+    <p class="q"><span class="dot"></span>完成確認</p>
+    <div class="checklist">
+      <span class="chk"><span class="sq"></span>有一張圖片</span>
+      <span class="chk"><span class="sq"></span>有簡短的文字</span>
+      <span class="chk"><span class="sq"></span>符合這個平台的呈現方式</span>
+      <span class="chk"><span class="sq"></span>已經<b>發布</b>，或存成<b>草稿</b><span class="note">按下去最重要</span></span>
+    </div>
+  </div>
+
+  <div class="tip gold">
+    <b>我的一週發文計畫：</b>星期＿＿＿發「商品」　·　星期＿＿＿發「過程」　·　星期＿＿＿發「有用的內容」　·　星期＿＿＿發「人／生活」<br>
+    四篇裡面只有一篇在賣東西。做不到就一週兩篇，但要固定。
+  </div>
+
+  <div class="ft"><span>社群平台操作入門　·　西屯婦女培力</span><span>講義 4 / 4</span></div>
+</section>
+
+</body>
+</html>
