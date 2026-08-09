@@ -57,6 +57,14 @@ body{ margin:0; padding:0; }
 }
 .pg.dark .pg-foot{ color:rgba(255,255,255,.5); }
 .pg .pg-defs{ position:absolute; width:0; height:0; }
+
+/* 輸出 PDF 時：一個 .pg 就是一頁，不留任何邊界 */
+@page{ size:1280px 720px; margin:0; }
+@media print{
+  html,body{ background:#fff; }
+  .pg{ margin:0 !important; page-break-after:always; break-after:page; }
+  .pg:last-child{ page-break-after:auto; break-after:auto; }
+}
 `;
 
 const pages = DECK.map((d, i) => {

@@ -681,6 +681,14 @@ body{ margin:0; padding:0; }
 .pg.dark .pg-foot{ color:rgba(255,255,255,.5); }
 .pg .pg-defs{ position:absolute; width:0; height:0; }
 
+/* 輸出 PDF 時：一個 .pg 就是一頁，不留任何邊界 */
+@page{ size:1280px 720px; margin:0; }
+@media print{
+  html,body{ background:#fff; }
+  .pg{ margin:0 !important; page-break-after:always; break-after:page; }
+  .pg:last-child{ page-break-after:auto; break-after:auto; }
+}
+
 </style>
 </head>
 <body>
@@ -839,7 +847,7 @@ body{ margin:0; padding:0; }
   <path d="M23.6 20.6h3.2l.6-4.2h-3.8v-2.6c0-1.2.4-2 2-2h2V8.1c-.4 0-1.6-.2-3-.2-3 0-5 1.8-5 5.2v3.3H16v4.2h3.6V32h4v-11.4Z" fill="#fff"/></svg></div>
         <div style="position:absolute;left:-92px;top:224px"><svg viewBox="0 0 40 40" width="56" height="56" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
-  <defs><linearGradient id="igzzopx" x1="0" y1="1" x2="1" y2="0">
+  <defs><linearGradient id="igza4yf" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".45" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs>
   <rect width="40" height="40" rx="12" fill="url(#ig)" style="fill:#e1306c"/>
@@ -899,7 +907,7 @@ body{ margin:0; padding:0; }
   <circle cx="20" cy="20" r="20" fill="#1877f2"/>
   <path d="M23.6 20.6h3.2l.6-4.2h-3.8v-2.6c0-1.2.4-2 2-2h2V8.1c-.4 0-1.6-.2-3-.2-3 0-5 1.8-5 5.2v3.3H16v4.2h3.6V32h4v-11.4Z" fill="#fff"/></svg> Facebook</span><span class="pill ig"><svg viewBox="0 0 40 40" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
-  <defs><linearGradient id="ighyl1a" x1="0" y1="1" x2="1" y2="0">
+  <defs><linearGradient id="igp2ulq" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".45" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs>
   <rect width="40" height="40" rx="12" fill="url(#ig)" style="fill:#e1306c"/>
@@ -1327,7 +1335,7 @@ body{ margin:0; padding:0; }
   <circle cx="20" cy="20" r="20" fill="#1877f2"/>
   <path d="M23.6 20.6h3.2l.6-4.2h-3.8v-2.6c0-1.2.4-2 2-2h2V8.1c-.4 0-1.6-.2-3-.2-3 0-5 1.8-5 5.2v3.3H16v4.2h3.6V32h4v-11.4Z" fill="#fff"/></svg><svg viewBox="0 0 40 40" width="78" height="78" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
-  <defs><linearGradient id="igaki2v" x1="0" y1="1" x2="1" y2="0">
+  <defs><linearGradient id="igd5yrb" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".45" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs>
   <rect width="40" height="40" rx="12" fill="url(#ig)" style="fill:#e1306c"/>
@@ -1539,7 +1547,7 @@ body{ margin:0; padding:0; }
       <h2 class="h" data-r style="font-size:40px;display:flex;align-items:center;gap:14px">
         <svg viewBox="0 0 40 40" width="42" height="42" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
-  <defs><linearGradient id="ig1jcgx" x1="0" y1="1" x2="1" y2="0">
+  <defs><linearGradient id="ig7cpgc" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".45" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs>
   <rect width="40" height="40" rx="12" fill="url(#ig)" style="fill:#e1306c"/>
@@ -1787,7 +1795,7 @@ body{ margin:0; padding:0; }
   <path d="M23.6 20.6h3.2l.6-4.2h-3.8v-2.6c0-1.2.4-2 2-2h2V8.1c-.4 0-1.6-.2-3-.2-3 0-5 1.8-5 5.2v3.3H16v4.2h3.6V32h4v-11.4Z" fill="#fff"/></svg> Facebook</span>
           <span class="pill ig"><svg viewBox="0 0 40 40" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
-  <defs><linearGradient id="igrhv77" x1="0" y1="1" x2="1" y2="0">
+  <defs><linearGradient id="igso480" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".45" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs>
   <rect width="40" height="40" rx="12" fill="url(#ig)" style="fill:#e1306c"/>
@@ -2397,7 +2405,7 @@ body{ margin:0; padding:0; }
   </div>
   <div class="d-art"><div style="transform:scale(1.05)"><svg viewBox="0 0 40 40" width="120" height="120" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
-  <defs><linearGradient id="igkk7au" x1="0" y1="1" x2="1" y2="0">
+  <defs><linearGradient id="igno5bo" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".45" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs>
   <rect width="40" height="40" rx="12" fill="url(#ig)" style="fill:#e1306c"/>
@@ -3028,7 +3036,7 @@ body{ margin:0; padding:0; }
   <circle cx="20" cy="20" r="20" fill="#1877f2"/>
   <path d="M23.6 20.6h3.2l.6-4.2h-3.8v-2.6c0-1.2.4-2 2-2h2V8.1c-.4 0-1.6-.2-3-.2-3 0-5 1.8-5 5.2v3.3H16v4.2h3.6V32h4v-11.4Z" fill="#fff"/></svg><svg viewBox="0 0 40 40" width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
-  <defs><linearGradient id="ig7ae50" x1="0" y1="1" x2="1" y2="0">
+  <defs><linearGradient id="ighm7jn" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".45" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs>
   <rect width="40" height="40" rx="12" fill="url(#ig)" style="fill:#e1306c"/>
@@ -3073,7 +3081,7 @@ body{ margin:0; padding:0; }
         <div class="card" style="background:#fdeef4;border-color:transparent;box-shadow:none;text-align:center;padding:28px 20px">
           <div style="display:flex;justify-content:center;margin-bottom:14px"><svg viewBox="0 0 40 40" width="40" height="40" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
-  <defs><linearGradient id="ig88qkg" x1="0" y1="1" x2="1" y2="0">
+  <defs><linearGradient id="igdeen2" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".45" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs>
   <rect width="40" height="40" rx="12" fill="url(#ig)" style="fill:#e1306c"/>
@@ -3201,7 +3209,7 @@ body{ margin:0; padding:0; }
       <h2 class="h" data-r style="font-size:38px;display:flex;align-items:center;gap:12px">
         <svg viewBox="0 0 40 40" width="38" height="38" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
-  <defs><linearGradient id="ig05gds" x1="0" y1="1" x2="1" y2="0">
+  <defs><linearGradient id="ig1lh48" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".45" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs>
   <rect width="40" height="40" rx="12" fill="url(#ig)" style="fill:#e1306c"/>
@@ -4055,7 +4063,7 @@ body{ margin:0; padding:0; }
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
           <svg viewBox="0 0 40 40" width="30" height="30" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
-  <defs><linearGradient id="igq5hsb" x1="0" y1="1" x2="1" y2="0">
+  <defs><linearGradient id="iggagqv" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".45" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs>
   <rect width="40" height="40" rx="12" fill="url(#ig)" style="fill:#e1306c"/>
@@ -4977,7 +4985,7 @@ body{ margin:0; padding:0; }
         <div class="card" style="padding:18px 20px;text-align:center;min-width:150px">
           <div style="display:flex;justify-content:center;margin-bottom:8px;height:38px;align-items:center"><svg viewBox="0 0 40 40" width="34" height="34" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
-  <defs><linearGradient id="igp8nxm" x1="0" y1="1" x2="1" y2="0">
+  <defs><linearGradient id="igxyrng" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".45" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs>
   <rect width="40" height="40" rx="12" fill="url(#ig)" style="fill:#e1306c"/>
@@ -5816,7 +5824,7 @@ body{ margin:0; padding:0; }
         <span style="align-self:center;font-size:15px;font-weight:800;color:#9c8b7c">或</span>
         <span class="pill ig"><svg viewBox="0 0 40 40" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"
     style="" class="" aria-hidden="true">
-  <defs><linearGradient id="ignxwee" x1="0" y1="1" x2="1" y2="0">
+  <defs><linearGradient id="igoovu5" x1="0" y1="1" x2="1" y2="0">
     <stop offset="0" stop-color="#fdcb5c"/><stop offset=".45" stop-color="#e1306c"/><stop offset="1" stop-color="#a02fbe"/>
   </linearGradient></defs>
   <rect width="40" height="40" rx="12" fill="url(#ig)" style="fill:#e1306c"/>
