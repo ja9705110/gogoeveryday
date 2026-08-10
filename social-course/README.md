@@ -8,8 +8,11 @@
 | --- | --- |
 | `index.html` | **簡報本體**（75 頁，單一檔案、完全離線可用）。用瀏覽器打開就能上課。 |
 | `handouts.html` | **四張 A4 課堂講義**，用瀏覽器直接列印（A4 直式、邊界「無」）。 |
+| `social-media-course-deck.pptx` | **PowerPoint／Canva 版**（76 頁，每個元素都是獨立可編輯物件）。 |
 | `src/` | 原始碼。改內容請改這裡，再重新 build。 |
 | `build.py` | 把 `src/` 組成單一檔案 `index.html`。 |
+| `export-canva.js` | 產生靜態的 `canva-import.html`（PPTX 匯出的中間檔）。 |
+| `export-pptx/` | 把版面拆成可編輯物件並組出 PPTX。 |
 
 ## 上課時怎麼用
 
@@ -82,3 +85,26 @@ S({ part:'PART 5', time:'13:28', kind:'std', title:'Slide 31｜一個商品，�
   搭配頁內元素依序浮現；不使用翻頁、旋轉、飛入等效果。
   瀏覽器不支援時自動退回柔和淡入，並尊重「減少動態效果」的系統設定。
 - 全部圖像都是內嵌 SVG 或 CSS 繪製，**不連外**，教室沒網路也能正常上課。
+
+## 匯出 PPTX（給 PowerPoint 或 Canva）
+
+```bash
+node export-canva.js          # 先產生靜態版面
+node export-pptx/extract.mjs  # 量測版面，拆成 shape / image / text
+node export-pptx/build.js     # 組出 social-media-course-deck.pptx
+node export-pptx/preview.js   # 選用：產生 preview.html 檢查組成結果
+```
+
+匯出的 PPTX 不是一張張圖片，而是三種可編輯物件：
+
+| 物件 | 數量 | 在 PowerPoint／Canva 裡可以做什麼 |
+| --- | --- | --- |
+| 文字框 | 1,220 | 改字、改色、改大小（全部 ≥ 15pt） |
+| 圖形 | 664 | 卡片、色塊、標籤、進度條——可改填色、框線、大小 |
+| 圖片 | 252 | 插畫、手機介面、貼文卡——可移動、縮放、刪除、替換 |
+
+底圖只保留漸層與 CSS 裝飾線，其餘都是獨立物件。
+
+`extract.mjs` 會在量測前先把小於 20px（15pt）的文字放大，讓整頁重新排版，
+因此文字框位置與背景圖取自同一個排版狀態，不會對不上。
+手機介面、貼文卡與第 33 頁「刻意做得看不清楚的傳單」標記為整塊圖片，不受字級下限影響。

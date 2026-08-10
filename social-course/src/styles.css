@@ -100,11 +100,11 @@ body{
 /* ── 投影片 ──────────────────────────────────────────────────────────── */
 .slide{
   position:absolute; inset:0; z-index:2;
-  padding:70px 84px 84px;
+  padding:58px 84px 78px;
   display:flex; flex-direction:column; justify-content:center;
   view-transition-name:slide;
 }
-.slide.pad-tight{ padding:56px 68px 76px; }
+.slide.pad-tight{ padding:48px 68px 72px; }
 
 /* ── 框架（頁眉／頁腳） ──────────────────────────────────────────────── */
 #chrome{ position:absolute; inset:0; z-index:6; pointer-events:none; }
@@ -176,7 +176,7 @@ h3.h{ font-size:29px; line-height:1.3;  letter-spacing:-.012em; font-weight:800;
 .split.w-right{ grid-template-columns:.85fr 1.15fr; }
 .split.art{ grid-template-columns:1.05fr .95fr; }
 .stack{ display:flex; flex-direction:column; }
-.gap-s{ gap:12px } .gap-m{ gap:20px } .gap-l{ gap:32px }
+.gap-s{ gap:11px } .gap-m{ gap:17px } .gap-l{ gap:25px }
 .center{ text-align:center; align-items:center; justify-content:center; }
 /* 置中欄位裡的區塊元素也要水平置中（滿版元素不受影響） */
 .center > *{ margin-left:auto; margin-right:auto; }

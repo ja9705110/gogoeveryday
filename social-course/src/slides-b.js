@@ -280,8 +280,8 @@ S({ part:'PART 6', time:'14:20', kind:'std', title:'Slide 41｜學員操作：�
   <div class="split w-left">
     <div class="col">
       <p class="eyebrow" data-r>動手做 · 8 分鐘</p>
-      <h2 class="h" data-r style="font-size:38px;margin-bottom:16px">請找出<br>跟自己最有關的 10 個關鍵字</h2>
-      <p class="lead" data-r style="margin-bottom:22px">
+      <h2 class="h" data-r style="font-size:34px;margin-bottom:12px">請找出<br>跟自己最有關的 10 個關鍵字</h2>
+      <p class="lead" data-r style="margin-bottom:16px">
         寫在<b>講義 3</b>，或直接打在<b>手機的備忘錄</b>裡。<br>
         建議兩邊都留一份。</p>
       <div class="checks" data-r style="grid-template-columns:1fr">
@@ -290,16 +290,16 @@ S({ part:'PART 6', time:'14:20', kind:'std', title:'Slide 41｜學員操作：�
         <div class="check"><span class="box"></span>情境／需求類 3–4 個</div>
         <div class="check"><span class="box"></span>存進手機備忘錄，取名「我的關鍵字」</div>
       </div>
-      <div class="callout sage" data-r style="margin-top:22px">${ART.note(34,C.sage)}
-        <span class="txt" style="font-size:18px">
-          以後每發一篇，<br><b class="hl-s">從這 10 個裡面挑 5–8 個</b>來用就好。</span></div>
+      <div class="callout sage" data-r style="margin-top:16px;padding:14px 20px">${ART.note(30,C.sage)}
+        <span class="txt" style="font-size:20px;line-height:1.45">
+          以後每發一篇，<b class="hl-s">從這 10 個挑 5–8 個</b>來用就好。</span></div>
     </div>
     <div class="col center" data-r>
       ${phone(`
         <div class="app-bar"><span class="ttl">備忘錄</span>
           <span style="font-size:12px;color:${C.gold};font-weight:800">完成</span></div>
-        <div class="app-body" style="padding:14px 15px">
-          <p style="margin:0 0 12px;font-size:15px;font-weight:900">我的關鍵字</p>
+        <div class="app-body" style="padding:12px 13px">
+          <p style="margin:0 0 10px;font-size:15px;font-weight:900">我的關鍵字</p>
           ${[['商品',['#鳳梨酥','#手工鳳梨酥','#手作烘焙']],
              ['地區',['#台中甜點','#台中伴手禮']],
              ['情境',['#下午茶','#送禮','#節慶禮盒']]]
@@ -308,7 +308,7 @@ S({ part:'PART 6', time:'14:20', kind:'std', title:'Slide 41｜學員操作：�
             ${arr.map(t=>`<p style="margin:0 0 5px;font-size:12px;font-weight:700;color:#1a1a1a">${t}</p>`).join('')}
             <div style="height:9px"></div>`).join('')}
           <p style="margin:0;font-size:11px;color:${C.muted};font-weight:650">＋ 再想 2 個……</p>
-        </div>`)}
+        </div>`, {sm:true})}
       <p class="cap-t">存在手機裡，發文時直接複製</p>
     </div>
   </div>`,
@@ -531,25 +531,25 @@ S({ part:'PART 7', time:'15:00', kind:'std', title:'Slide 47｜限時動態不�
     </div>
     <div class="split" data-r style="gap:52px;align-items:center">
       <div class="center">
-        <div style="width:300px;height:300px;border-radius:18px;overflow:hidden;position:relative;
+        <div style="width:208px;height:208px;border-radius:18px;overflow:hidden;position:relative;
           box-shadow:var(--shadow-l);background:linear-gradient(150deg,#f7dfc8,#e9ab7f);display:grid;place-items:center">
-          ${ART.jar(200)}
+          ${ART.jar(140)}
         </div>
-        <p class="k" style="margin-top:16px;font-size:21px">精緻商品照</p>
+        <p class="k" style="margin-top:12px;font-size:21px">精緻商品照</p>
         <p class="v" style="font-size:16px">放在<b>貼文</b>：<br>要留下來、要被反覆看到</p>
       </div>
       <div class="center">
-        <div style="width:300px;height:300px;border-radius:18px;overflow:hidden;position:relative;
+        <div style="width:208px;height:208px;border-radius:18px;overflow:hidden;position:relative;
           box-shadow:var(--shadow-l);background:linear-gradient(155deg,#e6ded2,#c9bda9);display:grid;place-items:center">
           <div style="transform:rotate(-6deg);display:grid;place-items:center;gap:6px">
-            ${ART.cookie(130)}
+            ${ART.cookie(92)}
             <span style="background:rgba(255,255,255,.92);font-size:13px;font-weight:800;
               padding:6px 14px;border-radius:8px;transform:rotate(3deg)">還在忙 😅</span>
           </div>
           <span style="position:absolute;top:12px;left:12px;font-size:11px;font-weight:800;
             background:rgba(0,0,0,.4);color:#fff;padding:4px 10px;border-radius:99px">限時動態</span>
         </div>
-        <p class="k" style="margin-top:16px;font-size:21px">手機隨手拍的工作桌</p>
+        <p class="k" style="margin-top:12px;font-size:21px">手機隨手拍的工作桌</p>
         <p class="v" style="font-size:16px">放在<b>限時動態</b>：<br>只活 24 小時、要的是真實</p>
       </div>
     </div>
@@ -1028,7 +1028,7 @@ S({ part:'PART 9', time:'15:49', kind:'std', title:'Slide 59｜不是每篇都�
     </div>
     <div class="col center" data-r>
       ${igProfile({bio:'手工果醬 · 小批製作<br>當季水果，一次只煮一鍋',
-                   grid:['jam','kim','cookie','gift','stall','cake','yoga','kim','ear']})}
+                   grid:['jam','kim','cookie','gift','stall','cake','yoga','kim','ear'], sm:true})}
       <div class="callout sage" style="margin-top:20px;max-width:320px;padding:16px 20px">
         ${ART.heart(30,C.sage)}
         <span class="txt" style="font-size:16.5px">

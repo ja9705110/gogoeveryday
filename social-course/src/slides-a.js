@@ -139,7 +139,7 @@ S({ part:'PART 1', time:'09:00', kind:'std', title:'Slide 2｜今天只解決三
 
 S({ part:'PART 1', time:'09:05', kind:'std', title:'Slide 3｜大家是不是都有這些困擾',
   html:`
-  <div class="split art">
+  <div class="split" style="grid-template-columns:1.32fr .68fr;gap:40px">
     <div class="col">
       <p class="eyebrow" data-r>課前需求調查 · 有效樣本 30 人</p>
       <h2 class="h" data-r style="font-size:40px;margin-bottom:24px">這些困擾，<br>是不是你也有？</h2>
@@ -154,12 +154,12 @@ S({ part:'PART 1', time:'09:05', kind:'std', title:'Slide 3｜大家是不是都
         ].map(([t,n,p,hot])=>`
         <div data-r style="display:flex;align-items:center;gap:14px">
           <span style="font-size:21px;font-weight:${hot?850:700};
-            color:${hot?C.clay:C.ink2};width:300px;flex:none">${t}</span>
+            color:${hot?C.clay:C.ink2};width:252px;flex:none">${t}</span>
           <span style="flex:1;height:14px;border-radius:99px;background:${C.paper3};overflow:hidden">
             <span style="display:block;height:100%;width:${p}%;border-radius:99px;
               background:${hot?`linear-gradient(90deg,${C.gold},${C.clay})`:C.sage}"></span></span>
           <span style="font-size:20px;font-weight:850;color:${hot?C.clay:C.ink3};
-            width:168px;text-align:right;white-space:nowrap;
+            width:152px;text-align:right;white-space:nowrap;
             font-variant-numeric:tabular-nums">${n} 人｜${p}%</span>
         </div>`).join('')}
       </div>
@@ -571,11 +571,11 @@ S({ part:'PART 2', time:'10:04', kind:'std', title:'Slide 13｜案例：這三�
       <h2 class="h" data-r style="font-size:38px">如果是他們，你會建議做哪個平台？</h2>
     </div>
     <div class="cards c3" data-r>
-      ${[[ART.kimchi(150),'A 阿姨','做手工泡菜','客人大多 40–60 歲，<br>都住在台中西屯附近。',
+      ${[[ART.kimchi(118),'A 阿姨','做手工泡菜','客人大多 40–60 歲，<br>都住在台中西屯附近。',
           `<span class="pill fb">Facebook</span><span class="pill ln">LINE</span>`],
-         [ART.earring(150),'B 學員','做手工耳環','想接觸 20–40 歲女性，<br>目前沒什麼在地客。',
+         [ART.earring(118),'B 學員','做手工耳環','想接觸 20–40 歲女性，<br>目前沒什麼在地客。',
           `<span class="pill ig">Instagram</span><span class="pill ln">LINE</span>`],
-         [ART.yoga(150),'C 學員','教瑜珈','主要想招募<br>附近社區的居民。',
+         [ART.yoga(118),'C 學員','教瑜珈','主要想招募<br>附近社區的居民。',
           `<span class="pill fb">Facebook</span><span class="pill ln">LINE</span>`]]
         .map(([art,n,job,d,ans])=>`
         <div class="card" style="text-align:center">
@@ -719,12 +719,12 @@ S({ part:'PART 3', time:'10:32', kind:'std', title:'Slide 16｜粉專名稱怎�
     </div>
     <div class="split" data-r style="gap:52px;align-items:center">
       <div class="center">
-        <div style="opacity:.85">${ART.sign('小芳的小天地', C.muted, 300)}</div>
+        <div style="opacity:.85">${ART.sign('小芳的小天地', C.muted, 244)}</div>
         <div class="no" style="justify-content:center;margin-top:12px"><i>✕</i>
           <span style="font-weight:750">看不出來在賣什麼</span></div>
       </div>
       <div class="center">
-        ${ART.sign('小芳手作果醬｜台中', C.clay, 300)}
+        ${ART.sign('小芳手作果醬｜台中', C.clay, 244)}
         <div class="yes" style="justify-content:center;margin-top:12px"><i>✓</i>
           <span style="font-weight:750">商品 ＋ 地區，一眼就懂</span></div>
       </div>
@@ -1023,7 +1023,7 @@ S({ part:'PART 4', time:'11:34', kind:'std', title:'Slide 24｜IG 品牌案例�
         <div class="card" style="padding:20px">
           <p class="cap" style="color:${C.plum}">${n}</p>
           <p class="k" style="font-size:20px">${t}</p>
-          <div class="slot" style="height:212px;margin:14px 0 12px">
+          <div class="slot" style="height:150px;margin:12px 0 10px">
             <span style="font-size:26px">📱</span>
             <span class="st">此處放實際 IG 截圖</span>
             <span class="sd">上課前先選好帳號，<br>截圖個人首頁（九宮格）放進來</span>
@@ -1323,41 +1323,40 @@ S({ part:'PART 5', time:'13:28', kind:'std', title:'Slide 31｜一個商品，�
       <div data-r>${ART.jar(70)}</div>
     </div>
     <div class="cards c3" data-r style="gap:16px">
-      <div class="card top-accent a-fb" style="padding:18px 20px">
+      <div class="card top-accent a-fb" style="padding:15px 18px">
         <span class="badge b-fb">FACEBOOK</span>
-        <p class="v" style="margin-top:12px;line-height:1.62">
+        <p class="v" style="margin-top:9px;line-height:1.5;font-size:20px">
           今天早上到大湖收了一批草莓，紅得發亮。<br><br>
           草莓果醬很花時間，要一顆一顆去蒂，小火慢慢熬，一鍋大概只能做 20 瓶。
           有客人問為什麼不做多一點，因為煮太多鍋，味道就跑掉了。<br><br>
           這週三西屯市集，歡迎過來試吃 🍓</p>
-        <div class="rule"></div>
+        <div class="rule" style="margin:10px 0 8px"></div>
         <p class="tiny" style="font-weight:800">約 130 字 · 講過程與原因</p>
       </div>
-      <div class="card top-accent a-ig" style="padding:18px 20px">
+      <div class="card top-accent a-ig" style="padding:15px 18px">
         <span class="badge b-ig">INSTAGRAM</span>
-        <p class="v" style="margin-top:12px;line-height:1.66">
+        <p class="v" style="margin-top:9px;line-height:1.52;font-size:20px">
           把春天裝進一瓶草莓果醬裡 🍓<br><br>
           一鍋只煮 20 瓶，<br>因為煮太多，味道就跑掉了。<br><br>
           週三 · 西屯市集見</p>
         <div class="tags" style="margin-top:12px">${['#台中果醬','#手工果醬','#西屯市集']
           .map(t=>`<span class="tag sm p">${t}</span>`).join('')}</div>
-        <div class="rule"></div>
+        <div class="rule" style="margin:10px 0 8px"></div>
         <p class="tiny" style="font-weight:800">約 60 字 · 圖片是主角</p>
       </div>
-      <div class="card top-accent a-ln" style="padding:18px 20px">
+      <div class="card top-accent a-ln" style="padding:15px 18px">
         <span class="badge b-ln">LINE</span>
-        <p class="v" style="margin-top:12px;line-height:1.66;font-weight:700">
+        <p class="v" style="margin-top:9px;line-height:1.52;font-size:20px;font-weight:700">
           🍓 草莓果醬本週開放預訂<br><br>
           每瓶 250 元<br><br>
           想預訂請直接回覆<br>「草莓＋數量」</p>
-        <div class="rule"></div>
+        <div class="rule" style="margin:10px 0 8px"></div>
         <p class="tiny" style="font-weight:800">約 40 字 · 直接說怎麼買</p>
       </div>
     </div>
     <div class="callout gold" data-r style="padding:13px 22px">${ART.bulb(30,C.gold)}
       <span class="txt" style="font-size:20px;line-height:1.45">
-        寫法不同，但講的是<b>同一件事</b>：一鍋只煮 20 瓶。<br>
-        <b>先寫最長的那一篇，再刪成短的</b>，是最省力的做法。</span></div>
+        寫法不同，但講的是<b>同一件事</b>：一鍋只煮 20 瓶　·　<b>先寫最長的那一篇，再刪成短的。</b></span></div>
   </div>`,
   notes:{
     say:['這是 PART 5 的核心頁，建議停留 5–6 分鐘，三欄逐一念出來讓學員感受差異。',
