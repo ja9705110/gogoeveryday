@@ -8,6 +8,7 @@
 | --- | --- |
 | `index.html` | **簡報本體**（42 頁，單一檔案、完全離線可用）。用瀏覽器打開就能上課。 |
 | `handouts.html` | **三張 A4 操作講義**（FB／IG／LINE 各一張），用瀏覽器直接列印。 |
+| `size-guide.html` | **四張 A4 圖片尺寸速查表**（總表＋三個平台），含比例示意圖。 |
 | `social-media-course-deck.pptx` | **PowerPoint／Canva 版**（42 頁，每個元素都是獨立可編輯物件）。 |
 | `src/` | 原始碼。改內容請改這裡，再重新 build。 |
 | `build.py` | 把 `src/` 組成單一檔案 `index.html`。 |

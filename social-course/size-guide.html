@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>圖片尺寸速查表｜FB · IG · LINE 官方帳號</title>
+<style>
+:root{
+  --paper:#fff; --ink:#241c17; --ink2:#4a3c33; --ink3:#7a6a5d; --muted:#9c8b7c;
+  --clay:#c05f3c; --clay-tint:#fbeee6; --sage:#5f7a63; --sage-soft:#eaf0e8;
+  --gold:#d99a4e; --gold-soft:#fbf0dc;
+  --fb:#1877f2; --fb-tint:#eef4ff; --ig:#e1306c; --ig-tint:#fdeef4;
+  --ln:#03934a; --ln-tint:#e6f8ee;
+  --line:#ded3c6; --line-2:#efe7dc;
+  --font:"PingFang TC","Noto Sans TC","Hiragino Sans TC","Microsoft JhengHei",
+         "Source Han Sans TC",system-ui,-apple-system,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{ margin:0; background:#e9e2d8; font-family:var(--font); color:var(--ink); }
+
+.sheet{
+  width:210mm; min-height:297mm; background:var(--paper); margin:14mm auto;
+  padding:11mm 13mm 9mm; position:relative;
+  box-shadow:0 10px 40px -14px rgba(60,40,28,.45);
+  display:flex; flex-direction:column;
+}
+
+/* 頁首 */
+.hd{ display:flex; align-items:flex-end; justify-content:space-between;
+     border-bottom:2.5px solid var(--ink); padding-bottom:3mm; margin-bottom:5mm }
+.hd .no{ font-size:10pt; font-weight:900; letter-spacing:.14em; margin:0 0 1mm }
+.hd h1{ font-size:20pt; font-weight:900; letter-spacing:-.02em; margin:0; line-height:1.15 }
+.hd .sub{ font-size:9.5pt; color:var(--ink3); font-weight:600; margin:1.5mm 0 0 }
+.hd .tagp{ font-size:8.5pt; font-weight:800; letter-spacing:.1em; color:#fff;
+           padding:1.6mm 3.5mm; border-radius:99px; white-space:nowrap }
+.fb .hd .no{color:var(--fb)} .ig .hd .no{color:var(--ig)} .ln .hd .no{color:var(--ln)}
+.fb .tagp{background:var(--fb)} .ig .tagp{background:var(--ig)} .ln .tagp{background:var(--ln)}
+.all .hd .no{color:var(--clay)} .all .tagp{background:var(--clay)}
+
+.blk{ margin-bottom:4.5mm }
+.blk > .q{ font-size:12pt; font-weight:850; margin:0 0 2.4mm; display:flex;
+           align-items:center; gap:2.5mm }
+.blk > .q .dot{ width:3.2mm; height:3.2mm; border-radius:99px; flex:none }
+.fb .dot{background:var(--fb)} .ig .dot{background:var(--ig)} .ln .dot{background:var(--ln)}
+.all .dot{background:var(--clay)}
+.blk > .q .hint{ font-size:9pt; font-weight:650; color:var(--muted) }
+
+/* 比例示意圖 */
+.shapes{ display:flex; gap:5mm; align-items:flex-end; padding:1mm 0 0 }
+.shape{ text-align:center; flex:none }
+.shape .fig{ border-radius:1.5mm; display:grid; place-items:center;
+             font-size:8pt; font-weight:800; color:#fff; letter-spacing:.02em }
+.shape .nm{ font-size:9pt; font-weight:850; margin:1.8mm 0 0; line-height:1.3 }
+.shape .px{ font-size:8.5pt; font-weight:700; color:var(--ink3); margin:.4mm 0 0 }
+.shape .rt{ font-size:8pt; font-weight:700; color:var(--muted); margin:.2mm 0 0 }
+.fb .fig{background:var(--fb)} .ig .fig{background:var(--ig)} .ln .fig{background:var(--ln)}
+.shape .fig.round{ border-radius:99px }
+.shape .fig.soft{ opacity:.55 }
+
+/* 規格表 */
+.spec{ width:100%; border-collapse:collapse; font-size:9.5pt }
+.spec th{ text-align:left; font-size:8.5pt; letter-spacing:.06em; color:var(--muted);
+          font-weight:800; padding:0 2mm 1.5mm; border-bottom:1.5px solid var(--line) }
+.spec td{ padding:2.2mm 2mm; border-bottom:1px dashed var(--line-2); vertical-align:top }
+.spec td.k{ font-weight:850; width:30mm }
+.spec td.d{ font-weight:800; font-variant-numeric:tabular-nums; width:35mm;
+            white-space:nowrap }
+.spec td.r{ font-weight:700; color:var(--ink3); width:16mm; white-space:nowrap }
+.spec td.n{ font-weight:600; color:var(--ink2); font-size:9pt; line-height:1.45 }
+.spec tr:last-child td{ border-bottom:none }
+
+/* 備註欄：把版面底部的留白變成可以寫字的地方 */
+.memo{ margin-top:auto; padding-top:5mm }
+.memo p{ font-size:8.5pt; font-weight:800; letter-spacing:.12em; color:var(--muted);
+         margin:0 0 3mm }
+.memo i{ display:block; border-bottom:1px dashed var(--line); height:7mm }
+
+/* 提示 */
+.tip{ border-radius:0 2.5mm 2.5mm 0; padding:3mm 4mm; font-size:9pt;
+      line-height:1.6; color:var(--ink2); font-weight:600 }
+.fb .tip{ background:var(--fb-tint); border-left:1.2mm solid var(--fb) }
+.ig .tip{ background:var(--ig-tint); border-left:1.2mm solid var(--ig) }
+.ln .tip{ background:var(--ln-tint); border-left:1.2mm solid var(--ln) }
+.all .tip{ background:var(--clay-tint); border-left:1.2mm solid var(--clay) }
+.fb .tip b{color:var(--fb)} .ig .tip b{color:var(--ig)} .ln .tip b{color:var(--ln)}
+.all .tip b{color:var(--clay)}
+.tip.sage{ background:var(--sage-soft); border-left-color:var(--sage) } .tip.sage b{color:var(--sage)}
+.tip.gold{ background:var(--gold-soft); border-left-color:var(--gold) } .tip.gold b{color:#a9761f}
+
+/* 總表 */
+.grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:4mm }
+.pcard{ border:1.2px solid var(--line); border-radius:2.5mm; overflow:hidden }
+.pcard .ph{ padding:2.6mm 3.5mm; font-size:10.5pt; font-weight:900; color:#fff }
+.pcard.fbc .ph{background:var(--fb)} .pcard.igc .ph{background:var(--ig)}
+.pcard.lnc .ph{background:var(--ln)}
+.pcard .pb{ padding:2.6mm 3.5mm 3mm }
+.pcard .row2{ display:flex; justify-content:space-between; gap:2mm;
+              font-size:9pt; padding:1.5mm 0; border-bottom:1px dashed var(--line-2) }
+.pcard .row2:last-child{ border-bottom:none }
+.pcard .row2 span:first-child{ font-weight:750; color:var(--ink2) }
+.pcard .row2 span:last-child{ font-weight:850; font-variant-numeric:tabular-nums; white-space:nowrap }
+
+/* 安全區示意 */
+.safe{ position:relative; width:100%; max-width:120mm; aspect-ratio:1640/624;
+       background:var(--fb); border-radius:1.5mm; overflow:hidden }
+.safe .mob{ position:absolute; top:0; bottom:0; left:19.5%; right:19.5%;
+            border-left:1.5px dashed #fff; border-right:1.5px dashed #fff;
+            background:rgba(255,255,255,.16); display:grid; place-items:center;
+            font-size:8pt; font-weight:850; color:#fff; text-align:center; line-height:1.4 }
+.safe .lab{ position:absolute; left:2mm; top:1.6mm; font-size:8pt; font-weight:850;
+            color:rgba(255,255,255,.85) }
+
+.ft{ margin-top:3mm; padding-top:3mm; border-top:1px solid var(--line-2);
+     display:flex; justify-content:space-between; font-size:8.5pt; color:var(--muted); font-weight:650 }
+
+.bar{ position:fixed; top:0; left:0; right:0; z-index:9; background:#241c17; color:#f5ede1;
+      font-size:13px; font-weight:700; padding:11px 20px; text-align:center; letter-spacing:.02em }
+.bar b{ color:#e3ab63 }
+body{ padding-top:44px }
+
+@page{ size:A4 portrait; margin:0 }
+@media print{
+  body{ background:#fff; padding-top:0 }
+  .bar{ display:none }
+  .sheet{ margin:0; box-shadow:none; page-break-after:always; break-after:page }
+  .sheet:last-child{ page-break-after:auto; break-after:auto }
+}
+</style>
+</head>
+<body>
+
+<div class="bar">圖片尺寸速查表（共 4 張，A4 直式）　·　列印：<b>Ctrl / Cmd + P</b> → 紙張 A4、方向直式、邊界「無」</div>
+
+<!-- ═══════════ 1｜總表 ═══════════ -->
+<section class="sheet all">
+  <div class="hd">
+    <div>
+      <p class="no">速查表 1 ｜ 總表</p>
+      <h1>一張紙看懂三個平台</h1>
+      <p class="sub">最常用到的尺寸，先記這幾個就夠。</p>
+    </div>
+    <span class="tagp">貼在工作桌前</span>
+  </div>
+
+  <div class="blk">
+    <p class="q"><span class="dot"></span>三個平台最常用的尺寸</p>
+    <div class="grid3">
+      <div class="pcard fbc">
+        <div class="ph">Facebook 粉專</div>
+        <div class="pb">
+          <div class="row2"><span>大頭貼</span><span>360 × 360</span></div>
+          <div class="row2"><span>封面（橫幅）</span><span>1640 × 624</span></div>
+          <div class="row2"><span>貼文（正方）</span><span>1080 × 1080</span></div>
+          <div class="row2"><span>貼文（直式）</span><span>1080 × 1350</span></div>
+          <div class="row2"><span>限時動態</span><span>1080 × 1920</span></div>
+        </div>
+      </div>
+      <div class="pcard igc">
+        <div class="ph">Instagram</div>
+        <div class="pb">
+          <div class="row2"><span>大頭貼</span><span>320 × 320</span></div>
+          <div class="row2"><span>貼文（直式）</span><span>1080 × 1350</span></div>
+          <div class="row2"><span>貼文（正方）</span><span>1080 × 1080</span></div>
+          <div class="row2"><span>限動 / Reels</span><span>1080 × 1920</span></div>
+          <div class="row2"><span>精選限動封面</span><span>1080 × 1920</span></div>
+        </div>
+      </div>
+      <div class="pcard lnc">
+        <div class="ph">LINE 官方帳號</div>
+        <div class="pb">
+          <div class="row2"><span>大頭貼</span><span>640 × 640</span></div>
+          <div class="row2"><span>封面（背景圖）</span><span>1080 × 878</span></div>
+          <div class="row2"><span>圖文選單（大）</span><span>2500 × 1686</span></div>
+          <div class="row2"><span>圖文選單（小）</span><span>2500 × 843</span></div>
+          <div class="row2"><span>圖文訊息</span><span>1040 × 1040</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="blk">
+    <p class="q"><span class="dot"></span>常見比例長什麼樣<span class="hint">同樣高度下的形狀差異</span></p>
+    <div class="shapes">
+      <div class="shape"><div class="fig round" style="width:22mm;height:22mm;background:var(--clay)">1:1</div>
+        <p class="nm">大頭貼</p><p class="rt">圓形裁切</p></div>
+      <div class="shape"><div class="fig" style="width:26mm;height:26mm;background:var(--clay)">1:1</div>
+        <p class="nm">正方形貼文</p><p class="rt">1080 × 1080</p></div>
+      <div class="shape"><div class="fig" style="width:22mm;height:27.5mm;background:var(--sage)">4:5</div>
+        <p class="nm">直式貼文</p><p class="rt">1080 × 1350</p></div>
+      <div class="shape"><div class="fig" style="width:16mm;height:28.4mm;background:var(--gold)">9:16</div>
+        <p class="nm">限動 / Reels</p><p class="rt">1080 × 1920</p></div>
+      <div class="shape"><div class="fig" style="width:40mm;height:15.2mm;background:var(--fb)">2.63:1</div>
+        <p class="nm">FB 封面</p><p class="rt">1640 × 624</p></div>
+      <div class="shape"><div class="fig" style="width:26mm;height:21.1mm;background:var(--ln)">1.23:1</div>
+        <p class="nm">LINE 封面</p><p class="rt">1080 × 878</p></div>
+    </div>
+  </div>
+
+  <div class="blk">
+    <p class="q"><span class="dot"></span>不管哪個平台，記住這五件事</p>
+    <table class="spec">
+      <tbody>
+        <tr><td class="k">寬度至少 1080</td>
+          <td class="n" colspan="3">手機螢幕很細緻，寬度低於 1080 上傳後會糊。手機直接拍的照片都超過這個數字，不用擔心。</td></tr>
+        <tr><td class="k">格式用 JPG</td>
+          <td class="n" colspan="3">照片用 JPG（檔案小、上傳快）。圖上有文字或需要透明背景才用 PNG。</td></tr>
+        <tr><td class="k">正方形最安全</td>
+          <td class="n" colspan="3">不知道要用什麼比例時，用 <b>1080 × 1080</b>，三個平台都不會被裁掉重要部分。</td></tr>
+        <tr><td class="k">重要內容放中間</td>
+          <td class="n" colspan="3">封面、橫幅在手機上會被裁掉左右兩邊。店名、電話千萬不要放在最邊邊。</td></tr>
+        <tr><td class="k">不要放大小圖</td>
+          <td class="n" colspan="3">小圖硬拉大一定會糊。寧可用原圖裁切，也不要把小圖放大。</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tip gold">
+    <b>怎麼知道自己的照片幾 px？</b>
+    iPhone：相簿打開照片 → 往上滑，會顯示「○○○○ × ○○○○」。
+    Android：相簿 → 右上角「⋮」→「詳細資料」。<br>
+    <b>怎麼裁成正方形？</b>相簿打開照片 → 編輯 → 裁切 → 選「正方形」，不用另外裝 App。
+  </div>
+
+  <div class="memo">
+    <p>備註</p>
+    <i></i><i></i><i></i>
+  </div>
+
+  <div class="ft"><span>社群平台操作入門　·　西屯婦女培力</span><span>速查表 1 / 4</span></div>
+</section>
+
+<!-- ═══════════ 2｜Facebook ═══════════ -->
+<section class="sheet fb">
+  <div class="hd">
+    <div>
+      <p class="no">速查表 2</p>
+      <h1>Facebook 粉絲專頁</h1>
+      <p class="sub">大頭貼、封面橫幅、貼文、限時動態</p>
+    </div>
+    <span class="tagp">FACEBOOK</span>
+  </div>
+
+  <div class="blk">
+    <p class="q"><span class="dot"></span>比例示意</p>
+    <div class="shapes">
+      <div class="shape"><div class="fig round" style="width:20mm;height:20mm">1:1</div>
+        <p class="nm">大頭貼</p><p class="px">360 × 360</p></div>
+      <div class="shape"><div class="fig" style="width:44mm;height:16.7mm">2.63:1</div>
+        <p class="nm">封面橫幅</p><p class="px">1640 × 624</p></div>
+      <div class="shape"><div class="fig" style="width:24mm;height:24mm">1:1</div>
+        <p class="nm">貼文</p><p class="px">1080 × 1080</p></div>
+      <div class="shape"><div class="fig" style="width:14mm;height:24.9mm">9:16</div>
+        <p class="nm">限時動態</p><p class="px">1080 × 1920</p></div>
+    </div>
+  </div>
+
+  <div class="blk">
+    <p class="q"><span class="dot"></span>完整規格</p>
+    <table class="spec">
+      <thead><tr><th>用途</th><th>建議上傳尺寸</th><th>比例</th><th>提醒</th></tr></thead>
+      <tbody>
+        <tr><td class="k">大頭貼</td><td class="d">360 × 360 px</td><td class="r">1:1</td>
+          <td class="n">顯示為<b>圓形</b>，四個角一定會被切掉。臉或商品要放正中間。手機上顯示約 196 px。</td></tr>
+        <tr><td class="k">封面橫幅</td><td class="d">1640 × 624 px</td><td class="r">2.63:1</td>
+          <td class="n">電腦顯示 820 × 312、手機顯示 640 × 360。<b>手機會裁掉左右兩側</b>，重要內容放中間（見下方）。</td></tr>
+        <tr><td class="k">貼文 · 正方形</td><td class="d">1080 × 1080 px</td><td class="r">1:1</td>
+          <td class="n">最通用，同一張圖也能直接發到 IG。</td></tr>
+        <tr><td class="k">貼文 · 直式</td><td class="d">1080 × 1350 px</td><td class="r">4:5</td>
+          <td class="n">在手機上佔的版面最大，比較容易被看到。</td></tr>
+        <tr><td class="k">貼文 · 橫式</td><td class="d">1200 × 630 px</td><td class="r">1.91:1</td>
+          <td class="n">分享連結時的預覽圖也是這個比例。</td></tr>
+        <tr><td class="k">限時動態</td><td class="d">1080 × 1920 px</td><td class="r">9:16</td>
+          <td class="n">滿版直式。上下各留約 250 px 不要放字，會被介面遮住。</td></tr>
+        <tr><td class="k">活動封面</td><td class="d">1920 × 1005 px</td><td class="r">1.91:1</td>
+          <td class="n">辦市集、開課活動時用。</td></tr>
+        <tr><td class="k">檔案格式</td><td class="d">JPG 或 PNG</td><td class="r">—</td>
+          <td class="n">照片用 JPG；圖上有文字用 PNG 比較不會糊。</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="blk">
+    <p class="q"><span class="dot"></span>封面橫幅的安全區<span class="hint">最常出錯的地方</span></p>
+    <div class="safe">
+      <span class="lab">電腦看得到的範圍（1640 × 624）</span>
+      <span class="mob">手機只看得到中間這一塊<br>店名、電話、重要圖案放這裡</span>
+    </div>
+  </div>
+
+  <div class="tip">
+    <b>最常見的三個錯誤：</b>
+    ① 大頭貼放全身照或風景，縮成圓形後看不出是什麼。
+    ② 封面把店名放在最左邊，手機一看就被裁掉。
+    ③ 用截圖當貼文圖片——截圖的解析度通常不夠，放大會糊。
+  </div>
+
+  
+
+  <div class="ft"><span>社群平台操作入門　·　西屯婦女培力</span><span>速查表 2 / 4</span></div>
+</section>
+
+<!-- ═══════════ 3｜Instagram ═══════════ -->
+<section class="sheet ig">
+  <div class="hd">
+    <div>
+      <p class="no">速查表 3</p>
+      <h1>Instagram</h1>
+      <p class="sub">大頭貼、貼文、限時動態、Reels、精選限動</p>
+    </div>
+    <span class="tagp">INSTAGRAM</span>
+  </div>
+
+  <div class="blk">
+    <p class="q"><span class="dot"></span>比例示意</p>
+    <div class="shapes">
+      <div class="shape"><div class="fig round" style="width:19mm;height:19mm">1:1</div>
+        <p class="nm">大頭貼</p><p class="px">320 × 320</p></div>
+      <div class="shape"><div class="fig" style="width:22mm;height:27.5mm">4:5</div>
+        <p class="nm">直式貼文</p><p class="px">1080 × 1350</p></div>
+      <div class="shape"><div class="fig" style="width:24mm;height:24mm">1:1</div>
+        <p class="nm">正方形貼文</p><p class="px">1080 × 1080</p></div>
+      <div class="shape"><div class="fig" style="width:15mm;height:26.7mm">9:16</div>
+        <p class="nm">限動 / Reels</p><p class="px">1080 × 1920</p></div>
+      <div class="shape"><div class="fig soft" style="width:18mm;height:24mm">3:4</div>
+        <p class="nm">九宮格顯示</p><p class="rt">系統自動裁切</p></div>
+    </div>
+  </div>
+
+  <div class="blk">
+    <p class="q"><span class="dot"></span>完整規格</p>
+    <table class="spec">
+      <thead><tr><th>用途</th><th>建議上傳尺寸</th><th>比例</th><th>提醒</th></tr></thead>
+      <tbody>
+        <tr><td class="k">大頭貼</td><td class="d">320 × 320 px</td><td class="r">1:1</td>
+          <td class="n">顯示為<b>圓形</b>且很小（約 110 px）。細節多的圖看不清楚，用單一主體最好。</td></tr>
+        <tr><td class="k">貼文 · 直式</td><td class="d">1080 × 1350 px</td><td class="r">4:5</td>
+          <td class="n"><b>最推薦。</b>在手機上佔版面最大，別人滑到時比較容易停下來。</td></tr>
+        <tr><td class="k">貼文 · 正方形</td><td class="d">1080 × 1080 px</td><td class="r">1:1</td>
+          <td class="n">最安全，跟 FB 通用，同一張圖兩邊都能發。</td></tr>
+        <tr><td class="k">貼文 · 橫式</td><td class="d">1080 × 566 px</td><td class="r">1.91:1</td>
+          <td class="n">佔版面最小，除非是風景照，否則不建議。</td></tr>
+        <tr><td class="k">限時動態</td><td class="d">1080 × 1920 px</td><td class="r">9:16</td>
+          <td class="n">上下各留約 250 px 不要放重要文字，會被頭像與輸入框遮住。</td></tr>
+        <tr><td class="k">Reels</td><td class="d">1080 × 1920 px</td><td class="r">9:16</td>
+          <td class="n">直式錄影即可。手機直接錄就是這個比例，不用調整。</td></tr>
+        <tr><td class="k">精選限動封面</td><td class="d">1080 × 1920 px</td><td class="r">9:16</td>
+          <td class="n">顯示成小圓形，只看得到<b>正中央</b>那一小塊。</td></tr>
+        <tr><td class="k">個人檔案九宮格</td><td class="d">系統自動裁切</td><td class="r">3:4</td>
+          <td class="n">貼文在九宮格會被裁成直式，<b>主體放中間</b>才不會被切到。</td></tr>
+        <tr><td class="k">檔案格式</td><td class="d">JPG 或 PNG</td><td class="r">—</td>
+          <td class="n">IG 會自動壓縮。原圖越清楚，壓縮後越好看。</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tip">
+    <b>兩個很多人不知道的重點：</b>
+    ① 貼文上傳時 IG 預設會裁成正方形，要點左下角的<b>「⤢」展開圖示</b>才會保留原本的直式比例。
+    ② 九宮格的裁切跟貼文本身不一樣——貼文是 4:5，九宮格顯示是 3:4，所以<b>商品不要放在照片最下面</b>。
+  </div>
+
+  <div class="memo">
+    <p>備註</p>
+    <i></i><i></i><i></i>
+  </div>
+
+  <div class="ft"><span>社群平台操作入門　·　西屯婦女培力</span><span>速查表 3 / 4</span></div>
+</section>
+
+<!-- ═══════════ 4｜LINE ═══════════ -->
+<section class="sheet ln">
+  <div class="hd">
+    <div>
+      <p class="no">速查表 4</p>
+      <h1>LINE 官方帳號</h1>
+      <p class="sub">大頭貼、封面、圖文選單、圖文訊息</p>
+    </div>
+    <span class="tagp">LINE OA</span>
+  </div>
+
+  <div class="blk">
+    <p class="q"><span class="dot"></span>比例示意</p>
+    <div class="shapes">
+      <div class="shape"><div class="fig round" style="width:20mm;height:20mm">1:1</div>
+        <p class="nm">大頭貼</p><p class="px">640 × 640</p></div>
+      <div class="shape"><div class="fig" style="width:26mm;height:21.1mm">1.23:1</div>
+        <p class="nm">封面背景圖</p><p class="px">1080 × 878</p></div>
+      <div class="shape"><div class="fig" style="width:34mm;height:22.9mm">1.48:1</div>
+        <p class="nm">圖文選單（大）</p><p class="px">2500 × 1686</p></div>
+      <div class="shape"><div class="fig" style="width:34mm;height:11.5mm">2.97:1</div>
+        <p class="nm">圖文選單（小）</p><p class="px">2500 × 843</p></div>
+      <div class="shape"><div class="fig" style="width:22mm;height:22mm">1:1</div>
+        <p class="nm">圖文訊息</p><p class="px">1040 × 1040</p></div>
+    </div>
+  </div>
+
+  <div class="blk">
+    <p class="q"><span class="dot"></span>完整規格<span class="hint">LINE 對檔案大小限制比較嚴格</span></p>
+    <table class="spec">
+      <thead><tr><th>用途</th><th>尺寸</th><th>檔案上限</th><th>提醒</th></tr></thead>
+      <tbody>
+        <tr><td class="k">大頭貼</td><td class="d">640 × 640 px</td><td class="r">3 MB</td>
+          <td class="n">顯示為<b>圓形</b>。建議跟 FB 粉專用同一張，客人才認得出是同一家。</td></tr>
+        <tr><td class="k">封面（背景圖）</td><td class="d">1080 × 878 px</td><td class="r">3 MB</td>
+          <td class="n">客人點進你的帳號首頁才看得到。上方會被大頭貼與名稱蓋住一部分。</td></tr>
+        <tr><td class="k">圖文選單 · 大</td><td class="d">2500 × 1686 px</td><td class="r">1 MB</td>
+          <td class="n">聊天室最下面固定的按鈕區。可切成 2–6 格。</td></tr>
+        <tr><td class="k">圖文選單 · 小</td><td class="d">2500 × 843 px</td><td class="r">1 MB</td>
+          <td class="n">只佔一半高度，不會擋到對話。初學者建議用這個。</td></tr>
+        <tr><td class="k">圖文訊息</td><td class="d">1040 × 1040 px</td><td class="r">10 MB</td>
+          <td class="n">群發時可以點的大圖，適合新品公告、活動通知。</td></tr>
+        <tr><td class="k">群發訊息圖片</td><td class="d">建議 1040 × 1040</td><td class="r">10 MB</td>
+          <td class="n">一般照片直接傳即可，系統會自動處理。</td></tr>
+        <tr><td class="k">優惠券圖片</td><td class="d">1040 × 1040 px</td><td class="r">10 MB</td>
+          <td class="n">正方形。</td></tr>
+        <tr><td class="k">檔案格式</td><td class="d">JPG / JPEG / PNG</td><td class="r">—</td>
+          <td class="n">不支援 HEIC。iPhone 拍的照片若無法上傳，先用「編輯 → 儲存」轉一次即可。</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tip">
+    <b>圖文選單 1 MB 的限制最容易卡住。</b>
+    2500 × 1686 的圖很容易超過 1 MB。解決方式：
+    ① 存檔時選 JPG 而不是 PNG；
+    ② 用手機內建的「編輯 → 儲存」再上傳一次，檔案通常會變小；
+    ③ 圖案簡單一點（純色背景 ＋ 文字），檔案自然小。
+  </div>
+
+  <div class="tip sage" style="margin-top:3mm">
+    <b>今天不用急著做圖文選單。</b>等好友累積到 30–50 人再回來設定，比較划算。
+    先把大頭貼與封面弄好就夠了。
+  </div>
+
+  <div class="memo">
+    <p>備註</p>
+    <i></i><i></i><i></i>
+  </div>
+
+  <div class="ft"><span>社群平台操作入門　·　西屯婦女培力</span><span>速查表 4 / 4</span></div>
+</section>
+
+</body>
+</html>
