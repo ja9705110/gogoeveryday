@@ -346,8 +346,8 @@ const avatar = (art=ART.jar, bg=C.claySoft)=>
    ========================================================================= */
 
 /* 手機外框 */
-function phone(inner, {sm=false, style=''}={}){
-  return `<div class="phone${sm?' sm':''}" style="${style}">
+function phone(inner, {sm=false, xs=false, style=''}={}){
+  return `<div class="phone${xs?' xs':sm?' sm':''}" style="${style}">
     <div class="scr">
       <div class="stat"><span>9:41</span><span class="r">●●● ▮</span></div>
       ${inner}
@@ -430,4 +430,87 @@ function richMenu(){
     border-radius:14px;border:1px solid rgba(36,28,23,.12)">
     ${cell('商品目錄','🧺')}${cell('我要預訂','📝')}${cell('營業時間','🕘')}
     ${cell('最新消息','📣')}${cell('取貨地點','📍')}${cell('聯絡我們','💬')}</div>`;
+}
+
+/* =========================================================================
+   四、操作教學專用元件（建立流程、設定畫面、後台數據）
+   ========================================================================= */
+
+/* 一列小手機＋編號說明，用來示範「幾個步驟完成一件事」 */
+function steps(list){
+  return `<div style="display:flex;gap:18px;align-items:flex-start;justify-content:center">
+    ${list.map((s,i)=>`
+    <div style="width:198px;flex:none;text-align:center">
+      <div style="position:relative;display:inline-block">
+        ${phone(s.screen, {xs:true})}
+        <span style="position:absolute;left:-15px;top:-15px;width:38px;height:38px;border-radius:99px;
+          background:${C.clay};color:#fff;display:grid;place-items:center;
+          font-size:20px;font-weight:900;border:3px solid ${C.paper};
+          box-shadow:0 3px 8px rgba(60,40,28,.28)">${i+1}</span>
+      </div>
+      <p style="margin:10px 0 0;font-size:20px;font-weight:800;color:${C.ink};line-height:1.3">${s.t}</p>
+      ${s.d?`<p style="margin:5px 0 0;font-size:20px;color:${C.ink3};font-weight:600;line-height:1.4">${s.d}</p>`:''}
+    </div>`).join('')}
+  </div>`;
+}
+
+/* 設定清單畫面（手機裡的一排設定項目，可指定highlight） */
+function settingRows(rows, hi=-1){
+  return rows.map(([t,v],i)=>`
+    <div style="display:flex;align-items:center;gap:9px;background:#fff;border-radius:9px;
+      padding:11px 12px;margin-bottom:6px;
+      ${i===hi?`outline:2.5px solid ${C.clay};outline-offset:1px`:''}">
+      <span style="font-size:13px;font-weight:750;color:#1c1e21">${t}</span>
+      <span style="margin-left:auto;font-size:12px;color:#8a8d91;font-weight:650">${v||'›'}</span>
+    </div>`).join('');
+}
+
+/* 大數字磚：後台數據用 */
+function numTile(label, value, sub, tone=C.clay, bg=C.clayTint){
+  return `<div class="card" style="padding:20px 22px;text-align:left">
+    <p class="cap" style="color:${tone};margin-bottom:6px">${label}</p>
+    <p style="margin:0;font-size:42px;font-weight:900;letter-spacing:-.02em;color:${C.ink};
+      line-height:1.05">${value}</p>
+    ${sub?`<p style="margin:6px 0 0;font-size:20px;font-weight:700;color:${C.ink3}">${sub}</p>`:''}
+  </div>`;
+}
+
+/* 後台數據畫面（手機版，三個平台共用外框） */
+function insightScreen({title, tone, rows, chart=true}){
+  return phone(`
+    <div class="app-bar" style="background:${tone};border-bottom:none">
+      <span class="ttl" style="color:#fff">${title}</span>
+      <span class="ic" style="color:rgba(255,255,255,.9)"><b style="font-size:13px">☰</b></span></div>
+    <div class="app-body" style="padding:11px;background:#f6f7f8">
+      ${chart?`<div style="background:#fff;border-radius:10px;padding:11px;margin-bottom:8px">
+        <svg viewBox="0 0 200 60" width="100%" height="52">
+          ${[12,26,20,38,32,48,44].map((v,i)=>
+            `<rect x="${8+i*27}" y="${56-v}" width="16" height="${v}" rx="3" fill="${tone}" opacity="${.35+i*.09}"/>`).join('')}
+        </svg>
+        <p style="margin:6px 0 0;font-size:10px;color:#8a8d91;font-weight:700;text-align:center">最近 7 天</p>
+      </div>`:''}
+      ${rows.map(([t,v,d])=>`
+        <div style="background:#fff;border-radius:10px;padding:10px 12px;margin-bottom:6px;
+          display:flex;align-items:center">
+          <span style="font-size:12px;font-weight:700;color:#1c1e21">${t}</span>
+          <span style="margin-left:auto;text-align:right">
+            <b style="display:block;font-size:15px;font-weight:900;color:#1c1e21">${v}</b>
+            ${d?`<span style="font-size:10px;font-weight:800;color:${d[0]==='＋'?'#2f855a':'#c53030'}">${d}</span>`:''}
+          </span></div>`).join('')}
+    </div>`);
+}
+
+/* 三種數據情況的解讀卡 */
+function readCard(sym, title, mean, act, tone, bg){
+  return `<div class="card" style="padding:22px 22px">
+    <div style="display:flex;align-items:center;gap:11px;margin-bottom:12px">
+      <span style="width:40px;height:40px;border-radius:12px;background:${bg};color:${tone};
+        display:grid;place-items:center;font-size:22px;font-weight:900;flex:none">${sym}</span>
+      <p class="k" style="margin:0;font-size:21px;color:${tone}">${title}</p>
+    </div>
+    <p class="cap" style="margin-bottom:4px">代表什麼</p>
+    <p class="v" style="margin-bottom:12px">${mean}</p>
+    <p class="cap" style="margin-bottom:4px">下一篇怎麼改</p>
+    <p class="v" style="font-weight:700;color:${C.ink}">${act}</p>
+  </div>`;
 }

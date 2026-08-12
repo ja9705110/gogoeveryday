@@ -3,12 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>課堂講義（四張）｜社群平台操作入門</title>
+<title>操作講義（三張）｜社群平台操作入門</title>
 <style>
 :root{
   --paper:#fff; --ink:#241c17; --ink2:#4a3c33; --ink3:#7a6a5d; --muted:#9c8b7c;
   --clay:#c05f3c; --clay-tint:#fbeee6; --sage:#5f7a63; --sage-soft:#eaf0e8;
-  --gold:#d99a4e; --gold-soft:#fbf0dc; --plum:#8a5a6d; --plum-soft:#f6eaef;
+  --gold:#d99a4e; --gold-soft:#fbf0dc;
+  --fb:#1877f2; --fb-tint:#eef4ff; --ig:#e1306c; --ig-tint:#fdeef4;
+  --ln:#03934a; --ln-tint:#e6f8ee;
   --line:#ded3c6; --line-2:#efe7dc;
   --font:"PingFang TC","Noto Sans TC","Hiragino Sans TC","Microsoft JhengHei",
          "Source Han Sans TC",system-ui,-apple-system,sans-serif;
@@ -18,78 +20,76 @@ body{ margin:0; background:#e9e2d8; font-family:var(--font); color:var(--ink); }
 
 .sheet{
   width:210mm; min-height:297mm; background:var(--paper); margin:14mm auto;
-  padding:16mm 16mm 12mm; position:relative;
+  padding:11mm 14mm 9mm; position:relative;
   box-shadow:0 10px 40px -14px rgba(60,40,28,.45);
   display:flex; flex-direction:column;
 }
 
 /* 頁首 */
 .hd{ display:flex; align-items:flex-end; justify-content:space-between;
-     border-bottom:2.5px solid var(--ink); padding-bottom:5mm; margin-bottom:7mm }
-.hd .no{ font-size:11pt; font-weight:900; letter-spacing:.18em; color:var(--clay); margin:0 0 2mm }
-.hd h1{ font-size:22pt; font-weight:900; letter-spacing:-.02em; margin:0; line-height:1.15 }
-.hd .sub{ font-size:9.5pt; color:var(--ink3); font-weight:600; margin:2mm 0 0 }
+     border-bottom:2.5px solid var(--ink); padding-bottom:3mm; margin-bottom:4.5mm }
+.hd .no{ font-size:10pt; font-weight:900; letter-spacing:.14em; margin:0 0 1mm }
+.hd h1{ font-size:19pt; font-weight:900; letter-spacing:-.02em; margin:0; line-height:1.15 }
+.hd .sub{ font-size:9.5pt; color:var(--ink3); font-weight:600; margin:1.5mm 0 0 }
 .hd .who{ text-align:right; font-size:9pt; color:var(--muted); font-weight:700; white-space:nowrap }
 .hd .who b{ display:block; color:var(--ink3); font-size:8.5pt; letter-spacing:.14em; margin-bottom:2mm }
-.hd .who .ln{ display:inline-block; width:34mm; border-bottom:1.2px solid var(--line) }
+.hd .who .ln{ display:inline-block; width:32mm; border-bottom:1.2px solid var(--line) }
+.fb .hd .no{color:var(--fb)} .ig .hd .no{color:var(--ig)} .ln .hd .no{color:var(--ln)}
 
-/* 區塊 */
-.blk{ margin-bottom:5.2mm }
-.blk > .q{ font-size:12.5pt; font-weight:850; margin:0 0 3mm; display:flex; align-items:center; gap:3mm }
-.blk > .q .dot{ width:3.2mm; height:3.2mm; border-radius:99px; background:var(--clay); flex:none }
-.blk > .q .hint{ font-size:9pt; font-weight:650; color:var(--muted); letter-spacing:0 }
-.blk.sage > .q .dot{ background:var(--sage) }
-.blk.gold > .q .dot{ background:var(--gold) }
-.blk.plum > .q .dot{ background:var(--plum) }
+.blk{ margin-bottom:2.6mm }
+.blk > .q{ font-size:11.5pt; font-weight:850; margin:0 0 1.8mm; display:flex;
+           align-items:center; gap:2.5mm }
+.blk > .q .dot{ width:3.2mm; height:3.2mm; border-radius:99px; flex:none }
+.fb .dot{background:var(--fb)} .ig .dot{background:var(--ig)} .ln .dot{background:var(--ln)}
+.blk > .q .hint{ font-size:9pt; font-weight:650; color:var(--muted) }
 
-/* 書寫線 */
-.lines{ display:flex; flex-direction:column; gap:8mm; padding-top:2.5mm }
-.lines i{ display:block; border-bottom:1.2px solid var(--line) }
-.lines.tight{ gap:6.5mm }
-.box{ border:1.4px solid var(--line); border-radius:2.5mm; min-height:23mm; padding:4mm 5mm;
-      background:#fffdfa }
-.box.tall{ min-height:38mm }
-.box .ph{ font-size:9pt; color:#c3b6a7; font-weight:600 }
+/* 步驟 */
+.steps{ counter-reset:s; display:flex; flex-direction:column; gap:1.3mm }
+.step{ display:flex; gap:2.6mm; align-items:flex-start; font-size:10pt; font-weight:700;
+       border-bottom:1px dashed var(--line-2); padding-bottom:1.2mm }
+.step .n{ width:6mm; height:6mm; border-radius:1.6mm; color:#fff; flex:none;
+          display:grid; place-items:center; font-size:9pt; font-weight:900 }
+.fb .step .n{background:var(--fb)} .ig .step .n{background:var(--ig)} .ln .step .n{background:var(--ln)}
+.step .d{ font-size:9pt; font-weight:600; color:var(--ink3); display:block; margin-top:.6mm }
+.step .sq{ width:4.6mm; height:4.6mm; border:1.5px solid var(--line); border-radius:1.2mm;
+           flex:none; margin-left:auto }
 
 /* 勾選 */
-.opts{ display:flex; flex-wrap:wrap; gap:4mm 8mm; padding-top:1mm }
-.opt{ display:flex; align-items:center; gap:2.5mm; font-size:12pt; font-weight:750 }
-.opt .sq{ width:5mm; height:5mm; border:1.6px solid var(--ink2); border-radius:1.2mm; flex:none }
-.checklist{ display:flex; flex-direction:column; gap:2.8mm; padding-top:1mm }
-.chk{ display:flex; align-items:center; gap:3.5mm; font-size:11.5pt; font-weight:700;
-      border-bottom:1px dashed var(--line-2); padding-bottom:2.2mm }
-.chk .sq{ width:5mm; height:5mm; border:1.6px solid var(--clay); border-radius:1.2mm; flex:none }
+.checklist{ display:flex; flex-direction:column; gap:1.4mm }
+.chk{ display:flex; align-items:center; gap:2.6mm; font-size:10pt; font-weight:700;
+      border-bottom:1px dashed var(--line-2); padding-bottom:1.2mm }
+.chk .sq{ width:5mm; height:5mm; border:1.6px solid var(--ink2); border-radius:1.2mm; flex:none }
 .chk .note{ margin-left:auto; font-size:8.5pt; color:var(--muted); font-weight:650 }
 
-/* 關鍵字格 */
-.kw{ display:grid; grid-template-columns:repeat(2,1fr); gap:3mm 7mm; padding-top:1.5mm }
-.kw .cell{ display:flex; align-items:baseline; gap:3mm }
-.kw .n{ font-size:10pt; font-weight:900; color:var(--clay); width:6mm; flex:none }
-.kw .ln{ flex:1; border-bottom:1.2px solid var(--line); height:8mm }
-.group{ border-radius:3mm; padding:3.5mm 5mm 4mm; margin-bottom:4mm }
-.group.a{ background:var(--clay-tint) } .group.b{ background:var(--sage-soft) }
-.group.c{ background:var(--gold-soft) }
-.group .gh{ display:flex; align-items:baseline; gap:3mm; margin-bottom:1mm }
-.group .gt{ font-size:12pt; font-weight:900 }
-.group .gd{ font-size:9pt; font-weight:650; color:var(--ink3) }
-.group.a .gt{ color:var(--clay) } .group.b .gt{ color:var(--sage) } .group.c .gt{ color:#a9761f }
+/* 書寫 */
+.lines{ display:flex; flex-direction:column; gap:6mm; padding-top:1.5mm }
+.lines i{ display:block; border-bottom:1.2px solid var(--line) }
+.box{ border:1.4px solid var(--line); border-radius:2.5mm; min-height:19mm; padding:3mm 4mm;
+      background:#fffdfa }
+.box .ph{ font-size:9pt; color:#c3b6a7; font-weight:600; line-height:1.6 }
 
-/* 提示卡 */
-.tip{ background:var(--clay-tint); border-left:1.2mm solid var(--clay); border-radius:0 2.5mm 2.5mm 0;
-      padding:4mm 5mm; font-size:9.5pt; line-height:1.7; color:var(--ink2); font-weight:600 }
-.tip b{ color:var(--clay) }
-.tip.sage{ background:var(--sage-soft); border-left-color:var(--sage) } .tip.sage b{ color:var(--sage) }
-.tip.gold{ background:var(--gold-soft); border-left-color:var(--gold) } .tip.gold b{ color:#a9761f }
-.eg{ font-size:9pt; color:var(--muted); font-weight:650; margin:1.5mm 0 0 }
+/* 數字記錄表 */
+.nums{ width:100%; border-collapse:collapse; font-size:10pt }
+.nums th{ text-align:left; font-size:8.5pt; letter-spacing:.08em; color:var(--muted);
+          font-weight:800; padding:0 2mm 1.5mm; border-bottom:1.5px solid var(--line) }
+.nums td{ padding:2.2mm 2mm; border-bottom:1px dashed var(--line-2); font-weight:700 }
+.nums td.v{ border-bottom:1.2px solid var(--line); width:26mm }
+.nums .exp{ font-size:8.5pt; color:var(--ink3); font-weight:600; margin-left:2.5mm }
 
-/* 頁尾 */
-.ft{ margin-top:auto; padding-top:5mm; border-top:1px solid var(--line-2);
+/* 提示 */
+.tip{ border-radius:0 2.5mm 2.5mm 0; padding:3mm 4mm; font-size:9pt;
+      line-height:1.55; color:var(--ink2); font-weight:600 }
+.fb .tip{ background:var(--fb-tint); border-left:1.2mm solid var(--fb) }
+.ig .tip{ background:var(--ig-tint); border-left:1.2mm solid var(--ig) }
+.ln .tip{ background:var(--ln-tint); border-left:1.2mm solid var(--ln) }
+.fb .tip b{color:var(--fb)} .ig .tip b{color:var(--ig)} .ln .tip b{color:var(--ln)}
+.eg{ font-size:8.5pt; color:var(--muted); font-weight:650; margin:1.2mm 0 0 }
+
+.ft{ margin-top:auto; padding-top:3mm; border-top:1px solid var(--line-2);
      display:flex; justify-content:space-between; font-size:8.5pt; color:var(--muted); font-weight:650 }
 
-/* 螢幕上的列印提示 */
 .bar{ position:fixed; top:0; left:0; right:0; z-index:9; background:#241c17; color:#f5ede1;
-      font-size:13px; font-weight:700; padding:11px 20px; display:flex; gap:16px;
-      align-items:center; justify-content:center; letter-spacing:.02em }
+      font-size:13px; font-weight:700; padding:11px 20px; text-align:center; letter-spacing:.02em }
 .bar b{ color:#e3ab63 }
 body{ padding-top:44px }
 
@@ -104,234 +104,217 @@ body{ padding-top:44px }
 </head>
 <body>
 
-<div class="bar">課堂講義（共 4 張，A4 直式）　·　列印：<b>Ctrl / Cmd + P</b> → 紙張 A4、方向直式、邊界「無」</div>
+<div class="bar">操作講義（共 3 張，A4 直式）　·　列印：<b>Ctrl / Cmd + P</b> → 紙張 A4、方向直式、邊界「無」</div>
 
-<!-- ══════════════ 講義 1 ══════════════ -->
-<section class="sheet">
+<!-- ═══════════ 講義 1｜Facebook ═══════════ -->
+<section class="sheet fb">
   <div class="hd">
     <div>
-      <p class="no">講義 1</p>
-      <h1>我的平台選擇</h1>
-      <p class="sub">搭配課程 Slide 12 · 61　｜　上午填前半，下課前完成後半</p>
+      <p class="no">講義 1 ｜ 09:10–11:05</p>
+      <h1>Facebook 粉絲專頁</h1>
+      <p class="sub">跟著講師一步一步做。做完一步就打一個勾。</p>
     </div>
     <div class="who"><b>姓名</b><span class="ln"></span></div>
   </div>
 
   <div class="blk">
-    <p class="q"><span class="dot"></span>我的商品／技能是什麼？</p>
-    <div class="lines"><i></i><i></i></div>
-    <p class="eg">例：手工果醬、手作耳環、瑜珈課、家常菜外帶、代客送禮包裝</p>
-  </div>
-
-  <div class="blk sage">
-    <p class="q"><span class="dot"></span>我想讓誰看到？<span class="hint">年紀、性別、住哪裡、什麼時候會需要</span></p>
-    <div class="lines"><i></i><i></i></div>
-    <p class="eg">例：住台中西屯、40–60 歲、常買伴手禮送人的女性</p>
-  </div>
-
-  <div class="blk gold">
-    <p class="q"><span class="dot"></span>我的主要曝光平台<span class="hint">只選一個，做熟了再考慮第二個</span></p>
-    <div class="opts">
-      <span class="opt"><span class="sq"></span>Facebook 粉絲專頁</span>
-      <span class="opt"><span class="sq"></span>Instagram</span>
+    <p class="q"><span class="dot"></span>建立粉絲專頁</p>
+    <div class="steps">
+      <span class="step"><span class="n">1</span><span>打開 Facebook，點右下角「☰」</span><span class="sq"></span></span>
+      <span class="step"><span class="n">2</span><span>點「粉絲專頁」→「建立新的粉絲專頁」</span><span class="sq"></span></span>
+      <span class="step"><span class="n">3</span><span>填名稱與類別
+        <span class="d">名稱公式：做什麼 ＋ 在哪裡（例：小芳手作果醬｜台中）</span></span><span class="sq"></span></span>
+      <span class="step"><span class="n">4</span><span>按「建立粉絲專頁」</span><span class="sq"></span></span>
     </div>
-    <p class="eg">客人年紀偏長、住附近 → Facebook　｜　想接觸年輕客、以照片為主 → Instagram</p>
+    <p class="eg">我的粉專名稱：＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿</p>
   </div>
 
-  <div class="blk plum">
-    <p class="q"><span class="dot"></span>我的顧客聯絡平台<span class="hint">幾乎每個人都需要</span></p>
-    <div class="opts">
-      <span class="opt"><span class="sq"></span>LINE 官方帳號</span>
-    </div>
-    <div class="checklist" style="margin-top:4mm">
-      <span class="chk"><span class="sq"></span>已經建立官方帳號<span class="note">還沒有的人，這週內把它開起來</span></span>
-      <span class="chk"><span class="sq"></span>已經找到我的 QR Code</span>
-      <span class="chk"><span class="sq"></span>已經把 QR Code 印出來，貼在包裝或攤位上</span>
+  <div class="blk">
+    <p class="q"><span class="dot"></span>設定<span class="hint">大頭貼放商品或本人，不要放風景</span></p>
+    <div class="checklist">
+      <span class="chk"><span class="sq"></span>換好大頭貼</span>
+      <span class="chk"><span class="sq"></span>換好封面照片<span class="note">用橫式照片</span></span>
+      <span class="chk"><span class="sq"></span>填好簡介（一句話說你做什麼）</span>
+      <span class="chk"><span class="sq"></span>至少留一個聯絡方式<span class="note">電話或 LINE</span></span>
     </div>
   </div>
 
   <div class="blk">
-    <p class="q"><span class="dot"></span>我的歡迎訊息（客人一加好友就會看到）<span class="hint">30 字以內</span></p>
-    <div class="box"><span class="ph">例：謝謝您加入！本週開放預訂草莓果醬，想預訂請直接回覆「草莓＋數量」。</span></div>
+    <p class="q"><span class="dot"></span>發第一篇貼文</p>
+    <div class="steps">
+      <span class="step"><span class="n">1</span><span>點發文區「在想些什麼？」</span><span class="sq"></span></span>
+      <span class="step"><span class="n">2</span><span>打字（寫幾句話就好）</span><span class="sq"></span></span>
+      <span class="step"><span class="n">3</span><span>點「相片／影片」加一張照片</span><span class="sq"></span></span>
+      <span class="step"><span class="n">4</span><span>按右上角「發布」</span><span class="sq"></span></span>
+      <span class="step"><span class="n">5</span><span>練習：把它編輯一次、再置頂
+        <span class="d">全部都在貼文右上角的「⋯」</span></span><span class="sq"></span></span>
+    </div>
+  </div>
+
+  <div class="blk">
+    <p class="q"><span class="dot"></span>看後台<span class="hint">粉專首頁往下滑 →「專業主頁面板」→「查看洞察報告」</span></p>
+    <table class="nums">
+      <thead><tr><th>數字</th><th>今天</th><th>一個月後</th></tr></thead>
+      <tbody>
+        <tr><td>觸及人數<span class="exp">多少人看到你的貼文</span></td><td class="v"></td><td class="v"></td></tr>
+        <tr><td>互動次數<span class="exp">按讚＋留言＋分享，比觸及重要</span></td><td class="v"></td><td class="v"></td></tr>
+        <tr><td>新追蹤者<span class="exp">這段期間多了幾個人</span></td><td class="v"></td><td class="v"></td></tr>
+        <tr><td>表現最好的一篇<span class="exp">寫下那篇在講什麼</span></td><td class="v"></td><td class="v"></td></tr>
+      </tbody>
+    </table>
   </div>
 
   <div class="tip">
-    <b>今天的公式：</b>一個曝光平台（FB 或 IG）＋ 一個聯絡平台（LINE 官方帳號）。
-    三個都開但都不更新，比只做好一個還糟。
+    <b>看完數字要做的事：</b>找出表現最好的那一篇，下個月照著<b>再做一次</b>——同樣主題、同樣拍法，換個商品。<br>
+    觸及低＝發文太少或時間不對，試試晚上 8–10 點；互動低＝內容只在賣東西，改成問問題或分享過程。
   </div>
 
-  <div class="ft"><span>社群平台操作入門　·　西屯婦女培力</span><span>講義 1 / 4</span></div>
+  <div class="ft"><span>社群平台操作入門　·　西屯婦女培力</span><span>講義 1 / 3</span></div>
 </section>
 
-<!-- ══════════════ 講義 2 ══════════════ -->
-<section class="sheet">
+<!-- ═══════════ 講義 2｜Instagram ═══════════ -->
+<section class="sheet ig">
   <div class="hd">
     <div>
-      <p class="no">講義 2</p>
-      <h1>IG 品牌觀察表</h1>
-      <p class="sub">搭配課程 Slide 25 · 26　｜　小組活動，一組看一個帳號</p>
+      <p class="no">講義 2 ｜ 11:05–13:50</p>
+      <h1>Instagram</h1>
+      <p class="sub">已經有帳號的人，從「切換成專業帳號」開始做。</p>
     </div>
     <div class="who"><b>姓名</b><span class="ln"></span></div>
   </div>
 
   <div class="blk">
-    <p class="q"><span class="dot"></span>我觀察的帳號名稱</p>
-    <div class="lines tight"><i></i></div>
+    <p class="q"><span class="dot"></span>建立帳號<span class="hint">已經有帳號就跳過</span></p>
+    <div class="steps">
+      <span class="step"><span class="n">1</span><span>下載並打開 App →「建立新帳號」</span><span class="sq"></span></span>
+      <span class="step"><span class="n">2</span><span>填手機或 Email，收驗證碼</span><span class="sq"></span></span>
+      <span class="step"><span class="n">3</span><span>設定使用者名稱（英文）後完成
+        <span class="d">建議跟粉專有關聯，例：xiaofang.jam</span></span><span class="sq"></span></span>
+    </div>
   </div>
 
   <div class="blk">
-    <p class="q"><span class="dot"></span>八項檢查<span class="hint">看得懂比漂不漂亮重要　·　五個以上打勾＝值得學的對象</span></p>
-    <div class="checklist">
-      <span class="chk"><span class="sq"></span>一眼就知道在做什麼</span>
-      <span class="chk"><span class="sq"></span>大頭貼清楚（是商品或本人，不是風景）</span>
-      <span class="chk"><span class="sq"></span>自我介紹清楚（做什麼、給誰、在哪裡）</span>
-      <span class="chk"><span class="sq"></span>有商品照</span>
-      <span class="chk"><span class="sq"></span>有幕後／製作過程</span>
-      <span class="chk"><span class="sq"></span>有 Reels</span>
-      <span class="chk"><span class="sq"></span>有精選限動</span>
-      <span class="chk"><span class="sq"></span>找得到購買方式</span>
+    <p class="q"><span class="dot"></span>切換成專業帳號<span class="hint">沒切換就看不到數據</span></p>
+    <div class="steps">
+      <span class="step"><span class="n">1</span><span>點右下角自己的頭像</span><span class="sq"></span></span>
+      <span class="step"><span class="n">2</span><span>點右上角「☰」</span><span class="sq"></span></span>
+      <span class="step"><span class="n">3</span><span>進入「設定和隱私」</span><span class="sq"></span></span>
+      <span class="step"><span class="n">4</span><span>找到「帳號類型和工具」</span><span class="sq"></span></span>
+      <span class="step"><span class="n">5</span><span>點「切換為專業帳號」→ 選「商家」</span><span class="sq"></span></span>
     </div>
   </div>
 
-  <div class="blk sage">
-    <p class="q"><span class="dot"></span>我最喜歡它哪一點？</p>
-    <div class="lines tight"><i></i><i></i></div>
+  <div class="blk">
+    <p class="q"><span class="dot"></span>填個人檔案五欄</p>
+    <div class="checklist">
+      <span class="chk"><span class="sq"></span>大頭貼</span>
+      <span class="chk"><span class="sq"></span>名稱（中文，可以被搜尋）</span>
+      <span class="chk"><span class="sq"></span>使用者名稱（英文 @帳號）</span>
+      <span class="chk"><span class="sq"></span>個人簡介（做什麼、賣給誰、在哪裡）</span>
+      <span class="chk"><span class="sq"></span>連結<span class="note">LINE 只能放這裡！</span></span>
+    </div>
   </div>
 
-  <div class="blk gold">
-    <p class="q"><span class="dot"></span>哪一篇讓我最想停下來？為什麼？</p>
-    <div class="lines tight"><i></i><i></i></div>
+  <div class="blk">
+    <p class="q"><span class="dot"></span>發布練習<span class="hint">三種都從「＋」開始</span></p>
+    <div class="checklist">
+      <span class="chk"><span class="sq"></span>發一篇貼文（照片＋幾句話＋3–5 個 Hashtag）</span>
+      <span class="chk"><span class="sq"></span>發一則限時動態<span class="note">24 小時後消失</span></span>
+      <span class="chk"><span class="sq"></span>錄一支 5 秒的 Reels<span class="note">不用跳舞、不用露臉</span></span>
+    </div>
   </div>
 
-  <div class="blk plum">
-    <p class="q"><span class="dot"></span>有什麼是我也做得到的？<span class="hint">這一題最重要</span></p>
-    <div class="box"><span class="ph">寫下一件明天就可以開始做的事</span></div>
+  <div class="blk">
+    <p class="q"><span class="dot"></span>看後台<span class="hint">個人檔案 →「洞察報告」</span></p>
+    <table class="nums">
+      <thead><tr><th>數字</th><th>今天</th><th>一個月後</th></tr></thead>
+      <tbody>
+        <tr><td>觸及帳號數<span class="exp">多少「人」看到（不是次數）</span></td><td class="v"></td><td class="v"></td></tr>
+        <tr><td>互動次數<span class="exp">讚＋留言＋分享＋儲存</span></td><td class="v"></td><td class="v"></td></tr>
+        <tr><td>個人檔案造訪<span class="exp">多少人點進來看你是誰</span></td><td class="v"></td><td class="v"></td></tr>
+        <tr><td>粉絲增減<span class="exp">掉粉通常是廣告發太多</span></td><td class="v"></td><td class="v"></td></tr>
+      </tbody>
+    </table>
   </div>
 
-  <div class="tip sage">
-    <b>提醒：</b>觀察的重點不是「拍得多美」，而是「有沒有把該說的說清楚」。
-    很多做得很好的小帳號，照片都只是用手機拍的。
+  <div class="tip">
+    <b>最值得看的是「個人檔案造訪」</b>——會點進來看你是誰的人，才是真的有興趣的人。<br>
+    有人造訪卻沒人聯絡你？把 <b>LINE 連結放進個人簡介</b>，貼文最後寫「詳情請看首頁連結」。
   </div>
 
-  <div class="ft"><span>社群平台操作入門　·　西屯婦女培力</span><span>講義 2 / 4</span></div>
+  <div class="ft"><span>社群平台操作入門　·　西屯婦女培力</span><span>講義 2 / 3</span></div>
 </section>
 
-<!-- ══════════════ 講義 3 ══════════════ -->
-<section class="sheet">
+<!-- ═══════════ 講義 3｜LINE ═══════════ -->
+<section class="sheet ln">
   <div class="hd">
     <div>
-      <p class="no">講義 3</p>
-      <h1>我的十大關鍵字</h1>
-      <p class="sub">搭配課程 Slide 38 · 41　｜　寫一次，可以用一整年</p>
-    </div>
-    <div class="who"><b>姓名</b><span class="ln"></span></div>
-  </div>
-
-  <div class="tip" style="margin-bottom:6mm">
-    <b>思考方式：</b>不要想「我想寫什麼」，要想「<b>別人會搜尋什麼</b>」。
-    把自己想像成客人，想買這個東西的時候，你會在搜尋列打什麼字？
-  </div>
-
-  <div class="group a">
-    <div class="gh"><span class="gt">商品</span><span class="gd">3–4 個　·　你賣的東西叫什麼？種類、做法、材料</span></div>
-    <div class="kw">
-      <span class="cell"><span class="n">1</span><span class="ln"></span></span>
-      <span class="cell"><span class="n">2</span><span class="ln"></span></span>
-      <span class="cell"><span class="n">3</span><span class="ln"></span></span>
-      <span class="cell"><span class="n">4</span><span class="ln"></span></span>
-    </div>
-    <p class="eg">例：#鳳梨酥　#手工鳳梨酥　#手作烘焙</p>
-  </div>
-
-  <div class="group b">
-    <div class="gh"><span class="gt">地區</span><span class="gd">2–3 個　·　你的客人在哪裡？縣市、區域、常去的市集</span></div>
-    <div class="kw">
-      <span class="cell"><span class="n">5</span><span class="ln"></span></span>
-      <span class="cell"><span class="n">6</span><span class="ln"></span></span>
-    </div>
-    <p class="eg">例：#台中甜點　#台中伴手禮　#西屯市集</p>
-  </div>
-
-  <div class="group c">
-    <div class="gh"><span class="gt">需求／情境</span><span class="gd">3–4 個　·　別人在什麼時候需要它？送誰？什麼場合？</span></div>
-    <div class="kw">
-      <span class="cell"><span class="n">7</span><span class="ln"></span></span>
-      <span class="cell"><span class="n">8</span><span class="ln"></span></span>
-      <span class="cell"><span class="n">9</span><span class="ln"></span></span>
-      <span class="cell"><span class="n">10</span><span class="ln"></span></span>
-    </div>
-    <p class="eg">例：#下午茶　#送禮　#節慶禮盒　#彌月禮盒</p>
-  </div>
-
-  <div class="blk" style="margin-top:2mm">
-    <p class="q"><span class="dot"></span>找不到字的時候，去這三個地方</p>
-    <div class="checklist">
-      <span class="chk"><span class="sq"></span><b>Instagram 搜尋</b>：打進商品名稱，看跳出哪些相關標籤與則數</span>
-      <span class="chk"><span class="sq"></span><b>Google 搜尋</b>：看「自動完成」與頁面最下方的「相關搜尋」</span>
-      <span class="chk"><span class="sq"></span><b>Google Trends</b>：比較兩種講法哪個比較多人搜（手工餅乾 vs 手作餅乾）</span>
-      <span class="chk"><span class="sq"></span>已經存一份到手機備忘錄，取名「我的關鍵字」<span class="note">重要！</span></span>
-    </div>
-  </div>
-
-  <div class="ft"><span>社群平台操作入門　·　西屯婦女培力</span><span>講義 3 / 4</span></div>
-</section>
-
-<!-- ══════════════ 講義 4 ══════════════ -->
-<section class="sheet">
-  <div class="hd">
-    <div>
-      <p class="no">講義 4</p>
-      <h1>我的第一篇社群內容</h1>
-      <p class="sub">搭配課程 Slide 31 · 34 · 60　｜　下課前完成，並實際發布或存成草稿</p>
+      <p class="no">講義 3 ｜ 13:50–15:45</p>
+      <h1>LINE 官方帳號</h1>
+      <p class="sub">要另外下載一個 App，用你現在的 LINE 登入就好。</p>
     </div>
     <div class="who"><b>姓名</b><span class="ln"></span></div>
   </div>
 
   <div class="blk">
-    <p class="q"><span class="dot"></span>我要發在哪裡？</p>
-    <div class="opts">
-      <span class="opt"><span class="sq"></span>Facebook</span>
-      <span class="opt"><span class="sq"></span>Instagram</span>
-      <span class="opt"><span class="sq"></span>LINE 官方帳號</span>
+    <p class="q"><span class="dot"></span>建立官方帳號</p>
+    <div class="steps">
+      <span class="step"><span class="n">1</span><span>下載 App「LINE 官方帳號」
+        <span class="d">綠底白色對話框，跟一般 LINE 不一樣</span></span><span class="sq"></span></span>
+      <span class="step"><span class="n">2</span><span>用現在的 LINE 帳號登入</span><span class="sq"></span></span>
+      <span class="step"><span class="n">3</span><span>填帳號名稱與業種
+        <span class="d">建議跟粉專同名，客人才認得出是同一家</span></span><span class="sq"></span></span>
+      <span class="step"><span class="n">4</span><span>完成，進入管理後台</span><span class="sq"></span></span>
     </div>
-    <p class="eg">建議字數　·　Facebook 80–200 字　｜　Instagram 50–150 字　｜　LINE 30–80 字（以上為教學建議，不是平台限制）</p>
-  </div>
-
-  <div class="blk sage">
-    <p class="q"><span class="dot"></span>我要搭配哪一張照片？<span class="hint">圖片負責讓人停下來</span></p>
-    <div class="lines tight"><i></i></div>
-    <p class="eg">如果要在圖上放字：<b>一個主標題 ＋ 一個重點</b>就好（例：手作草莓果醬／本週限量 20 瓶）</p>
-  </div>
-
-  <div class="blk gold">
-    <p class="q"><span class="dot"></span>我要寫什麼？<span class="hint">文字負責讓人看懂</span></p>
-    <div class="box tall">
-      <span class="ph">卡住的時候照這個順序寫：<br>
-      ① 這是什麼？　② 有什麼特別的？　③ 想要的話可以怎麼跟我說</span>
-    </div>
-  </div>
-
-  <div class="blk plum">
-    <p class="q"><span class="dot"></span>我要用哪些關鍵字？<span class="hint">從講義 3 挑 5–8 個，IG 適用</span></p>
-    <div class="lines tight"><i></i><i></i></div>
   </div>
 
   <div class="blk">
-    <p class="q"><span class="dot"></span>完成確認</p>
+    <p class="q"><span class="dot"></span>寫我的歡迎訊息<span class="hint">客人一加好友就自動收到 · 30 字以內</span></p>
+    <div class="box"><span class="ph">
+      結構：謝謝你 → 我是做什麼的 → 想買怎麼跟我說<br><br>
+      例：謝謝你加入 😊 這裡是小芳手作果醬，用當季水果小批製作。想訂購請直接回覆「我要訂購」。
+    </span></div>
+  </div>
+
+  <div class="blk">
+    <p class="q"><span class="dot"></span>操作練習</p>
     <div class="checklist">
-      <span class="chk"><span class="sq"></span>有一張圖片</span>
-      <span class="chk"><span class="sq"></span>有簡短的文字</span>
-      <span class="chk"><span class="sq"></span>符合這個平台的呈現方式</span>
-      <span class="chk"><span class="sq"></span>已經<b>發布</b>，或存成<b>草稿</b><span class="note">按下去最重要</span></span>
+      <span class="chk"><span class="sq"></span>歡迎訊息已設定並儲存</span>
+      <span class="chk"><span class="sq"></span>群發過一則訊息<span class="note">設定 → 群發訊息</span></span>
+      <span class="chk"><span class="sq"></span>找到圖文選單在哪<span class="note">今天知道有就好</span></span>
+      <span class="chk"><span class="sq"></span>QR Code 已截圖存到相簿</span>
     </div>
   </div>
 
-  <div class="tip gold">
-    <b>我的一週發文計畫：</b>星期＿＿＿發「商品」　·　星期＿＿＿發「過程」　·　星期＿＿＿發「有用的內容」　·　星期＿＿＿發「人／生活」<br>
-    四篇裡面只有一篇在賣東西。做不到就一週兩篇，但要固定。
+  <div class="blk">
+    <p class="q"><span class="dot"></span>我的 QR Code 要放在哪<span class="hint">最常見的錯誤是印太小</span></p>
+    <div class="checklist">
+      <span class="chk"><span class="sq"></span>商品包裝上</span>
+      <span class="chk"><span class="sq"></span>市集攤位立牌（印成 A4）</span>
+      <span class="chk"><span class="sq"></span>Facebook 粉專簡介</span>
+      <span class="chk"><span class="sq"></span>Instagram 個人簡介的連結欄</span>
+    </div>
   </div>
 
-  <div class="ft"><span>社群平台操作入門　·　西屯婦女培力</span><span>講義 4 / 4</span></div>
+  <div class="blk">
+    <p class="q"><span class="dot"></span>看後台<span class="hint">後台首頁 →「分析」</span></p>
+    <table class="nums">
+      <thead><tr><th>數字</th><th>今天</th><th>一個月後</th></tr></thead>
+      <tbody>
+        <tr><td>好友人數<span class="exp">最珍貴的名單，隨時聯絡得到</span></td><td class="v"></td><td class="v"></td></tr>
+        <tr><td>封鎖人數<span class="exp">1–2 個正常；一群發就被封＝發太頻繁</span></td><td class="v"></td><td class="v"></td></tr>
+        <tr><td>訊息則數<span class="exp">免費方案每月有上限</span></td><td class="v"></td><td class="v"></td></tr>
+        <tr><td>開封率<span class="exp">100 個人收到，幾個人點開</span></td><td class="v"></td><td class="v"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tip">
+    <b>群發一個月 1–2 則就好</b>，而且要發對客人有用的事（到貨、休假、優惠）。<br>
+    開封率低？第一句直接講重點：「本週開放預訂」，不要用「大家好」開頭。
+  </div>
+
+  <div class="ft"><span>社群平台操作入門　·　西屯婦女培力</span><span>講義 3 / 3</span></div>
 </section>
 
 </body>

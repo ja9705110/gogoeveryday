@@ -284,7 +284,7 @@ ul.list.dense li::before{ width:6px; height:6px; margin-top:8px }
 
 /* ── 時間表 ──────────────────────────────────────────────────────────── */
 .agenda{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px 40px; }
-.ag{ display:flex; gap:14px; align-items:center; padding:7px 12px; border-radius:11px; }
+.ag{ display:flex; gap:13px; align-items:center; padding:5px 11px; border-radius:10px; }
 .ag .t{ font-size:20px; font-weight:800; color:var(--clay); font-variant-numeric:tabular-nums;
         letter-spacing:.01em; width:104px; flex:none }
 .ag .n{ font-size:20px; font-weight:650; color:var(--ink-2); line-height:1.4 }
@@ -298,11 +298,13 @@ ul.list.dense li::before{ width:6px; height:6px; margin-top:8px }
   position:relative;
 }
 .phone.sm{ width:228px; height:462px; border-radius:34px; padding:8px }
+.phone.xs{ width:196px; height:392px; border-radius:30px; padding:7px }
 .phone .scr{
   width:100%; height:100%; background:#fff; border-radius:32px; overflow:hidden;
   display:flex; flex-direction:column; position:relative;
 }
 .phone.sm .scr{ border-radius:27px }
+.phone.xs .scr{ border-radius:24px }
 .phone .notch{
   position:absolute; top:9px; left:50%; transform:translateX(-50%);
   width:86px; height:20px; background:#17110d; border-radius:0 0 13px 13px; z-index:4;
