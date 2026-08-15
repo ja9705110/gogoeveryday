@@ -10,6 +10,9 @@
 | `handouts.html` | **三張 A4 操作講義**（FB／IG／LINE 各一張），用瀏覽器直接列印。 |
 | `size-guide.html` | **四張 A4 圖片尺寸速查表**（總表＋三個平台），含比例示意圖。 |
 | `social-media-course-deck.pptx` | **PowerPoint／Canva 版**（42 頁，每個元素都是獨立可編輯物件）。 |
+| `word/三平台實作檢核表.docx` | **實作檢核表**（4 頁）：FB 20 項／IG 19 項／LINE 18 項＋總覽與數字追蹤。 |
+| `word/圖片尺寸速查表.docx` | 尺寸速查表的 Word 版（4 頁，表格可直接編輯）。 |
+| `word/課後測驗_選擇題4題.docx` | 課後測驗（學員作答頁＋講師解答解析頁）。 |
 | `src/` | 原始碼。改內容請改這裡，再重新 build。 |
 | `build.py` | 把 `src/` 組成單一檔案 `index.html`。 |
 | `export-canva.js` | 產生靜態的 `canva-import.html`（PPTX 匯出的中間檔）。 |
