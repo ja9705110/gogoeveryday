@@ -1,0 +1,23 @@
+示範圖片清單　·　虛擬品牌「小芳手作果醬」
+每一張都已經是該用途的正確尺寸，可以直接上傳。
+
+FB-01	Facebook	大頭貼	360 × 360	14 KB
+FB-02	Facebook	封面橫幅	1640 × 624	70 KB
+FB-03	Facebook	貼文-正方形	1080 × 1080	113 KB
+FB-04	Facebook	貼文-直式	1080 × 1350	120 KB
+FB-05	Facebook	貼文-橫式	1200 × 630	71 KB
+FB-06	Facebook	限時動態	1080 × 1920	132 KB
+FB-07	Facebook	活動封面	1920 × 1005	111 KB
+IG-01	Instagram	大頭貼	320 × 320	12 KB
+IG-02	Instagram	貼文-直式	1080 × 1350	124 KB
+IG-03	Instagram	貼文-正方形	1080 × 1080	99 KB
+IG-04	Instagram	貼文-橫式	1080 × 566	68 KB
+IG-05	Instagram	限時動態	1080 × 1920	129 KB
+IG-06	Instagram	Reels封面	1080 × 1920	115 KB
+IG-07	Instagram	精選限動封面	1080 × 1920	36 KB
+LN-01	LINE官方帳號	大頭貼	640 × 640	28 KB
+LN-02	LINE官方帳號	封面背景圖	1080 × 878	61 KB
+LN-03	LINE官方帳號	圖文選單-大	2500 × 1686	186 KB
+LN-04	LINE官方帳號	圖文選單-小	2500 × 843	60 KB
+LN-05	LINE官方帳號	圖文訊息	1040 × 1040	111 KB
+LN-06	LINE官方帳號	優惠券	1040 × 1040	89 KB
