@@ -258,7 +258,6 @@ S({ part:'開場', time:'09:17', kind:'std', title:'【實作 0】照你平常�
 S({ part:'PART 1', time:'09:25–10:20', kind:'divider', title:'PART 1｜認識你的手機相機',
   html:`
   <div class="wrap">
-    <span class="d-time" data-r>09:25 – 10:20 ｜ 55 分鐘</span>
     <p class="pno" data-r>01</p>
     <h2 data-r>認識你的<br>手機相機</h2>
     <p class="d-sub" data-r>找得到功能，後面才做得動。這一段不求快，求每個人都跟得上。</p>

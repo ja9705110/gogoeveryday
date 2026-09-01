@@ -449,7 +449,7 @@ ul.list.dense li::before{ width:6px; height:6px; margin-top:8px }
 }
 .slide.divider .pno{
   font-size:150px; font-weight:900; line-height:1; letter-spacing:-.05em;
-  color:rgba(255,255,255,.11); margin:0 0 -22px;
+  color:rgba(255,255,255,.11); margin:0 0 6px;
 }
 .slide.divider h2{ font-size:56px; font-weight:850; letter-spacing:-.03em; margin:0 0 18px; color:#fff }
 .slide.divider .d-sub{ font-size:23px; color:rgba(255,255,255,.72); font-weight:550; line-height:1.6; max-width:660px }
@@ -840,8 +840,6 @@ body.printing #notes,body.printing #ov,body.printing #help,body.printing #bar{ d
     <div id="chrome">
       <div class="ch-top">
         <span class="ch-part"><span class="ch-dot"></span><span id="cpart">開場</span></span>
-        <span class="ch-sep">·</span>
-        <span class="ch-time" id="ctime">09:00</span>
       </div>
       <div class="ch-foot">
         <span class="ch-brand"><b>手機拍攝商品與影像編修基礎（1）</b>　·　09/13</span>
@@ -1097,7 +1095,7 @@ ART.slot = (o = {}) => `
 /* ── 手機外框 ────────────────────────────────────────────────────── */
 ART.phone = (inner, o = {}) => {
   const w = o.w || 232, h = o.h || 464;
-  return `<div style="width:${w}px;height:${h}px;border-radius:30px;background:#1b1512;
+  return `<div class="baked" style="width:${w}px;height:${h}px;border-radius:30px;background:#1b1512;
     padding:9px 7px;box-shadow:0 20px 44px -22px rgba(40,26,16,.6);flex:0 0 auto">
     <div style="position:relative;width:100%;height:100%;border-radius:23px;
       background:${o.bg || C.white};overflow:hidden;text-align:left">${inner}</div>
@@ -1471,7 +1469,6 @@ S({ part:'開場', time:'09:17', kind:'std', title:'【實作 0】照你平常�
 S({ part:'PART 1', time:'09:25–10:20', kind:'divider', title:'PART 1｜認識你的手機相機',
   html:`
   <div class="wrap">
-    <span class="d-time" data-r>09:25 – 10:20 ｜ 55 分鐘</span>
     <p class="pno" data-r>01</p>
     <h2 data-r>認識你的<br>手機相機</h2>
     <p class="d-sub" data-r>找得到功能，後面才做得動。這一段不求快，求每個人都跟得上。</p>
@@ -1882,7 +1879,7 @@ S({ part:'PART 1', time:'10:14', kind:'std', title:'你的預設值就設這個'
     const dark = d.kind === 'divider';
     chrome.classList.toggle('on-dark', dark);
     elPart.textContent = d.part;
-    elTime.textContent = d.time;
+    if (elTime) elTime.textContent = d.time;
     elNum.innerHTML = String(i + 1) + ' <small>/ ' + N + '</small>';
     bar.style.width = ((i + 1) / N * 100) + '%';
 

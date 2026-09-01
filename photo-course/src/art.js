@@ -207,7 +207,7 @@ ART.slot = (o = {}) => `
 /* ── 手機外框 ────────────────────────────────────────────────────── */
 ART.phone = (inner, o = {}) => {
   const w = o.w || 232, h = o.h || 464;
-  return `<div style="width:${w}px;height:${h}px;border-radius:30px;background:#1b1512;
+  return `<div class="baked" style="width:${w}px;height:${h}px;border-radius:30px;background:#1b1512;
     padding:9px 7px;box-shadow:0 20px 44px -22px rgba(40,26,16,.6);flex:0 0 auto">
     <div style="position:relative;width:100%;height:100%;border-radius:23px;
       background:${o.bg || C.white};overflow:hidden;text-align:left">${inner}</div>

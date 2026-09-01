@@ -1,0 +1,1931 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>手機拍攝商品與影像編修基礎（1）｜09/13</title>
+<style>
+/* =========================================================================
+   社群平台操作入門 — 簡報視覺系統
+   Stage: 1280 x 720, scaled to fit. All units in px against that stage.
+   ========================================================================= */
+
+:root{
+  /* 溫暖紙感基底 */
+  --paper:      #fbf7f1;
+  --paper-2:    #f4ece1;
+  --paper-3:    #ece0d1;
+  --white:      #ffffff;
+
+  /* 墨色 */
+  --ink:        #241c17;
+  --ink-2:      #4a3c33;
+  --ink-3:      #7a6a5d;
+  --muted:      #9c8b7c;
+
+  /* 主色：陶土 */
+  --clay:       #c05f3c;
+  --clay-2:     #a94e2e;
+  --clay-soft:  #f5ddd1;
+  --clay-tint:  #fbeee6;
+
+  /* 副色 */
+  --sage:       #5f7a63;
+  --sage-soft:  #dfe8dc;
+  --gold:       #d99a4e;
+  --gold-soft:  #f8e6c9;
+  --plum:       #8a5a6d;
+  --plum-soft:  #f0dfe4;
+
+  /* 平台色（僅少量點綴） */
+  --fb:         #1877f2;
+  --ig-a:       #f9a03f;
+  --ig-b:       #e1306c;
+  --ig-c:       #a02fbe;
+  --ln:         #06c755;
+
+  --line:       rgba(36,28,23,.12);
+  --line-2:     rgba(36,28,23,.07);
+
+  --shadow-s:   0 2px 6px -2px rgba(60,40,28,.18);
+  --shadow-m:   0 14px 34px -20px rgba(60,40,28,.45);
+  --shadow-l:   0 34px 70px -34px rgba(60,40,28,.55);
+
+  --r-s: 10px; --r-m: 16px; --r-l: 24px; --r-xl: 32px;
+
+  --ease: cubic-bezier(.16,1,.3,1);
+  --ease-2: cubic-bezier(.4,0,.2,1);
+
+  --font: "PingFang TC","Noto Sans TC","Hiragino Sans TC","Microsoft JhengHei",
+          "Source Han Sans TC", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0; background:var(--ink); color:var(--ink);
+  font-family:var(--font); font-weight:500;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  overflow:hidden;
+}
+
+/* ── 舞台 ────────────────────────────────────────────────────────────── */
+#viewport{
+  position:fixed; inset:0; display:grid; place-items:center;
+  background:
+    radial-gradient(1200px 700px at 20% -10%, #3a2c23 0%, transparent 60%),
+    radial-gradient(900px 600px at 110% 120%, #33261f 0%, transparent 60%),
+    #1d1712;
+}
+#stage{
+  position:relative; width:1280px; height:720px; flex:none;
+  transform-origin:center center;
+  background:var(--paper); overflow:hidden;
+  border-radius:6px;
+  box-shadow:0 60px 120px -50px rgba(0,0,0,.75), 0 0 0 1px rgba(255,255,255,.05);
+}
+
+/* 溫潤的背景層：極慢的光暈 + 細顆粒 */
+#stage::before{
+  content:""; position:absolute; inset:-10%; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(560px 420px at 12% 8%,  rgba(217,154,78,.16), transparent 62%),
+    radial-gradient(620px 480px at 92% 22%, rgba(192,95,60,.13),  transparent 64%),
+    radial-gradient(700px 520px at 70% 104%,rgba(95,122,99,.12),  transparent 62%);
+  animation:drift 34s var(--ease-2) infinite alternate;
+}
+@keyframes drift{
+  0%{ transform:translate3d(0,0,0) scale(1); }
+  100%{ transform:translate3d(-2.2%,1.6%,0) scale(1.06); }
+}
+#grain{
+  position:absolute; inset:0; z-index:1; pointer-events:none; opacity:.5;
+  mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
+}
+
+/* ── 投影片 ──────────────────────────────────────────────────────────── */
+.slide{
+  position:absolute; inset:0; z-index:2;
+  padding:58px 84px 78px;
+  display:flex; flex-direction:column; justify-content:center;
+  view-transition-name:slide;
+}
+.slide.pad-tight{ padding:48px 68px 72px; }
+
+/* ── 框架（頁眉／頁腳） ──────────────────────────────────────────────── */
+#chrome{ position:absolute; inset:0; z-index:6; pointer-events:none; }
+.ch-top{
+  position:absolute; top:26px; left:84px; right:84px;
+  display:flex; align-items:center; justify-content:flex-start; gap:14px;
+  font-size:20px; letter-spacing:.08em; color:var(--muted); font-weight:700;
+}
+.ch-sep{ opacity:.45 }
+.ch-part{ display:flex; align-items:center; gap:10px; }
+.ch-dot{ width:7px; height:7px; border-radius:99px; background:var(--clay);
+         box-shadow:0 0 0 4px var(--clay-tint); transition:background .5s var(--ease); }
+.ch-time{ font-variant-numeric:tabular-nums; }
+.ch-foot{
+  position:absolute; bottom:24px; left:84px; right:84px;
+  display:flex; align-items:center; justify-content:space-between;
+  font-size:20px; color:var(--muted); font-weight:600; letter-spacing:.04em;
+}
+.ch-brand{ display:flex; align-items:center; gap:9px; opacity:.9; }
+.ch-brand b{ color:var(--ink-3); font-weight:800; letter-spacing:.02em; }
+#pnum{ font-variant-numeric:tabular-nums; font-weight:800; color:var(--ink-3); }
+#pnum small{ color:var(--muted); font-weight:600; }
+#bar{
+  position:absolute; left:0; bottom:0; height:3px; width:0%;
+  background:linear-gradient(90deg,var(--gold),var(--clay));
+  transition:width .65s var(--ease); z-index:7;
+}
+.slide.full ~ #chrome .ch-top,
+body.hide-chrome #chrome{ opacity:0; }
+#chrome.on-dark .ch-top,#chrome.on-dark .ch-foot{ color:rgba(255,255,255,.55); }
+#chrome.on-dark #pnum,#chrome.on-dark .ch-brand b{ color:rgba(255,255,255,.8); }
+
+/* ── 文字階層 ────────────────────────────────────────────────────────── */
+.eyebrow{
+  font-size:20px; font-weight:800; letter-spacing:.1em; color:var(--clay);
+  margin:0 0 16px; display:flex; align-items:center; gap:12px;
+}
+.eyebrow::after{ content:""; height:1px; flex:1; background:linear-gradient(90deg,var(--clay-soft),transparent); }
+.eyebrow.sage{ color:var(--sage); } .eyebrow.sage::after{ background:linear-gradient(90deg,var(--sage-soft),transparent); }
+.eyebrow.plum{ color:var(--plum); } .eyebrow.plum::after{ background:linear-gradient(90deg,var(--plum-soft),transparent); }
+
+h1.h{ font-size:60px; line-height:1.16; letter-spacing:-.025em; font-weight:800; margin:0 0 20px; }
+h2.h{ font-size:44px; line-height:1.22; letter-spacing:-.02em; font-weight:800; margin:0 0 18px; }
+h3.h{ font-size:29px; line-height:1.3;  letter-spacing:-.012em; font-weight:800; margin:0 0 12px; }
+.mega{ font-size:82px; line-height:1.24; letter-spacing:-.03em; font-weight:850; margin:0; }
+.mega.sm{ font-size:58px; }
+.lead{ font-size:25px; line-height:1.62; color:var(--ink-2); font-weight:500; margin:0; }
+.sub{ font-size:21px; line-height:1.6; color:var(--ink-3); font-weight:500; margin:0; }
+.tiny{ font-size:20px; line-height:1.55; color:var(--muted); font-weight:600; }
+.hl{ color:var(--clay); }
+.hl-s{ color:var(--sage); }
+.mark{
+  background:linear-gradient(transparent 58%, var(--gold-soft) 58%);
+  padding:0 3px; border-radius:2px;
+}
+.num-badge{
+  display:inline-grid; place-items:center; width:38px; height:38px; flex:none;
+  border-radius:12px; background:var(--clay); color:#fff;
+  font-size:19px; font-weight:800; box-shadow:var(--shadow-s);
+}
+.num-badge.ghost{ background:var(--clay-tint); color:var(--clay); box-shadow:none; }
+
+/* ── 版面骨架 ────────────────────────────────────────────────────────── */
+.row{ display:flex; gap:52px; align-items:center; }
+.row.top{ align-items:flex-start; }
+.col{ min-width:0; }
+.split{ display:grid; grid-template-columns:1fr 1fr; gap:52px; align-items:center; }
+.split.w-left{ grid-template-columns:1.15fr .85fr; }
+.split.w-right{ grid-template-columns:.85fr 1.15fr; }
+.split.art{ grid-template-columns:1.05fr .95fr; }
+.stack{ display:flex; flex-direction:column; }
+.gap-s{ gap:11px } .gap-m{ gap:17px } .gap-l{ gap:25px }
+.center{ text-align:center; align-items:center; justify-content:center; }
+/* 置中欄位裡的區塊元素也要水平置中（滿版元素不受影響） */
+.center > *{ margin-left:auto; margin-right:auto; }
+/* 插畫外框：避免底圓溢出 */
+.art-box{ display:grid; place-items:center; overflow:hidden; border-radius:14px; }
+/* 需要絕對定位標註的容器，寬度須貼齊內容 */
+.anchor{ position:relative; width:max-content; }
+
+/* ── 卡片 ────────────────────────────────────────────────────────────── */
+.cards{ display:grid; gap:20px; }
+.c2{ grid-template-columns:repeat(2,1fr) } .c3{ grid-template-columns:repeat(3,1fr) }
+.c4{ grid-template-columns:repeat(4,1fr) } .c5{ grid-template-columns:repeat(5,1fr) }
+.card{
+  background:var(--white); border:1px solid var(--line); border-radius:var(--r-l);
+  padding:26px 26px 28px; box-shadow:var(--shadow-m); position:relative; overflow:hidden;
+}
+.card.flat{ background:rgba(255,255,255,.62); box-shadow:none; }
+.card.tint{ background:var(--clay-tint); border-color:transparent; box-shadow:none; }
+.card.sage{ background:var(--sage-soft); border-color:transparent; box-shadow:none; }
+.card.gold{ background:var(--gold-soft); border-color:transparent; box-shadow:none; }
+.card.plum{ background:var(--plum-soft); border-color:transparent; box-shadow:none; }
+.card .k{ font-size:24px; font-weight:800; margin:0 0 8px; letter-spacing:-.01em; }
+.card .v{ font-size:21px; line-height:1.62; color:var(--ink-2); margin:0; font-weight:500; }
+.card .ico{ margin-bottom:14px; display:block; }
+.card .cap{ font-size:20px; font-weight:800; letter-spacing:.08em; color:var(--muted); margin:0 0 10px; }
+.card .rule{ height:1px; background:var(--line); margin:16px 0 14px; }
+.card.top-accent::before{
+  content:""; position:absolute; top:0; left:0; right:0; height:4px;
+  background:var(--clay);
+}
+.card.top-accent.a-sage::before{ background:var(--sage) }
+.card.top-accent.a-gold::before{ background:var(--gold) }
+.card.top-accent.a-plum::before{ background:var(--plum) }
+.card.top-accent.a-fb::before{ background:var(--fb) }
+.card.top-accent.a-ig::before{ background:linear-gradient(90deg,var(--ig-a),var(--ig-b),var(--ig-c)) }
+.card.top-accent.a-ln::before{ background:var(--ln) }
+
+/* ── 條列（節制使用） ────────────────────────────────────────────────── */
+ul.list{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:13px; }
+ul.list li{
+  font-size:21px; line-height:1.5; color:var(--ink-2); font-weight:600;
+  display:flex; gap:13px; align-items:flex-start;
+}
+ul.list li::before{
+  content:""; width:8px; height:8px; border-radius:99px; background:var(--clay);
+  margin-top:9px; flex:none;
+}
+ul.list.sage li::before{ background:var(--sage) }
+ul.list.dense li{ font-size:20px; gap:11px }
+ul.list.dense li::before{ width:6px; height:6px; margin-top:8px }
+
+.yes,.no{ display:flex; gap:12px; align-items:flex-start; font-size:21px; font-weight:650;
+          line-height:1.5; color:var(--ink-2); }
+.yes i,.no i{ font-style:normal; font-size:21px; font-weight:900; flex:none; line-height:1.45 }
+.yes i{ color:var(--sage) } .no i{ color:var(--clay) }
+
+/* ── 打勾清單（學員實作） ────────────────────────────────────────────── */
+.checks{ display:grid; gap:12px 22px; }
+.check{
+  display:flex; align-items:center; gap:14px; padding:13px 18px;
+  background:var(--white); border:1px solid var(--line); border-radius:14px;
+  font-size:21px; font-weight:700; color:var(--ink-2); box-shadow:var(--shadow-s);
+}
+.check .box{
+  width:24px; height:24px; border-radius:7px; border:2.5px solid var(--clay);
+  flex:none; background:var(--white);
+}
+.check.done .box{ background:var(--clay); position:relative; }
+.check.done .box::after{
+  content:""; position:absolute; left:7px; top:3px; width:6px; height:12px;
+  border:solid #fff; border-width:0 2.5px 2.5px 0; transform:rotate(43deg);
+}
+
+/* ── 流程 / 漏斗 ─────────────────────────────────────────────────────── */
+.funnel{ display:flex; flex-direction:column; align-items:center; gap:9px; }
+.funnel .f{
+  display:grid; place-items:center; height:54px; border-radius:13px; color:#fff;
+  font-size:22px; font-weight:800; letter-spacing:.02em; box-shadow:var(--shadow-s);
+}
+.chain{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.chain .node{
+  padding:12px 20px; border-radius:99px; background:var(--white);
+  border:1px solid var(--line); font-size:21px; font-weight:800; color:var(--ink-2);
+  box-shadow:var(--shadow-s); white-space:nowrap;
+}
+.chain .node.on{ background:var(--clay); color:#fff; border-color:transparent; }
+.chain .arw{ color:var(--clay); font-size:16px; font-weight:900; opacity:.55 }
+.steps{ display:flex; gap:0; align-items:stretch; }
+.steps .st{ flex:1; padding:0 20px; position:relative; }
+.steps .st + .st{ border-left:1px dashed var(--line); }
+.steps .st .n{ font-size:20px; font-weight:900; letter-spacing:.08em; color:var(--clay); margin-bottom:9px }
+.steps .st .t{ font-size:22px; font-weight:800; line-height:1.35; margin-bottom:6px }
+.steps .st .d{ font-size:20px; color:var(--ink-3); line-height:1.55; font-weight:500 }
+
+/* ── 比較表 ──────────────────────────────────────────────────────────── */
+.tbl{ width:100%; border-collapse:separate; border-spacing:0; font-size:21px; }
+.tbl th,.tbl td{ padding:15px 20px; text-align:left; }
+.tbl thead th{
+  font-size:20px; letter-spacing:.06em; font-weight:900; color:var(--muted);
+  border-bottom:1px solid var(--line); padding-bottom:11px;
+}
+.tbl tbody td{ border-bottom:1px solid var(--line-2); color:var(--ink-2); font-weight:600; }
+.tbl tbody tr:last-child td{ border-bottom:none }
+.tbl .lead-col{ font-weight:800; color:var(--ink) }
+
+/* ── 時間表 ──────────────────────────────────────────────────────────── */
+.agenda{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px 40px; }
+.ag{ display:flex; gap:13px; align-items:center; padding:5px 11px; border-radius:10px; }
+.ag .t{ font-size:20px; font-weight:800; color:var(--clay); font-variant-numeric:tabular-nums;
+        letter-spacing:.01em; width:104px; flex:none }
+.ag .n{ font-size:20px; font-weight:650; color:var(--ink-2); line-height:1.4 }
+.ag.rest{ background:var(--paper-2) } .ag.rest .t,.ag.rest .n{ color:var(--muted) }
+
+/* ── 手機模擬 ────────────────────────────────────────────────────────── */
+.phone{
+  text-align:left;
+  width:272px; height:552px; border-radius:40px; background:#17110d; padding:9px;
+  box-shadow:var(--shadow-l), 0 0 0 1px rgba(255,255,255,.06) inset; flex:none;
+  position:relative;
+}
+.phone.sm{ width:228px; height:462px; border-radius:34px; padding:8px }
+.phone.xs{ width:196px; height:392px; border-radius:30px; padding:7px }
+.phone .scr{
+  width:100%; height:100%; background:#fff; border-radius:32px; overflow:hidden;
+  display:flex; flex-direction:column; position:relative;
+}
+.phone.sm .scr{ border-radius:27px }
+.phone.xs .scr{ border-radius:24px }
+.phone .notch{
+  position:absolute; top:9px; left:50%; transform:translateX(-50%);
+  width:86px; height:20px; background:#17110d; border-radius:0 0 13px 13px; z-index:4;
+}
+.phone .stat{
+  height:24px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 15px; font-size:10.5px; font-weight:800; color:#1b1b1b; flex:none;
+}
+.phone .stat .r{ display:flex; gap:4px; align-items:center; opacity:.75 }
+.app-bar{
+  height:42px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 13px; border-bottom:1px solid #eceef1; flex:none;
+}
+.app-bar .ttl{ font-size:16px; font-weight:900; letter-spacing:-.01em }
+.app-bar .ic{ display:flex; gap:11px; color:#3d3d3d }
+.app-body{ flex:1; overflow:hidden; background:#fff }
+.app-body.grey{ background:#f2f3f5 }
+
+/* Facebook 版 */
+.fb-bar{ background:#fff; border-bottom:1px solid #e6e8ec }
+.fb-bar .ttl{ color:var(--fb); font-size:17px; letter-spacing:-.02em }
+.fb-post{ padding:12px 13px; background:#fff; border-bottom:8px solid #f0f2f5 }
+.fb-head{ display:flex; gap:9px; align-items:center; margin-bottom:9px }
+.fb-name{ font-size:14px; font-weight:800; line-height:1.25 }
+.fb-meta{ font-size:11.5px; color:#8a8d91; font-weight:600 }
+.fb-text{ font-size:13.5px; line-height:1.62; color:#1c1e21; font-weight:500 }
+.fb-acts{ display:flex; justify-content:space-around; padding:8px 0 2px; margin-top:9px;
+          border-top:1px solid #eceef1; font-size:12px; color:#65676b; font-weight:750 }
+
+/* Instagram 版 */
+.ig-bar{ border-bottom:1px solid #efefef }
+.ig-bar .ttl{ font-size:15px }
+.ig-prof{ padding:13px 13px 0 }
+.ig-top{ display:flex; gap:16px; align-items:center; margin-bottom:11px }
+.ig-stats{ display:flex; gap:17px; flex:1; justify-content:space-around }
+.ig-stats div{ text-align:center }
+.ig-stats b{ display:block; font-size:14px; font-weight:900 }
+.ig-stats span{ font-size:11px; color:#737373; font-weight:650 }
+.ig-bio{ font-size:12.5px; line-height:1.55; font-weight:600; color:#1a1a1a }
+.ig-bio .lk{ color:#00376b; font-weight:700 }
+.ig-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:2px; margin-top:12px }
+.ig-cell{ aspect-ratio:1; position:relative; overflow:hidden }
+.ring{
+  width:54px; height:54px; border-radius:99px; padding:2.5px; flex:none;
+  background:conic-gradient(from 200deg,var(--ig-a),var(--ig-b),var(--ig-c),var(--ig-a));
+}
+.ring > *{ width:100%; height:100%; border-radius:99px; border:2px solid #fff; overflow:hidden;
+           display:block; background:#fff }
+.ring.sm{ width:40px; height:40px; padding:2px }
+
+/* LINE 版 */
+.ln-bar{ background:var(--ln); border-bottom:none }
+.ln-bar .ttl{ color:#fff }
+.ln-bar .ic{ color:rgba(255,255,255,.9) }
+.ln-body{ background:#8fb6d8; padding:12px 11px; height:100%; }
+.ln-day{ text-align:center; margin-bottom:12px }
+.ln-day span{ background:rgba(0,0,0,.16); color:#fff; font-size:9.5px; font-weight:750;
+              padding:3px 11px; border-radius:99px }
+.bub{
+  max-width:82%; padding:10px 13px; border-radius:16px; font-size:13.5px; line-height:1.55;
+  font-weight:600; margin-bottom:9px; box-shadow:0 1px 2px rgba(0,0,0,.12);
+}
+.bub.in{ background:#fff; color:#1a1a1a; border-top-left-radius:4px }
+.bub.out{ background:#8de055; color:#12240a; margin-left:auto; border-top-right-radius:4px }
+
+/* 貼文縮圖（純 CSS 色塊 + SVG 圖） */
+.thumb{ width:100%; height:100%; display:grid; place-items:center; overflow:hidden }
+.tr-1{ background:linear-gradient(145deg,#f6d9c5,#eab08c) }
+.tr-2{ background:linear-gradient(145deg,#e7e2d2,#cfc7ab) }
+.tr-3{ background:linear-gradient(145deg,#f3ddd6,#dfa9a0) }
+.tr-4{ background:linear-gradient(145deg,#dfe7dc,#b3c6b2) }
+.tr-5{ background:linear-gradient(145deg,#f7e8cc,#e6c489) }
+.tr-6{ background:linear-gradient(145deg,#efe0ea,#cdaec2) }
+
+/* ── 貼文卡（示範文案） ──────────────────────────────────────────────── */
+.post{
+  background:#fff; border:1px solid var(--line); border-radius:18px; overflow:hidden;
+  box-shadow:var(--shadow-m);
+}
+.post .ph{ display:flex; align-items:center; gap:10px; padding:13px 15px; border-bottom:1px solid var(--line-2) }
+.post .ph .av{ width:32px; height:32px; border-radius:99px; flex:none; overflow:hidden }
+.post .ph .nm{ font-size:17px; font-weight:850 }
+.post .ph .mt{ font-size:14px; color:var(--muted); font-weight:650 }
+.post .pb{ padding:14px 16px; font-size:18px; line-height:1.72; color:var(--ink-2); font-weight:550 }
+.post .pb .cnt{ float:right; font-size:14px; color:var(--muted); font-weight:800 }
+.post .badge{
+  display:inline-flex; align-items:center; gap:6px; font-size:15px; font-weight:900;
+  letter-spacing:.06em; padding:5px 11px; border-radius:99px;
+}
+.b-fb{ background:#e7f0fe; color:var(--fb) }
+.b-ig{ background:#fdeaf1; color:var(--ig-b) }
+.b-ln{ background:#e2f8ea; color:#03934a }
+
+/* ── Hashtag ─────────────────────────────────────────────────────────── */
+.tags{ display:flex; flex-wrap:wrap; gap:10px }
+.tag{
+  padding:9px 16px; border-radius:99px; font-size:20px; font-weight:750;
+  background:var(--white); border:1px solid var(--line); color:var(--ink-2);
+  box-shadow:var(--shadow-s);
+}
+.tag.on{ background:var(--clay); color:#fff; border-color:transparent }
+.tag.g{ background:var(--sage-soft); border-color:transparent; color:#3f5744 }
+.tag.y{ background:var(--gold-soft); border-color:transparent; color:#8a5f1c }
+.tag.p{ background:var(--plum-soft); border-color:transparent; color:#6d4356 }
+.tag.dim{ background:transparent; border-style:dashed; color:var(--muted); box-shadow:none }
+.tag.sm{ font-size:20px; padding:7px 14px }
+
+/* ── 螢光標記／提示條 ────────────────────────────────────────────────── */
+.callout{
+  display:flex; gap:16px; align-items:center; padding:20px 26px; border-radius:18px;
+  background:var(--clay-tint); border-left:5px solid var(--clay);
+}
+.callout .txt{ font-size:21px; font-weight:750; line-height:1.55; color:var(--ink-2) }
+.callout.sage{ background:var(--sage-soft); border-left-color:var(--sage) }
+.callout.gold{ background:var(--gold-soft); border-left-color:var(--gold) }
+
+.pill{
+  display:inline-flex; align-items:center; gap:8px; padding:8px 15px; border-radius:99px;
+  font-size:20px; font-weight:800; letter-spacing:.02em;
+  background:var(--white); border:1px solid var(--line); color:var(--ink-3);
+  box-shadow:var(--shadow-s);
+}
+.pill.fb{ color:var(--fb); background:#eef4ff; border-color:transparent }
+.pill.ig{ color:var(--ig-b); background:#fdeef4; border-color:transparent }
+.pill.ln{ color:#03934a; background:#e6f8ee; border-color:transparent }
+
+/* ── 章節封面 ────────────────────────────────────────────────────────── */
+.slide.divider{
+  background:linear-gradient(135deg,#2a1e18 0%,#3d2a20 48%,#4a3123 100%);
+  color:#fff; padding:0;
+}
+.slide.divider .wrap{
+  position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center;
+  padding:0 96px; z-index:2;
+}
+.slide.divider .pno{
+  font-size:150px; font-weight:900; line-height:1; letter-spacing:-.05em;
+  color:rgba(255,255,255,.11); margin:0 0 6px;
+}
+.slide.divider h2{ font-size:56px; font-weight:850; letter-spacing:-.03em; margin:0 0 18px; color:#fff }
+.slide.divider .d-sub{ font-size:23px; color:rgba(255,255,255,.72); font-weight:550; line-height:1.6; max-width:660px }
+.slide.divider .d-time{
+  display:inline-flex; align-items:center; gap:10px; margin-bottom:26px;
+  font-size:20px; font-weight:800; letter-spacing:.08em; color:var(--gold);
+}
+.slide.divider .d-art{
+  position:absolute; right:74px; bottom:0; top:0; width:420px;
+  display:grid; place-items:center; opacity:.95; z-index:1;
+}
+.slide.divider::after{
+  content:""; position:absolute; inset:0; z-index:0;
+  background:radial-gradient(600px 400px at 88% 50%, rgba(217,154,78,.2), transparent 65%);
+}
+
+/* ── 封面／結尾 ──────────────────────────────────────────────────────── */
+.slide.cover{ padding:0 }
+.cover-wrap{ position:absolute; inset:0; display:grid; grid-template-columns:1.02fr .98fr; z-index:2 }
+.cover-l{ display:flex; flex-direction:column; justify-content:center; padding:0 0 0 88px }
+.cover-r{ position:relative; display:grid; place-items:center }
+.cover .kicker{
+  display:inline-flex; align-items:center; gap:11px; align-self:flex-start;
+  font-size:20px; font-weight:850; letter-spacing:.1em; color:var(--clay);
+  background:var(--clay-tint); padding:9px 18px; border-radius:99px; margin-bottom:26px;
+}
+.cover h1{ font-size:74px; line-height:1.1; letter-spacing:-.04em; font-weight:900; margin:0 0 22px }
+.cover .cs{ font-size:26px; line-height:1.55; color:var(--ink-2); font-weight:550; max-width:460px; margin:0 0 34px }
+.cover .meta{ display:flex; gap:14px; flex-wrap:wrap }
+
+/* ── 觀察／實作 標籤 ─────────────────────────────────────────────────── */
+.act-tag{
+  position:absolute; top:24px; right:84px; z-index:8;
+  display:inline-flex; align-items:center; gap:9px; padding:9px 17px; border-radius:99px;
+  font-size:20px; font-weight:900; letter-spacing:.06em;
+  background:var(--ink); color:var(--paper); box-shadow:var(--shadow-m);
+}
+.act-tag.ask{ background:var(--sage) } .act-tag.do{ background:var(--clay) }
+
+/* ── 圖片插槽（現場放真實截圖用） ────────────────────────────────────── */
+.slot{
+  border:2px dashed var(--clay); border-radius:18px; background:var(--clay-tint);
+  display:grid; place-items:center; text-align:center; padding:22px; gap:8px;
+}
+.slot .st{ font-size:20px; font-weight:850; color:var(--clay-2) }
+.slot .sd{ font-size:17px; color:var(--ink-3); font-weight:600; line-height:1.5 }
+
+/* ── 圖說 ────────────────────────────────────────────────────────────── */
+.cap-t{ font-size:20px; font-weight:800; letter-spacing:.1em; color:var(--muted);
+        text-align:center; margin-top:14px }
+
+/* ── 進場動畫（逐項浮現） ────────────────────────────────────────────── */
+.slide [data-r]{
+  opacity:0; transform:translateY(16px); filter:blur(5px);
+  animation:rise .78s var(--ease) forwards;
+  animation-delay:calc(var(--i,0) * 68ms + 110ms);
+}
+@keyframes rise{ to{ opacity:1; transform:none; filter:none } }
+
+/* View Transition：緩慢的溶解＋微縮放，避免老套翻頁 */
+::view-transition-group(slide){ animation-duration:.62s }
+::view-transition-old(slide){
+  animation:vt-out .44s var(--ease-2) both; mix-blend-mode:normal;
+}
+::view-transition-new(slide){
+  animation:vt-in .62s var(--ease) both; mix-blend-mode:normal;
+}
+@keyframes vt-out{
+  to{ opacity:0; transform:scale(1.028) translateY(calc(var(--dir,1) * -14px)); filter:blur(9px) }
+}
+@keyframes vt-in{
+  from{ opacity:0; transform:scale(.982) translateY(calc(var(--dir,1) * 20px)); filter:blur(11px) }
+}
+/* 無 View Transition 時的備援 */
+.slide.enter{ animation:soft-in .58s var(--ease) both }
+@keyframes soft-in{ from{ opacity:0; transform:scale(.99) translateY(12px); filter:blur(8px) } }
+
+/* ── 總覽（Overview） ────────────────────────────────────────────────── */
+#ov{
+  position:fixed; inset:0; z-index:40; background:rgba(24,18,14,.94);
+  backdrop-filter:blur(14px); display:none; flex-direction:column; padding:34px 44px 24px;
+}
+#ov.on{ display:flex; animation:ov-in .32s var(--ease-2) both }
+@keyframes ov-in{ from{ opacity:0 } }
+#ov h4{ color:#fff; font-size:19px; font-weight:800; margin:0 0 4px; letter-spacing:-.01em }
+#ov .oh{ display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:20px }
+#ov .oh p{ color:rgba(255,255,255,.5); font-size:13px; margin:0; font-weight:600 }
+#ovg{ flex:1; overflow-y:auto; display:grid; grid-template-columns:repeat(6,1fr); gap:11px;
+      align-content:start; padding-right:6px }
+.ov-i{
+  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px;
+  padding:12px 13px; cursor:pointer; text-align:left; color:#fff; font-family:inherit;
+  transition:background .2s var(--ease-2), transform .2s var(--ease-2), border-color .2s;
+  min-height:80px; display:flex; flex-direction:column; gap:6px;
+}
+.ov-i:hover{ background:rgba(255,255,255,.13); transform:translateY(-2px) }
+.ov-i.cur{ border-color:var(--gold); background:rgba(217,154,78,.18) }
+.ov-i .n{ font-size:10.5px; font-weight:900; color:var(--gold); letter-spacing:.1em }
+.ov-i .t{ font-size:12.5px; font-weight:700; line-height:1.4; color:rgba(255,255,255,.92);
+          display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden }
+.ov-i.div-i{ background:rgba(217,154,78,.16); border-color:rgba(217,154,78,.32) }
+
+/* ── 講師備忘（Notes） ───────────────────────────────────────────────── */
+#notes{
+  position:fixed; left:0; right:0; bottom:0; z-index:30; transform:translateY(101%);
+  transition:transform .46s var(--ease);
+  background:rgba(22,17,13,.97); backdrop-filter:blur(16px); color:#fff;
+  padding:22px 34px 24px; max-height:44vh; overflow-y:auto;
+  box-shadow:0 -20px 60px -20px rgba(0,0,0,.7);
+}
+#notes.on{ transform:translateY(0) }
+#notes .ng{ display:grid; grid-template-columns:1.5fr 1fr 1fr 1fr .9fr .9fr; gap:20px; max-width:1720px; margin:0 auto }
+#notes .nb h5{
+  margin:0 0 9px; font-size:11.5px; letter-spacing:.2em; font-weight:900;
+  display:flex; align-items:center; gap:8px;
+}
+#notes .nb h5 s{ width:7px; height:7px; border-radius:99px; background:currentColor; display:block }
+#notes .nb.say h5{ color:var(--gold) }
+#notes .nb.ask h5{ color:#8fd5a0 }
+#notes .nb.do h5{ color:#f2a184 }
+#notes .nb.diff h5{ color:#9ec6e8 }
+#notes .nb.more h5{ color:#cbb6e0 }
+#notes .nb.less h5{ color:#b9b2a8 }
+#notes .nb p, #notes .nb li{
+  margin:0 0 7px; font-size:14.5px; line-height:1.68; color:rgba(255,255,255,.84); font-weight:500;
+}
+#notes .nb ul{ margin:0; padding-left:17px }
+#notes .nn{ color:rgba(255,255,255,.35); font-size:12px; text-align:right; margin-top:12px; font-weight:600 }
+
+/* ── 說明卡 / Help ───────────────────────────────────────────────────── */
+#help{
+  position:fixed; inset:0; z-index:50; display:none; place-items:center;
+  background:rgba(20,15,12,.86); backdrop-filter:blur(10px);
+}
+#help.on{ display:grid; animation:ov-in .28s var(--ease-2) both }
+#help .hc{
+  background:var(--paper); border-radius:24px; padding:38px 42px; width:min(620px,90vw);
+  box-shadow:var(--shadow-l);
+}
+#help h4{ margin:0 0 6px; font-size:24px; font-weight:850 }
+#help p.hs{ margin:0 0 24px; color:var(--ink-3); font-size:15px; font-weight:600 }
+#help dl{ display:grid; grid-template-columns:auto 1fr; gap:13px 20px; margin:0; align-items:center }
+#help dt{ display:flex; gap:6px }
+#help dd{ margin:0; font-size:15.5px; color:var(--ink-2); font-weight:600 }
+kbd{
+  display:inline-grid; place-items:center; min-width:30px; height:29px; padding:0 9px;
+  background:#fff; border:1px solid var(--line); border-bottom-width:2.5px; border-radius:8px;
+  font-family:inherit; font-size:13px; font-weight:800; color:var(--ink-2);
+}
+
+/* ── 計時器 ──────────────────────────────────────────────────────────── */
+#timer{
+  position:fixed; top:16px; right:18px; z-index:35; display:none; align-items:center; gap:11px;
+  background:rgba(22,17,13,.9); backdrop-filter:blur(8px); color:#fff;
+  padding:9px 15px; border-radius:99px; font-size:14px; font-weight:800;
+  font-variant-numeric:tabular-nums; letter-spacing:.04em; box-shadow:var(--shadow-m);
+}
+#timer.on{ display:flex }
+#timer .tdot{ width:8px; height:8px; border-radius:99px; background:#f2a184 }
+#timer .tdot.run{ background:#8fd5a0; animation:pulse 2s var(--ease-2) infinite }
+@keyframes pulse{ 50%{ opacity:.3 } }
+#timer button{
+  background:rgba(255,255,255,.13); border:none; color:#fff; font-family:inherit;
+  font-size:11.5px; font-weight:800; padding:5px 10px; border-radius:99px; cursor:pointer;
+}
+#timer button:hover{ background:rgba(255,255,255,.24) }
+
+#hint{
+  position:fixed; bottom:18px; left:50%; transform:translateX(-50%); z-index:20;
+  color:rgba(255,255,255,.42); font-size:12.5px; font-weight:650; letter-spacing:.05em;
+  transition:opacity .6s var(--ease-2); pointer-events:none;
+}
+#hint.gone{ opacity:0 }
+
+/* ── 動作偏好 ────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion:reduce){
+  .slide [data-r]{ animation:none; opacity:1; transform:none; filter:none }
+  #stage::before{ animation:none }
+  ::view-transition-old(slide),::view-transition-new(slide){ animation-duration:.18s }
+  .slide.enter{ animation-duration:.18s }
+}
+
+/* ── 列印（輸出 PDF：按 P） ──────────────────────────────────────────── */
+#printroot{ display:none }
+body.printing{ overflow:visible; background:#fff }
+body.printing #printroot{ display:block }
+body.printing #viewport,body.printing #timer,body.printing #hint,
+body.printing #notes,body.printing #ov,body.printing #help,body.printing #bar{ display:none !important }
+
+.stage-print{
+  position:relative; width:1280px; height:720px; background:var(--paper);
+  overflow:hidden; page-break-after:always; break-after:page;
+}
+.stage-print .slide{ position:absolute; inset:0; view-transition-name:none; animation:none }
+.stage-print .slide [data-r]{ animation:none; opacity:1; transform:none; filter:none }
+.print-foot{
+  position:absolute; bottom:22px; left:84px; right:84px; z-index:9;
+  display:flex; justify-content:space-between;
+  font-size:12.5px; color:var(--muted); font-weight:700; letter-spacing:.06em;
+}
+.stage-print:has(.divider) .print-foot,
+.stage-print:has(.divider) .print-foot span{ color:rgba(255,255,255,.5) }
+
+@page{ size:1280px 720px; margin:0 }
+@media print{
+  html,body{ height:auto; overflow:visible; background:#fff }
+  #viewport,#timer,#hint,#notes,#ov,#help,#bar{ display:none !important }
+  #printroot{ display:block }
+  .stage-print{ box-shadow:none; border-radius:0 }
+}
+
+/* =========================================================================
+   手機攝影課專用元件
+   ========================================================================= */
+
+:root{
+  --slot-line:  #c8b9a6;
+  --slot-bg:    #f2ebe0;
+  --warm:       #c9743f;   /* 溫暖手作 */
+  --clean:      #4a7fa5;   /* 乾淨專業 */
+  --fresh:      #6a9160;   /* 新鮮現做 */
+  --lux:        #7b5a86;   /* 高級精緻 */
+}
+
+/* ── 可替換照片版位 ────────────────────────────────────────────────
+   講師之後換成實拍照時，把 .slot-ph 整塊換成 <img> 即可。 */
+.slot-ph{
+  position:relative; border-radius:var(--r-m);
+  background:
+    repeating-linear-gradient(135deg,
+      rgba(200,185,166,.16) 0 10px, rgba(200,185,166,0) 10px 20px),
+    var(--slot-bg);
+  border:2px dashed var(--slot-line);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:7px; text-align:center; padding:14px; overflow:hidden;
+}
+.slot-ph .sp-ic{ opacity:.5; }
+.slot-ph .sp-t{ font-size:21px; font-weight:800; color:var(--ink-2); line-height:1.3; }
+.slot-ph .sp-s{ font-size:19px; font-weight:700; color:var(--ink-3); line-height:1.35; }
+.slot-ph .sp-tag{
+  position:absolute; left:10px; top:10px; font-size:17px; font-weight:800;
+  color:#fff; background:var(--muted); padding:3px 10px; border-radius:20px;
+  letter-spacing:.02em;
+}
+
+/* ── 模擬用相框：真的做出差異，不是標籤 ─────────────────────────── */
+.fr{ position:relative; border-radius:var(--r-m); overflow:hidden;
+     background:var(--paper-2); box-shadow:var(--shadow-s); }
+.fr > .fr-in{ position:absolute; inset:0; }
+.fr .fr-cap{
+  position:absolute; left:0; right:0; bottom:0; padding:8px 12px;
+  font-size:20px; font-weight:800; color:#fff; text-align:center;
+  background:linear-gradient(to top, rgba(24,16,10,.72), rgba(24,16,10,0));
+}
+.fr.bad{ outline:3px solid #d63b2f; outline-offset:-3px; }
+.fr.good{ outline:3px solid var(--sage); outline-offset:-3px; }
+.fr .fr-mark{
+  position:absolute; right:9px; top:9px; width:34px; height:34px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; font-weight:900; color:#fff;
+}
+.fr.bad .fr-mark{ background:#d63b2f; }
+.fr.good .fr-mark{ background:var(--sage); }
+
+/* 模擬濾鏡 */
+.sim-blur   > .fr-in{ filter:blur(4.5px); }
+.sim-dark   > .fr-in{ filter:brightness(.52) saturate(.85); }
+.sim-bright > .fr-in{ filter:brightness(1.42) saturate(.72) contrast(.86); }
+.sim-warmcast > .fr-in{ filter:sepia(.42) saturate(1.25) hue-rotate(-12deg); }
+.sim-flat   > .fr-in{ filter:contrast(.82) saturate(.8); }
+.sim-soft   > .fr-in{ filter:contrast(1.06) saturate(1.06); }
+
+/* 光線方向：用漸層與投影方向模擬 */
+.lit{ position:absolute; inset:0; pointer-events:none; }
+.lit-front{ background:radial-gradient(120% 90% at 50% 8%, rgba(255,247,232,.92) 0%, rgba(255,247,232,0) 62%); }
+.lit-side { background:linear-gradient(100deg, rgba(255,247,232,.95) 0%, rgba(255,247,232,.15) 42%, rgba(52,34,22,.30) 100%); }
+.lit-back { background:linear-gradient(0deg, rgba(38,25,16,.55) 0%, rgba(38,25,16,.10) 45%, rgba(255,250,238,.95) 100%); }
+.lit-harsh{ background:linear-gradient(112deg, rgba(255,255,255,1) 0%, rgba(255,255,255,.5) 26%, rgba(30,18,10,.55) 58%, rgba(30,18,10,.72) 100%); }
+
+/* ── 感覺配方（貫穿全課的主軸） ──────────────────────────────────── */
+.feel-strip{
+  display:flex; gap:10px; align-items:stretch;
+  background:var(--paper-2); border:1px solid var(--line);
+  border-radius:var(--r-m); padding:11px 14px;
+}
+.feel-strip .fs-lab{
+  display:flex; align-items:center; gap:8px; padding-right:13px;
+  border-right:1px solid var(--line); font-size:20px; font-weight:900; color:var(--ink);
+  white-space:nowrap;
+}
+.feel-strip .fs-items{ display:flex; gap:16px; flex:1; align-items:center; flex-wrap:wrap; }
+.feel-strip .fs-i{ font-size:20px; font-weight:700; color:var(--ink-2); white-space:nowrap; }
+.feel-strip .fs-i b{ font-weight:900; }
+.f-warm  b, .f-warm  .fd{ color:var(--warm); }
+.f-clean b, .f-clean .fd{ color:var(--clean); }
+.f-fresh b, .f-fresh .fd{ color:var(--fresh); }
+.f-lux   b, .f-lux   .fd{ color:var(--lux); }
+
+.feel-card{
+  border-radius:var(--r-l); padding:15px 15px 17px; background:var(--white);
+  border:1px solid var(--line); box-shadow:var(--shadow-s);
+  display:flex; flex-direction:column; gap:7px;
+}
+.feel-card .fr{ border-radius:12px; margin-bottom:3px; }
+.feel-card .fc-top{ height:5px; border-radius:20px; margin-bottom:3px; }
+.feel-card h5{ margin:0; font-size:24px; font-weight:900; letter-spacing:-.01em; }
+.feel-card .fc-r{ display:flex; gap:7px; font-size:19px; line-height:1.3; }
+.feel-card .fc-k{ font-weight:800; color:var(--ink-3); min-width:44px; }
+.feel-card .fc-v{ font-weight:700; color:var(--ink-2); }
+
+/* ── OX 判讀（借教材 CH03 的格式） ───────────────────────────────── */
+.ox-q{
+  display:flex; gap:14px; align-items:center;
+  border:2px solid var(--line); border-radius:var(--r-l);
+  padding:13px 20px; background:var(--white);
+}
+.ox-q .oq-n{
+  font-size:34px; font-weight:900; color:var(--clean); line-height:1;
+  letter-spacing:-.03em;
+}
+.ox-q .oq-t{ font-size:26px; font-weight:900; color:var(--ink); }
+.ox-q .oq-tip{ font-size:19px; font-weight:700; color:var(--ink-3); }
+
+/* ── 手機修圖介面示意 ─────────────────────────────────────────── */
+.edit-bar{
+  display:flex; gap:6px; align-items:center; justify-content:center;
+  background:#1b1512; border-radius:0 0 22px 22px; padding:9px 8px;
+}
+.edit-bar .eb-i{
+  width:34px; height:34px; border-radius:9px; background:rgba(255,255,255,.12);
+  display:flex; align-items:center; justify-content:center;
+  font-size:17px; font-weight:800; color:rgba(255,255,255,.72);
+}
+.edit-bar .eb-i.on{ background:var(--gold); color:#241c17; }
+
+.slider{ display:flex; align-items:center; gap:10px; }
+.slider .sl-t{ font-size:20px; font-weight:800; color:var(--ink-2); min-width:74px; }
+.slider .sl-bar{ flex:1; height:7px; border-radius:20px; background:var(--paper-3); position:relative; }
+.slider .sl-fill{ position:absolute; left:0; top:0; bottom:0; border-radius:20px; background:var(--clay); }
+.slider .sl-dot{
+  position:absolute; top:50%; width:19px; height:19px; border-radius:50%;
+  background:#fff; border:3px solid var(--clay); transform:translate(-50%,-50%);
+  box-shadow:var(--shadow-s);
+}
+.slider .sl-v{ font-size:20px; font-weight:900; color:var(--clay); min-width:46px; text-align:right; }
+
+/* ── 指令卡（AI 提示詞） ─────────────────────────────────────────── */
+.prompt{
+  border-radius:var(--r-m); padding:15px 18px; font-size:21px; line-height:1.55;
+  font-weight:700; border:1px solid var(--line); background:var(--white);
+}
+.prompt.bad{ border-color:#e6b3ad; background:#fdf1ef; }
+.prompt.good{ border-color:#b9cdb8; background:#f0f6ee; }
+.prompt .p-lab{
+  display:inline-block; font-size:18px; font-weight:900; color:#fff;
+  padding:2px 11px; border-radius:20px; margin-bottom:8px; letter-spacing:.02em;
+}
+.prompt.bad .p-lab{ background:#c0392b; }
+.prompt.good .p-lab{ background:var(--sage); }
+.prompt em{ font-style:normal; background:var(--gold-soft); border-radius:4px;
+            padding:1px 4px; font-weight:900; }
+
+/* 四要素標記 */
+.pe{ display:inline-block; font-size:17px; font-weight:900; color:#fff;
+     padding:2px 9px; border-radius:6px; margin-right:6px; }
+.pe-1{ background:var(--clay); } .pe-2{ background:var(--sage); }
+.pe-3{ background:var(--gold); color:var(--ink); } .pe-4{ background:var(--plum); }
+
+/* ── 紅線警示 ────────────────────────────────────────────────────── */
+.redline{
+  border-radius:var(--r-l); border:2px solid #e0b4ae; background:#fdf3f1;
+  padding:17px 20px; display:flex; gap:14px; align-items:flex-start;
+}
+.redline .rl-n{
+  width:38px; height:38px; border-radius:50%; background:#c0392b; color:#fff;
+  font-size:22px; font-weight:900; display:flex; align-items:center;
+  justify-content:center; flex:0 0 auto;
+}
+.redline h5{ margin:0 0 5px; font-size:24px; font-weight:900; color:#a2301f; }
+.redline p{ margin:0; font-size:20px; font-weight:700; color:var(--ink-2); line-height:1.45; }
+
+
+html,body{ height:auto; overflow:visible; background:#e8e1d6; }
+body{ margin:0; padding:0; }
+.pg{
+  position:relative; width:1280px; height:720px; overflow:hidden;
+  background:var(--paper); margin:0 auto; display:block;
+}
+.pg + .pg{ margin-top:28px; }
+.pg::before{
+  content:""; position:absolute; inset:-10%; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(560px 420px at 12% 8%,  rgba(217,154,78,.16), transparent 62%),
+    radial-gradient(620px 480px at 92% 22%, rgba(192,95,60,.13),  transparent 64%),
+    radial-gradient(700px 520px at 70% 104%,rgba(95,122,99,.12),  transparent 62%);
+  animation:none;
+}
+.pg .slide{ position:absolute; inset:0; view-transition-name:none; animation:none; }
+.pg .slide [data-r]{ opacity:1; transform:none; filter:none; animation:none; }
+.pg .pg-foot{
+  position:absolute; bottom:24px; left:84px; right:84px; z-index:9;
+  display:flex; justify-content:space-between;
+  font-size:20px; color:var(--muted); font-weight:650; letter-spacing:.04em;
+}
+.pg.dark .pg-foot{ color:rgba(255,255,255,.5); }
+.pg .pg-defs{ position:absolute; width:0; height:0; }
+
+/* 輸出 PDF 時：一個 .pg 就是一頁，不留任何邊界 */
+@page{ size:1280px 720px; margin:0; }
+@media print{
+  html,body{ background:#fff; }
+  .pg{ margin:0 !important; page-break-after:always; break-after:page; }
+  .pg:last-child{ page-break-after:auto; break-after:auto; }
+}
+
+</style>
+</head>
+<body>
+<div class="pg"
+     data-document-role="page"
+     data-label="01｜封面：手機拍攝商品與影像編修基礎（1）"
+     data-speaker-notes="講師說明：自我介紹兩分鐘就好，不要久。 開場最重要的一件事：請所有人現在就把手機拿出來，確認電量、確認相機打得開、確認相簿有空間。 這件事在九點做，比在十點半發現有人手機滿了要好太多。
+
+互動提問：問：今天有帶自己的商品或小東西來的舉手？（沒帶的人現場借杯子、鑰匙、水瓶都可以）
+
+學員實作：請所有人把手機拿出來放桌上，螢幕朝上。
+
+預期看到的差異：學員會意識到今天是要動手的，不是聽課。
+
+進度快：可以補充：可以請一兩位學員說自己做什麼商品，後面舉例時用得到。
+
+進度慢：可以刪掉：自我介紹壓到一分鐘，直接進第 2 頁。">
+  <div class="pg-defs"></div>
+  <section class="slide cover">
+  <div class="cover-wrap">
+    <div class="cover-l">
+      <p class="eyebrow" data-r>6 小時實體課程　·　09/13</p>
+      <h1 class="mega" data-r style="font-size:66px">手機拍攝商品<br>與影像編修基礎</h1>
+      <p class="lead" data-r style="margin-top:18px;font-size:27px">
+        今天不聽理論。<br>
+        你會用自己的手機，把一個商品<b class="hl">真的拍好、真的修好</b>。</p>
+      <div data-r style="display:flex;gap:10px;margin-top:26px;flex-wrap:wrap"><span class="tag sm" style="color:#c9743f;border-color:#c9743f44">溫暖手作</span><span class="tag sm" style="color:#4a7fa5;border-color:#4a7fa544">乾淨專業</span><span class="tag sm" style="color:#6a9160;border-color:#6a916044">新鮮現做</span><span class="tag sm" style="color:#7b5a86;border-color:#7b5a8644">高級精緻</span></div>
+    </div>
+    <div class="cover-r" data-r>
+      <div class="fr"
+      style="width:360px;height:300px">
+    <div class="fr-in" style="background:repeating-linear-gradient(91deg,
+          rgba(120,80,48,.16) 0 3px, rgba(120,80,48,0) 3px 13px),
+        linear-gradient(#c9a271,#b98f5c)">
+      
+      <div style="position:absolute;left:50%; top:52%; transform:translate(-50%,-50%);filter:drop-shadow(25.35px 9.75px 15.6px rgba(40,24,12,.42));">
+<svg width="195" height="195" viewBox="0 0 100 100" fill="none">
+  <ellipse cx="50" cy="19" rx="19" ry="7" fill="#c05f3c"/>
+  <ellipse cx="50" cy="16.5" rx="19" ry="7" fill="#c05f3c" opacity=".72"/>
+  <path d="M31 19v6a8 8 0 0 0 8 8h22a8 8 0 0 0 8-8v-6" fill="#c05f3c"/>
+  <path d="M33 27c0 4 7.6 7 17 7s17-3 17-7v50a8 8 0 0 1-8 8H41a8 8 0 0 1-8-8V27Z"
+        fill="#fff" fill-opacity=".93" stroke="#c05f3c" stroke-width="2.4"/>
+  <path d="M36 48c0 3 6.3 5.4 14 5.4S64 51 64 48v29a5 5 0 0 1-5 5H41a5 5 0 0 1-5-5V48Z" fill="#d99a4e"/>
+  <ellipse cx="50" cy="48" rx="14" ry="5" fill="#d99a4e" opacity=".55"/>
+  <circle cx="44" cy="38" r="3.2" fill="#c05f3c" opacity=".8"/>
+  <circle cx="57" cy="41" r="2.3" fill="#c05f3c" opacity=".6"/>
+  <rect x="39" y="58" width="22" height="12" rx="2.5" fill="#fff" opacity=".9"/>
+</svg></div>
+      <div class="lit lit-side"></div>
+    </div>
+    
+    
+  </div>
+    </div>
+  </div></section>
+  <div class="pg-foot"><span>開場</span><span>1 / 17</span></div>
+</div>
+
+<div class="pg"
+     data-document-role="page"
+     data-label="02｜今天結束時，你會有這些"
+     data-speaker-notes="講師說明：把終點講得很具體，中高齡學員才有安全感。 最後一句「做完一半也是成功」一定要講，這是整天不讓人放棄的關鍵。
+
+互動提問：問：你們現在拍商品最大的困擾是什麼？（多半會說「拍起來很暗」「看起來很雜」）
+
+預期看到的差異：學員的表情會從「又要上課」變成「原來今天有東西可以帶走」。
+
+進度快：可以補充：把學員說的困擾寫在白板上，下午對應到哪一段解決。
+
+進度慢：可以刪掉：只講四張卡片的標題，不展開。">
+  <div class="pg-defs"></div>
+  <section class="slide">
+  <div class="stack gap-m">
+    <div>
+      <p class="eyebrow" data-r>下午四點，你帶回家的東西</p>
+      <h2 class="h" data-r style="font-size:38px">不是筆記，是四樣做好的成果</h2>
+    </div>
+    <div class="cards c4" data-r style="gap:18px">
+      
+        <div class="card tint" style="padding:24px 20px">
+          <span class="ico"><svg width="42" height="42" viewBox="0 0 24 24" fill="#c05f3c"><path d="M9 4h6l1.5 2H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3.5L9 4Zm3 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"/></svg></span>
+          <p class="k" style="font-size:23px">一組六張商品照</p>
+          <p class="v" style="font-size:20px">同一個商品，六種用途，風格一致</p>
+        </div>
+        <div class="card sage" style="padding:24px 20px">
+          <span class="ico"><svg width="42" height="42" viewBox="0 0 24 24" fill="#5f7a63"><path d="M14 2l1.5 3.5L19 7l-3.5 1.5L14 12l-1.5-3.5L9 7l3.5-1.5L14 2ZM6 12l1 2.2L9 15l-2 .8L6 18l-1-2.2L3 15l2-.8L6 12Zm12.5 1.5 1 2.3 2.3 1-2.3 1-1 2.3-1-2.3-2.3-1 2.3-1 1-2.3ZM2 21 12.5 10.5l1 1L3 22l-1-1Z"/></svg></span>
+          <p class="k" style="font-size:23px">一張修過的照片</p>
+          <p class="v" style="font-size:20px">裁切、亮度、顏色都調過，可以直接上架</p>
+        </div>
+        <div class="card gold" style="padding:24px 20px">
+          <span class="ico"><svg width="42" height="42" viewBox="0 0 24 24" fill="#d99a4e"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z"/></svg></span>
+          <p class="k" style="font-size:23px">一張拍攝前檢查表</p>
+          <p class="v" style="font-size:20px">回家照著走，不會再忘記擦鏡頭</p>
+        </div>
+        <div class="card plum" style="padding:24px 20px">
+          <span class="ico"><svg width="42" height="42" viewBox="0 0 24 24" fill="#8a5a6d"><path d="M12 2a7 7 0 0 1 4 12.7V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.3A7 7 0 0 1 12 2ZM9 19h6v1a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-1Z"/></svg></span>
+          <p class="k" style="font-size:23px">一個屬於你的風格</p>
+          <p class="v" style="font-size:20px">四種感覺挑一種，以後拍什麼都照這個調</p>
+        </div>
+    </div>
+    <div class="callout gold" data-r><svg width="34" height="34" viewBox="0 0 24 24" fill="#d99a4e"><path d="M12 2 1 21h22L12 2Zm0 5 7.5 12.9h-15L12 7Zm-1 4v5h2v-5h-2Zm0 6.5V19h2v-1.5h-2Z"/></svg>
+      <span class="txt">做不完沒關係。<b>做完一半也是成功</b>——重點是回家知道怎麼繼續。</span></div>
+  </div></section>
+  <div class="pg-foot"><span>開場</span><span>2 / 17</span></div>
+</div>
+
+<div class="pg"
+     data-document-role="page"
+     data-label="03｜今天的節奏"
+     data-speaker-notes="講師說明：這一頁是整天的操作手冊，要講清楚。 「一次只改一個變因」是所有比較能成立的前提，也是學員回家自己練習的方法。 提醒：每一次「再拍」都不要刪掉舊的那張，兩張都要留著。
+
+互動提問：問：等一下拍完，如果你看不出兩張哪裡不一樣，要怎麼辦？（答：舉手，我們一起看）
+
+學員實作：請學員在相簿裡開一個新相簿叫「09/13 上課」，今天拍的都丟進去。
+
+預期看到的差異：學員會開始留意「這一張跟上一張差在哪」，而不是只看好不好看。
+
+進度快：可以補充：示範一次相簿建立的路徑。
+
+進度慢：可以刪掉：跳過建相簿，直接口頭提醒不要刪照片。">
+  <div class="pg-defs"></div>
+  <section class="slide">
+  <div class="stack gap-m">
+    <div>
+      <p class="eyebrow" data-r>整天都是這四步，重複十幾次</p>
+      <h2 class="h" data-r style="font-size:38px">先拍 → 再講 → 再拍 → 比較</h2>
+    </div>
+    <div data-r style="display:flex;align-items:center;gap:14px">
+      
+        
+        <div style="flex:1;background:#fff;border:1px solid rgba(36,28,23,.12);border-top:5px solid #9c8b7c;
+             border-radius:18px;padding:22px 18px;box-shadow:0 14px 34px -20px rgba(60,40,28,.45)">
+          <p style="margin:0 0 8px;font-size:27px;font-weight:900;color:#9c8b7c">先拍</p>
+          <p style="margin:0;font-size:21px;font-weight:650;color:#4a3c33;line-height:1.45">用你平常的方式拍一張</p>
+        </div>
+        <span style="font-size:34px;color:#9c8b7c;font-weight:300">→</span>
+        <div style="flex:1;background:#fff;border:1px solid rgba(36,28,23,.12);border-top:5px solid #c05f3c;
+             border-radius:18px;padding:22px 18px;box-shadow:0 14px 34px -20px rgba(60,40,28,.45)">
+          <p style="margin:0 0 8px;font-size:27px;font-weight:900;color:#c05f3c">再講</p>
+          <p style="margin:0;font-size:21px;font-weight:650;color:#4a3c33;line-height:1.45">我只講一個技巧</p>
+        </div>
+        <span style="font-size:34px;color:#9c8b7c;font-weight:300">→</span>
+        <div style="flex:1;background:#fff;border:1px solid rgba(36,28,23,.12);border-top:5px solid #d99a4e;
+             border-radius:18px;padding:22px 18px;box-shadow:0 14px 34px -20px rgba(60,40,28,.45)">
+          <p style="margin:0 0 8px;font-size:27px;font-weight:900;color:#d99a4e">再拍</p>
+          <p style="margin:0;font-size:21px;font-weight:650;color:#4a3c33;line-height:1.45">用剛學的再拍一張</p>
+        </div>
+        <span style="font-size:34px;color:#9c8b7c;font-weight:300">→</span>
+        <div style="flex:1;background:#fff;border:1px solid rgba(36,28,23,.12);border-top:5px solid #5f7a63;
+             border-radius:18px;padding:22px 18px;box-shadow:0 14px 34px -20px rgba(60,40,28,.45)">
+          <p style="margin:0 0 8px;font-size:27px;font-weight:900;color:#5f7a63">比較</p>
+          <p style="margin:0;font-size:21px;font-weight:650;color:#4a3c33;line-height:1.45">兩張並排，自己看差別</p>
+        </div>
+    </div>
+    <div class="callout" data-r><svg width="34" height="34" viewBox="0 0 24 24" fill="#c05f3c"><path d="M12 5c5 0 9 4.5 9 7s-4 7-9 7-9-4.5-9-7 4-7 9-7Zm0 2c-3.5 0-6.4 3-6.9 5 .5 2 3.4 5 6.9 5s6.4-3 6.9-5C18.4 10 15.5 7 12 7Zm0 1.8a3.2 3.2 0 1 1 0 6.4 3.2 3.2 0 0 1 0-6.4Z"/></svg>
+      <span class="txt">我不會一次講四件事。<b class="hl">一次只改一個地方</b>，你才看得出來是哪裡變好的。</span></div>
+  </div></section>
+  <div class="pg-foot"><span>開場</span><span>3 / 17</span></div>
+</div>
+
+<div class="pg"
+     data-document-role="page"
+     data-label="04｜四個觀念先講在前面"
+     data-speaker-notes="講師說明：第一點要講得斬釘截鐵。班上一定有人用舊手機，這句話是在告訴她「你可以」。 第三點先埋下伏筆，下午 PART 11 會回來收。
+
+互動提問：問：你們覺得一張商品照最重要的是什麼？（引導到「看得清楚」）
+
+預期看到的差異：用舊手機的學員會放鬆下來。
+
+進度快：可以補充：舉例：同一個場景用五年前的手機和最新的手機，光線對了差距很小。
+
+進度慢：可以刪掉：只講第一點和第三點。">
+  <div class="pg-defs"></div>
+  <section class="slide">
+  <div class="stack gap-m">
+    <div>
+      <p class="eyebrow" data-r>先講完，整天就不用再爭辯</p>
+      <h2 class="h" data-r style="font-size:38px">這四件事，今天會一直回來</h2>
+    </div>
+    <div class="cards c2" data-r style="gap:17px">
+      
+        <div class="card" style="padding:22px 24px;border-left:5px solid #c05f3c">
+          <p class="k" style="font-size:25px;color:#c05f3c">手機貴，不代表照片好看</p>
+          <p class="v" style="font-size:21px">決定照片好不好的是光線、對焦、有沒有晃。這三件事跟你手機多少錢無關。</p>
+        </div>
+        <div class="card" style="padding:22px 24px;border-left:5px solid #5f7a63">
+          <p class="k" style="font-size:25px;color:#5f7a63">商品照只要做到三件事</p>
+          <p class="v" style="font-size:21px"><b>看得清楚</b>、<b>看得舒服</b>、<b>看得懂重點</b>。做到這三件就夠了，不用追求藝術感。</p>
+        </div>
+        <div class="card" style="padding:22px 24px;border-left:5px solid #d99a4e">
+          <p class="k" style="font-size:25px;color:#d99a4e">先把照片拍好，再談修圖</p>
+          <p class="v" style="font-size:21px">修圖救得回太暗、有點歪；救不回沒對到焦、手震糊掉。下午你會親眼看到界線在哪。</p>
+        </div>
+        <div class="card" style="padding:22px 24px;border-left:5px solid #8a5a6d">
+          <p class="k" style="font-size:25px;color:#8a5a6d">一次只改一個地方</p>
+          <p class="v" style="font-size:21px">同時改光線又換背景，你永遠不知道是哪個讓照片變好。</p>
+        </div>
+    </div>
+  </div></section>
+  <div class="pg-foot"><span>開場</span><span>4 / 17</span></div>
+</div>
+
+<div class="pg"
+     data-document-role="page"
+     data-label="05｜攝影名詞，翻成生活話"
+     data-speaker-notes="講師說明：逐列念過去，每一列都用「動作」收尾，不要停在名詞解釋。 白平衡這一列一定要照實講。教材 P.56 明載 iOS 內建沒有白平衡功能，講錯學員回家會找不到。 這一頁不用背，附錄有同樣的表。
+
+互動提問：問：這五個字裡面，哪一個你以前聽過但不知道意思？
+
+預期看到的差異：學員不再被術語卡住，後面講對焦、曝光時能直接跟上。
+
+進度快：可以補充：補一個「解析度＝照片有多少格子」，接第 15 頁。
+
+進度慢：可以刪掉：只講對焦與曝光兩列，其餘留給附錄。">
+  <div class="pg-defs"></div>
+  <section class="slide">
+  <div class="stack gap-m">
+    <div>
+      <p class="eyebrow" data-r>今天不背術語</p>
+      <h2 class="h" data-r style="font-size:38px">聽到這些字，心裡想的是這句話</h2>
+    </div>
+    <table class="tbl" data-r>
+      <thead><tr><th style="width:180px">聽到這個字</th><th style="width:330px">心裡想這句話</th><th>今天你要會做的動作</th></tr></thead>
+      <tbody>
+        <tr><td class="lead-col">對焦</td><td><b>哪裡要清楚</b></td><td>用手指點商品，畫面出現方框就對了</td></tr>
+        <tr><td class="lead-col">曝光</td><td><b>太亮還是太暗</b></td><td>點完之後按住旁邊的太陽圖示，上下移動</td></tr>
+        <tr><td class="lead-col">構圖</td><td><b>商品放在哪裡比較舒服</b></td><td>打開格線，把商品放在線上或交叉點</td></tr>
+        <tr><td class="lead-col">景深</td><td><b>背景是清楚還是模糊</b></td><td>離商品近一點，背景自然會糊掉</td></tr>
+        <tr><td class="lead-col">白平衡</td><td><b>顏色有沒有偏黃或偏藍</b></td><td>iPhone 拍的時候調不了，<b>下午用修圖救</b></td></tr>
+      </tbody>
+    </table>
+    <div class="callout gold" data-r><svg width="32" height="32" viewBox="0 0 24 24" fill="#d99a4e"><path d="M12 2 1 21h22L12 2Zm0 5 7.5 12.9h-15L12 7Zm-1 4v5h2v-5h-2Zm0 6.5V19h2v-1.5h-2Z"/></svg>
+      <span class="txt">最後一列要注意：<b>iPhone 內建相機沒有白平衡功能</b>，
+      只能換角度或事後修圖；Android 的專業模式才調得到。</span></div>
+  </div></section>
+  <div class="pg-foot"><span>開場</span><span>5 / 17</span></div>
+</div>
+
+<div class="pg"
+     data-document-role="page"
+     data-label="06｜你想給人什麼感覺？"
+     data-speaker-notes="講師說明：這一頁是整天的主軸，講慢一點。 四種感覺不是規則，是四條現成的路。學員只要選一條走，就不會每拍一張都在猶豫。 請學員現在心裡先選一種，不用講出來，下午總實作時會再確認一次。
+
+互動提問：問：你的商品，你希望客人看到照片時第一個感覺是什麼？ 問：手作果醬適合哪一種？（沒有標準答案，四種都可以，重點是要選一種）
+
+學員實作：請學員在講義上圈選一種感覺。
+
+預期看到的差異：之後每一段的頁尾呼應帶出現時，學員會開始自己對照自己圈的那一列。
+
+進度快：可以補充：請兩三位學員說自己選哪一種、為什麼，全班一起討論合不合適。
+
+進度慢：可以刪掉：只講「先問感覺，再問怎麼拍」這句話，四張卡片快速帶過。">
+  <div class="pg-defs"></div>
+  <section class="slide pad-tight">
+  <div class="stack gap-s pad-tight">
+    <div>
+      <p class="eyebrow" data-r>今天最重要的一個問題</p>
+      <h2 class="h" data-r style="font-size:34px;margin-bottom:4px">
+        不要先問「怎麼拍比較好看」，先問<span class="hl">「我想給人什麼感覺」</span></h2>
+    </div>
+    <div class="cards c4" data-r style="gap:15px">
+      
+<div class="feel-card">
+  <div class="fc-top" style="background:#c9743f"></div>
+  <div class="fr"
+      style="width:202px;height:133px">
+    <div class="fr-in" style="background:repeating-linear-gradient(91deg,
+          rgba(120,80,48,.16) 0 3px, rgba(120,80,48,0) 3px 13px),
+        linear-gradient(#c9a271,#b98f5c)">
+      
+      <div style="position:absolute;left:50%; top:52%; transform:translate(-50%,-50%);filter:drop-shadow(11.05px 4.25px 6.8px rgba(40,24,12,.42));">
+<svg width="85" height="85" viewBox="0 0 100 100" fill="none">
+  <ellipse cx="50" cy="19" rx="19" ry="7" fill="#c05f3c"/>
+  <ellipse cx="50" cy="16.5" rx="19" ry="7" fill="#c05f3c" opacity=".72"/>
+  <path d="M31 19v6a8 8 0 0 0 8 8h22a8 8 0 0 0 8-8v-6" fill="#c05f3c"/>
+  <path d="M33 27c0 4 7.6 7 17 7s17-3 17-7v50a8 8 0 0 1-8 8H41a8 8 0 0 1-8-8V27Z"
+        fill="#fff" fill-opacity=".93" stroke="#c05f3c" stroke-width="2.4"/>
+  <path d="M36 48c0 3 6.3 5.4 14 5.4S64 51 64 48v29a5 5 0 0 1-5 5H41a5 5 0 0 1-5-5V48Z" fill="#d99a4e"/>
+  <ellipse cx="50" cy="48" rx="14" ry="5" fill="#d99a4e" opacity=".55"/>
+  <circle cx="44" cy="38" r="3.2" fill="#c05f3c" opacity=".8"/>
+  <circle cx="57" cy="41" r="2.3" fill="#c05f3c" opacity=".6"/>
+  <rect x="39" y="58" width="22" height="12" rx="2.5" fill="#fff" opacity=".9"/>
+</svg></div>
+      <div class="lit lit-side"></div>
+    </div>
+    
+    
+  </div>
+  <h5 style="color:#c9743f">溫暖手作</h5>
+  <div class="fc-r"><span class="fc-k">光線</span><span class="fc-v">側光</span></div><div class="fc-r"><span class="fc-k">背景</span><span class="fc-v">木質、素色布</span></div><div class="fc-r"><span class="fc-k">角度</span><span class="fc-v">45 度</span></div><div class="fc-r"><span class="fc-k">構圖</span><span class="fc-v">留一點手的動作</span></div>
+</div>
+<div class="feel-card">
+  <div class="fc-top" style="background:#4a7fa5"></div>
+  <div class="fr"
+      style="width:202px;height:133px">
+    <div class="fr-in" style="background:radial-gradient(120% 110% at 50% 20%, #ffffff 0%, #f3f0ea 100%)">
+      
+      <div style="position:absolute;left:50%; top:52%; transform:translate(-50%,-50%);filter:drop-shadow(0 4.25px 5.95px rgba(40,24,12,.30));">
+<svg width="85" height="85" viewBox="0 0 100 100" fill="none">
+  <rect x="31" y="11" width="38" height="10" rx="3.5" fill="#c05f3c"/>
+  <rect x="34.5" y="7.5" width="31" height="5" rx="2.5" fill="#c05f3c" opacity=".72"/>
+  <path d="M33 21h34v56a8 8 0 0 1-8 8H41a8 8 0 0 1-8-8V21Z"
+        fill="#fff" fill-opacity=".93" stroke="#c05f3c" stroke-width="2.4"/>
+  <path d="M36 46h28v31a5 5 0 0 1-5 5H41a5 5 0 0 1-5-5V46Z" fill="#d99a4e"/>
+  <path d="M36 46h28v5H36z" fill="#d99a4e" opacity=".5"/>
+  <circle cx="45" cy="33" r="3.4" fill="#c05f3c" opacity=".8"/>
+  <circle cx="57" cy="28" r="2.4" fill="#c05f3c" opacity=".62"/>
+  <circle cx="53" cy="38" r="2" fill="#c05f3c" opacity=".55"/>
+  <rect x="39" y="55" width="22" height="12" rx="2.5" fill="#fff" opacity=".9"/>
+</svg></div>
+      <div class="lit lit-front"></div>
+    </div>
+    
+    
+  </div>
+  <h5 style="color:#4a7fa5">乾淨專業</h5>
+  <div class="fc-r"><span class="fc-k">光線</span><span class="fc-v">順光</span></div><div class="fc-r"><span class="fc-k">背景</span><span class="fc-v">白或淺灰</span></div><div class="fc-r"><span class="fc-k">角度</span><span class="fc-v">平拍或正俯拍</span></div><div class="fc-r"><span class="fc-k">構圖</span><span class="fc-v">置中、不加濾鏡</span></div>
+</div>
+<div class="feel-card">
+  <div class="fc-top" style="background:#6a9160"></div>
+  <div class="fr"
+      style="width:202px;height:133px">
+    <div class="fr-in" style="background:radial-gradient(60% 50% at 22% 76%, rgba(255,255,255,.85) 0%, rgba(255,255,255,0) 60%),
+         repeating-linear-gradient(89deg, rgba(120,80,48,.14) 0 3px, rgba(120,80,48,0) 3px 12px),
+         linear-gradient(#c9a271,#b98f5c)">
+      
+      <div style="position:absolute;left:50%; top:52%; transform:translate(-50%,-50%);filter:drop-shadow(0 4.25px 5.95px rgba(40,24,12,.30));">
+<svg width="85" height="85" viewBox="0 0 100 100" fill="none">
+  <circle cx="50" cy="50" r="34" fill="#fff" fill-opacity=".9" stroke="#c05f3c" stroke-width="2"/>
+  <circle cx="50" cy="50" r="28" fill="#c05f3c"/>
+  <circle cx="50" cy="50" r="23" fill="#c05f3c" opacity=".7"/>
+  <circle cx="50" cy="50" r="15" fill="#d99a4e" opacity=".9"/>
+  <line x1="74" y1="50"
+                  x2="78" y2="50"
+                  stroke="#fff" stroke-width="1.6" opacity=".35"/><line x1="72.17310878027088" y1="59.18440237676215"
+                  x2="75.86862691031602" y2="60.715136106222516"
+                  stroke="#fff" stroke-width="1.6" opacity=".35"/><line x1="66.97056274847714" y1="66.97056274847714"
+                  x2="69.79898987322333" y2="69.79898987322332"
+                  stroke="#fff" stroke-width="1.6" opacity=".35"/><line x1="59.18440237676216" y1="72.17310878027088"
+                  x2="60.715136106222516" y2="75.86862691031602"
+                  stroke="#fff" stroke-width="1.6" opacity=".35"/><line x1="50" y1="74"
+                  x2="50" y2="78"
+                  stroke="#fff" stroke-width="1.6" opacity=".35"/><line x1="40.81559762323785" y1="72.17310878027088"
+                  x2="39.284863893777484" y2="75.86862691031602"
+                  stroke="#fff" stroke-width="1.6" opacity=".35"/><line x1="33.029437251522864" y1="66.97056274847714"
+                  x2="30.201010126776673" y2="69.79898987322333"
+                  stroke="#fff" stroke-width="1.6" opacity=".35"/><line x1="27.82689121972912" y1="59.18440237676216"
+                  x2="24.131373089683972" y2="60.715136106222516"
+                  stroke="#fff" stroke-width="1.6" opacity=".35"/><line x1="26" y1="50"
+                  x2="22" y2="50"
+                  stroke="#fff" stroke-width="1.6" opacity=".35"/><line x1="27.826891219729113" y1="40.815597623237856"
+                  x2="24.131373089683965" y2="39.2848638937775"
+                  stroke="#fff" stroke-width="1.6" opacity=".35"/><line x1="33.02943725152286" y1="33.029437251522864"
+                  x2="30.201010126776666" y2="30.201010126776673"
+                  stroke="#fff" stroke-width="1.6" opacity=".35"/><line x1="40.81559762323785" y1="27.826891219729117"
+                  x2="39.2848638937775" y2="24.13137308968397"
+                  stroke="#fff" stroke-width="1.6" opacity=".35"/><line x1="49.99999999999999" y1="26"
+                  x2="49.99999999999999" y2="22"
+                  stroke="#fff" stroke-width="1.6" opacity=".35"/><line x1="59.18440237676216" y1="27.82689121972912"
+                  x2="60.715136106222516" y2="24.131373089683976"
+                  stroke="#fff" stroke-width="1.6" opacity=".35"/><line x1="66.97056274847714" y1="33.02943725152286"
+                  x2="69.79898987322332" y2="30.201010126776666"
+                  stroke="#fff" stroke-width="1.6" opacity=".35"/><line x1="72.17310878027088" y1="40.81559762323785"
+                  x2="75.86862691031604" y2="39.28486389377749"
+                  stroke="#fff" stroke-width="1.6" opacity=".35"/>
+</svg></div>
+      <div class="lit lit-front"></div>
+    </div>
+    
+    
+  </div>
+  <h5 style="color:#6a9160">新鮮現做</h5>
+  <div class="fc-r"><span class="fc-k">光線</span><span class="fc-v">窗邊自然光</span></div><div class="fc-r"><span class="fc-k">背景</span><span class="fc-v">有製作痕跡的檯面</span></div><div class="fc-r"><span class="fc-k">角度</span><span class="fc-v">俯拍或 45 度</span></div><div class="fc-r"><span class="fc-k">構圖</span><span class="fc-v">加肢體動作</span></div>
+</div>
+<div class="feel-card">
+  <div class="fc-top" style="background:#7b5a86"></div>
+  <div class="fr"
+      style="width:202px;height:133px">
+    <div class="fr-in" style="background:radial-gradient(130% 110% at 30% 12%, #4a3f45 0%, #241d22 70%)">
+      
+      <div style="position:absolute;left:50%; top:52%; transform:translate(-50%,-50%);filter:drop-shadow(0 2.55px 4.25px rgba(40,24,12,.20));">
+<svg width="85" height="85" viewBox="0 0 100 100" fill="none">
+  <ellipse cx="50" cy="19" rx="19" ry="7" fill="#c05f3c"/>
+  <ellipse cx="50" cy="16.5" rx="19" ry="7" fill="#c05f3c" opacity=".72"/>
+  <path d="M31 19v6a8 8 0 0 0 8 8h22a8 8 0 0 0 8-8v-6" fill="#c05f3c"/>
+  <path d="M33 27c0 4 7.6 7 17 7s17-3 17-7v50a8 8 0 0 1-8 8H41a8 8 0 0 1-8-8V27Z"
+        fill="#fff" fill-opacity=".93" stroke="#c05f3c" stroke-width="2.4"/>
+  <path d="M36 48c0 3 6.3 5.4 14 5.4S64 51 64 48v29a5 5 0 0 1-5 5H41a5 5 0 0 1-5-5V48Z" fill="#d99a4e"/>
+  <ellipse cx="50" cy="48" rx="14" ry="5" fill="#d99a4e" opacity=".55"/>
+  <circle cx="44" cy="38" r="3.2" fill="#c05f3c" opacity=".8"/>
+  <circle cx="57" cy="41" r="2.3" fill="#c05f3c" opacity=".6"/>
+  <rect x="39" y="58" width="22" height="12" rx="2.5" fill="#fff" opacity=".9"/>
+</svg></div>
+      <div class="lit lit-back"></div>
+    </div>
+    
+    
+  </div>
+  <h5 style="color:#7b5a86">高級精緻</h5>
+  <div class="fc-r"><span class="fc-k">光線</span><span class="fc-v">側光或逆光</span></div><div class="fc-r"><span class="fc-k">背景</span><span class="fc-v">深色</span></div><div class="fc-r"><span class="fc-k">角度</span><span class="fc-v">特寫</span></div><div class="fc-r"><span class="fc-k">構圖</span><span class="fc-v">大量留白</span></div>
+</div>
+    </div>
+    <div class="callout" data-r style="padding:15px 24px"><svg width="32" height="32" viewBox="0 0 24 24" fill="#d99a4e"><path d="M12 2a7 7 0 0 1 4 12.7V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.3A7 7 0 0 1 12 2ZM9 19h6v1a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-1Z"/></svg>
+      <span class="txt">感覺定了，<b>光線、背景、角度、構圖四件事就都有答案</b>，
+      不用每一項重新猜。今天每一段結束，我們都會回來對一次這張表。</span></div>
+  </div></section>
+  <div class="pg-foot"><span>開場</span><span>6 / 17</span></div>
+</div>
+
+<div class="pg"
+     data-document-role="page"
+     data-label="07｜【實作 0】照你平常的方式，先拍一張"
+     data-speaker-notes="講師說明：這一段完全不要給提示。給了提示，下午的對照就沒有說服力了。 五分鐘就好，不要拖。有人拍很久就說「就這樣，先拍一張」。 拍完之後，三個問題一個一個問，讓學員自己講。
+
+互動提問：問：你覺得這張哪裡不錯？ 問：哪裡還可以更好？ 問：你覺得是手機的問題，還是拍法可以調整？（多數人會說手機，這正是今天要翻轉的）
+
+學員實作：每人用自己的商品或現場物件，拍一張，存在「09/13 上課」相簿。
+
+預期看到的差異：多數人會拍出：光線不足、背景雜亂、商品放正中央但很小。這三個問題正好對應今天的三大段。
+
+進度快：可以補充：請兩位學員的照片投影出來，全班一起講哪裡可以更好。
+
+進度慢：可以刪掉：縮短到三分鐘，三個問題只問第三個。">
+  <div class="pg-defs"></div>
+  <section class="slide">
+  <div class="split w-left" style="gap:44px">
+    <div class="stack gap-m">
+      <div>
+        <p class="eyebrow" data-r>實作 0　·　五分鐘</p>
+        <h2 class="h" data-r style="font-size:40px">先不要想太多<br>照你平常的方式拍一張</h2>
+      </div>
+      <p class="lead" data-r style="font-size:23px">
+        不用擦鏡頭、不用找地方、不用調任何東西。<br>
+        就像你平常拍要放到臉書那樣，拍一張就好。</p>
+      <div class="callout" data-r><svg width="32" height="32" viewBox="0 0 24 24" fill="#c05f3c"><path d="M12 2 1 21h22L12 2Zm0 5 7.5 12.9h-15L12 7Zm-1 4v5h2v-5h-2Zm0 6.5V19h2v-1.5h-2Z"/></svg>
+        <span class="txt"><b>這張照片千萬不要刪掉。</b>下午四點我們會把它拿出來，
+        跟你最後拍的那張並排比較。</span></div>
+      <div data-r style="display:flex;gap:10px;flex-wrap:wrap">
+        <span class="tag">① 這張哪裡不錯？</span>
+        <span class="tag">② 哪裡還可以更好？</span>
+        <span class="tag on">③ 是手機的問題，還是拍法的問題？</span>
+      </div>
+    </div>
+    <div data-r style="display:flex;justify-content:center">
+      
+<div class="slot-ph" style="width:330px;height:400px">
+  <span class="sp-tag">學員自己的 Before</span>
+  <span class="sp-ic"><svg width="34" height="34" viewBox="0 0 24 24" fill="#9c8b7c"><path d="M9 4h6l1.5 2H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3.5L9 4Zm3 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"/></svg></span>
+  <span class="sp-t">學員拍的第一張</span>
+  <span class="sp-s">不給任何提示<br>拍完留著，下午做前後對照</span>
+</div>
+    </div>
+  </div></section>
+  <div class="pg-foot"><span>開場</span><span>7 / 17</span></div>
+</div>
+
+<div class="pg dark"
+     data-document-role="page"
+     data-label="08｜PART 1｜認識你的手機相機"
+     data-speaker-notes="講師說明：這一段是後面所有實作的地基，慢一點沒關係。">
+  <div class="pg-defs"></div>
+  <section class="slide divider">
+  <div class="wrap">
+    <p class="pno" data-r>01</p>
+    <h2 data-r>認識你的<br>手機相機</h2>
+    <p class="d-sub" data-r>找得到功能，後面才做得動。這一段不求快，求每個人都跟得上。</p>
+  </div>
+  <div class="d-art"><svg width="130" height="130" viewBox="0 0 24 24" fill="rgba(255,255,255,.13)"><path d="M7 1h10a2 2 0 0 1 2 2v18a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2Zm0 4v14h10V5H7Zm5 15.2a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Z"/></svg></div></section>
+  <div class="pg-foot"><span>PART 1</span><span>8 / 17</span></div>
+</div>
+
+<div class="pg"
+     data-document-role="page"
+     data-label="09｜iPhone 和 Android，差在哪裡"
+     data-speaker-notes="講師說明：先解決學員心裡的焦慮：「我用 Android，是不是比較差？」不是。 重點放在「差別很小，而且可以補」，不要花時間比較優劣。 白平衡那一點先提，第 5 頁講過，下午修圖段會再回來。
+
+互動提問：問：現場用 iPhone 的舉手？用 Android 的舉手？（先知道比例，後面示範才知道要投影哪一台）
+
+預期看到的差異：用 Android 的學員不會覺得自己被冷落。
+
+進度快：可以補充：請一位 Android 學員的手機投影，讓大家看專業模式長什麼樣。
+
+進度慢：可以刪掉：只講最後那句結論。">
+  <div class="pg-defs"></div>
+  <section class="slide">
+  <div class="stack gap-m">
+    <div>
+      <p class="eyebrow" data-r>先把心裡的疙瘩解決掉</p>
+      <h2 class="h" data-r style="font-size:38px">兩邊的核心功能，其實一樣</h2>
+    </div>
+    <div class="cards c2" data-r style="gap:22px">
+      <div class="card" style="border-top:5px solid #4a7fa5">
+        <p class="cap" style="color:#4a7fa5">iPhone　·　iOS</p>
+        <ul class="list">
+          <li>介面各機型幾乎一致，教一次大家都通</li>
+          <li>內建水平儀，拍俯拍很好用</li>
+          <li><b>沒有白平衡</b>，顏色只能事後修</li>
+          <li>有原況照片、方形畫面、全景</li>
+        </ul>
+      </div>
+      <div class="card" style="border-top:5px solid #6a9160">
+        <p class="cap" style="color:#6a9160">Android　·　Samsung／OPPO／小米…</p>
+        <ul class="list sage">
+          <li>各廠牌介面差很多，位置要自己找</li>
+          <li>多半有<b>專業模式</b>，可調白平衡、EV、ISO</li>
+          <li>格線可能叫「構圖線」或「Grid」</li>
+          <li>水平儀有些要另外裝 App</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout sage" data-r><svg width="32" height="32" viewBox="0 0 24 24" fill="#5f7a63"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z"/></svg>
+      <span class="txt">教材原話：「iOS 與 Android 在手機相機內建的功能中，有些微的差別，
+      <b>但基本上都可以透過下載 App 補足各自缺少的功能</b>。」</span></div>
+  </div></section>
+  <div class="pg-foot"><span>PART 1</span><span>9 / 17</span></div>
+</div>
+
+<div class="pg"
+     data-document-role="page"
+     data-label="10｜不要背按鈕位置，要知道自己在找什麼"
+     data-speaker-notes="講師說明：這一頁的觀念比內容重要：介面會改版，記位置沒用，要記「我在找什麼」。 這句話今天會用到很多次，尤其現場有人的手機跟投影不一樣時。
+
+互動提問：問：有人手機的相機介面跟我投影的長得不一樣嗎？（找一台出來當範例）
+
+學員實作：請學員打開自己的相機 App，試著找出這六個在哪裡，找不到的舉手。
+
+預期看到的差異：助教這時候會很忙，這是正常的，讓大家花三分鐘找。
+
+進度快：可以補充：示範用設定搜尋找「格線」。
+
+進度慢：可以刪掉：六個只找對焦、亮度、格線三個。">
+  <div class="pg-defs"></div>
+  <section class="slide">
+  <div class="stack gap-m">
+    <div>
+      <p class="eyebrow" data-r>介面會一直改版，這六件事不會變</p>
+      <h2 class="h" data-r style="font-size:38px">每支手機都要找得到這六個</h2>
+    </div>
+    <div class="cards c3" data-r style="gap:16px">
+      
+        <div class="card flat" style="padding:18px 20px;display:flex;gap:14px;align-items:center">
+          <span style="flex:0 0 auto"><svg width="34" height="34" viewBox="0 0 24 24" fill="#c05f3c"><path d="M12 5c5 0 9 4.5 9 7s-4 7-9 7-9-4.5-9-7 4-7 9-7Zm0 2c-3.5 0-6.4 3-6.9 5 .5 2 3.4 5 6.9 5s6.4-3 6.9-5C18.4 10 15.5 7 12 7Zm0 1.8a3.2 3.2 0 1 1 0 6.4 3.2 3.2 0 0 1 0-6.4Z"/></svg></span>
+          <span><p class="k" style="font-size:23px;margin:0 0 3px">對焦</p>
+          <p class="v" style="font-size:20px;margin:0">點螢幕，出現方框</p></span>
+        </div>
+        <div class="card flat" style="padding:18px 20px;display:flex;gap:14px;align-items:center">
+          <span style="flex:0 0 auto"><svg width="34" height="34" viewBox="0 0 24 24" fill="#d99a4e"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-13a1 1 0 0 1-1-1V2a1 1 0 0 1 2 0v1a1 1 0 0 1-1 1Zm0 18a1 1 0 0 1-1-1v-1a1 1 0 0 1 2 0v1a1 1 0 0 1-1 1ZM4 13H3a1 1 0 0 1 0-2h1a1 1 0 0 1 0 2Zm17 0h-1a1 1 0 0 1 0-2h1a1 1 0 0 1 0 2ZM6.3 7.7 5.6 7a1 1 0 0 1 1.4-1.4l.7.7a1 1 0 0 1-1.4 1.4Zm11.4 11.4-.7-.7a1 1 0 0 1 1.4-1.4l.7.7a1 1 0 0 1-1.4 1.4Zm0-11.4a1 1 0 0 1 0-1.4l.7-.7A1 1 0 0 1 19.8 7l-.7.7a1 1 0 0 1-1.4 0ZM6.3 19.1a1 1 0 0 1-1.4-1.4l.7-.7A1 1 0 0 1 7 18.4l-.7.7Z"/></svg></span>
+          <span><p class="k" style="font-size:23px;margin:0 0 3px">亮度</p>
+          <p class="v" style="font-size:20px;margin:0">方框旁邊的太陽</p></span>
+        </div>
+        <div class="card flat" style="padding:18px 20px;display:flex;gap:14px;align-items:center">
+          <span style="flex:0 0 auto"><svg width="34" height="34" viewBox="0 0 24 24" fill="#4a7fa5"><path d="M9 4h6l1.5 2H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3.5L9 4Zm3 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"/></svg></span>
+          <span><p class="k" style="font-size:23px;margin:0 0 3px">鏡頭切換</p>
+          <p class="v" style="font-size:20px;margin:0">0.5x／1x／2x</p></span>
+        </div>
+        <div class="card flat" style="padding:18px 20px;display:flex;gap:14px;align-items:center">
+          <span style="flex:0 0 auto"><svg width="34" height="34" viewBox="0 0 24 24" fill="#5f7a63"><path d="M3 3h18v18H3V3Zm2 6h4V5H5v4Zm6 0h2V5h-2v4Zm4 0h4V5h-4v4ZM5 15h4v-4H5v4Zm6 0h2v-4h-2v4Zm4 0h4v-4h-4v4ZM5 19h4v-2H5v2Zm6 0h2v-2h-2v2Zm4 0h4v-2h-4v2Z"/></svg></span>
+          <span><p class="k" style="font-size:23px;margin:0 0 3px">格線</p>
+          <p class="v" style="font-size:20px;margin:0">設定裡的九宮格</p></span>
+        </div>
+        <div class="card flat" style="padding:18px 20px;display:flex;gap:14px;align-items:center">
+          <span style="flex:0 0 auto"><svg width="34" height="34" viewBox="0 0 24 24" fill="#8a5a6d"><path d="M7 2v3H2v2h5v10h10v5h2v-5h3v-2h-3V5H7V2Zm10 5v10H9V7h8Z"/></svg></span>
+          <span><p class="k" style="font-size:23px;margin:0 0 3px">照片比例</p>
+          <p class="v" style="font-size:20px;margin:0">4:3／1:1／16:9</p></span>
+        </div>
+        <div class="card flat" style="padding:18px 20px;display:flex;gap:14px;align-items:center">
+          <span style="flex:0 0 auto"><svg width="34" height="34" viewBox="0 0 24 24" fill="#7a6a5d"><path d="M7 1h10a2 2 0 0 1 2 2v18a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2Zm0 4v14h10V5H7Zm5 15.2a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Z"/></svg></span>
+          <span><p class="k" style="font-size:23px;margin:0 0 3px">錄影畫質</p>
+          <p class="v" style="font-size:20px;margin:0">1080p／4K、fps</p></span>
+        </div>
+    </div>
+    <div class="callout" data-r><svg width="32" height="32" viewBox="0 0 24 24" fill="#c05f3c"><path d="M12 2a7 7 0 0 1 4 12.7V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.3A7 7 0 0 1 12 2ZM9 19h6v1a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-1Z"/></svg>
+      <span class="txt">找不到的時候，用手機<b>設定裡的搜尋</b>打關鍵字，
+      例如「格線」「畫質」。這比記位置有用得多。</span></div>
+  </div></section>
+  <div class="pg-foot"><span>PART 1</span><span>10 / 17</span></div>
+</div>
+
+<div class="pg"
+     data-document-role="page"
+     data-label="11｜格線在哪裡開：iPhone／Android 對照"
+     data-speaker-notes="講師說明：一次只講一個步驟，講完停下來等大家做完。 Android 的學員名稱可能不一樣，請她們找「有九宮格圖示」的那一項。 格線打開之後不要關掉，今天整天都會用到。
+
+互動提問：問：Android 的同學，你們的選項叫什麼名字？（收集不同說法，寫在白板上）
+
+學員實作：所有人現在打開格線。助教走動確認每一台都開好。
+
+預期看到的差異：打開格線後，學員拍照時會自然開始留意有沒有拍歪。
+
+進度快：可以補充：iPhone 順便打開水平儀，示範俯拍時兩個十字對齊。
+
+進度慢：可以刪掉：只講 iPhone，Android 交給助教個別協助。">
+  <div class="pg-defs"></div>
+  <section class="slide">
+  <div class="split" style="gap:36px">
+    <div class="stack gap-m">
+      <div>
+        <p class="eyebrow" data-r>第一個要打開的設定</p>
+        <h2 class="h" data-r style="font-size:36px">格線不是裝飾<br>是幫你拍直、拍正</h2>
+      </div>
+      
+<div style="display:flex;gap:14px;align-items:stretch">
+  
+    <div style="flex:1;background:#fff;border:1px solid rgba(36,28,23,.12);
+      border-radius:16px;padding:16px 15px;display:flex;flex-direction:column;gap:8px">
+      <span style="width:30px;height:30px;border-radius:50%;background:#c05f3c;color:#fff;
+        font-size:18px;font-weight:900;display:flex;align-items:center;justify-content:center">1</span>
+      <span style="font-size:22px;font-weight:900;color:#241c17;line-height:1.3">iPhone</span>
+      <span style="font-size:20px;font-weight:700;color:#4a3c33;line-height:1.4">設定 → 相機 → 打開「格線」。<br>同一頁還有水平儀可以一起開。</span>
+    </div>
+    <div style="flex:1;background:#fff;border:1px solid rgba(36,28,23,.12);
+      border-radius:16px;padding:16px 15px;display:flex;flex-direction:column;gap:8px">
+      <span style="width:30px;height:30px;border-radius:50%;background:#c05f3c;color:#fff;
+        font-size:18px;font-weight:900;display:flex;align-items:center;justify-content:center">2</span>
+      <span style="font-size:22px;font-weight:900;color:#241c17;line-height:1.3">Android</span>
+      <span style="font-size:20px;font-weight:700;color:#4a3c33;line-height:1.4">相機 App → 右上角設定 → 「格線」<br>或「構圖線」「Grid」。各廠名稱不同。</span>
+    </div>
+</div>
+      <div class="callout gold" data-r style="padding:15px 22px"><svg width="30" height="30" viewBox="0 0 24 24" fill="#d99a4e"><path d="M3 3h18v18H3V3Zm2 6h4V5H5v4Zm6 0h2V5h-2v4Zm4 0h4V5h-4v4ZM5 15h4v-4H5v4Zm6 0h2v-4h-2v4Zm4 0h4v-4h-4v4ZM5 19h4v-2H5v2Zm6 0h2v-2h-2v2Zm4 0h4v-2h-4v2Z"/></svg>
+        <span class="txt">教材 P.21：三分法又叫「九宮格構圖法」，
+        <b>在手機開啟格線功能後，即可使用</b>。下午講構圖就是用這條線。</span></div>
+    </div>
+    <div data-r style="display:flex;justify-content:center;align-items:center">
+      <div class="baked" style="width:238px;height:474px;border-radius:30px;background:#1b1512;
+    padding:9px 7px;box-shadow:0 20px 44px -22px rgba(40,26,16,.6);flex:0 0 auto">
+    <div style="position:relative;width:100%;height:100%;border-radius:23px;
+      background:#ffffff;overflow:hidden;text-align:left">
+  <div style="position:relative;width:100%;height:100%;background:#12100e">
+    <div style="position:absolute;left:0;right:0;top:0;height:54px;background:#12100e;
+      display:flex;align-items:center;justify-content:space-between;padding:0 14px">
+      <span style="font-size:16px;font-weight:800;color:rgba(255,255,255,.55)">4:3</span>
+      <span style="font-size:16px;font-weight:800;color:rgba(255,255,255,.55)">格線已開</span>
+    </div>
+    <div style="position:absolute;left:0;right:0;top:54px;bottom:96px;overflow:hidden">
+      <div style="position:absolute;inset:0;background:linear-gradient(#c9a271,#b98f5c)">
+                 <div style="position:absolute;left:50%;top:55%;transform:translate(-50%,-50%)">
+                   
+<svg width="120" height="120" viewBox="0 0 100 100" fill="none">
+  <ellipse cx="50" cy="19" rx="19" ry="7" fill="#c05f3c"/>
+  <ellipse cx="50" cy="16.5" rx="19" ry="7" fill="#c05f3c" opacity=".72"/>
+  <path d="M31 19v6a8 8 0 0 0 8 8h22a8 8 0 0 0 8-8v-6" fill="#c05f3c"/>
+  <path d="M33 27c0 4 7.6 7 17 7s17-3 17-7v50a8 8 0 0 1-8 8H41a8 8 0 0 1-8-8V27Z"
+        fill="#fff" fill-opacity=".93" stroke="#c05f3c" stroke-width="2.4"/>
+  <path d="M36 48c0 3 6.3 5.4 14 5.4S64 51 64 48v29a5 5 0 0 1-5 5H41a5 5 0 0 1-5-5V48Z" fill="#d99a4e"/>
+  <ellipse cx="50" cy="48" rx="14" ry="5" fill="#d99a4e" opacity=".55"/>
+  <circle cx="44" cy="38" r="3.2" fill="#c05f3c" opacity=".8"/>
+  <circle cx="57" cy="41" r="2.3" fill="#c05f3c" opacity=".6"/>
+  <rect x="39" y="58" width="22" height="12" rx="2.5" fill="#fff" opacity=".9"/>
+</svg></div></div>
+    <div style="position:absolute;inset:0;pointer-events:none">
+      <div style="position:absolute;left:33.33%;top:0;bottom:0;width:1px;background:rgba(255,255,255,.55)"></div>
+      <div style="position:absolute;left:66.66%;top:0;bottom:0;width:1px;background:rgba(255,255,255,.55)"></div>
+      <div style="position:absolute;top:33.33%;left:0;right:0;height:1px;background:rgba(255,255,255,.55)"></div>
+      <div style="position:absolute;top:66.66%;left:0;right:0;height:1px;background:rgba(255,255,255,.55)"></div>
+    </div>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;height:96px;background:#12100e;
+      display:flex;align-items:center;justify-content:center;gap:22px">
+      <span style="font-size:15px;font-weight:800;color:rgba(255,255,255,.5)">0.5x</span>
+      <span style="width:52px;height:52px;border-radius:50%;background:#fff;
+        box-shadow:0 0 0 3px #12100e,0 0 0 5px rgba(255,255,255,.85)"></span>
+      <span style="font-size:15px;font-weight:800;color:rgba(255,255,255,.5)">2x</span>
+    </div>
+  </div></div>
+  </div>
+    </div>
+  </div></section>
+  <div class="pg-foot"><span>PART 1</span><span>11 / 17</span></div>
+</div>
+
+<div class="pg"
+     data-document-role="page"
+     data-label="12｜【實作】一起把格線打開"
+     data-speaker-notes="講師說明：這是今天第一個「全班一起做」的動作，節奏要抓好。 確認每個人螢幕上都有線再往下，不要留人。
+
+互動提問：問：看得到四條線的舉手。（沒舉手的請助教過去）
+
+學員實作：打開格線，隨便拍一張，確認畫面上有線。
+
+預期看到的差異：學員第一次看到畫面被分成九格，會開始意識到「商品可以不放正中間」。
+
+進度快：可以補充：順便講一句：線的交叉點就是等一下構圖要用的位置。
+
+進度慢：可以刪掉：不拍照，只確認線有出現。">
+  <div class="pg-defs"></div>
+  <section class="slide">
+  <div class="stack gap-m center" style="text-align:center">
+    <div>
+      <p class="eyebrow" data-r style="justify-content:center">實作　·　五分鐘</p>
+      <h2 class="h" data-r style="font-size:42px">現在打開格線，拍一張</h2>
+    </div>
+    <div data-r style="display:flex;gap:26px;justify-content:center;align-items:center">
+      <div class="fr"
+      style="width:300px;height:225px">
+    <div class="fr-in" style="background:repeating-linear-gradient(91deg,
+          rgba(120,80,48,.16) 0 3px, rgba(120,80,48,0) 3px 13px),
+        linear-gradient(#c9a271,#b98f5c)">
+      
+      <div style="position:absolute;left:50%; top:52%; transform:translate(-50%,-50%);filter:drop-shadow(0 5.6000000000000005px 12.6px rgba(40,24,12,.22));">
+<svg width="140" height="140" viewBox="0 0 100 100" fill="none">
+  <ellipse cx="50" cy="19" rx="19" ry="7" fill="#c05f3c"/>
+  <ellipse cx="50" cy="16.5" rx="19" ry="7" fill="#c05f3c" opacity=".72"/>
+  <path d="M31 19v6a8 8 0 0 0 8 8h22a8 8 0 0 0 8-8v-6" fill="#c05f3c"/>
+  <path d="M33 27c0 4 7.6 7 17 7s17-3 17-7v50a8 8 0 0 1-8 8H41a8 8 0 0 1-8-8V27Z"
+        fill="#fff" fill-opacity=".93" stroke="#c05f3c" stroke-width="2.4"/>
+  <path d="M36 48c0 3 6.3 5.4 14 5.4S64 51 64 48v29a5 5 0 0 1-5 5H41a5 5 0 0 1-5-5V48Z" fill="#d99a4e"/>
+  <ellipse cx="50" cy="48" rx="14" ry="5" fill="#d99a4e" opacity=".55"/>
+  <circle cx="44" cy="38" r="3.2" fill="#c05f3c" opacity=".8"/>
+  <circle cx="57" cy="41" r="2.3" fill="#c05f3c" opacity=".6"/>
+  <rect x="39" y="58" width="22" height="12" rx="2.5" fill="#fff" opacity=".9"/>
+</svg></div>
+      
+    </div>
+    
+    <span class="fr-cap">沒有格線：不知道有沒有歪</span>
+  </div>
+      <span style="font-size:36px;color:#9c8b7c;font-weight:300">→</span>
+      <div style="position:relative">
+        <div class="fr"
+      style="width:300px;height:225px">
+    <div class="fr-in" style="background:repeating-linear-gradient(91deg,
+          rgba(120,80,48,.16) 0 3px, rgba(120,80,48,0) 3px 13px),
+        linear-gradient(#c9a271,#b98f5c)">
+      
+      <div style="position:absolute;left:34%; top:54%; transform:translate(-50%,-50%);filter:drop-shadow(0 5.6000000000000005px 12.6px rgba(40,24,12,.22));">
+<svg width="140" height="140" viewBox="0 0 100 100" fill="none">
+  <ellipse cx="50" cy="19" rx="19" ry="7" fill="#c05f3c"/>
+  <ellipse cx="50" cy="16.5" rx="19" ry="7" fill="#c05f3c" opacity=".72"/>
+  <path d="M31 19v6a8 8 0 0 0 8 8h22a8 8 0 0 0 8-8v-6" fill="#c05f3c"/>
+  <path d="M33 27c0 4 7.6 7 17 7s17-3 17-7v50a8 8 0 0 1-8 8H41a8 8 0 0 1-8-8V27Z"
+        fill="#fff" fill-opacity=".93" stroke="#c05f3c" stroke-width="2.4"/>
+  <path d="M36 48c0 3 6.3 5.4 14 5.4S64 51 64 48v29a5 5 0 0 1-5 5H41a5 5 0 0 1-5-5V48Z" fill="#d99a4e"/>
+  <ellipse cx="50" cy="48" rx="14" ry="5" fill="#d99a4e" opacity=".55"/>
+  <circle cx="44" cy="38" r="3.2" fill="#c05f3c" opacity=".8"/>
+  <circle cx="57" cy="41" r="2.3" fill="#c05f3c" opacity=".6"/>
+  <rect x="39" y="58" width="22" height="12" rx="2.5" fill="#fff" opacity=".9"/>
+</svg></div>
+      
+    </div>
+    
+    <span class="fr-cap">有格線：商品放在線上</span>
+  </div>
+        <div style="position:absolute;inset:0;pointer-events:none;border-radius:16px;overflow:hidden">
+          <div style="position:absolute;left:33.33%;top:0;bottom:0;width:1px;background:rgba(255,255,255,.7)"></div>
+          <div style="position:absolute;left:66.66%;top:0;bottom:0;width:1px;background:rgba(255,255,255,.7)"></div>
+          <div style="position:absolute;top:33.33%;left:0;right:0;height:1px;background:rgba(255,255,255,.7)"></div>
+          <div style="position:absolute;top:66.66%;left:0;right:0;height:1px;background:rgba(255,255,255,.7)"></div>
+        </div>
+      </div>
+    </div>
+    <p class="lead" data-r style="font-size:23px;text-align:center">
+      這一步先不用管好不好看，<b>只要確認你的螢幕上真的看得到那四條線</b>。</p>
+  </div></section>
+  <div class="pg-foot"><span>PART 1</span><span>12 / 17</span></div>
+</div>
+
+<div class="pg"
+     data-document-role="page"
+     data-label="13｜照片比例：4:3、1:1、16:9 長什麼樣"
+     data-speaker-notes="講師說明：三張是同一個場景，只有比例不同。請學員注意 16:9 上下被切掉多少。 不要講定義，直接看畫面。
+
+互動提問：問：這三張，哪一張你最有可能之後想裁成正方形發 IG？（引導到 4:3 保留最多）
+
+學員實作：請學員在自己的相機裡找到比例切換的位置，試著切一次再切回來。
+
+預期看到的差異：學員會發現 16:9 拍起來「比較有電影感」但東西少很多。
+
+進度快：可以補充：講一下教材 P.58–59 用同一盆花做的對照。
+
+進度慢：可以刪掉：只講 4:3 和 1:1，16:9 帶過。">
+  <div class="pg-defs"></div>
+  <section class="slide">
+  <div class="stack gap-m">
+    <div>
+      <p class="eyebrow" data-r>同一個商品，同一個位置，只換比例</p>
+      <h2 class="h" data-r style="font-size:36px">看畫面裡留下多少東西</h2>
+    </div>
+    <div data-r style="display:flex;gap:22px;align-items:flex-end;justify-content:center">
+      <div class="fr"
+      style="width:300px;height:225px">
+    <div class="fr-in" style="background:repeating-linear-gradient(91deg,
+          rgba(120,80,48,.16) 0 3px, rgba(120,80,48,0) 3px 13px),
+        linear-gradient(#c9a271,#b98f5c)">
+      
+      <div style="position:absolute;left:50%; top:52%; transform:translate(-50%,-50%);filter:drop-shadow(18.2px 7px 11.200000000000001px rgba(40,24,12,.42));">
+<svg width="140" height="140" viewBox="0 0 100 100" fill="none">
+  <ellipse cx="50" cy="19" rx="19" ry="7" fill="#c05f3c"/>
+  <ellipse cx="50" cy="16.5" rx="19" ry="7" fill="#c05f3c" opacity=".72"/>
+  <path d="M31 19v6a8 8 0 0 0 8 8h22a8 8 0 0 0 8-8v-6" fill="#c05f3c"/>
+  <path d="M33 27c0 4 7.6 7 17 7s17-3 17-7v50a8 8 0 0 1-8 8H41a8 8 0 0 1-8-8V27Z"
+        fill="#fff" fill-opacity=".93" stroke="#c05f3c" stroke-width="2.4"/>
+  <path d="M36 48c0 3 6.3 5.4 14 5.4S64 51 64 48v29a5 5 0 0 1-5 5H41a5 5 0 0 1-5-5V48Z" fill="#d99a4e"/>
+  <ellipse cx="50" cy="48" rx="14" ry="5" fill="#d99a4e" opacity=".55"/>
+  <circle cx="44" cy="38" r="3.2" fill="#c05f3c" opacity=".8"/>
+  <circle cx="57" cy="41" r="2.3" fill="#c05f3c" opacity=".6"/>
+  <rect x="39" y="58" width="22" height="12" rx="2.5" fill="#fff" opacity=".9"/>
+</svg></div>
+      <div class="lit lit-side"></div>
+    </div>
+    
+    <span class="fr-cap">4:3　最完整</span>
+  </div>
+      <div class="fr"
+      style="width:225px;height:225px">
+    <div class="fr-in" style="background:repeating-linear-gradient(91deg,
+          rgba(120,80,48,.16) 0 3px, rgba(120,80,48,0) 3px 13px),
+        linear-gradient(#c9a271,#b98f5c)">
+      
+      <div style="position:absolute;left:50%; top:52%; transform:translate(-50%,-50%);filter:drop-shadow(18.2px 7px 11.200000000000001px rgba(40,24,12,.42));">
+<svg width="140" height="140" viewBox="0 0 100 100" fill="none">
+  <ellipse cx="50" cy="19" rx="19" ry="7" fill="#c05f3c"/>
+  <ellipse cx="50" cy="16.5" rx="19" ry="7" fill="#c05f3c" opacity=".72"/>
+  <path d="M31 19v6a8 8 0 0 0 8 8h22a8 8 0 0 0 8-8v-6" fill="#c05f3c"/>
+  <path d="M33 27c0 4 7.6 7 17 7s17-3 17-7v50a8 8 0 0 1-8 8H41a8 8 0 0 1-8-8V27Z"
+        fill="#fff" fill-opacity=".93" stroke="#c05f3c" stroke-width="2.4"/>
+  <path d="M36 48c0 3 6.3 5.4 14 5.4S64 51 64 48v29a5 5 0 0 1-5 5H41a5 5 0 0 1-5-5V48Z" fill="#d99a4e"/>
+  <ellipse cx="50" cy="48" rx="14" ry="5" fill="#d99a4e" opacity=".55"/>
+  <circle cx="44" cy="38" r="3.2" fill="#c05f3c" opacity=".8"/>
+  <circle cx="57" cy="41" r="2.3" fill="#c05f3c" opacity=".6"/>
+  <rect x="39" y="58" width="22" height="12" rx="2.5" fill="#fff" opacity=".9"/>
+</svg></div>
+      <div class="lit lit-side"></div>
+    </div>
+    
+    <span class="fr-cap">1:1　左右被切掉</span>
+  </div>
+      <div class="fr"
+      style="width:300px;height:169px">
+    <div class="fr-in" style="background:repeating-linear-gradient(91deg,
+          rgba(120,80,48,.16) 0 3px, rgba(120,80,48,0) 3px 13px),
+        linear-gradient(#c9a271,#b98f5c)">
+      
+      <div style="position:absolute;left:50%; top:52%; transform:translate(-50%,-50%);filter:drop-shadow(18.2px 7px 11.200000000000001px rgba(40,24,12,.42));">
+<svg width="140" height="140" viewBox="0 0 100 100" fill="none">
+  <ellipse cx="50" cy="19" rx="19" ry="7" fill="#c05f3c"/>
+  <ellipse cx="50" cy="16.5" rx="19" ry="7" fill="#c05f3c" opacity=".72"/>
+  <path d="M31 19v6a8 8 0 0 0 8 8h22a8 8 0 0 0 8-8v-6" fill="#c05f3c"/>
+  <path d="M33 27c0 4 7.6 7 17 7s17-3 17-7v50a8 8 0 0 1-8 8H41a8 8 0 0 1-8-8V27Z"
+        fill="#fff" fill-opacity=".93" stroke="#c05f3c" stroke-width="2.4"/>
+  <path d="M36 48c0 3 6.3 5.4 14 5.4S64 51 64 48v29a5 5 0 0 1-5 5H41a5 5 0 0 1-5-5V48Z" fill="#d99a4e"/>
+  <ellipse cx="50" cy="48" rx="14" ry="5" fill="#d99a4e" opacity=".55"/>
+  <circle cx="44" cy="38" r="3.2" fill="#c05f3c" opacity=".8"/>
+  <circle cx="57" cy="41" r="2.3" fill="#c05f3c" opacity=".6"/>
+  <rect x="39" y="58" width="22" height="12" rx="2.5" fill="#fff" opacity=".9"/>
+</svg></div>
+      <div class="lit lit-side"></div>
+    </div>
+    
+    <span class="fr-cap">16:9　上下被切掉</span>
+  </div>
+    </div>
+    <div class="callout" data-r><svg width="32" height="32" viewBox="0 0 24 24" fill="#c05f3c"><path d="M7 2v3H2v2h5v10h10v5h2v-5h3v-2h-3V5H7V2Zm10 5v10H9V7h8Z"/></svg>
+      <span class="txt">比例不是「哪個好看」，是<b>「畫面裡留下多少東西」</b>。
+      留得多，之後才有得裁。</span></div>
+  </div></section>
+  <div class="pg-foot"><span>PART 1</span><span>13 / 17</span></div>
+</div>
+
+<div class="pg"
+     data-document-role="page"
+     data-label="14｜商品照為什麼先用 4:3"
+     data-speaker-notes="講師說明：「留得多才有得裁」是這一頁唯一要記住的。 接社群課：上一堂教過 IG 貼文是 4:5、限動是 9:16，都是從 4:3 裁出來的。
+
+互動提問：問：如果你拍的時候就裁成正方形，事後想改成直式，救得回來嗎？（救不回來）
+
+學員實作：把相機的比例設定成 4:3，今天之後都用這個。
+
+預期看到的差異：學員之後拍照會習慣留一點空間，不再把商品塞滿畫面。
+
+進度快：可以補充：接社群課的尺寸速查表，講一次三個平台的常用比例。
+
+進度慢：可以刪掉：只講理由 2。">
+  <div class="pg-defs"></div>
+  <section class="slide">
+  <div class="stack gap-m">
+    <div>
+      <p class="eyebrow" data-r>不知道要用什麼比例時的預設答案</p>
+      <h2 class="h" data-r style="font-size:38px">先用 4:3，三個理由</h2>
+    </div>
+    <div class="cards c3" data-r style="gap:18px">
+      
+        <div class="card" style="padding:24px 22px">
+          <span class="num-badge" style="background:#c05f3c;margin-bottom:12px">1</span>
+          <p class="k" style="font-size:25px">留得最完整</p>
+          <p class="v" style="font-size:21px">手機感光元件本來就是 4:3，這是原生比例，不會浪費畫素。</p>
+        </div>
+        <div class="card" style="padding:24px 22px">
+          <span class="num-badge" style="background:#5f7a63;margin-bottom:12px">2</span>
+          <p class="k" style="font-size:25px">之後好裁</p>
+          <p class="v" style="font-size:21px">要發 IG 裁成 1:1、要發限動裁成 9:16，都還有空間。</p>
+        </div>
+        <div class="card" style="padding:24px 22px">
+          <span class="num-badge" style="background:#d99a4e;margin-bottom:12px">3</span>
+          <p class="k" style="font-size:25px">不會後悔</p>
+          <p class="v" style="font-size:21px">拍太滿事後救不回來；留白一點，永遠有退路。</p>
+        </div>
+    </div>
+    <div class="callout gold" data-r><svg width="32" height="32" viewBox="0 0 24 24" fill="#d99a4e"><path d="M12 2 1 21h22L12 2Zm0 5 7.5 12.9h-15L12 7Zm-1 4v5h2v-5h-2Zm0 6.5V19h2v-1.5h-2Z"/></svg>
+      <span class="txt">不要一開始就把所有照片拍成 16:9。
+      <b>拍得寬，不代表拍得好</b>，而且事後補不回上下被切掉的部分。</span></div>
+  </div></section>
+  <div class="pg-foot"><span>PART 1</span><span>14 / 17</span></div>
+</div>
+
+<div class="pg"
+     data-document-role="page"
+     data-label="15｜幾 MP？高畫素不等於高畫質"
+     data-speaker-notes="講師說明：這一頁是在幫學員省錢：不用為了拍照換手機。 右邊四件事是今天課程的預告，講完可以說「這四個等一下都會做到」。
+
+互動提問：問：有人知道自己手機幾 MP 嗎？（多半不知道，這正好證明「不用管」）
+
+預期看到的差異：學員不再糾結手機規格，注意力回到操作。
+
+進度快：可以補充：教怎麼查：手機設定 → 關於本機，或搜尋官網規格。
+
+進度慢：可以刪掉：整頁只講「畫素都夠用了，不用管」一句。">
+  <div class="pg-defs"></div>
+  <section class="slide">
+  <div class="split w-right" style="gap:40px">
+    <div class="stack gap-m">
+      <div>
+        <p class="eyebrow" data-r>常見的誤會</p>
+        <h2 class="h" data-r style="font-size:36px">畫素高，<br>照片不一定好看</h2>
+      </div>
+      <p class="lead" data-r style="font-size:22px">
+        教材原話：「有些人認為畫素愈高，呈現的畫質就會愈好，<b>其實並不一定</b>。」<br>
+        決定畫質的是感光元件大小，不是數字。</p>
+      <div class="callout sage" data-r style="padding:15px 22px"><svg width="30" height="30" viewBox="0 0 24 24" fill="#5f7a63"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z"/></svg>
+        <span class="txt">現在的手機，<b>畫素都夠用了</b>。今天不用再想這件事。</span></div>
+    </div>
+    <div class="stack gap-s" data-r>
+      <p class="cap" style="color:#9c8b7c;font-size:20px;letter-spacing:.08em">真正決定照片好壞的四件事</p>
+      
+        <div style="display:flex;gap:14px;align-items:center;background:#fff;
+             border:1px solid rgba(36,28,23,.12);border-left:5px solid #d99a4e;
+             border-radius:14px;padding:14px 18px">
+          <span style="font-size:24px;font-weight:900;color:#d99a4e;min-width:104px">光線</span>
+          <span style="font-size:21px;font-weight:650;color:#4a3c33">夠不夠、從哪裡來</span>
+        </div>
+        <div style="display:flex;gap:14px;align-items:center;background:#fff;
+             border:1px solid rgba(36,28,23,.12);border-left:5px solid #c05f3c;
+             border-radius:14px;padding:14px 18px">
+          <span style="font-size:24px;font-weight:900;color:#c05f3c;min-width:104px">對焦</span>
+          <span style="font-size:21px;font-weight:650;color:#4a3c33">有沒有點在商品上</span>
+        </div>
+        <div style="display:flex;gap:14px;align-items:center;background:#fff;
+             border:1px solid rgba(36,28,23,.12);border-left:5px solid #8a5a6d;
+             border-radius:14px;padding:14px 18px">
+          <span style="font-size:24px;font-weight:900;color:#8a5a6d;min-width:104px">手震</span>
+          <span style="font-size:21px;font-weight:650;color:#4a3c33">有沒有拿穩</span>
+        </div>
+        <div style="display:flex;gap:14px;align-items:center;background:#fff;
+             border:1px solid rgba(36,28,23,.12);border-left:5px solid #4a7fa5;
+             border-radius:14px;padding:14px 18px">
+          <span style="font-size:24px;font-weight:900;color:#4a7fa5;min-width:104px">數位變焦</span>
+          <span style="font-size:21px;font-weight:650;color:#4a3c33">有沒有用手指硬放大</span>
+        </div>
+      <p style="margin:6px 0 0;font-size:20px;font-weight:700;color:#7a6a5d">
+        這四件事，今天全部都會教。</p>
+    </div>
+  </div></section>
+  <div class="pg-foot"><span>PART 1</span><span>15 / 17</span></div>
+</div>
+
+<div class="pg"
+     data-document-role="page"
+     data-label="16｜錄影設定：1080p 還是 4K、30 還是 60fps"
+     data-speaker-notes="講師說明：不要深入講 Codec、Bitrate、Log 這些，今天用不到。 60fps 的例子要具體：倒果醬、撒粉、切蛋糕，學員才知道什麼時候要用。
+
+互動提問：問：你們拍過製作過程的影片嗎？
+
+學員實作：在相機設定裡把錄影設成 1080p / 30fps。
+
+預期看到的差異：之後拍幕後影片時不會因為 4K 把手機空間塞爆。
+
+進度快：可以補充：講慢動作與縮時攝影各適合什麼（教材 P.55）。
+
+進度慢：可以刪掉：整頁只留最後那句結論。">
+  <div class="pg-defs"></div>
+  <section class="slide">
+  <div class="stack gap-m">
+    <div>
+      <p class="eyebrow" data-r>之後要拍製作過程、開箱時會用到</p>
+      <h2 class="h" data-r style="font-size:36px">兩個數字，看懂就好</h2>
+    </div>
+    <div class="cards c2" data-r style="gap:22px">
+      <div class="card" style="border-top:5px solid #4a7fa5">
+        <p class="cap" style="color:#4a7fa5">解析度</p>
+        <div class="stack gap-s">
+          <div class="yes"><i>●</i><span><b>1080p</b>　發社群完全夠用，檔案小、上傳快</span></div>
+          <div class="no"><i>●</i><span><b>4K</b>　細節多，但檔案大、手機容易滿</span></div>
+        </div>
+      </div>
+      <div class="card" style="border-top:5px solid #d99a4e">
+        <p class="cap" style="color:#d99a4e">每秒格數 fps</p>
+        <div class="stack gap-s">
+          <div class="yes"><i>●</i><span><b>30fps</b>　一般日常影片</span></div>
+          <div class="no"><i>●</i><span><b>60fps</b>　動作順，適合<b>倒果醬、撒糖粉、切蛋糕</b>這種畫面</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="callout" data-r><svg width="32" height="32" viewBox="0 0 24 24" fill="#c05f3c"><path d="M12 2a7 7 0 0 1 4 12.7V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.3A7 7 0 0 1 12 2ZM9 19h6v1a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-1Z"/></svg>
+      <span class="txt">初學者就設 <b>1080p / 30fps</b>。
+      要拍製作過程的動作畫面，再改成 <b>1080p / 60fps</b>。</span></div>
+  </div></section>
+  <div class="pg-foot"><span>PART 1</span><span>16 / 17</span></div>
+</div>
+
+<div class="pg"
+     data-document-role="page"
+     data-label="17｜你的預設值就設這個"
+     data-speaker-notes="講師說明：這是 PART 1 的收攏頁，五項一起確認一次。 閃光燈關閉這一項，等一下 PART 3 會解釋為什麼。 最後那句「設完就忘掉它」很重要，讓學員知道設定階段結束了。
+
+互動提問：問：五項都設好的舉手。（沒舉手的請助教處理，不要拖全班）
+
+學員實作：五項逐一確認，助教走動檢查。
+
+預期看到的差異：接下來所有實作的起點都一致，比較才有意義。
+
+進度快：可以補充：順便把上傳畫質也一起設好（FB 設定 → 媒體；IG 設定和隱私 → 媒體品質）。
+
+進度慢：可以刪掉：只確認格線、比例、閃光燈三項。">
+  <div class="pg-defs"></div>
+  <section class="slide">
+  <div class="stack gap-m center" style="text-align:center">
+    <div>
+      <p class="eyebrow" data-r style="justify-content:center">PART 1 帶走頁</p>
+      <h2 class="h" data-r style="font-size:40px">設好這五項，今天之後都不用再改</h2>
+    </div>
+    <div class="checks c2" data-r style="grid-template-columns:repeat(2,1fr);gap:14px 30px;max-width:840px">
+      
+        <div class="check done" style="justify-content:flex-start">
+          <span class="box"></span>
+          <span style="font-size:23px;font-weight:750;color:#4a3c33">
+            格線　<b style="color:#c05f3c">打開</b></span>
+        </div>
+        <div class="check done" style="justify-content:flex-start">
+          <span class="box"></span>
+          <span style="font-size:23px;font-weight:750;color:#4a3c33">
+            照片比例　<b style="color:#c05f3c">4:3</b></span>
+        </div>
+        <div class="check done" style="justify-content:flex-start">
+          <span class="box"></span>
+          <span style="font-size:23px;font-weight:750;color:#4a3c33">
+            錄影　<b style="color:#c05f3c">1080p / 30fps</b></span>
+        </div>
+        <div class="check done" style="justify-content:flex-start">
+          <span class="box"></span>
+          <span style="font-size:23px;font-weight:750;color:#4a3c33">
+            閃光燈　<b style="color:#c05f3c">關閉</b></span>
+        </div>
+        <div class="check done" style="justify-content:flex-start">
+          <span class="box"></span>
+          <span style="font-size:23px;font-weight:750;color:#4a3c33">
+            上傳畫質　<b style="color:#c05f3c">最高（社群 App 裡設定）</b></span>
+        </div>
+    </div>
+    <div class="callout sage" data-r style="max-width:840px"><svg width="32" height="32" viewBox="0 0 24 24" fill="#5f7a63"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z"/></svg>
+      <span class="txt">這五項是一次性的設定。<b>設完就忘掉它</b>，
+      接下來整天我們只練「怎麼拍」。</span></div>
+  </div></section>
+  <div class="pg-foot"><span>PART 1</span><span>17 / 17</span></div>
+</div>
+</body>
+</html>

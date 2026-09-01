@@ -442,7 +442,7 @@ ul.list.dense li::before{ width:6px; height:6px; margin-top:8px }
 }
 .slide.divider .pno{
   font-size:150px; font-weight:900; line-height:1; letter-spacing:-.05em;
-  color:rgba(255,255,255,.11); margin:0 0 -22px;
+  color:rgba(255,255,255,.11); margin:0 0 6px;
 }
 .slide.divider h2{ font-size:56px; font-weight:850; letter-spacing:-.03em; margin:0 0 18px; color:#fff }
 .slide.divider .d-sub{ font-size:23px; color:rgba(255,255,255,.72); font-weight:550; line-height:1.6; max-width:660px }

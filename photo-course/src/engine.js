@@ -54,7 +54,7 @@
     const dark = d.kind === 'divider';
     chrome.classList.toggle('on-dark', dark);
     elPart.textContent = d.part;
-    elTime.textContent = d.time;
+    if (elTime) elTime.textContent = d.time;
     elNum.innerHTML = String(i + 1) + ' <small>/ ' + N + '</small>';
     bar.style.width = ((i + 1) / N * 100) + '%';
 
