@@ -134,9 +134,12 @@ const BG = {
          repeating-linear-gradient(-45deg, rgba(0,0,0,.045) 0 2px, rgba(0,0,0,0) 2px 5px),
          linear-gradient(#ded3c2,#cfc2ae)`,
   dark :`radial-gradient(130% 110% at 30% 12%, #4a3f45 0%, #241d22 70%)`,
-  flour:`radial-gradient(60% 50% at 22% 76%, rgba(255,255,255,.85) 0%, rgba(255,255,255,0) 60%),
-         repeating-linear-gradient(89deg, rgba(120,80,48,.14) 0 3px, rgba(120,80,48,0) 3px 12px),
-         linear-gradient(#c9a271,#b98f5c)`
+  flour:`radial-gradient(26% 20% at 18% 82%, rgba(255,255,255,.95) 0%, rgba(255,255,255,0) 70%),
+         radial-gradient(20% 15% at 74% 88%, rgba(255,255,255,.85) 0%, rgba(255,255,255,0) 72%),
+         radial-gradient(13% 10% at 46% 92%, rgba(255,255,255,.8) 0%, rgba(255,255,255,0) 74%),
+         radial-gradient(16% 12% at 86% 34%, rgba(255,255,255,.6) 0%, rgba(255,255,255,0) 76%),
+         radial-gradient(11% 8% at 12% 30%, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 78%),
+         linear-gradient(#8f7f6b,#7d6d5b)`
 };
 
 /* ── 核心：場景模擬器 ─────────────────────────────────────────────
@@ -279,7 +282,7 @@ ART.FEEL = [
     sim:{ bg:'white', light:'front', angle:'side', pos:'center' } },
   { key:'fresh', name:'新鮮現做', c:C.fresh, cls:'f-fresh',
     light:'窗邊自然光',  bg:'有製作痕跡的檯面',  angle:'俯拍或 45 度', comp:'加肢體動作',
-    sim:{ bg:'flour', light:'front', angle:'top',  pos:'center' } },
+    sim:{ bg:'flour', light:'front', angle:'a45', pos:'center' } },
   { key:'lux',   name:'高級精緻', c:C.lux,   cls:'f-lux',
     light:'側光或逆光',  bg:'深色',              angle:'特寫',         comp:'大量留白',
     sim:{ bg:'dark',  light:'back',  angle:'a45',  pos:'center', zoom:1.15 } }

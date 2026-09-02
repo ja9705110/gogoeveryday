@@ -177,17 +177,55 @@ S({ part:'開場', time:'09:11', kind:'std', title:'攝影名詞，翻成生活�
   }});
 
 /* =========================================================================
-   6　你想給人什麼感覺？　★ 全課主軸
+   6　先用眼睛看：四張照片，感覺一樣嗎？　★ 純視覺，不給答案
+   ========================================================================= */
+S({ part:'開場', time:'09:13', kind:'std', title:'先看照片：這四張，感覺一樣嗎？',
+  html:`
+  <div class="stack gap-m center" style="text-align:center">
+    <div>
+      <h2 class="h" data-r style="font-size:38px">同一罐果醬，四個人拍<br>
+        <span class="hl">給你的感覺一樣嗎？</span></h2>
+    </div>
+    <div data-r style="display:flex;gap:18px;justify-content:center">
+      ${F.map((f,i)=>`
+        <div style="position:relative">
+          ${ART.scene(Object.assign({ w:258, h:322, px:150 }, f.sim))}
+          <span style="position:absolute;left:12px;top:12px;width:38px;height:38px;
+                border-radius:50%;background:rgba(255,255,255,.94);color:${C.ink};
+                font-size:22px;font-weight:900;display:flex;align-items:center;
+                justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25)">
+            ${'ABCD'[i]}</span>
+        </div>`).join('')}
+    </div>
+    <p class="lead" data-r style="font-size:24px">
+      先不要想技巧、不要管哪張比較好看。<br>
+      <b class="hl">哪一張，最像你想給客人的感覺？</b></p>
+  </div>`,
+  notes:{
+    say:['這一頁完全不要解釋，先讓學員用眼睛看。',
+         '四張是同一罐果醬、同一個商品，差別只有拍法。這件事先不要說破，等她們自己發現。',
+         '停久一點，至少三十秒，讓大家真的看進去。'],
+    ask:['問：A 給你什麼感覺？（讓學員自己講詞：溫暖、乾淨、新鮮、高級⋯⋯）',
+         '問：B 呢？C 呢？D 呢？（把學員說的形容詞寫在白板上）',
+         '問：哪一張最像你想給客人的感覺？舉手投票。'],
+    do:['四張各舉手投票一次，看班上分布。'],
+    diff:['學員會發現「同一個東西，拍法不同，感覺差很多」——這是整天最重要的一次體會。'],
+    more:['請投給不同選項的學員各說一句為什麼，答案會很有趣。'],
+    less:['只問「哪一張最像你想給客人的感覺」一題。']
+  }});
+
+/* =========================================================================
+   7　你想給人什麼感覺？　★ 全課主軸（揭曉配方）
    ========================================================================= */
 S({ part:'開場', time:'09:14', kind:'std', title:'你想給人什麼感覺？',
   html:`
   <div class="stack gap-s pad-tight">
     <div>
       <h2 class="h" data-r style="font-size:34px;margin-bottom:4px">
-        不要先問「怎麼拍比較好看」，先問<span class="hl">「我想給人什麼感覺」</span></h2>
+        剛剛那四張，差別在這裡——<span class="hl">感覺，決定怎麼拍</span></h2>
     </div>
     <div class="cards c4" data-r style="gap:15px">
-      ${F.map(f=>ART.feelCard(f, 202)).join('')}
+      ${F.map((f,i)=>ART.feelCard(Object.assign({}, f, { name:'ABCD'[i] + '　' + f.name }), 202)).join('')}
     </div>
     <div class="callout" data-r style="padding:15px 24px">${ART.icon('bulb',32,C.gold)}
       <span class="txt">感覺定了，<b>光線、背景、角度、構圖四件事就都有答案</b>，
