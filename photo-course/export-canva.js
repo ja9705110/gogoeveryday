@@ -15,7 +15,7 @@ const read = f => fs.readFileSync(path.join(SRC, f), 'utf8');
 
 /* 在同一個 scope 裡依序執行三個檔案，取得 DECK 與 IG_DEFS */
 const sandbox = {};
-const code = [read('art.js'), read('slides-a.js'), read('slides-b.js')].join('\n');
+const code = [read('art.js'), read('slides-a.js'), read('slides-b.js'), read('slides-c.js')].join('\n');
 const run = new Function(code + '\n; return { DECK: DECK };');
 const { DECK } = run.call(sandbox);
 const IG_DEFS = '';
@@ -88,7 +88,7 @@ const pages = DECK.map((d, i) => {
      data-speaker-notes="${esc(notesText(d))}">
   <div class="pg-defs">${IG_DEFS}</div>
   <section class="${cls}">${d.html}${tag}</section>
-  <div class="pg-foot"><span>${esc(d.part)}</span><span>${i + 1} / ${DECK.length}</span></div>
+  <div class="pg-foot"><span>${esc(d.part)}</span><span></span></div>
 </div>`;
 }).join('\n\n');
 

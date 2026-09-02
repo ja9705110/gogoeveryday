@@ -18,7 +18,7 @@ pres.layout = 'LAYOUT_WIDE';
 pres.title = '手機拍攝商品與影像編修基礎（1）｜09/13';
 
 /* 講師備忘 */
-const deckSrc = ['art.js', 'slides-a.js', 'slides-b.js']
+const deckSrc = ['art.js', 'slides-a.js', 'slides-b.js', 'slides-c.js']
   .map(f => fs.readFileSync(path.join(HERE, '..', 'src', f), 'utf8')).join('\n');
 const { DECK } = new Function(deckSrc + '\n; return { DECK: DECK };')();
 const notesFor = i => {

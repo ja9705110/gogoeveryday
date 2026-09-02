@@ -55,7 +55,7 @@
     chrome.classList.toggle('on-dark', dark);
     elPart.textContent = d.part;
     if (elTime) elTime.textContent = d.time;
-    elNum.innerHTML = String(i + 1) + ' <small>/ ' + N + '</small>';
+    if (elNum) elNum.innerHTML = String(i + 1) + ' <small>/ ' + N + '</small>';
     bar.style.width = ((i + 1) / N * 100) + '%';
 
     renderNotes(d, i);

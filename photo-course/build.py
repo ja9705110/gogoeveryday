@@ -13,6 +13,7 @@ PARTS = {
     "/*__ART__*/": "art.js",
     "/*__SLIDES_A__*/": "slides-a.js",
     "/*__SLIDES_B__*/": "slides-b.js",
+    "/*__SLIDES_C__*/": "slides-c.js",
     "/*__ENGINE__*/": "engine.js",
 }
 
