@@ -57,7 +57,6 @@ S({ part:'PART 2', time:'10:34', kind:'std', title:'鏡頭髒了會怎樣，該�
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>最便宜、效果最大的一件事</p>
       <h2 class="h" data-r style="font-size:38px">鏡頭髒，整張照片都會蒙一層霧</h2>
     </div>
     <div class="split" style="gap:34px">
@@ -130,7 +129,6 @@ S({ part:'PART 2', time:'10:42', kind:'std', title:'保護貼與螢幕顯示會�
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>照片沒問題，是你看到的畫面有問題</p>
       <h2 class="h" data-r style="font-size:36px">這些東西不會改照片，但會改你的判斷</h2>
     </div>
     <div class="cards c3" data-r style="gap:16px">
@@ -163,7 +161,6 @@ S({ part:'PART 2', time:'10:46', kind:'std', title:'拍攝前檢查表',
   html:`
   <div class="stack gap-m center" style="text-align:center">
     <div>
-      <p class="eyebrow" data-r style="justify-content:center">PART 2 帶走頁　·　附錄有同樣一張</p>
       <h2 class="h" data-r style="font-size:40px">每次拍之前，花十秒走一遍</h2>
     </div>
     <div class="checks" data-r style="grid-template-columns:repeat(2,1fr);gap:13px 34px;max-width:880px">
@@ -203,11 +200,10 @@ S({ part:'PART 3', time:'10:51', kind:'std', title:'對焦＝用手指告訴手�
   <div class="split" style="gap:36px">
     <div class="stack gap-m">
       <div>
-        <p class="eyebrow" data-r>今天最常用的一個動作</p>
         <h2 class="h" data-r style="font-size:36px">手機不知道你要拍什麼<br>你要告訴它</h2>
       </div>
       <p class="lead" data-r style="font-size:22px">
-        教材原話：先決定要成像清楚的位置，並點手機螢幕，
+        先決定要成像清楚的位置，並點手機螢幕，
         <b>當畫面出現方格時，代表已在所點選的位置進行對焦</b>。</p>
       <div class="callout gold" data-r>${ART.icon('bulb',32,C.gold)}
         <span class="txt">點一下螢幕，就是把「自動對焦」變成「<b>手動對焦</b>」。
@@ -264,7 +260,6 @@ S({ part:'PART 3', time:'11:00', kind:'std', title:'曝光＝照片太亮還是�
   <div class="split" style="gap:36px">
     <div class="stack gap-m">
       <div>
-        <p class="eyebrow" data-r>對焦完，順手做的第二個動作</p>
         <h2 class="h" data-r style="font-size:36px">方框旁邊<br>有一個小太陽</h2>
       </div>
       ${ART.steps([
@@ -327,7 +322,6 @@ S({ part:'PART 3', time:'11:10', kind:'std', title:'鏡頭切換：0.5x、1x、2
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>同一個位置，只換倍率</p>
       <h2 class="h" data-r style="font-size:36px">商品照，先用 1x</h2>
     </div>
     <div data-r style="display:flex;gap:20px;justify-content:center;align-items:flex-end">
@@ -357,13 +351,12 @@ S({ part:'PART 3', time:'11:14', kind:'std', title:'能走近，就不要用手�
   <div class="split w-left" style="gap:40px">
     <div class="stack gap-m">
       <div>
-        <p class="eyebrow" data-r>教材小物攝影的標準答案</p>
         <h2 class="h" data-r style="font-size:38px">用腳靠近<br>不要用手指放大</h2>
       </div>
       <p class="lead" data-r style="font-size:22px">
-        教材 P.37：數位變焦只是把畫面做「裁剪」，
+        數位變焦只是把畫面做「裁剪」，
         <b>會降低照片畫質，畫面看起來也會較模糊</b>。<br><br>
-        教材 P.100 小物攝影正解：<b class="hl">近距離拍攝是最不會影響解析度的方法。</b></p>
+        小物攝影正解：<b class="hl">近距離拍攝是最不會影響解析度的方法。</b></p>
       <div class="callout sage" data-r>${ART.icon('ok',32,C.sage)}
         <span class="txt">想拍細節，<b>人往前走兩步</b>，不要在原地用手指撐開畫面。</span></div>
     </div>
@@ -418,7 +411,6 @@ S({ part:'PART 3', time:'11:20', kind:'std', title:'閃光燈：什麼時候該�
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>教材在三個地方都提醒過</p>
       <h2 class="h" data-r style="font-size:38px">拍商品，幾乎永遠關掉</h2>
     </div>
     <div class="split" style="gap:34px">
@@ -431,7 +423,7 @@ S({ part:'PART 3', time:'11:20', kind:'std', title:'閃光燈：什麼時候該�
       <div class="stack gap-s" data-r>
         <p class="cap" style="color:${C.muted};font-size:20px;letter-spacing:.08em">為什麼不要開</p>
         <ul class="list">
-          <li>教材 P.49：拍攝物件或人像時<b>盡量不要開啟閃光燈</b>，會使陰影呈現不自然，也會使光源過硬</li>
+          <li>拍攝物件或人像時<b>盡量不要開啟閃光燈</b>，會使陰影呈現不自然，也會使光源過硬</li>
           <li>顏色會偏掉，商品的真實色跑掉</li>
           <li>玻璃罐、塑膠包裝會直接反光成一個白點</li>
           <li>開閃光燈時相機會自動<b>調降 ISO</b>，快門變慢，<b>反而更容易晃</b></li>
@@ -459,7 +451,6 @@ S({ part:'PART 4', time:'11:22', kind:'std', title:'照片糊掉，多半不是�
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>教材金句</p>
       <h2 class="h" data-r style="font-size:38px">
         「有時連<span class="hl">呼吸的起伏</span>都會影響畫面的清晰度」</h2>
     </div>
@@ -467,7 +458,7 @@ S({ part:'PART 4', time:'11:22', kind:'std', title:'照片糊掉，多半不是�
       ${[['雙手固定手機','一手托住、一手扶邊，不要單手伸很遠'],
          ['用指腹按快門','不是用指尖戳，戳下去手機會震'],
          ['手肘靠身體','手肘夾住肋骨，等於多兩根支架'],
-         ['靠桌面或牆','教材 P.60：附近有可倚靠的物體，穩定效果更佳']]
+         ['靠桌面或牆','附近有可倚靠的物體，穩定效果更佳']]
         .map(([k,v],i)=>`
         <div class="card" style="padding:22px 20px">
           <span class="num-badge" style="background:${[C.clay,C.gold,C.sage,C.plum][i]};margin-bottom:11px">${i+1}</span>
@@ -493,7 +484,6 @@ S({ part:'PART 4', time:'11:26', kind:'std', title:'錯誤拿法 vs 正確拿法
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>順便講直式與橫式</p>
       <h2 class="h" data-r style="font-size:36px">同樣的光，拿法不同結果不同</h2>
     </div>
     <div class="split" style="gap:30px">
@@ -570,7 +560,6 @@ S({ part:'PART 5', time:'11:36', kind:'std', title:'你第一眼看到的是商�
   html:`
   <div class="stack gap-m center" style="text-align:center">
     <div>
-      <p class="eyebrow" data-r style="justify-content:center">先看兩張，再講道理</p>
       <h2 class="h" data-r style="font-size:38px">你的眼睛先看到哪裡？</h2>
     </div>
     <div data-r style="display:flex;gap:30px;justify-content:center;align-items:center">
@@ -580,8 +569,8 @@ S({ part:'PART 5', time:'11:36', kind:'std', title:'你第一眼看到的是商�
                     cls:'good', mark:'✓', cap:'背景只有桌面' })}
     </div>
     <div class="callout" data-r style="max-width:920px">${ART.icon('eye',32)}
-      <span class="txt">教材 P.90：<b>愈乾淨、愈整齊的背景，愈可以將商品最原始的樣子呈現出來。</b>
-      教材 P.102 也提醒：東西放太多，會讓人分不出主體是誰。</span></div>
+      <span class="txt"><b>愈乾淨、愈整齊的背景，愈可以將商品最原始的樣子呈現出來。</b>
+      也提醒：東西放太多，會讓人分不出主體是誰。</span></div>
   </div>`,
   notes:{
     say:['先讓學員看，再問問題，不要先講道理。',
@@ -599,7 +588,6 @@ S({ part:'PART 5', time:'11:40', kind:'std', title:'背景越簡單越容易成�
   <div class="split w-left" style="gap:40px">
     <div class="stack gap-m">
       <div>
-        <p class="eyebrow" data-r>兩個習慣，一輩子受用</p>
         <h2 class="h" data-r style="font-size:36px">按快門前，眼睛沿著<br>畫面繞一圈</h2>
       </div>
       <div class="stack gap-s" data-r>
@@ -640,7 +628,6 @@ S({ part:'PART 5', time:'11:45', kind:'std', title:'錯誤 vs 改善：只換背
   html:`
   <div class="stack gap-m center" style="text-align:center">
     <div>
-      <p class="eyebrow" data-r style="justify-content:center">一次只改一個地方</p>
       <h2 class="h" data-r style="font-size:38px">同一個商品，四種背景</h2>
     </div>
     <div data-r style="display:flex;gap:16px;justify-content:center">
@@ -668,7 +655,6 @@ S({ part:'PART 5', time:'11:52', kind:'std', title:'商品怎麼放：誰是主�
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>不只是「放進去」，是「安排」</p>
       <h2 class="h" data-r style="font-size:36px">畫面裡一定要知道誰是主角</h2>
     </div>
     <div class="cards c4" data-r style="gap:16px">
@@ -683,7 +669,7 @@ S({ part:'PART 5', time:'11:52', kind:'std', title:'商品怎麼放：誰是主�
         </div>`).join('')}
     </div>
     <div class="callout" data-r>${ART.icon('warn',32)}
-      <span class="txt">教材 P.102 的反例：把小物跟植物放在一起拍，
+      <span class="txt">的反例：把小物跟植物放在一起拍，
       <b>會讓人分不出主體是誰，易使主題失焦</b>。配角是來襯托的，不是來搶戲的。</span></div>
     ${strip('這一段對應到', f => f.bg)}
   </div>`,
@@ -709,7 +695,6 @@ S({ part:'PART 6', time:'13:00', kind:'divider', title:'PART 6｜光線',
 S({ part:'PART 6', time:'13:01', kind:'std', title:'光線，是商品照最重要的一件事',
   html:`
   <div class="stack gap-l center" style="text-align:center;justify-content:center">
-    <p class="eyebrow" data-r style="justify-content:center">教材 P.26</p>
     <h2 class="mega" data-r style="font-size:56px;max-width:1000px;line-height:1.3">
       光線在拍攝照片中<br><span class="hl">扮演最重要的角色</span></h2>
     <p class="lead" data-r style="font-size:25px;max-width:860px">
@@ -735,17 +720,16 @@ S({ part:'PART 6', time:'13:04', kind:'std', title:'第一步：先找窗戶',
   <div class="split w-left" style="gap:40px">
     <div class="stack gap-m">
       <div>
-        <p class="eyebrow" data-r>不用花錢的第一步</p>
         <h2 class="h" data-r style="font-size:38px">你家最好的燈<br>就是窗戶</h2>
       </div>
       <ul class="list" data-r>
-        <li>教材 P.26：<b>自然光源就是太陽光</b>，是大家拍攝時最常使用的光線</li>
+        <li><b>自然光源就是太陽光</b>，是大家拍攝時最常使用的光線</li>
         <li>室內透過窗戶照射，<b>光線強度已經減少</b>，比在戶外好控制</li>
         <li>白天不用開燈，把商品端到窗邊就好</li>
         <li>陰天的窗邊光其實最漂亮，因為雲層把光打散了</li>
       </ul>
       <div class="callout sage" data-r>${ART.icon('ok',32,C.sage)}
-        <span class="txt"><b>現在還不用買燈。</b>教材裡的燈箱、劍燈、環形燈都是選配；
+        <span class="txt"><b>現在還不用買燈。</b>市售的燈箱、劍燈、環形燈都是選配；
         P.29 甚至寫「可自行製作簡易燈箱，利用紙箱與白紙」。</span></div>
     </div>
     <div data-r style="display:flex;justify-content:center;align-items:center">
@@ -772,11 +756,10 @@ S({ part:'PART 6', time:'13:09', kind:'std', title:'順光：最安全、最清�
     </div>
     <div class="stack gap-m">
       <div>
-        <p class="eyebrow" data-r>光從拍攝者的背後進入</p>
         <h2 class="h" data-r style="font-size:36px">不知道用什麼光<br>就用順光</h2>
       </div>
       <ul class="list" data-r>
-        <li>教材 P.26：<b>顏色飽和、亮度足夠，色彩看起來更鮮豔</b></li>
+        <li><b>顏色飽和、亮度足夠，色彩看起來更鮮豔</b></li>
         <li>細節最清楚，商品的字、紋理都看得到</li>
         <li>最不容易失敗，適合<b>主圖</b>與<b>電商上架照</b></li>
       </ul>
@@ -800,11 +783,10 @@ S({ part:'PART 6', time:'13:14', kind:'std', title:'側光：立體感從這裡�
   <div class="split w-right" style="gap:36px">
     <div class="stack gap-m">
       <div>
-        <p class="eyebrow" data-r>光從側邊進入</p>
         <h2 class="h" data-r style="font-size:36px">手作、食物<br>最適合側光</h2>
       </div>
       <ul class="list" data-r>
-        <li>教材 P.27：利用側光拍攝，<b>產生陰影，可以增加照片的立體感</b></li>
+        <li>利用側光拍攝，<b>產生陰影，可以增加照片的立體感</b></li>
         <li>室內側光柔和，<b>能呈現更好的立體感，讓照片更有層次感</b></li>
         <li>果醬的濃稠、麵包的孔洞、布料的織紋，側光才看得出來</li>
       </ul>
@@ -836,14 +818,13 @@ S({ part:'PART 6', time:'13:19', kind:'std', title:'逆光：有氣氛，但最�
     </div>
     <div class="stack gap-m">
       <div>
-        <p class="eyebrow" data-r>光從商品的背後進入</p>
         <h2 class="h" data-r style="font-size:36px">好看，但<br>初學者最容易失敗</h2>
       </div>
       <ul class="list" data-r>
-        <li>教材 P.28：可以<b>營造另一種照片的氛圍</b>，也能增加立體感</li>
+        <li>可以<b>營造另一種照片的氛圍</b>，也能增加立體感</li>
         <li>飲料、果醬、蜂蜜這類<b>透光的商品</b>，逆光會很漂亮</li>
         <li>但商品正面容易變成一片黑，需要補光</li>
-        <li>教材 P.28 提醒：室內逆光要注意角度，<b>避免背景過曝或整體模糊</b></li>
+        <li>室內逆光要注意角度，<b>避免背景過曝或整體模糊</b></li>
       </ul>
       <div class="callout gold" data-r style="padding:15px 22px">${ART.icon('warn',30,C.gold)}
         <span class="txt">今天先知道有這個選項就好。<b>想試的話，一定要搭配下一頁的白紙。</b></span></div>
@@ -863,7 +844,6 @@ S({ part:'PART 6', time:'13:24', kind:'std', title:'大太陽直射，為什麼�
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>很多人以為光越強越好</p>
       <h2 class="h" data-r style="font-size:38px">正中午的太陽，是最難用的光</h2>
     </div>
     <div class="split" style="gap:30px">
@@ -904,15 +884,14 @@ S({ part:'PART 6', time:'13:28', kind:'std', title:'一張白紙就能補光',
   <div class="split w-left" style="gap:40px">
     <div class="stack gap-m">
       <div>
-        <p class="eyebrow" data-r>今天最划算的一招</p>
         <h2 class="h" data-r style="font-size:38px">陰影太重<br>拿張白紙擋回去</h2>
       </div>
       <p class="lead" data-r style="font-size:22px">
-        教材 P.31 明講：反光板<b>也可以使用一般白紙、雷射卡或厚紙板來代替</b>。</p>
+        反光板<b>也可以使用一般白紙、雷射卡或厚紙板來代替</b>。</p>
       ${ART.steps([
         ['商品放窗邊','光從一側進來，另一側會有陰影'],
         ['白紙放陰影側','A4 白紙立起來，對著暗的那一邊'],
-        ['靠近一點','教材 P.32：白色反光效果較弱，<b>要靠主體更近</b>']
+        ['靠近一點','白色反光效果較弱，<b>要靠主體更近</b>']
       ])}
       <div class="callout gold" data-r style="padding:14px 20px">${ART.icon('bulb',30,C.gold)}
         <span class="txt">沒有白紙？<b>白色便當盒蓋、白毛巾、A4 紙</b>都可以。</span></div>
@@ -966,8 +945,7 @@ S({ part:'PART 6', time:'13:41', kind:'std', title:'三個問題，自己挑出�
   html:`
   <div class="stack gap-m center" style="text-align:center">
     <div>
-      <p class="eyebrow" data-r style="justify-content:center">一起判讀</p>
-      <h2 class="h" data-r style="font-size:38px">不要問我哪張好，問這三個問題</h2>
+      <h2 class="h" data-r style="font-size:38px">用這三個問題，自己挑一張</h2>
     </div>
     <div class="cards c3" data-r style="gap:20px;max-width:1000px;margin:0 auto">
       ${[['1','哪一張商品最清楚？','看得到字、看得到紋理',C.clay],
@@ -1007,7 +985,6 @@ S({ part:'PART 7', time:'13:46', kind:'std', title:'構圖＝商品放在哪裡�
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>早上打開的格線，現在要用了</p>
       <h2 class="h" data-r style="font-size:38px">構圖只有一個問題：放中間，還是不放中間</h2>
     </div>
     <div class="split" style="gap:34px">
@@ -1033,7 +1010,7 @@ S({ part:'PART 7', time:'13:46', kind:'std', title:'構圖＝商品放在哪裡�
       </div>
     </div>
     <div class="callout" data-r>${ART.icon('grid',32)}
-      <span class="txt">教材 P.21：三分法又稱<b>九宮格構圖法</b>，
+      <span class="txt">三分法又稱<b>九宮格構圖法</b>，
       把畫面分成九等分，主體放在其中一個交叉點或線上。<b class="hl">開啟格線後就能直接用。</b></span></div>
   </div>`,
   notes:{
@@ -1055,11 +1032,10 @@ S({ part:'PART 7', time:'13:50', kind:'std', title:'中央構圖：最安全',
     </div>
     <div class="stack gap-m">
       <div>
-        <p class="eyebrow" data-r>教材 P.22 中心式構圖法</p>
         <h2 class="h" data-r style="font-size:36px">不知道怎麼放<br>就放中間</h2>
       </div>
       <ul class="list" data-r>
-        <li>教材原話：可以讓人在看到照片的瞬間，<b>就知道照片主體的位置</b></li>
+        <li>可以讓人在看到照片的瞬間，<b>就知道照片主體的位置</b></li>
         <li>最適合：<b>電商主圖、商品目錄、包裝照</b></li>
         <li>對稱的商品（瓶罐、盒子）放中間最好看</li>
         <li>缺點：比較沒有故事感，看久了會單調</li>
@@ -1082,14 +1058,13 @@ S({ part:'PART 7', time:'13:54', kind:'std', title:'三分法：讓商品不一�
   <div class="split w-right" style="gap:36px">
     <div class="stack gap-m">
       <div>
-        <p class="eyebrow" data-r>教材 P.21 三分法構圖</p>
         <h2 class="h" data-r style="font-size:36px">放在線上<br>畫面會呼吸</h2>
       </div>
       <ul class="list" data-r>
         <li>把商品放在<b>格線的交叉點</b>或線上</li>
         <li>另一側留出來的空間，讓照片不那麼緊繃</li>
         <li>適合：情境照、幕後照、有配角的畫面</li>
-        <li>教材：可以讓照片<b>增加穩重感</b></li>
+        <li>可以讓照片<b>增加穩重感</b></li>
       </ul>
       <div class="callout gold" data-r style="padding:15px 22px">${ART.icon('bulb',30,C.gold)}
         <span class="txt">實務做法：把商品往左或往右移到<b>第一條線上</b>，
@@ -1124,11 +1099,10 @@ S({ part:'PART 7', time:'13:58', kind:'std', title:'留白：留給文字的位�
     </div>
     <div class="stack gap-m">
       <div>
-        <p class="eyebrow" data-r>教材 P.23 留白構圖法</p>
         <h2 class="h" data-r style="font-size:36px">空白不是浪費<br>是留位置</h2>
       </div>
       <ul class="list" data-r>
-        <li>教材：適當的留白<b>可以製造意境與氛圍，增加想像的空間</b></li>
+        <li>適當的留白<b>可以製造意境與氛圍，增加想像的空間</b></li>
         <li>對做生意的人來說更實際：<b>空白處可以放價格、名稱、活動文字</b></li>
         <li>接社群課：貼文要加字的話，拍的時候就要先留位置</li>
       </ul>
@@ -1184,16 +1158,15 @@ S({ part:'PART 8', time:'14:16', kind:'std', title:'平拍、45 度、俯拍，�
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>同一個商品，三個高度</p>
       <h2 class="h" data-r style="font-size:38px">商品照的預設答案是 45 度</h2>
     </div>
     <div class="cards c3" data-r style="gap:18px">
       ${[['平拍','手機跟商品同高',
-          '看得到正面與標籤。適合<b>瓶罐、包裝、有字的商品</b>。<br>教材 P.96：層次感會少一些。',C.clean,'side'],
+          '看得到正面與標籤。適合<b>瓶罐、包裝、有字的商品</b>。<br>層次感會少一些。',C.clean,'side'],
          ['45 度','手機略高於商品',
-          '<b>最推薦</b>。教材 P.95：更可展現細節及立體感。<br>教材 P.88：看得到切面。',C.warm,'a45'],
+          '<b>最推薦</b>。更可展現細節及立體感。<br>看得到切面。',C.warm,'a45'],
          ['俯拍','手機在商品正上方',
-          '適合<b>多個商品排列、平放的東西</b>。<br>教材 P.88：單一商品俯拍會失去立體感。',C.fresh,'top']]
+          '適合<b>多個商品排列、平放的東西</b>。<br>單一商品俯拍會失去立體感。',C.fresh,'top']]
         .map(([k,s,v,c,ang])=>`
         <div class="card" style="padding:18px 18px 20px;border-top:5px solid ${c}">
           ${ART.scene({ w:262, h:150, bg:'wood', light:'side', angle:ang, px:92 })}
@@ -1203,8 +1176,7 @@ S({ part:'PART 8', time:'14:16', kind:'std', title:'平拍、45 度、俯拍，�
         </div>`).join('')}
     </div>
     <div class="callout gold" data-r>${ART.icon('bulb',32,C.gold)}
-      <span class="txt">教材 P.95 還有一句很實用：
-      <b>若一開始不確定要使用哪種角度，可拍多張再進行挑選。</b></span></div>
+      <span class="txt"><b>若一開始不確定要使用哪種角度，可拍多張再進行挑選。</b></span></div>
   </div>`,
   notes:{
     say:['45 度是這一段唯一要記住的答案。',
@@ -1221,7 +1193,6 @@ S({ part:'PART 8', time:'14:20', kind:'std', title:'同一個商品，三個角�
   html:`
   <div class="stack gap-m center" style="text-align:center">
     <div>
-      <p class="eyebrow" data-r style="justify-content:center">只有手機的高度不同</p>
       <h2 class="h" data-r style="font-size:38px">看得出來立體感差在哪嗎？</h2>
     </div>
     <div data-r style="display:flex;gap:22px;justify-content:center">
@@ -1281,7 +1252,6 @@ S({ part:'PART 9', time:'14:31', kind:'std', title:'四種感覺的完整配方�
   html:`
   <div class="stack gap-s pad-tight">
     <div>
-      <p class="eyebrow" data-r>早上第 6 頁那張表，現在填滿了</p>
       <h2 class="h" data-r style="font-size:34px;margin-bottom:4px">
         挑<span class="hl">一列</span>，六張照片全部照那一列拍</h2>
     </div>
@@ -1320,7 +1290,6 @@ S({ part:'PART 9', time:'14:35', kind:'std', title:'一張照片，只負責一�
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>不要想用一張照片講完所有事</p>
       <h2 class="h" data-r style="font-size:38px">一組商品素材，至少要有這六張</h2>
     </div>
     <div class="cards c3" data-r style="gap:16px">
@@ -1338,7 +1307,7 @@ S({ part:'PART 9', time:'14:35', kind:'std', title:'一張照片，只負責一�
         </div>`).join('')}
     </div>
     <div class="callout gold" data-r>${ART.icon('bulb',32,C.gold)}
-      <span class="txt">教材 P.92：<b>不拍攝食物的全貌，以特寫的方式，反而更可以拍出餐點的特色</b>——
+      <span class="txt"><b>不拍攝食物的全貌，以特寫的方式，反而更可以拍出餐點的特色</b>——
       這就是第 3 張細節照的用意。</span></div>
   </div>`,
   notes:{
@@ -1355,7 +1324,6 @@ S({ part:'PART 9', time:'14:39', kind:'std', title:'這六張分別發在哪裡'
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>接上一堂社群平台課</p>
       <h2 class="h" data-r style="font-size:38px">拍完不是放著，是各有各的位置</h2>
     </div>
     <table class="tbl" data-r>

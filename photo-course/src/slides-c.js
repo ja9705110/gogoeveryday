@@ -10,7 +10,6 @@ S({ part:'PART 10', time:'進度緩衝', kind:'std', title:'配件不是拿來�
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>進度快才上　·　可整段跳過</p>
       <h2 class="h" data-r style="font-size:38px">配件的工作是幫人看懂商品</h2>
     </div>
     <div class="cards c3" data-r style="gap:16px">
@@ -48,7 +47,6 @@ S({ part:'PART 10', time:'進度緩衝', kind:'std', title:'一個主角 ＋ 1�
   html:`
   <div class="stack gap-m center" style="text-align:center">
     <div>
-      <p class="eyebrow" data-r style="justify-content:center">配件的數量原則</p>
       <h2 class="h" data-r style="font-size:40px">寧可少，不要多</h2>
     </div>
     <div data-r style="display:flex;gap:26px;justify-content:center;align-items:center">
@@ -58,7 +56,7 @@ S({ part:'PART 10', time:'進度緩衝', kind:'std', title:'一個主角 ＋ 1�
                     cls:'good', mark:'✓', cap:'一主一配：主角很明確' })}
     </div>
     <div class="callout" data-r style="max-width:920px">${ART.icon('warn',32)}
-      <span class="txt">教材 P.102 的反例講得最好：東西放在一起拍，
+      <span class="txt">東西放在一起拍，
       <b>會讓人分不出主體是誰，易使主題失焦</b>。</span></div>
   </div>`,
   notes:{
@@ -82,7 +80,6 @@ S({ part:'PART 11', time:'14:51', kind:'std', title:'修圖救得回什麼、救
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>早上第 4 頁那句話，現在來驗證</p>
       <h2 class="h" data-r style="font-size:38px">先知道界線，才不會白花時間</h2>
     </div>
     <div class="split" style="gap:30px">
@@ -126,7 +123,6 @@ S({ part:'PART 11', time:'14:54', kind:'std', title:'修圖會破壞照片：一
   html:`
   <div class="stack gap-m center" style="text-align:center">
     <div>
-      <p class="eyebrow" data-r style="justify-content:center">教材 P.173</p>
       <h2 class="mega" data-r style="font-size:46px;max-width:1000px;line-height:1.32">
         「修圖對圖片是一種破壞，<br>有些為不可逆的，<br>
         <span class="hl">修圖一次就是對圖片的一次損傷</span>」</h2>
@@ -157,7 +153,6 @@ S({ part:'PART 11', time:'14:57', kind:'std', title:'內建修圖在哪裡：iPh
   <div class="split" style="gap:36px">
     <div class="stack gap-m">
       <div>
-        <p class="eyebrow" data-r>不用裝 App，手機本來就有</p>
         <h2 class="h" data-r style="font-size:36px">相簿打開照片<br>右上角「編輯」</h2>
       </div>
       ${ART.steps([
@@ -165,7 +160,7 @@ S({ part:'PART 11', time:'14:57', kind:'std', title:'內建修圖在哪裡：iPh
         ['Android','相簿／Google 相簿 → 打開照片 →<br>下方「編輯」→ 調整、濾鏡、裁剪']
       ])}
       <div class="callout sage" data-r style="padding:15px 22px">${ART.icon('ok',30,C.sage)}
-        <span class="txt">教材 P.164–167 列了十幾個選項，
+        <span class="txt">列了十幾個選項，
         今天<b>只教三個</b>：裁切、亮度、顏色。其他先不用碰。</span></div>
     </div>
     <div data-r style="display:flex;justify-content:center;align-items:center">
@@ -205,12 +200,11 @@ S({ part:'PART 11', time:'15:01', kind:'std', title:'動作一：裁切與拉正
   <div class="split w-left" style="gap:40px">
     <div class="stack gap-m">
       <div>
-        <p class="eyebrow" data-r>第一個動作，也是最常用的</p>
         <h2 class="h" data-r style="font-size:38px">先把畫面<br>切乾淨、拉正</h2>
       </div>
       <ul class="list" data-r>
         <li><b>裁切</b>：把邊邊的雜物切掉，讓商品佔更大</li>
-        <li><b>拉正</b>：教材 P.170 的「校正」，把歪掉的水平轉回來</li>
+        <li><b>拉正</b>：的「校正」，把歪掉的水平轉回來</li>
         <li><b>換比例</b>：切成 1:1 給 IG、9:16 給限動</li>
         <li>早上用 4:3 拍就是為了這一步——<b>留得多才有得裁</b></li>
       </ul>
@@ -246,7 +240,6 @@ S({ part:'PART 11', time:'15:05', kind:'std', title:'動作二：亮度與陰影
     </div>
     <div class="stack gap-m">
       <div>
-        <p class="eyebrow" data-r>教材 P.164–166</p>
         <h2 class="h" data-r style="font-size:36px">只動兩根滑桿</h2>
       </div>
       <div class="stack gap-s" data-r>
@@ -261,7 +254,7 @@ S({ part:'PART 11', time:'15:05', kind:'std', title:'動作二：亮度與陰影
         </div>
       </div>
       <div class="callout" data-r style="padding:14px 20px">${ART.icon('warn',30)}
-        <span class="txt">教材還有增豔、亮部、對比、黑點等選項，
+        <span class="txt">還有增豔、亮部、對比、黑點等選項，
         <b>今天先不要碰</b>。兩根滑桿就能解決八成的問題。</span></div>
     </div>
   </div>`,
@@ -280,7 +273,6 @@ S({ part:'PART 11', time:'15:09', kind:'std', title:'動作三：飽和度與色
   <div class="split w-right" style="gap:36px">
     <div class="stack gap-m">
       <div>
-        <p class="eyebrow" data-r>早上白平衡那個伏筆，現在收回來</p>
         <h2 class="h" data-r style="font-size:36px">iPhone 拍的時候<br>調不了顏色<br>這裡可以救</h2>
       </div>
       <div class="stack gap-s" data-r>
@@ -356,7 +348,6 @@ S({ part:'PART 11', time:'15:19', kind:'std', title:'濾鏡：商品照為什麼
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>教材 P.168–169</p>
       <h2 class="h" data-r style="font-size:38px">濾鏡可以統一風格，不能改商品顏色</h2>
     </div>
     <div data-r style="display:flex;gap:16px;justify-content:center">
@@ -385,7 +376,6 @@ S({ part:'PART 11', time:'15:22', kind:'std', title:'AI 幫你做兩件事：修
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>先把這兩件事分清楚，後面才不會出事</p>
       <h2 class="h" data-r style="font-size:38px">修圖是整理你拍的，生圖是無中生有</h2>
     </div>
     <div class="split" style="gap:30px">
@@ -427,7 +417,6 @@ S({ part:'PART 11', time:'15:25', kind:'std', title:'AI 修圖：四個最實用
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>做生意的人最常用到這四個</p>
       <h2 class="h" data-r style="font-size:38px">不用學全部，這四個就夠</h2>
     </div>
     <div class="cards c4" data-r style="gap:16px">
@@ -460,7 +449,6 @@ S({ part:'PART 11', time:'15:28', kind:'std', title:'兩條路：手機內建 vs
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>教室有網路，兩條路今天都可以做</p>
       <h2 class="h" data-r style="font-size:38px">先試手機內建，不夠再用網頁</h2>
     </div>
     <div class="split" style="gap:30px">
@@ -505,7 +493,6 @@ S({ part:'PART 11', time:'15:31', kind:'std', title:'指令怎麼下：四個要
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>用網頁 AI 的關鍵</p>
       <h2 class="h" data-r style="font-size:38px">一句好指令，有這四個部分</h2>
     </div>
     <div class="cards c4" data-r style="gap:14px">
@@ -543,7 +530,6 @@ S({ part:'PART 11', time:'15:34', kind:'std', title:'好指令 vs 壞指令',
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>同一張照片，兩種指令，兩種結果</p>
       <h2 class="h" data-r style="font-size:38px">講得越模糊，AI 越會自己發揮</h2>
     </div>
     <div class="split" style="gap:28px">
@@ -609,7 +595,6 @@ S({ part:'PART 11', time:'15:41', kind:'std', title:'AI 生圖可以拿來做什
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>生圖不是不能用，是要用對地方</p>
       <h2 class="h" data-r style="font-size:38px">拿來做「配角」可以，拿來當「主角」不行</h2>
     </div>
     <div class="split" style="gap:30px">
@@ -651,7 +636,6 @@ S({ part:'PART 11', time:'15:44', kind:'std', title:'商品照的三條紅線',
   html:`
   <div class="stack gap-s pad-tight">
     <div>
-      <p class="eyebrow" data-r>這一頁請講最久</p>
       <h2 class="h" data-r style="font-size:36px;margin-bottom:6px">
         AI 可以整理畫面，<span class="hl">不可以改變商品</span></h2>
     </div>
@@ -725,7 +709,6 @@ S({ part:'PART 11', time:'15:49', kind:'std', title:'修圖 App 五款對照',
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>教材 P.173–178　·　今天不用裝</p>
       <h2 class="h" data-r style="font-size:38px">先用內建就夠了，這些等有需要再說</h2>
     </div>
     <table class="tbl" data-r style="font-size:20px">
@@ -739,7 +722,7 @@ S({ part:'PART 11', time:'15:49', kind:'std', title:'修圖 App 五款對照',
       </tbody>
     </table>
     <div class="callout sage" data-r>${ART.icon('ok',32,C.sage)}
-      <span class="txt">教材 P.173 提醒：這些 App <b>有些功能需要額外付費</b>。
+      <span class="txt">這些 App <b>有些功能需要額外付費</b>。
       今天教的三個動作用內建就做得到，<b class="hl">不用花錢</b>。</span></div>
   </div>`,
   notes:{
@@ -760,7 +743,6 @@ S({ part:'收尾', time:'15:50', kind:'std', title:'拿出你早上第一張照�
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>今天最後一件事</p>
       <h2 class="h" data-r style="font-size:38px">早上那張，跟現在這張，放在一起</h2>
     </div>
     <div class="split" style="gap:30px" data-r>
@@ -859,7 +841,6 @@ S({ part:'附錄', time:'—', kind:'std', title:'附錄①　拍攝前檢查表
   html:`
   <div class="stack gap-s pad-tight">
     <div>
-      <p class="eyebrow" data-r>可單獨列印　·　貼在工作檯前面</p>
       <h2 class="h" data-r style="font-size:31px;margin-bottom:2px">拍之前十秒，修圖三動作</h2>
     </div>
     <div class="split" style="gap:26px">
@@ -899,7 +880,7 @@ S({ part:'附錄', time:'—', kind:'std', title:'附錄②　感覺配方表 �
   html:`
   <div class="stack gap-s pad-tight">
     <div>
-      <h2 class="h" data-r style="font-size:29px;margin-bottom:0">回家照著做的三張表　<span style="font-size:19px;font-weight:700;color:${C.ink3}">可單獨列印</span></h2>
+      <h2 class="h" data-r style="font-size:29px;margin-bottom:0">回家照著做的三張表</h2>
     </div>
     <table class="tbl compact" data-r style="font-size:17px">
       <thead><tr><th style="width:126px">感覺</th><th>光線</th><th>背景</th><th>角度</th><th>構圖</th></tr></thead>

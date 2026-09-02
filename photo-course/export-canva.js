@@ -88,7 +88,7 @@ const pages = DECK.map((d, i) => {
      data-speaker-notes="${esc(notesText(d))}">
   <div class="pg-defs">${IG_DEFS}</div>
   <section class="${cls}">${d.html}${tag}</section>
-  <div class="pg-foot"><span>${esc(d.part)}</span><span></span></div>
+  <div class="pg-foot"><span></span><span></span></div>
 </div>`;
 }).join('\n\n');
 

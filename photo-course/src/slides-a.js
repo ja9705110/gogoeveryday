@@ -16,7 +16,6 @@ S({ part:'開場', time:'09:00', kind:'cover', title:'封面：手機拍攝商�
   html:`
   <div class="cover-wrap">
     <div class="cover-l">
-      <p class="eyebrow" data-r>6 小時實體課程　·　09/13</p>
       <h1 class="mega" data-r style="font-size:66px">手機拍攝商品<br>與影像編修基礎</h1>
       <p class="lead" data-r style="margin-top:18px;font-size:27px">
         今天不聽理論。<br>
@@ -45,7 +44,6 @@ S({ part:'開場', time:'09:02', kind:'std', title:'今天結束時，你會有�
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>下午四點，你帶回家的東西</p>
       <h2 class="h" data-r style="font-size:38px">不是筆記，是四樣做好的成果</h2>
     </div>
     <div class="cards c4" data-r style="gap:18px">
@@ -80,7 +78,6 @@ S({ part:'開場', time:'09:05', kind:'std', title:'今天的節奏',
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>整天都是這四步，重複十幾次</p>
       <h2 class="h" data-r style="font-size:38px">先拍 → 再講 → 再拍 → 比較</h2>
     </div>
     <div data-r style="display:flex;align-items:center;gap:14px">
@@ -117,8 +114,7 @@ S({ part:'開場', time:'09:08', kind:'std', title:'四個觀念先講在前面'
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>先講完，整天就不用再爭辯</p>
-      <h2 class="h" data-r style="font-size:38px">這四件事，今天會一直回來</h2>
+      <h2 class="h" data-r style="font-size:38px">拍好一張商品照的四個前提</h2>
     </div>
     <div class="cards c2" data-r style="gap:17px">
       ${[['手機貴，不代表照片好看',
@@ -153,7 +149,6 @@ S({ part:'開場', time:'09:11', kind:'std', title:'攝影名詞，翻成生活�
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>今天不背術語</p>
       <h2 class="h" data-r style="font-size:38px">聽到這些字，心裡想的是這句話</h2>
     </div>
     <table class="tbl" data-r>
@@ -188,7 +183,6 @@ S({ part:'開場', time:'09:14', kind:'std', title:'你想給人什麼感覺？'
   html:`
   <div class="stack gap-s pad-tight">
     <div>
-      <p class="eyebrow" data-r>今天最重要的一個問題</p>
       <h2 class="h" data-r style="font-size:34px;margin-bottom:4px">
         不要先問「怎麼拍比較好看」，先問<span class="hl">「我想給人什麼感覺」</span></h2>
     </div>
@@ -272,7 +266,6 @@ S({ part:'PART 1', time:'09:26', kind:'std', title:'iPhone 和 Android，差在�
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>先把心裡的疙瘩解決掉</p>
       <h2 class="h" data-r style="font-size:38px">兩邊的核心功能，其實一樣</h2>
     </div>
     <div class="cards c2" data-r style="gap:22px">
@@ -296,7 +289,7 @@ S({ part:'PART 1', time:'09:26', kind:'std', title:'iPhone 和 Android，差在�
       </div>
     </div>
     <div class="callout sage" data-r>${ART.icon('ok',32,C.sage)}
-      <span class="txt">教材原話：「iOS 與 Android 在手機相機內建的功能中，有些微的差別，
+      <span class="txt">「iOS 與 Android 在手機相機內建的功能中，有些微的差別，
       <b>但基本上都可以透過下載 App 補足各自缺少的功能</b>。」</span></div>
   </div>`,
   notes:{
@@ -317,7 +310,6 @@ S({ part:'PART 1', time:'09:32', kind:'std', title:'不要背按鈕位置，要�
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>介面會一直改版，這六件事不會變</p>
       <h2 class="h" data-r style="font-size:38px">每支手機都要找得到這六個</h2>
     </div>
     <div class="cards c3" data-r style="gap:16px">
@@ -356,7 +348,6 @@ S({ part:'PART 1', time:'09:38', kind:'std', title:'格線在哪裡開：iPhone�
   <div class="split" style="gap:36px">
     <div class="stack gap-m">
       <div>
-        <p class="eyebrow" data-r>第一個要打開的設定</p>
         <h2 class="h" data-r style="font-size:36px">格線不是裝飾<br>是幫你拍直、拍正</h2>
       </div>
       ${ART.steps([
@@ -364,7 +355,7 @@ S({ part:'PART 1', time:'09:38', kind:'std', title:'格線在哪裡開：iPhone�
         ['Android','相機 App → 右上角設定 → 「格線」<br>或「構圖線」「Grid」。各廠名稱不同。']
       ])}
       <div class="callout gold" data-r style="padding:15px 22px">${ART.icon('grid',30,C.gold)}
-        <span class="txt">教材 P.21：三分法又叫「九宮格構圖法」，
+        <span class="txt">三分法又叫「九宮格構圖法」，
         <b>在手機開啟格線功能後，即可使用</b>。下午講構圖就是用這條線。</span></div>
     </div>
     <div data-r style="display:flex;justify-content:center;align-items:center">
@@ -432,7 +423,6 @@ S({ part:'PART 1', time:'09:50', kind:'std', title:'照片比例：4:3、1:1、1
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>同一個商品，同一個位置，只換比例</p>
       <h2 class="h" data-r style="font-size:36px">看畫面裡留下多少東西</h2>
     </div>
     <div data-r style="display:flex;gap:22px;align-items:flex-end;justify-content:center">
@@ -461,7 +451,6 @@ S({ part:'PART 1', time:'09:56', kind:'std', title:'商品照為什麼先用 4:3
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>不知道要用什麼比例時的預設答案</p>
       <h2 class="h" data-r style="font-size:38px">先用 4:3，三個理由</h2>
     </div>
     <div class="cards c3" data-r style="gap:18px">
@@ -497,11 +486,10 @@ S({ part:'PART 1', time:'10:02', kind:'std', title:'幾 MP？高畫素不等於�
   <div class="split w-right" style="gap:40px">
     <div class="stack gap-m">
       <div>
-        <p class="eyebrow" data-r>常見的誤會</p>
         <h2 class="h" data-r style="font-size:36px">畫素高，<br>照片不一定好看</h2>
       </div>
       <p class="lead" data-r style="font-size:22px">
-        教材原話：「有些人認為畫素愈高，呈現的畫質就會愈好，<b>其實並不一定</b>。」<br>
+        「有些人認為畫素愈高，呈現的畫質就會愈好，<b>其實並不一定</b>。」<br>
         決定畫質的是感光元件大小，不是數字。</p>
       <div class="callout sage" data-r style="padding:15px 22px">${ART.icon('ok',30,C.sage)}
         <span class="txt">現在的手機，<b>畫素都夠用了</b>。今天不用再想這件事。</span></div>
@@ -540,7 +528,6 @@ S({ part:'PART 1', time:'10:08', kind:'std', title:'錄影設定：1080p 還是 
   html:`
   <div class="stack gap-m">
     <div>
-      <p class="eyebrow" data-r>之後要拍製作過程、開箱時會用到</p>
       <h2 class="h" data-r style="font-size:36px">兩個數字，看懂就好</h2>
     </div>
     <div class="cards c2" data-r style="gap:22px">
@@ -580,7 +567,6 @@ S({ part:'PART 1', time:'10:14', kind:'std', title:'你的預設值就設這個'
   html:`
   <div class="stack gap-m center" style="text-align:center">
     <div>
-      <p class="eyebrow" data-r style="justify-content:center">PART 1 帶走頁</p>
       <h2 class="h" data-r style="font-size:40px">設好這五項，今天之後都不用再改</h2>
     </div>
     <div class="checks c2" data-r style="grid-template-columns:repeat(2,1fr);gap:14px 30px;max-width:840px">
