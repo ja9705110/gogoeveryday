@@ -323,3 +323,51 @@ ART.steps = (list) => `
       <span style="font-size:20px;font-weight:700;color:${C.ink2};line-height:1.4">${s[1]}</span>
     </div>`).join('')}
 </div>`;
+
+/* ── 構圖示意圖（教材 P.21–23 八種） ─────────────────────────────────
+   kind: third | quarter | symmetry | diagonal | center | frame | curve | space | repeat  */
+ART.comp = (kind, w = 232, h = 168) => {
+  const j = (x, y, s) =>
+    `<div style="position:absolute;left:${x}%;top:${y}%;transform:translate(-50%,-50%)">
+       ${ART.jar45(s)}</div>`;
+  const line = css => `<div style="position:absolute;${css};background:${C.gold};opacity:.75"></div>`;
+  const S = Math.round(Math.min(w, h) * 0.46);
+  const s2 = Math.round(S * 0.72), s3 = Math.round(S * 0.56);
+
+  const G3 = line('left:33.33%;top:0;bottom:0;width:1.5px') + line('left:66.66%;top:0;bottom:0;width:1.5px')
+           + line('top:33.33%;left:0;right:0;height:1.5px') + line('top:66.66%;left:0;right:0;height:1.5px');
+  const G4 = [25,50,75].map(p => line(`left:${p}%;top:0;bottom:0;width:1.2px`)).join('')
+           + [25,50,75].map(p => line(`top:${p}%;left:0;right:0;height:1.2px`)).join('');
+
+  const art = {
+    third:    G3 + j(33.33, 55, S),
+    quarter:  G4 + j(25, 60, S),
+    symmetry: j(30, 55, s2) + j(70, 55, s2)
+              + line('left:50%;top:0;bottom:0;width:1.5px'),
+    diagonal: `<div style="position:absolute;inset:0;overflow:hidden">
+                 <div style="position:absolute;left:-10%;top:-10%;width:140%;height:2px;
+                      background:${C.gold};opacity:.75;transform:rotate(28deg);
+                      transform-origin:left center"></div></div>`
+              + j(24, 34, s3) + j(50, 56, s3) + j(76, 78, s3),
+    center:   j(50, 55, S) + line('left:50%;top:0;bottom:0;width:1.2px')
+              + line('top:50%;left:0;right:0;height:1.2px'),
+    frame:    `<div style="position:absolute;left:12%;top:10%;right:12%;bottom:10%;
+                    border:${Math.round(S*0.16)}px solid rgba(60,40,26,.55);border-radius:6px"></div>`
+              + j(50, 55, s2),
+    curve:    `<svg style="position:absolute;inset:0" viewBox="0 0 100 100" preserveAspectRatio="none">
+                 <path d="M4 78 C 30 34, 70 34, 96 74" stroke="${C.gold}" stroke-width="1.6"
+                       fill="none" opacity=".75"/></svg>`
+              + j(16, 68, s3) + j(50, 44, s3) + j(84, 66, s3),
+    repeat:   j(22, 38, s3) + j(50, 38, s3) + j(78, 38, s3)
+              + j(36, 74, s3) + j(64, 74, s3),
+    space:    j(76, 58, s2)
+              + `<div style="position:absolute;left:8%;top:30%;width:38%;height:8px;
+                      background:${C.gold};opacity:.35;border-radius:6px"></div>
+                 <div style="position:absolute;left:8%;top:46%;width:28%;height:8px;
+                      background:${C.gold};opacity:.28;border-radius:6px"></div>`
+  }[kind] || '';
+
+  return `<div class="fr" style="width:${w}px;height:${h}px">
+    <div class="fr-in" style="background:linear-gradient(#e6d9c4,#d8c7ad)">${art}</div>
+  </div>`;
+};

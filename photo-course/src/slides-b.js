@@ -715,7 +715,7 @@ S({ part:'PART 6', time:'13:01', kind:'std', title:'光線，是商品照最重�
     more:[], less:['直接進下一頁。']
   }});
 
-S({ part:'PART 6', time:'13:04', kind:'std', title:'第一步：先找窗戶',
+S({ part:'PART 6', time:'13:03', kind:'std', title:'第一步：先找窗戶',
   html:`
   <div class="split w-left" style="gap:40px">
     <div class="stack gap-m">
@@ -747,7 +747,7 @@ S({ part:'PART 6', time:'13:04', kind:'std', title:'第一步：先找窗戶',
     less:['不移動，只講原理。']
   }});
 
-S({ part:'PART 6', time:'13:09', kind:'std', title:'順光：最安全、最清楚',
+S({ part:'PART 6', time:'13:07', kind:'std', title:'順光：最安全、最清楚',
   html:`
   <div class="split" style="gap:36px">
     <div data-r>
@@ -778,7 +778,7 @@ S({ part:'PART 6', time:'13:09', kind:'std', title:'順光：最安全、最清�
     less:['三個光向合併成一頁講。']
   }});
 
-S({ part:'PART 6', time:'13:14', kind:'std', title:'側光：立體感從這裡來',
+S({ part:'PART 6', time:'13:11', kind:'std', title:'側光：立體感從這裡來',
   html:`
   <div class="split w-right" style="gap:36px">
     <div class="stack gap-m">
@@ -809,7 +809,7 @@ S({ part:'PART 6', time:'13:14', kind:'std', title:'側光：立體感從這裡�
     less:['和順光合併。']
   }});
 
-S({ part:'PART 6', time:'13:19', kind:'std', title:'逆光：有氣氛，但最難控制',
+S({ part:'PART 6', time:'13:15', kind:'std', title:'逆光：有氣氛，但最難控制',
   html:`
   <div class="split" style="gap:36px">
     <div data-r>
@@ -840,7 +840,7 @@ S({ part:'PART 6', time:'13:19', kind:'std', title:'逆光：有氣氛，但最�
     less:['整頁只留一句「逆光很難，今天先不做」。']
   }});
 
-S({ part:'PART 6', time:'13:24', kind:'std', title:'大太陽直射，為什麼反而難拍',
+S({ part:'PART 6', time:'13:19', kind:'std', title:'大太陽直射，為什麼反而難拍',
   html:`
   <div class="stack gap-m">
     <div>
@@ -879,7 +879,7 @@ S({ part:'PART 6', time:'13:24', kind:'std', title:'大太陽直射，為什麼�
     less:['一句話帶過：「不要在大太陽底下拍」。']
   }});
 
-S({ part:'PART 6', time:'13:28', kind:'std', title:'一張白紙就能補光',
+S({ part:'PART 6', time:'13:23', kind:'std', title:'一張白紙就能補光',
   html:`
   <div class="split w-left" style="gap:40px">
     <div class="stack gap-m">
@@ -913,7 +913,7 @@ S({ part:'PART 6', time:'13:28', kind:'std', title:'一張白紙就能補光',
     less:['講師示範一次就好，不發紙。']
   }});
 
-S({ part:'PART 6', time:'13:33', kind:'std', title:'【實作】四張並排',
+S({ part:'PART 6', time:'13:27', kind:'std', title:'【實作】四張並排',
   html:`
   <div class="stack gap-m center" style="text-align:center">
     <div>
@@ -941,7 +941,7 @@ S({ part:'PART 6', time:'13:33', kind:'std', title:'【實作】四張並排',
     less:['只拍 ① 和 ④ 兩張。']
   }});
 
-S({ part:'PART 6', time:'13:41', kind:'std', title:'三個問題，自己挑出最好的那一張',
+S({ part:'PART 6', time:'13:35', kind:'std', title:'三個問題，自己挑出最好的那一張',
   html:`
   <div class="stack gap-m center" style="text-align:center">
     <div>
@@ -975,13 +975,26 @@ S({ part:'PART 6', time:'13:41', kind:'std', title:'三個問題，自己挑出�
 /* =========================================================================
    PART 7　構圖　（51–56）
    ========================================================================= */
-S({ part:'PART 7', time:'13:45', kind:'divider', title:'PART 7｜構圖',
+const BADGE = `<span style="font-size:16px;font-weight:800;color:#fff;background:${C.clay};
+  padding:2px 9px;border-radius:20px">今天練</span>`;
+const COMPS = [
+  { k:'center',   name:'中心式',  use:'最安全',       main:1 },
+  { k:'third',    name:'三分法',  use:'最常用',       main:1 },
+  { k:'space',    name:'留白',    use:'留給文字',     main:1 },
+  { k:'symmetry', name:'對稱式',  use:'包裝、成套',   main:1 },
+  { k:'quarter',  name:'四分法',  use:'三分法的進階', main:0 },
+  { k:'diagonal', name:'對角線',  use:'活潑、有動感', main:0 },
+  { k:'frame',    name:'框架式',  use:'有層次感',     main:0 },
+  { k:'curve',    name:'曲線',    use:'排列成弧形',   main:0 }
+];
+
+S({ part:'PART 7', time:'13:40', kind:'divider', title:'PART 7｜構圖',
   html: divider('07','構圖',
-    '教材 P.21 註明：「構圖法僅為拍攝參考。」<br>不是規則，是四條可以直接用的路。',
+    '書上一共八種構圖法。<br>今天先把五種練熟，另外三種知道有就好。',
     ART.icon('grid',130,'rgba(255,255,255,.13)')),
   notes:{ say:['開場就把「這不是規則」講清楚，學員才不會綁手綁腳。'], ask:[], do:[] }});
 
-S({ part:'PART 7', time:'13:46', kind:'std', title:'構圖＝商品放在哪裡比較舒服',
+S({ part:'PART 7', time:'13:41', kind:'std', title:'構圖＝商品放在哪裡比較舒服',
   html:`
   <div class="stack gap-m">
     <div>
@@ -1023,7 +1036,39 @@ S({ part:'PART 7', time:'13:46', kind:'std', title:'構圖＝商品放在哪裡�
     less:['直接進第 55 頁留白。']
   }});
 
-S({ part:'PART 7', time:'13:50', kind:'std', title:'中央構圖：最安全',
+S({ part:'PART 7', time:'13:43', kind:'std', title:'八種構圖法，一次看完',
+  html:`
+  <div class="stack gap-s pad-tight">
+    <div>
+      <h2 class="h" data-r style="font-size:34px;margin-bottom:4px">
+        書上一共八種——<span class="hl">今天練五種，另外三種知道有就好</span></h2>
+    </div>
+    <div data-r style="display:grid;grid-template-columns:repeat(4,1fr);gap:13px">
+      ${COMPS.map(c => `
+        <div>
+          ${ART.comp(c.k, 250, 146)}
+          <p style="margin:7px 0 0;font-size:21px;font-weight:900;
+             color:${c.main ? C.clay : C.ink3};display:flex;align-items:center;gap:7px">
+            ${c.name}${c.main ? BADGE : ''}</p>
+          <p style="margin:1px 0 0;font-size:18px;font-weight:650;color:${C.ink3}">${c.use}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout" data-r style="padding:13px 22px">${ART.icon('bulb',28)}
+      <span class="txt">「構圖法僅為拍攝參考」——<b>不是規則，是八條現成的路</b>。
+      挑一條走就好，不用每張都換。</span></div>
+  </div>`,
+  notes:{
+    say:['這一頁是給學員一個全貌，不要逐一講解，八個名字念過去就好。',
+         '重點是讓她們知道：構圖不只有一種，但今天只要練會五種。',
+         '標「今天練」的四個，加上等一下的重複排列，就是今天要練的五種。'],
+    ask:['問：這八張圖裡，哪一張最像你平常拍的？（多半是中心式）'],
+    do:[],
+    diff:['學員會發現自己一直只用同一種構圖。'],
+    more:['八種各講一句用途。'],
+    less:['只指出「今天練這五種」，其他跳過。']
+  }});
+
+S({ part:'PART 7', time:'13:46', kind:'std', title:'中央構圖：最安全',
   html:`
   <div class="split" style="gap:36px">
     <div data-r>
@@ -1053,7 +1098,7 @@ S({ part:'PART 7', time:'13:50', kind:'std', title:'中央構圖：最安全',
     more:[], less:['和下一頁合併。']
   }});
 
-S({ part:'PART 7', time:'13:54', kind:'std', title:'三分法：讓商品不一定放正中間',
+S({ part:'PART 7', time:'13:49', kind:'std', title:'三分法：讓商品不一定放正中間',
   html:`
   <div class="split w-right" style="gap:36px">
     <div class="stack gap-m">
@@ -1090,7 +1135,7 @@ S({ part:'PART 7', time:'13:54', kind:'std', title:'三分法：讓商品不一�
     less:['只講「往旁邊移一點」。']
   }});
 
-S({ part:'PART 7', time:'13:58', kind:'std', title:'留白：留給文字的位置',
+S({ part:'PART 7', time:'13:52', kind:'std', title:'留白：留給文字的位置',
   html:`
   <div class="split" style="gap:36px">
     <div data-r>
@@ -1107,8 +1152,8 @@ S({ part:'PART 7', time:'13:58', kind:'std', title:'留白：留給文字的位�
         <li>接社群課：貼文要加字的話，拍的時候就要先留位置</li>
       </ul>
       <div class="callout" data-r style="padding:15px 22px">${ART.icon('tag',30)}
-        <span class="txt"><b>對稱與重複排列</b>也很好用：包裝、成套商品用對稱；
-        餅乾、飾品、農產品排成一列或九宮格，畫面會很整齊。</span></div>
+        <span class="txt">留白要留在<b>同一側</b>。左邊留白就每張都留左邊，
+        六張放在一起才會整齊。</span></div>
     </div>
   </div>`,
   notes:{
@@ -1121,7 +1166,79 @@ S({ part:'PART 7', time:'13:58', kind:'std', title:'留白：留給文字的位�
     less:['只講「加字的話先留位置」。']
   }});
 
-S({ part:'PART 7', time:'14:01', kind:'std', title:'【實作】同一個商品，三種構圖',
+S({ part:'PART 7', time:'13:55', kind:'std', title:'對稱與重複排列',
+  html:`
+  <div class="stack gap-m">
+    <div>
+      <h2 class="h" data-r style="font-size:36px">成套商品用對稱，一堆小東西用排列</h2>
+    </div>
+    <div class="split" style="gap:30px">
+      <div class="card" data-r style="padding:18px 20px;border-top:5px solid ${C.plum}">
+        ${ART.comp('symmetry', 470, 210)}
+        <p class="k" style="font-size:24px;color:${C.plum};margin-top:12px">對稱式</p>
+        <p class="v" style="font-size:20px">
+          左右一樣、上下一樣，畫面會很穩。<br>
+          適合：<b>禮盒、成套商品、一組兩罐、包裝正面照</b>。</p>
+      </div>
+      <div class="card" data-r style="padding:18px 20px;border-top:5px solid ${C.sage}">
+        ${ART.comp('repeat', 470, 210)}
+        <p class="k" style="font-size:24px;color:${C.sage};margin-top:12px">重複排列</p>
+        <p class="v" style="font-size:20px">
+          同樣的東西排成一列、一排或九宮格，整齊本身就好看。<br>
+          適合：<b>餅乾、飾品、農產品、手工皂</b>。</p>
+      </div>
+    </div>
+    <div class="callout gold" data-r style="padding:14px 22px">${ART.icon('bulb',30,C.gold)}
+      <span class="txt">重複排列有個小訣竅：<b>數量用單數</b>（3 個、5 個）比雙數自然，
+      而且不要排得太整齊，稍微錯開比較有手感。</span></div>
+  </div>`,
+  notes:{
+    say:['這兩種是今天五種裡最後兩種，也是最容易做出「像樣」照片的兩種。',
+         '重複排列對做餅乾、飾品、農產品的學員特別有用，可以多花一點時間。',
+         '單數比雙數自然這個小訣竅很好用，講了學員會記得。'],
+    ask:['問：你的商品可以一次拍好幾個嗎？'],
+    do:['商品有多個的學員，排成一列或三角形拍一張。'],
+    diff:['一堆散放的小東西排整齊之後，會突然變得像商品照。'],
+    more:['講九宮格排列（3×3）拍俯視圖，很適合發 IG。'],
+    less:['只講對稱，重複排列口頭帶過。']
+  }});
+
+S({ part:'PART 7', time:'進度快才上', kind:'std', title:'另外三種：對角線、框架、曲線',
+  html:`
+  <div class="stack gap-m">
+    <div>
+      <h2 class="h" data-r style="font-size:36px">這三種今天不用練，知道有就好</h2>
+    </div>
+    <div class="cards c3" data-r style="gap:18px">
+      ${[['diagonal','對角線',
+          '東西沿著斜線排。畫面會比較<b>活潑、有動感</b>，適合幕後照、製作過程。',C.clay],
+         ['frame','框架式',
+          '用窗框、門框、手圈起來當框，把商品框在裡面，<b>有層次感</b>。',C.clean],
+         ['curve','曲線',
+          '東西排成弧形或 S 形，視線會跟著走，適合<b>多個小物一起拍</b>。',C.sage]]
+        .map(([k,name,v,c])=>`
+        <div class="card" style="padding:16px 16px 20px;border-top:5px solid ${c}">
+          ${ART.comp(k, 306, 168)}
+          <p class="k" style="font-size:24px;color:${c};margin-top:11px">${name}</p>
+          <p class="v" style="font-size:19px">${v}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout" data-r style="padding:14px 22px">${ART.icon('warn',30)}
+      <span class="txt">加上前面五種，這就是書上完整的八種。
+      <b>但今天只要練會五種就夠了</b>——構圖法是參考，不是規則。</span></div>
+  </div>`,
+  notes:{
+    say:['這一頁是進度緩衝，時間不夠就整頁跳過，不影響今天的成果。',
+         '如果有學員問「書上還有其他的嗎」，這一頁就是答案。',
+         '講完把八種收攏一次：五種今天練，三種回家自己試。'],
+    ask:['問：這三種裡，有沒有哪一種你想試試看？'],
+    do:[],
+    diff:['學員知道自己學的是完整八種裡的哪五種，不會覺得漏了東西。'],
+    more:['四分法也在這裡補一句：把畫面分成十六格，主體放在中間四格的角上。'],
+    less:['整頁跳過。']
+  }});
+
+S({ part:'PART 7', time:'13:59', kind:'std', title:'【實作】同一個商品，三種構圖',
   html:`
   <div class="stack gap-m center" style="text-align:center">
     <div>
