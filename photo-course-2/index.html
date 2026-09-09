@@ -1,0 +1,4201 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>手機拍攝商品與影像編修基礎（2）</title>
+<meta name="description" content="6 小時實體課程簡報：商品短影音的主題、腳本、分鏡、景別、運鏡、正式拍攝與 InShot 剪輯。">
+<style>/* =========================================================================
+   社群平台操作入門 — 簡報視覺系統
+   Stage: 1280 x 720, scaled to fit. All units in px against that stage.
+   ========================================================================= */
+
+:root{
+  /* 溫暖紙感基底 */
+  --paper:      #fbf7f1;
+  --paper-2:    #f4ece1;
+  --paper-3:    #ece0d1;
+  --white:      #ffffff;
+
+  /* 墨色 */
+  --ink:        #241c17;
+  --ink-2:      #4a3c33;
+  --ink-3:      #7a6a5d;
+  --muted:      #9c8b7c;
+
+  /* 主色：陶土 */
+  --clay:       #c05f3c;
+  --clay-2:     #a94e2e;
+  --clay-soft:  #f5ddd1;
+  --clay-tint:  #fbeee6;
+
+  /* 副色 */
+  --sage:       #5f7a63;
+  --sage-soft:  #dfe8dc;
+  --gold:       #d99a4e;
+  --gold-soft:  #f8e6c9;
+  --plum:       #8a5a6d;
+  --plum-soft:  #f0dfe4;
+
+  /* 平台色（僅少量點綴） */
+  --fb:         #1877f2;
+  --ig-a:       #f9a03f;
+  --ig-b:       #e1306c;
+  --ig-c:       #a02fbe;
+  --ln:         #06c755;
+
+  --line:       rgba(36,28,23,.12);
+  --line-2:     rgba(36,28,23,.07);
+
+  --shadow-s:   0 2px 6px -2px rgba(60,40,28,.18);
+  --shadow-m:   0 14px 34px -20px rgba(60,40,28,.45);
+  --shadow-l:   0 34px 70px -34px rgba(60,40,28,.55);
+
+  --r-s: 10px; --r-m: 16px; --r-l: 24px; --r-xl: 32px;
+
+  --ease: cubic-bezier(.16,1,.3,1);
+  --ease-2: cubic-bezier(.4,0,.2,1);
+
+  --font: "PingFang TC","Noto Sans TC","Hiragino Sans TC","Microsoft JhengHei",
+          "Source Han Sans TC", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0; background:var(--ink); color:var(--ink);
+  font-family:var(--font); font-weight:500;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  overflow:hidden;
+}
+
+/* ── 舞台 ────────────────────────────────────────────────────────────── */
+#viewport{
+  position:fixed; inset:0; display:grid; place-items:center;
+  background:
+    radial-gradient(1200px 700px at 20% -10%, #3a2c23 0%, transparent 60%),
+    radial-gradient(900px 600px at 110% 120%, #33261f 0%, transparent 60%),
+    #1d1712;
+}
+#stage{
+  position:relative; width:1280px; height:720px; flex:none;
+  transform-origin:center center;
+  background:var(--paper); overflow:hidden;
+  border-radius:6px;
+  box-shadow:0 60px 120px -50px rgba(0,0,0,.75), 0 0 0 1px rgba(255,255,255,.05);
+}
+
+/* 溫潤的背景層：極慢的光暈 + 細顆粒 */
+#stage::before{
+  content:""; position:absolute; inset:-10%; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(560px 420px at 12% 8%,  rgba(217,154,78,.16), transparent 62%),
+    radial-gradient(620px 480px at 92% 22%, rgba(192,95,60,.13),  transparent 64%),
+    radial-gradient(700px 520px at 70% 104%,rgba(95,122,99,.12),  transparent 62%);
+  animation:drift 34s var(--ease-2) infinite alternate;
+}
+@keyframes drift{
+  0%{ transform:translate3d(0,0,0) scale(1); }
+  100%{ transform:translate3d(-2.2%,1.6%,0) scale(1.06); }
+}
+#grain{
+  position:absolute; inset:0; z-index:1; pointer-events:none; opacity:.5;
+  mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
+}
+
+/* ── 投影片 ──────────────────────────────────────────────────────────── */
+.slide{
+  position:absolute; inset:0; z-index:2;
+  padding:58px 84px 78px;
+  display:flex; flex-direction:column; justify-content:center;
+  view-transition-name:slide;
+}
+.slide.pad-tight{ padding:48px 68px 72px; }
+
+/* ── 框架（頁眉／頁腳） ──────────────────────────────────────────────── */
+#chrome{ position:absolute; inset:0; z-index:6; pointer-events:none; }
+.ch-top{
+  position:absolute; top:26px; left:84px; right:84px;
+  display:flex; align-items:center; justify-content:flex-start; gap:14px;
+  font-size:20px; letter-spacing:.08em; color:var(--muted); font-weight:700;
+}
+.ch-sep{ opacity:.45 }
+.ch-part{ display:flex; align-items:center; gap:10px; }
+.ch-dot{ width:7px; height:7px; border-radius:99px; background:var(--clay);
+         box-shadow:0 0 0 4px var(--clay-tint); transition:background .5s var(--ease); }
+.ch-time{ font-variant-numeric:tabular-nums; }
+.ch-foot{
+  position:absolute; bottom:24px; left:84px; right:84px;
+  display:flex; align-items:center; justify-content:space-between;
+  font-size:20px; color:var(--muted); font-weight:600; letter-spacing:.04em;
+}
+.ch-brand{ display:flex; align-items:center; gap:9px; opacity:.9; }
+.ch-brand b{ color:var(--ink-3); font-weight:800; letter-spacing:.02em; }
+#pnum{ font-variant-numeric:tabular-nums; font-weight:800; color:var(--ink-3); }
+#pnum small{ color:var(--muted); font-weight:600; }
+#bar{
+  position:absolute; left:0; bottom:0; height:3px; width:0%;
+  background:linear-gradient(90deg,var(--gold),var(--clay));
+  transition:width .65s var(--ease); z-index:7;
+}
+.slide.full ~ #chrome .ch-top,
+body.hide-chrome #chrome{ opacity:0; }
+#chrome.on-dark .ch-top,#chrome.on-dark .ch-foot{ color:rgba(255,255,255,.55); }
+#chrome.on-dark #pnum,#chrome.on-dark .ch-brand b{ color:rgba(255,255,255,.8); }
+
+/* ── 文字階層 ────────────────────────────────────────────────────────── */
+.eyebrow{
+  font-size:20px; font-weight:800; letter-spacing:.1em; color:var(--clay);
+  margin:0 0 16px; display:flex; align-items:center; gap:12px;
+}
+.eyebrow::after{ content:""; height:1px; flex:1; background:linear-gradient(90deg,var(--clay-soft),transparent); }
+.eyebrow.sage{ color:var(--sage); } .eyebrow.sage::after{ background:linear-gradient(90deg,var(--sage-soft),transparent); }
+.eyebrow.plum{ color:var(--plum); } .eyebrow.plum::after{ background:linear-gradient(90deg,var(--plum-soft),transparent); }
+
+h1.h{ font-size:60px; line-height:1.16; letter-spacing:-.025em; font-weight:800; margin:0 0 20px; }
+h2.h{ font-size:44px; line-height:1.22; letter-spacing:-.02em; font-weight:800; margin:0 0 18px; }
+h3.h{ font-size:29px; line-height:1.3;  letter-spacing:-.012em; font-weight:800; margin:0 0 12px; }
+.mega{ font-size:82px; line-height:1.24; letter-spacing:-.03em; font-weight:850; margin:0; }
+.mega.sm{ font-size:58px; }
+.lead{ font-size:25px; line-height:1.62; color:var(--ink-2); font-weight:500; margin:0; }
+.sub{ font-size:21px; line-height:1.6; color:var(--ink-3); font-weight:500; margin:0; }
+.tiny{ font-size:20px; line-height:1.55; color:var(--muted); font-weight:600; }
+.hl{ color:var(--clay); }
+.hl-s{ color:var(--sage); }
+.mark{
+  background:linear-gradient(transparent 58%, var(--gold-soft) 58%);
+  padding:0 3px; border-radius:2px;
+}
+.num-badge{
+  display:inline-grid; place-items:center; width:38px; height:38px; flex:none;
+  border-radius:12px; background:var(--clay); color:#fff;
+  font-size:19px; font-weight:800; box-shadow:var(--shadow-s);
+}
+.num-badge.ghost{ background:var(--clay-tint); color:var(--clay); box-shadow:none; }
+
+/* ── 版面骨架 ────────────────────────────────────────────────────────── */
+.row{ display:flex; gap:52px; align-items:center; }
+.row.top{ align-items:flex-start; }
+.col{ min-width:0; }
+.split{ display:grid; grid-template-columns:1fr 1fr; gap:52px; align-items:center; }
+.split.w-left{ grid-template-columns:1.15fr .85fr; }
+.split.w-right{ grid-template-columns:.85fr 1.15fr; }
+.split.art{ grid-template-columns:1.05fr .95fr; }
+.stack{ display:flex; flex-direction:column; }
+.gap-s{ gap:11px } .gap-m{ gap:17px } .gap-l{ gap:25px }
+.center{ text-align:center; align-items:center; justify-content:center; }
+/* 置中欄位裡的區塊元素也要水平置中（滿版元素不受影響） */
+.center > *{ margin-left:auto; margin-right:auto; }
+/* 插畫外框：避免底圓溢出 */
+.art-box{ display:grid; place-items:center; overflow:hidden; border-radius:14px; }
+/* 需要絕對定位標註的容器，寬度須貼齊內容 */
+.anchor{ position:relative; width:max-content; }
+
+/* ── 卡片 ────────────────────────────────────────────────────────────── */
+.cards{ display:grid; gap:20px; }
+.c2{ grid-template-columns:repeat(2,1fr) } .c3{ grid-template-columns:repeat(3,1fr) }
+.c4{ grid-template-columns:repeat(4,1fr) } .c5{ grid-template-columns:repeat(5,1fr) }
+.card{
+  background:var(--white); border:1px solid var(--line); border-radius:var(--r-l);
+  padding:26px 26px 28px; box-shadow:var(--shadow-m); position:relative; overflow:hidden;
+}
+.card.flat{ background:rgba(255,255,255,.62); box-shadow:none; }
+.card.tint{ background:var(--clay-tint); border-color:transparent; box-shadow:none; }
+.card.sage{ background:var(--sage-soft); border-color:transparent; box-shadow:none; }
+.card.gold{ background:var(--gold-soft); border-color:transparent; box-shadow:none; }
+.card.plum{ background:var(--plum-soft); border-color:transparent; box-shadow:none; }
+.card .k{ font-size:24px; font-weight:800; margin:0 0 8px; letter-spacing:-.01em; }
+.card .v{ font-size:21px; line-height:1.62; color:var(--ink-2); margin:0; font-weight:500; }
+.card .ico{ margin-bottom:14px; display:block; }
+.card .cap{ font-size:20px; font-weight:800; letter-spacing:.08em; color:var(--muted); margin:0 0 10px; }
+.card .rule{ height:1px; background:var(--line); margin:16px 0 14px; }
+.card.top-accent::before{
+  content:""; position:absolute; top:0; left:0; right:0; height:4px;
+  background:var(--clay);
+}
+.card.top-accent.a-sage::before{ background:var(--sage) }
+.card.top-accent.a-gold::before{ background:var(--gold) }
+.card.top-accent.a-plum::before{ background:var(--plum) }
+.card.top-accent.a-fb::before{ background:var(--fb) }
+.card.top-accent.a-ig::before{ background:linear-gradient(90deg,var(--ig-a),var(--ig-b),var(--ig-c)) }
+.card.top-accent.a-ln::before{ background:var(--ln) }
+
+/* ── 條列（節制使用） ────────────────────────────────────────────────── */
+ul.list{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:13px; }
+ul.list li{
+  font-size:21px; line-height:1.5; color:var(--ink-2); font-weight:600;
+  display:flex; gap:13px; align-items:flex-start;
+}
+ul.list li::before{
+  content:""; width:8px; height:8px; border-radius:99px; background:var(--clay);
+  margin-top:9px; flex:none;
+}
+ul.list.sage li::before{ background:var(--sage) }
+ul.list.dense li{ font-size:20px; gap:11px }
+ul.list.dense li::before{ width:6px; height:6px; margin-top:8px }
+
+.yes,.no{ display:flex; gap:12px; align-items:flex-start; font-size:21px; font-weight:650;
+          line-height:1.5; color:var(--ink-2); }
+.yes i,.no i{ font-style:normal; font-size:21px; font-weight:900; flex:none; line-height:1.45 }
+.yes i{ color:var(--sage) } .no i{ color:var(--clay) }
+
+/* ── 打勾清單（學員實作） ────────────────────────────────────────────── */
+.checks{ display:grid; gap:12px 22px; }
+.check{
+  display:flex; align-items:center; gap:14px; padding:13px 18px;
+  background:var(--white); border:1px solid var(--line); border-radius:14px;
+  font-size:21px; font-weight:700; color:var(--ink-2); box-shadow:var(--shadow-s);
+}
+.check .box{
+  width:24px; height:24px; border-radius:7px; border:2.5px solid var(--clay);
+  flex:none; background:var(--white);
+}
+.check.done .box{ background:var(--clay); position:relative; }
+.check.done .box::after{
+  content:""; position:absolute; left:7px; top:3px; width:6px; height:12px;
+  border:solid #fff; border-width:0 2.5px 2.5px 0; transform:rotate(43deg);
+}
+
+/* ── 流程 / 漏斗 ─────────────────────────────────────────────────────── */
+.funnel{ display:flex; flex-direction:column; align-items:center; gap:9px; }
+.funnel .f{
+  display:grid; place-items:center; height:54px; border-radius:13px; color:#fff;
+  font-size:22px; font-weight:800; letter-spacing:.02em; box-shadow:var(--shadow-s);
+}
+.chain{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.chain .node{
+  padding:12px 20px; border-radius:99px; background:var(--white);
+  border:1px solid var(--line); font-size:21px; font-weight:800; color:var(--ink-2);
+  box-shadow:var(--shadow-s); white-space:nowrap;
+}
+.chain .node.on{ background:var(--clay); color:#fff; border-color:transparent; }
+.chain .arw{ color:var(--clay); font-size:16px; font-weight:900; opacity:.55 }
+.steps{ display:flex; gap:0; align-items:stretch; }
+.steps .st{ flex:1; padding:0 20px; position:relative; }
+.steps .st + .st{ border-left:1px dashed var(--line); }
+.steps .st .n{ font-size:20px; font-weight:900; letter-spacing:.08em; color:var(--clay); margin-bottom:9px }
+.steps .st .t{ font-size:22px; font-weight:800; line-height:1.35; margin-bottom:6px }
+.steps .st .d{ font-size:20px; color:var(--ink-3); line-height:1.55; font-weight:500 }
+
+/* ── 比較表 ──────────────────────────────────────────────────────────── */
+.tbl{ width:100%; border-collapse:separate; border-spacing:0; font-size:21px; }
+.tbl th,.tbl td{ padding:15px 20px; text-align:left; }
+.tbl thead th{
+  font-size:20px; letter-spacing:.06em; font-weight:900; color:var(--muted);
+  border-bottom:1px solid var(--line); padding-bottom:11px;
+}
+.tbl tbody td{ border-bottom:1px solid var(--line-2); color:var(--ink-2); font-weight:600; }
+.tbl tbody tr:last-child td{ border-bottom:none }
+.tbl .lead-col{ font-weight:800; color:var(--ink) }
+
+/* ── 時間表 ──────────────────────────────────────────────────────────── */
+.agenda{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px 40px; }
+.ag{ display:flex; gap:13px; align-items:center; padding:5px 11px; border-radius:10px; }
+.ag .t{ font-size:20px; font-weight:800; color:var(--clay); font-variant-numeric:tabular-nums;
+        letter-spacing:.01em; width:104px; flex:none }
+.ag .n{ font-size:20px; font-weight:650; color:var(--ink-2); line-height:1.4 }
+.ag.rest{ background:var(--paper-2) } .ag.rest .t,.ag.rest .n{ color:var(--muted) }
+
+/* ── 手機模擬 ────────────────────────────────────────────────────────── */
+.phone{
+  text-align:left;
+  width:272px; height:552px; border-radius:40px; background:#17110d; padding:9px;
+  box-shadow:var(--shadow-l), 0 0 0 1px rgba(255,255,255,.06) inset; flex:none;
+  position:relative;
+}
+.phone.sm{ width:228px; height:462px; border-radius:34px; padding:8px }
+.phone.xs{ width:196px; height:392px; border-radius:30px; padding:7px }
+.phone .scr{
+  width:100%; height:100%; background:#fff; border-radius:32px; overflow:hidden;
+  display:flex; flex-direction:column; position:relative;
+}
+.phone.sm .scr{ border-radius:27px }
+.phone.xs .scr{ border-radius:24px }
+.phone .notch{
+  position:absolute; top:9px; left:50%; transform:translateX(-50%);
+  width:86px; height:20px; background:#17110d; border-radius:0 0 13px 13px; z-index:4;
+}
+.phone .stat{
+  height:24px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 15px; font-size:10.5px; font-weight:800; color:#1b1b1b; flex:none;
+}
+.phone .stat .r{ display:flex; gap:4px; align-items:center; opacity:.75 }
+.app-bar{
+  height:42px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 13px; border-bottom:1px solid #eceef1; flex:none;
+}
+.app-bar .ttl{ font-size:16px; font-weight:900; letter-spacing:-.01em }
+.app-bar .ic{ display:flex; gap:11px; color:#3d3d3d }
+.app-body{ flex:1; overflow:hidden; background:#fff }
+.app-body.grey{ background:#f2f3f5 }
+
+/* Facebook 版 */
+.fb-bar{ background:#fff; border-bottom:1px solid #e6e8ec }
+.fb-bar .ttl{ color:var(--fb); font-size:17px; letter-spacing:-.02em }
+.fb-post{ padding:12px 13px; background:#fff; border-bottom:8px solid #f0f2f5 }
+.fb-head{ display:flex; gap:9px; align-items:center; margin-bottom:9px }
+.fb-name{ font-size:14px; font-weight:800; line-height:1.25 }
+.fb-meta{ font-size:11.5px; color:#8a8d91; font-weight:600 }
+.fb-text{ font-size:13.5px; line-height:1.62; color:#1c1e21; font-weight:500 }
+.fb-acts{ display:flex; justify-content:space-around; padding:8px 0 2px; margin-top:9px;
+          border-top:1px solid #eceef1; font-size:12px; color:#65676b; font-weight:750 }
+
+/* Instagram 版 */
+.ig-bar{ border-bottom:1px solid #efefef }
+.ig-bar .ttl{ font-size:15px }
+.ig-prof{ padding:13px 13px 0 }
+.ig-top{ display:flex; gap:16px; align-items:center; margin-bottom:11px }
+.ig-stats{ display:flex; gap:17px; flex:1; justify-content:space-around }
+.ig-stats div{ text-align:center }
+.ig-stats b{ display:block; font-size:14px; font-weight:900 }
+.ig-stats span{ font-size:11px; color:#737373; font-weight:650 }
+.ig-bio{ font-size:12.5px; line-height:1.55; font-weight:600; color:#1a1a1a }
+.ig-bio .lk{ color:#00376b; font-weight:700 }
+.ig-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:2px; margin-top:12px }
+.ig-cell{ aspect-ratio:1; position:relative; overflow:hidden }
+.ring{
+  width:54px; height:54px; border-radius:99px; padding:2.5px; flex:none;
+  background:conic-gradient(from 200deg,var(--ig-a),var(--ig-b),var(--ig-c),var(--ig-a));
+}
+.ring > *{ width:100%; height:100%; border-radius:99px; border:2px solid #fff; overflow:hidden;
+           display:block; background:#fff }
+.ring.sm{ width:40px; height:40px; padding:2px }
+
+/* LINE 版 */
+.ln-bar{ background:var(--ln); border-bottom:none }
+.ln-bar .ttl{ color:#fff }
+.ln-bar .ic{ color:rgba(255,255,255,.9) }
+.ln-body{ background:#8fb6d8; padding:12px 11px; height:100%; }
+.ln-day{ text-align:center; margin-bottom:12px }
+.ln-day span{ background:rgba(0,0,0,.16); color:#fff; font-size:9.5px; font-weight:750;
+              padding:3px 11px; border-radius:99px }
+.bub{
+  max-width:82%; padding:10px 13px; border-radius:16px; font-size:13.5px; line-height:1.55;
+  font-weight:600; margin-bottom:9px; box-shadow:0 1px 2px rgba(0,0,0,.12);
+}
+.bub.in{ background:#fff; color:#1a1a1a; border-top-left-radius:4px }
+.bub.out{ background:#8de055; color:#12240a; margin-left:auto; border-top-right-radius:4px }
+
+/* 貼文縮圖（純 CSS 色塊 + SVG 圖） */
+.thumb{ width:100%; height:100%; display:grid; place-items:center; overflow:hidden }
+.tr-1{ background:linear-gradient(145deg,#f6d9c5,#eab08c) }
+.tr-2{ background:linear-gradient(145deg,#e7e2d2,#cfc7ab) }
+.tr-3{ background:linear-gradient(145deg,#f3ddd6,#dfa9a0) }
+.tr-4{ background:linear-gradient(145deg,#dfe7dc,#b3c6b2) }
+.tr-5{ background:linear-gradient(145deg,#f7e8cc,#e6c489) }
+.tr-6{ background:linear-gradient(145deg,#efe0ea,#cdaec2) }
+
+/* ── 貼文卡（示範文案） ──────────────────────────────────────────────── */
+.post{
+  background:#fff; border:1px solid var(--line); border-radius:18px; overflow:hidden;
+  box-shadow:var(--shadow-m);
+}
+.post .ph{ display:flex; align-items:center; gap:10px; padding:13px 15px; border-bottom:1px solid var(--line-2) }
+.post .ph .av{ width:32px; height:32px; border-radius:99px; flex:none; overflow:hidden }
+.post .ph .nm{ font-size:17px; font-weight:850 }
+.post .ph .mt{ font-size:14px; color:var(--muted); font-weight:650 }
+.post .pb{ padding:14px 16px; font-size:18px; line-height:1.72; color:var(--ink-2); font-weight:550 }
+.post .pb .cnt{ float:right; font-size:14px; color:var(--muted); font-weight:800 }
+.post .badge{
+  display:inline-flex; align-items:center; gap:6px; font-size:15px; font-weight:900;
+  letter-spacing:.06em; padding:5px 11px; border-radius:99px;
+}
+.b-fb{ background:#e7f0fe; color:var(--fb) }
+.b-ig{ background:#fdeaf1; color:var(--ig-b) }
+.b-ln{ background:#e2f8ea; color:#03934a }
+
+/* ── Hashtag ─────────────────────────────────────────────────────────── */
+.tags{ display:flex; flex-wrap:wrap; gap:10px }
+.tag{
+  padding:9px 16px; border-radius:99px; font-size:20px; font-weight:750;
+  background:var(--white); border:1px solid var(--line); color:var(--ink-2);
+  box-shadow:var(--shadow-s);
+}
+.tag.on{ background:var(--clay); color:#fff; border-color:transparent }
+.tag.g{ background:var(--sage-soft); border-color:transparent; color:#3f5744 }
+.tag.y{ background:var(--gold-soft); border-color:transparent; color:#8a5f1c }
+.tag.p{ background:var(--plum-soft); border-color:transparent; color:#6d4356 }
+.tag.dim{ background:transparent; border-style:dashed; color:var(--muted); box-shadow:none }
+.tag.sm{ font-size:20px; padding:7px 14px }
+
+/* ── 螢光標記／提示條 ────────────────────────────────────────────────── */
+.callout{
+  display:flex; gap:16px; align-items:center; padding:20px 26px; border-radius:18px;
+  background:var(--clay-tint); border-left:5px solid var(--clay);
+}
+.callout .txt{ font-size:21px; font-weight:750; line-height:1.55; color:var(--ink-2) }
+.callout.sage{ background:var(--sage-soft); border-left-color:var(--sage) }
+.callout.gold{ background:var(--gold-soft); border-left-color:var(--gold) }
+
+.pill{
+  display:inline-flex; align-items:center; gap:8px; padding:8px 15px; border-radius:99px;
+  font-size:20px; font-weight:800; letter-spacing:.02em;
+  background:var(--white); border:1px solid var(--line); color:var(--ink-3);
+  box-shadow:var(--shadow-s);
+}
+.pill.fb{ color:var(--fb); background:#eef4ff; border-color:transparent }
+.pill.ig{ color:var(--ig-b); background:#fdeef4; border-color:transparent }
+.pill.ln{ color:#03934a; background:#e6f8ee; border-color:transparent }
+
+/* ── 章節封面 ────────────────────────────────────────────────────────── */
+.slide.divider{
+  background:linear-gradient(135deg,#2a1e18 0%,#3d2a20 48%,#4a3123 100%);
+  color:#fff; padding:0;
+}
+.slide.divider .wrap{
+  position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center;
+  padding:0 96px; z-index:2;
+}
+.slide.divider .pno{
+  font-size:150px; font-weight:900; line-height:1; letter-spacing:-.05em;
+  color:rgba(255,255,255,.11); margin:0 0 6px;
+}
+.slide.divider h2{ font-size:56px; font-weight:850; letter-spacing:-.03em; margin:0 0 18px; color:#fff }
+.slide.divider .d-sub{ font-size:23px; color:rgba(255,255,255,.72); font-weight:550; line-height:1.6; max-width:660px }
+.slide.divider .d-time{
+  display:inline-flex; align-items:center; gap:10px; margin-bottom:26px;
+  font-size:20px; font-weight:800; letter-spacing:.08em; color:var(--gold);
+}
+.slide.divider .d-art{
+  position:absolute; right:74px; bottom:0; top:0; width:420px;
+  display:grid; place-items:center; opacity:.95; z-index:1;
+}
+.slide.divider::after{
+  content:""; position:absolute; inset:0; z-index:0;
+  background:radial-gradient(600px 400px at 88% 50%, rgba(217,154,78,.2), transparent 65%);
+}
+
+/* ── 封面／結尾 ──────────────────────────────────────────────────────── */
+.slide.cover{ padding:0 }
+.cover-wrap{ position:absolute; inset:0; display:grid; grid-template-columns:1.02fr .98fr; z-index:2 }
+.cover-l{ display:flex; flex-direction:column; justify-content:center; padding:0 0 0 88px }
+.cover-r{ position:relative; display:grid; place-items:center }
+.cover .kicker{
+  display:inline-flex; align-items:center; gap:11px; align-self:flex-start;
+  font-size:20px; font-weight:850; letter-spacing:.1em; color:var(--clay);
+  background:var(--clay-tint); padding:9px 18px; border-radius:99px; margin-bottom:26px;
+}
+.cover h1{ font-size:74px; line-height:1.1; letter-spacing:-.04em; font-weight:900; margin:0 0 22px }
+.cover .cs{ font-size:26px; line-height:1.55; color:var(--ink-2); font-weight:550; max-width:460px; margin:0 0 34px }
+.cover .meta{ display:flex; gap:14px; flex-wrap:wrap }
+
+/* ── 觀察／實作 標籤 ─────────────────────────────────────────────────── */
+.act-tag{
+  position:absolute; top:24px; right:84px; z-index:8;
+  display:inline-flex; align-items:center; gap:9px; padding:9px 17px; border-radius:99px;
+  font-size:20px; font-weight:900; letter-spacing:.06em;
+  background:var(--ink); color:var(--paper); box-shadow:var(--shadow-m);
+}
+.act-tag.ask{ background:var(--sage) } .act-tag.do{ background:var(--clay) }
+
+/* ── 圖片插槽（現場放真實截圖用） ────────────────────────────────────── */
+.slot{
+  border:2px dashed var(--clay); border-radius:18px; background:var(--clay-tint);
+  display:grid; place-items:center; text-align:center; padding:22px; gap:8px;
+}
+.slot .st{ font-size:20px; font-weight:850; color:var(--clay-2) }
+.slot .sd{ font-size:17px; color:var(--ink-3); font-weight:600; line-height:1.5 }
+
+/* ── 圖說 ────────────────────────────────────────────────────────────── */
+.cap-t{ font-size:20px; font-weight:800; letter-spacing:.1em; color:var(--muted);
+        text-align:center; margin-top:14px }
+
+/* ── 進場動畫（逐項浮現） ────────────────────────────────────────────── */
+.slide [data-r]{
+  opacity:0; transform:translateY(16px); filter:blur(5px);
+  animation:rise .78s var(--ease) forwards;
+  animation-delay:calc(var(--i,0) * 68ms + 110ms);
+}
+@keyframes rise{ to{ opacity:1; transform:none; filter:none } }
+
+/* View Transition：緩慢的溶解＋微縮放，避免老套翻頁 */
+::view-transition-group(slide){ animation-duration:.62s }
+::view-transition-old(slide){
+  animation:vt-out .44s var(--ease-2) both; mix-blend-mode:normal;
+}
+::view-transition-new(slide){
+  animation:vt-in .62s var(--ease) both; mix-blend-mode:normal;
+}
+@keyframes vt-out{
+  to{ opacity:0; transform:scale(1.028) translateY(calc(var(--dir,1) * -14px)); filter:blur(9px) }
+}
+@keyframes vt-in{
+  from{ opacity:0; transform:scale(.982) translateY(calc(var(--dir,1) * 20px)); filter:blur(11px) }
+}
+/* 無 View Transition 時的備援 */
+.slide.enter{ animation:soft-in .58s var(--ease) both }
+@keyframes soft-in{ from{ opacity:0; transform:scale(.99) translateY(12px); filter:blur(8px) } }
+
+/* ── 總覽（Overview） ────────────────────────────────────────────────── */
+#ov{
+  position:fixed; inset:0; z-index:40; background:rgba(24,18,14,.94);
+  backdrop-filter:blur(14px); display:none; flex-direction:column; padding:34px 44px 24px;
+}
+#ov.on{ display:flex; animation:ov-in .32s var(--ease-2) both }
+@keyframes ov-in{ from{ opacity:0 } }
+#ov h4{ color:#fff; font-size:19px; font-weight:800; margin:0 0 4px; letter-spacing:-.01em }
+#ov .oh{ display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:20px }
+#ov .oh p{ color:rgba(255,255,255,.5); font-size:13px; margin:0; font-weight:600 }
+#ovg{ flex:1; overflow-y:auto; display:grid; grid-template-columns:repeat(6,1fr); gap:11px;
+      align-content:start; padding-right:6px }
+.ov-i{
+  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px;
+  padding:12px 13px; cursor:pointer; text-align:left; color:#fff; font-family:inherit;
+  transition:background .2s var(--ease-2), transform .2s var(--ease-2), border-color .2s;
+  min-height:80px; display:flex; flex-direction:column; gap:6px;
+}
+.ov-i:hover{ background:rgba(255,255,255,.13); transform:translateY(-2px) }
+.ov-i.cur{ border-color:var(--gold); background:rgba(217,154,78,.18) }
+.ov-i .n{ font-size:10.5px; font-weight:900; color:var(--gold); letter-spacing:.1em }
+.ov-i .t{ font-size:12.5px; font-weight:700; line-height:1.4; color:rgba(255,255,255,.92);
+          display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden }
+.ov-i.div-i{ background:rgba(217,154,78,.16); border-color:rgba(217,154,78,.32) }
+
+/* ── 講師備忘（Notes） ───────────────────────────────────────────────── */
+#notes{
+  position:fixed; left:0; right:0; bottom:0; z-index:30; transform:translateY(101%);
+  transition:transform .46s var(--ease);
+  background:rgba(22,17,13,.97); backdrop-filter:blur(16px); color:#fff;
+  padding:22px 34px 24px; max-height:44vh; overflow-y:auto;
+  box-shadow:0 -20px 60px -20px rgba(0,0,0,.7);
+}
+#notes.on{ transform:translateY(0) }
+#notes .ng{ display:grid; grid-template-columns:1.5fr 1fr 1fr 1fr .9fr .9fr; gap:20px; max-width:1720px; margin:0 auto }
+#notes .nb h5{
+  margin:0 0 9px; font-size:11.5px; letter-spacing:.2em; font-weight:900;
+  display:flex; align-items:center; gap:8px;
+}
+#notes .nb h5 s{ width:7px; height:7px; border-radius:99px; background:currentColor; display:block }
+#notes .nb.say h5{ color:var(--gold) }
+#notes .nb.ask h5{ color:#8fd5a0 }
+#notes .nb.do h5{ color:#f2a184 }
+#notes .nb.diff h5{ color:#9ec6e8 }
+#notes .nb.more h5{ color:#cbb6e0 }
+#notes .nb.less h5{ color:#b9b2a8 }
+#notes .nb p, #notes .nb li{
+  margin:0 0 7px; font-size:14.5px; line-height:1.68; color:rgba(255,255,255,.84); font-weight:500;
+}
+#notes .nb ul{ margin:0; padding-left:17px }
+#notes .nn{ color:rgba(255,255,255,.35); font-size:12px; text-align:right; margin-top:12px; font-weight:600 }
+
+/* ── 說明卡 / Help ───────────────────────────────────────────────────── */
+#help{
+  position:fixed; inset:0; z-index:50; display:none; place-items:center;
+  background:rgba(20,15,12,.86); backdrop-filter:blur(10px);
+}
+#help.on{ display:grid; animation:ov-in .28s var(--ease-2) both }
+#help .hc{
+  background:var(--paper); border-radius:24px; padding:38px 42px; width:min(620px,90vw);
+  box-shadow:var(--shadow-l);
+}
+#help h4{ margin:0 0 6px; font-size:24px; font-weight:850 }
+#help p.hs{ margin:0 0 24px; color:var(--ink-3); font-size:15px; font-weight:600 }
+#help dl{ display:grid; grid-template-columns:auto 1fr; gap:13px 20px; margin:0; align-items:center }
+#help dt{ display:flex; gap:6px }
+#help dd{ margin:0; font-size:15.5px; color:var(--ink-2); font-weight:600 }
+kbd{
+  display:inline-grid; place-items:center; min-width:30px; height:29px; padding:0 9px;
+  background:#fff; border:1px solid var(--line); border-bottom-width:2.5px; border-radius:8px;
+  font-family:inherit; font-size:13px; font-weight:800; color:var(--ink-2);
+}
+
+/* ── 計時器 ──────────────────────────────────────────────────────────── */
+#timer{
+  position:fixed; top:16px; right:18px; z-index:35; display:none; align-items:center; gap:11px;
+  background:rgba(22,17,13,.9); backdrop-filter:blur(8px); color:#fff;
+  padding:9px 15px; border-radius:99px; font-size:14px; font-weight:800;
+  font-variant-numeric:tabular-nums; letter-spacing:.04em; box-shadow:var(--shadow-m);
+}
+#timer.on{ display:flex }
+#timer .tdot{ width:8px; height:8px; border-radius:99px; background:#f2a184 }
+#timer .tdot.run{ background:#8fd5a0; animation:pulse 2s var(--ease-2) infinite }
+@keyframes pulse{ 50%{ opacity:.3 } }
+#timer button{
+  background:rgba(255,255,255,.13); border:none; color:#fff; font-family:inherit;
+  font-size:11.5px; font-weight:800; padding:5px 10px; border-radius:99px; cursor:pointer;
+}
+#timer button:hover{ background:rgba(255,255,255,.24) }
+
+#hint{
+  position:fixed; bottom:18px; left:50%; transform:translateX(-50%); z-index:20;
+  color:rgba(255,255,255,.42); font-size:12.5px; font-weight:650; letter-spacing:.05em;
+  transition:opacity .6s var(--ease-2); pointer-events:none;
+}
+#hint.gone{ opacity:0 }
+
+/* ── 動作偏好 ────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion:reduce){
+  .slide [data-r]{ animation:none; opacity:1; transform:none; filter:none }
+  #stage::before{ animation:none }
+  ::view-transition-old(slide),::view-transition-new(slide){ animation-duration:.18s }
+  .slide.enter{ animation-duration:.18s }
+}
+
+/* ── 列印（輸出 PDF：按 P） ──────────────────────────────────────────── */
+#printroot{ display:none }
+body.printing{ overflow:visible; background:#fff }
+body.printing #printroot{ display:block }
+body.printing #viewport,body.printing #timer,body.printing #hint,
+body.printing #notes,body.printing #ov,body.printing #help,body.printing #bar{ display:none !important }
+
+.stage-print{
+  position:relative; width:1280px; height:720px; background:var(--paper);
+  overflow:hidden; page-break-after:always; break-after:page;
+}
+.stage-print .slide{ position:absolute; inset:0; view-transition-name:none; animation:none }
+.stage-print .slide [data-r]{ animation:none; opacity:1; transform:none; filter:none }
+.print-foot{
+  position:absolute; bottom:22px; left:84px; right:84px; z-index:9;
+  display:flex; justify-content:space-between;
+  font-size:12.5px; color:var(--muted); font-weight:700; letter-spacing:.06em;
+}
+.stage-print:has(.divider) .print-foot,
+.stage-print:has(.divider) .print-foot span{ color:rgba(255,255,255,.5) }
+
+@page{ size:1280px 720px; margin:0 }
+@media print{
+  html,body{ height:auto; overflow:visible; background:#fff }
+  #viewport,#timer,#hint,#notes,#ov,#help,#bar{ display:none !important }
+  #printroot{ display:block }
+  .stage-print{ box-shadow:none; border-radius:0 }
+}
+
+/* =========================================================================
+   手機攝影課專用元件
+   ========================================================================= */
+
+:root{
+  --slot-line:  #c8b9a6;
+  --slot-bg:    #f2ebe0;
+  --warm:       #c9743f;   /* 溫暖手作 */
+  --clean:      #4a7fa5;   /* 乾淨專業 */
+  --fresh:      #6a9160;   /* 新鮮現做 */
+  --lux:        #7b5a86;   /* 高級精緻 */
+}
+
+/* ── 可替換照片版位 ────────────────────────────────────────────────
+   講師之後換成實拍照時，把 .slot-ph 整塊換成 <img> 即可。 */
+.slot-ph{
+  position:relative; border-radius:var(--r-m);
+  background:
+    repeating-linear-gradient(135deg,
+      rgba(200,185,166,.16) 0 10px, rgba(200,185,166,0) 10px 20px),
+    var(--slot-bg);
+  border:2px dashed var(--slot-line);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:7px; text-align:center; padding:14px; overflow:hidden;
+}
+.slot-ph .sp-ic{ opacity:.5; }
+.slot-ph .sp-t{ font-size:21px; font-weight:800; color:var(--ink-2); line-height:1.3; }
+.slot-ph .sp-s{ font-size:19px; font-weight:700; color:var(--ink-3); line-height:1.35; }
+.slot-ph .sp-tag{
+  position:absolute; left:10px; top:10px; font-size:17px; font-weight:800;
+  color:#fff; background:var(--muted); padding:3px 10px; border-radius:20px;
+  letter-spacing:.02em;
+}
+
+/* ── 模擬用相框：真的做出差異，不是標籤 ─────────────────────────── */
+.fr{ position:relative; border-radius:var(--r-m); overflow:hidden;
+     background:var(--paper-2); box-shadow:var(--shadow-s); }
+.fr > .fr-in{ position:absolute; inset:0; }
+.fr .fr-cap{
+  position:absolute; left:0; right:0; bottom:0; padding:8px 12px;
+  font-size:20px; font-weight:800; color:#fff; text-align:center;
+  background:linear-gradient(to top, rgba(24,16,10,.72), rgba(24,16,10,0));
+}
+.fr.bad{ outline:3px solid #d63b2f; outline-offset:-3px; }
+.fr.good{ outline:3px solid var(--sage); outline-offset:-3px; }
+.fr .fr-mark{
+  position:absolute; right:9px; top:9px; width:34px; height:34px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; font-weight:900; color:#fff;
+}
+.fr.bad .fr-mark{ background:#d63b2f; }
+.fr.good .fr-mark{ background:var(--sage); }
+
+/* 模擬濾鏡 */
+.sim-blur   > .fr-in{ filter:blur(4.5px); }
+.sim-dark   > .fr-in{ filter:brightness(.52) saturate(.85); }
+.sim-bright > .fr-in{ filter:brightness(1.42) saturate(.72) contrast(.86); }
+.sim-warmcast > .fr-in{ filter:sepia(.42) saturate(1.25) hue-rotate(-12deg); }
+.sim-flat   > .fr-in{ filter:contrast(.82) saturate(.8); }
+.sim-soft   > .fr-in{ filter:contrast(1.06) saturate(1.06); }
+
+/* 光線方向：用漸層與投影方向模擬 */
+.lit{ position:absolute; inset:0; pointer-events:none; }
+.lit-front{ background:radial-gradient(120% 90% at 50% 8%, rgba(255,247,232,.92) 0%, rgba(255,247,232,0) 62%); }
+.lit-side { background:linear-gradient(100deg, rgba(255,247,232,.95) 0%, rgba(255,247,232,.15) 42%, rgba(52,34,22,.30) 100%); }
+.lit-back { background:linear-gradient(0deg, rgba(38,25,16,.55) 0%, rgba(38,25,16,.10) 45%, rgba(255,250,238,.95) 100%); }
+.lit-harsh{ background:linear-gradient(112deg, rgba(255,255,255,1) 0%, rgba(255,255,255,.5) 26%, rgba(30,18,10,.55) 58%, rgba(30,18,10,.72) 100%); }
+
+/* ── 感覺配方（貫穿全課的主軸） ──────────────────────────────────── */
+.feel-strip{
+  display:flex; gap:10px; align-items:stretch;
+  background:var(--paper-2); border:1px solid var(--line);
+  border-radius:var(--r-m); padding:11px 14px;
+}
+.feel-strip .fs-lab{
+  display:flex; align-items:center; gap:8px; padding-right:13px;
+  border-right:1px solid var(--line); font-size:20px; font-weight:900; color:var(--ink);
+  white-space:nowrap;
+}
+.feel-strip .fs-items{ display:flex; gap:16px; flex:1; align-items:center; flex-wrap:wrap; }
+.feel-strip .fs-i{ font-size:20px; font-weight:700; color:var(--ink-2); white-space:nowrap; }
+.feel-strip .fs-i b{ font-weight:900; }
+.f-warm  b, .f-warm  .fd{ color:var(--warm); }
+.f-clean b, .f-clean .fd{ color:var(--clean); }
+.f-fresh b, .f-fresh .fd{ color:var(--fresh); }
+.f-lux   b, .f-lux   .fd{ color:var(--lux); }
+
+.feel-card{
+  border-radius:var(--r-l); padding:15px 15px 17px; background:var(--white);
+  border:1px solid var(--line); box-shadow:var(--shadow-s);
+  display:flex; flex-direction:column; gap:7px;
+}
+.feel-card .fr{ border-radius:12px; margin-bottom:3px; }
+.feel-card .fc-top{ height:5px; border-radius:20px; margin-bottom:3px; }
+.feel-card h5{ margin:0; font-size:24px; font-weight:900; letter-spacing:-.01em; }
+.feel-card .fc-r{ display:flex; gap:7px; font-size:19px; line-height:1.3; }
+.feel-card .fc-k{ font-weight:800; color:var(--ink-3); min-width:44px; }
+.feel-card .fc-v{ font-weight:700; color:var(--ink-2); }
+
+/* ── OX 判讀（借教材 CH03 的格式） ───────────────────────────────── */
+.ox-q{
+  display:flex; gap:14px; align-items:center;
+  border:2px solid var(--line); border-radius:var(--r-l);
+  padding:13px 20px; background:var(--white);
+}
+.ox-q .oq-n{
+  font-size:34px; font-weight:900; color:var(--clean); line-height:1;
+  letter-spacing:-.03em;
+}
+.ox-q .oq-t{ font-size:26px; font-weight:900; color:var(--ink); }
+.ox-q .oq-tip{ font-size:19px; font-weight:700; color:var(--ink-3); }
+
+/* ── 手機修圖介面示意 ─────────────────────────────────────────── */
+.edit-bar{
+  display:flex; gap:6px; align-items:center; justify-content:center;
+  background:#1b1512; border-radius:0 0 22px 22px; padding:9px 8px;
+}
+.edit-bar .eb-i{
+  width:34px; height:34px; border-radius:9px; background:rgba(255,255,255,.12);
+  display:flex; align-items:center; justify-content:center;
+  font-size:17px; font-weight:800; color:rgba(255,255,255,.72);
+}
+.edit-bar .eb-i.on{ background:var(--gold); color:#241c17; }
+
+.slider{ display:flex; align-items:center; gap:10px; }
+.slider .sl-t{ font-size:20px; font-weight:800; color:var(--ink-2); min-width:74px; }
+.slider .sl-bar{ flex:1; height:7px; border-radius:20px; background:var(--paper-3); position:relative; }
+.slider .sl-fill{ position:absolute; left:0; top:0; bottom:0; border-radius:20px; background:var(--clay); }
+.slider .sl-dot{
+  position:absolute; top:50%; width:19px; height:19px; border-radius:50%;
+  background:#fff; border:3px solid var(--clay); transform:translate(-50%,-50%);
+  box-shadow:var(--shadow-s);
+}
+.slider .sl-v{ font-size:20px; font-weight:900; color:var(--clay); min-width:46px; text-align:right; }
+
+/* ── 指令卡（AI 提示詞） ─────────────────────────────────────────── */
+.prompt{
+  border-radius:var(--r-m); padding:15px 18px; font-size:21px; line-height:1.55;
+  font-weight:700; border:1px solid var(--line); background:var(--white);
+}
+.prompt.bad{ border-color:#e6b3ad; background:#fdf1ef; }
+.prompt.good{ border-color:#b9cdb8; background:#f0f6ee; }
+.prompt .p-lab{
+  display:inline-block; font-size:18px; font-weight:900; color:#fff;
+  padding:2px 11px; border-radius:20px; margin-bottom:8px; letter-spacing:.02em;
+}
+.prompt.bad .p-lab{ background:#c0392b; }
+.prompt.good .p-lab{ background:var(--sage); }
+.prompt em{ font-style:normal; background:var(--gold-soft); border-radius:4px;
+            padding:1px 4px; font-weight:900; }
+
+/* 四要素標記 */
+.pe{ display:inline-block; font-size:17px; font-weight:900; color:#fff;
+     padding:2px 9px; border-radius:6px; margin-right:6px; }
+.pe-1{ background:var(--clay); } .pe-2{ background:var(--sage); }
+.pe-3{ background:var(--gold); color:var(--ink); } .pe-4{ background:var(--plum); }
+
+/* ── 紅線警示 ────────────────────────────────────────────────────── */
+.redline{
+  border-radius:var(--r-l); border:2px solid #e0b4ae; background:#fdf3f1;
+  padding:17px 20px; display:flex; gap:14px; align-items:flex-start;
+}
+.redline .rl-n{
+  width:38px; height:38px; border-radius:50%; background:#c0392b; color:#fff;
+  font-size:22px; font-weight:900; display:flex; align-items:center;
+  justify-content:center; flex:0 0 auto;
+}
+.redline h5{ margin:0 0 5px; font-size:24px; font-weight:900; color:#a2301f; }
+.redline p{ margin:0; font-size:20px; font-weight:700; color:var(--ink-2); line-height:1.45; }
+
+.tbl.compact th,.tbl.compact td{ padding:9px 14px; }
+</style>
+</head>
+<body>
+
+<div id="viewport">
+  <div id="stage">
+    <div id="grain"></div>
+    <div id="chrome">
+      <div class="ch-foot">
+        <span class="ch-brand"><b>手機拍攝商品與影像編修基礎（2）</b></span>
+      </div>
+    </div>
+    <div id="bar"></div>
+  </div>
+</div>
+
+<div id="timer">
+  <span class="tdot" id="tdot"></span>
+  <span id="ttxt">00:00:00</span>
+  <button id="tbtn">暫停</button>
+  <button id="trst">歸零</button>
+</div>
+
+<div id="notes"></div>
+
+<div id="ov">
+  <div class="oh">
+    <div><h4>投影片總覽</h4><p>點選任一頁直接跳過去　·　按 O 或 Esc 關閉</p></div>
+    <p>← → 翻頁　·　S 講師備忘　·　T 計時器　·　P 列印　·　? 說明</p>
+  </div>
+  <div id="ovg"></div>
+</div>
+
+<div id="help">
+  <div class="hc">
+    <h4>操作說明</h4>
+    <p class="hs">這份簡報可以完全離線使用，不需要網路。</p>
+    <dl>
+      <dt><kbd>←</kbd><kbd>→</kbd></dt><dd>上一頁／下一頁（也可以點畫面左右兩側、或左右滑動）</dd>
+      <dt><kbd>O</kbd></dt><dd>投影片總覽，點選直接跳頁</dd>
+      <dt><kbd>S</kbd></dt><dd>講師備忘：說明重點、互動提問、學員實作</dd>
+      <dt><kbd>T</kbd></dt><dd>課堂計時器（可暫停、歸零）</dd>
+      <dt><kbd>F</kbd></dt><dd>全螢幕</dd>
+      <dt><kbd>P</kbd></dt><dd>列印／輸出 PDF（請選「橫向」並勾選背景圖形）</dd>
+      <dt><kbd>數字</kbd><kbd>↵</kbd></dt><dd>輸入頁碼後按 Enter 直接跳頁</dd>
+      <dt><kbd>Esc</kbd></dt><dd>關閉目前開啟的面板</dd>
+    </dl>
+  </div>
+</div>
+
+<div id="hint">← → 翻頁　·　S 講師備忘　·　O 總覽　·　? 操作說明</div>
+
+<script>/* =========================================================================
+   art.js — 手機拍攝商品課　插畫與模擬元件庫
+   全部內嵌 SVG／CSS，不連外。
+   核心是 ART.scene()：同一件商品，換光線／背景／角度／構圖，畫面真的會變。
+   ========================================================================= */
+const C = {
+  paper:'#fbf7f1', paper2:'#f4ece1', paper3:'#ece0d1', white:'#ffffff',
+  ink:'#241c17', ink2:'#4a3c33', ink3:'#7a6a5d', muted:'#9c8b7c',
+  clay:'#c05f3c', clayD:'#a94e2e', claySoft:'#f5ddd1', clayTint:'#fbeee6',
+  sage:'#5f7a63', sageSoft:'#dfe8dc', gold:'#d99a4e', goldSoft:'#f8e6c9',
+  plum:'#8a5a6d', plumSoft:'#f0dfe4', red:'#d63b2f',
+  warm:'#c9743f', clean:'#4a7fa5', fresh:'#6a9160', lux:'#7b5a86'
+};
+
+const ART = {};
+
+/* ── 商品：果醬罐，三種視角 ──────────────────────────────────────── */
+
+/* 側面（平拍） */
+ART.jarSide = (s, body = C.gold, lid = C.clay) => `
+<svg width="${s}" height="${s}" viewBox="0 0 100 100" fill="none">
+  <rect x="31" y="11" width="38" height="10" rx="3.5" fill="${lid}"/>
+  <rect x="34.5" y="7.5" width="31" height="5" rx="2.5" fill="${lid}" opacity=".72"/>
+  <path d="M33 21h34v56a8 8 0 0 1-8 8H41a8 8 0 0 1-8-8V21Z"
+        fill="#fff" fill-opacity=".93" stroke="${lid}" stroke-width="2.4"/>
+  <path d="M36 46h28v31a5 5 0 0 1-5 5H41a5 5 0 0 1-5-5V46Z" fill="${body}"/>
+  <path d="M36 46h28v5H36z" fill="${body}" opacity=".5"/>
+  <circle cx="45" cy="33" r="3.4" fill="${lid}" opacity=".8"/>
+  <circle cx="57" cy="28" r="2.4" fill="${lid}" opacity=".62"/>
+  <circle cx="53" cy="38" r="2" fill="${lid}" opacity=".55"/>
+  <rect x="39" y="55" width="22" height="12" rx="2.5" fill="#fff" opacity=".9"/>
+</svg>`;
+
+/* 45 度（略帶透視，看得到罐口與側面） */
+ART.jar45 = (s, body = C.gold, lid = C.clay) => `
+<svg width="${s}" height="${s}" viewBox="0 0 100 100" fill="none">
+  <ellipse cx="50" cy="19" rx="19" ry="7" fill="${lid}"/>
+  <ellipse cx="50" cy="16.5" rx="19" ry="7" fill="${lid}" opacity=".72"/>
+  <path d="M31 19v6a8 8 0 0 0 8 8h22a8 8 0 0 0 8-8v-6" fill="${lid}"/>
+  <path d="M33 27c0 4 7.6 7 17 7s17-3 17-7v50a8 8 0 0 1-8 8H41a8 8 0 0 1-8-8V27Z"
+        fill="#fff" fill-opacity=".93" stroke="${lid}" stroke-width="2.4"/>
+  <path d="M36 48c0 3 6.3 5.4 14 5.4S64 51 64 48v29a5 5 0 0 1-5 5H41a5 5 0 0 1-5-5V48Z" fill="${body}"/>
+  <ellipse cx="50" cy="48" rx="14" ry="5" fill="${body}" opacity=".55"/>
+  <circle cx="44" cy="38" r="3.2" fill="${lid}" opacity=".8"/>
+  <circle cx="57" cy="41" r="2.3" fill="${lid}" opacity=".6"/>
+  <rect x="39" y="58" width="22" height="12" rx="2.5" fill="#fff" opacity=".9"/>
+</svg>`;
+
+/* 俯拍（正上方，看得到蓋子圓面） */
+ART.jarTop = (s, body = C.gold, lid = C.clay) => `
+<svg width="${s}" height="${s}" viewBox="0 0 100 100" fill="none">
+  <circle cx="50" cy="50" r="34" fill="#fff" fill-opacity=".9" stroke="${lid}" stroke-width="2"/>
+  <circle cx="50" cy="50" r="28" fill="${lid}"/>
+  <circle cx="50" cy="50" r="23" fill="${lid}" opacity=".7"/>
+  <circle cx="50" cy="50" r="15" fill="${body}" opacity=".9"/>
+  ${Array.from({length:16},(_,i)=>{
+    const a=i*22.5*Math.PI/180, r1=24, r2=28;
+    return `<line x1="${50+r1*Math.cos(a)}" y1="${50+r1*Math.sin(a)}"
+                  x2="${50+r2*Math.cos(a)}" y2="${50+r2*Math.sin(a)}"
+                  stroke="#fff" stroke-width="1.6" opacity=".35"/>`;}).join('')}
+</svg>`;
+
+/* ── 配角小物（做雜亂背景與情境用） ─────────────────────────────── */
+ART.berry = (s, c = '#c0392b') => `
+<svg width="${s}" height="${s}" viewBox="0 0 100 100" fill="none">
+  <path d="M50 28c15 0 26 11 26 25 0 16-13 29-26 33-13-4-26-17-26-33 0-14 11-25 26-25Z" fill="${c}"/>
+  <path d="M50 28c-6-8-13-10-21-10 2 8 8 13 14 15" fill="${C.sage}"/>
+  <path d="M50 28c6-8 13-10 21-10-2 8-8 13-14 15" fill="${C.sage}" opacity=".85"/>
+</svg>`;
+
+ART.spoon = (s, c = '#b9a894') => `
+<svg width="${s}" height="${s}" viewBox="0 0 100 100" fill="none">
+  <ellipse cx="30" cy="28" rx="15" ry="19" fill="${c}"/>
+  <rect x="26" y="44" width="8" height="46" rx="4" fill="${c}"/>
+</svg>`;
+
+ART.cup = (s, c = '#cfc3b2') => `
+<svg width="${s}" height="${s}" viewBox="0 0 100 100" fill="none">
+  <path d="M24 34h44v34a18 18 0 0 1-18 18H42a18 18 0 0 1-18-18V34Z" fill="${c}"/>
+  <path d="M68 44h7a10 10 0 0 1 0 20h-7" stroke="${c}" stroke-width="6" fill="none"/>
+  <ellipse cx="46" cy="34" rx="22" ry="6" fill="#fff" opacity=".55"/>
+</svg>`;
+
+ART.keys = (s, c = '#9aa0a6') => `
+<svg width="${s}" height="${s}" viewBox="0 0 100 100" fill="none">
+  <circle cx="32" cy="34" r="15" stroke="${c}" stroke-width="8" fill="none"/>
+  <rect x="42" y="42" width="42" height="8" rx="4" fill="${c}"/>
+  <rect x="68" y="50" width="8" height="12" rx="3" fill="${c}"/>
+</svg>`;
+
+ART.paperSheet = (s, c = '#ffffff') => `
+<svg width="${s}" height="${s}" viewBox="0 0 100 100" fill="none">
+  <path d="M14 16h72v68H14z" fill="${c}" stroke="#d9cebc" stroke-width="2"/>
+  <path d="M14 16h72v68" stroke="#fff" stroke-width="4" opacity=".7"/>
+</svg>`;
+
+ART.leaf = (s, c = C.sage, o = 1) => `
+<svg width="${s}" height="${s}" viewBox="0 0 100 100" fill="none" opacity="${o}">
+  <path d="M84 16C48 16 20 38 20 68c0 6 1 11 3 16 22-2 40-11 50-25 9-13 11-28 11-43Z" fill="${c}"/>
+  <path d="M78 22C56 34 38 52 27 80" stroke="#fff" stroke-width="2.6" opacity=".5"/>
+</svg>`;
+
+/* ── 通用圖示 ────────────────────────────────────────────────────── */
+const IC = {
+  sun:'M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-13a1 1 0 0 1-1-1V2a1 1 0 0 1 2 0v1a1 1 0 0 1-1 1Zm0 18a1 1 0 0 1-1-1v-1a1 1 0 0 1 2 0v1a1 1 0 0 1-1 1ZM4 13H3a1 1 0 0 1 0-2h1a1 1 0 0 1 0 2Zm17 0h-1a1 1 0 0 1 0-2h1a1 1 0 0 1 0 2ZM6.3 7.7 5.6 7a1 1 0 0 1 1.4-1.4l.7.7a1 1 0 0 1-1.4 1.4Zm11.4 11.4-.7-.7a1 1 0 0 1 1.4-1.4l.7.7a1 1 0 0 1-1.4 1.4Zm0-11.4a1 1 0 0 1 0-1.4l.7-.7A1 1 0 0 1 19.8 7l-.7.7a1 1 0 0 1-1.4 0ZM6.3 19.1a1 1 0 0 1-1.4-1.4l.7-.7A1 1 0 0 1 7 18.4l-.7.7Z',
+  win:'M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Zm7 2H5v6h6V5Zm2 0v6h6V5h-6Zm-2 8H5v6h6v-6Zm2 0v6h6v-6h-6Z',
+  cam:'M9 4h6l1.5 2H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3.5L9 4Zm3 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z',
+  hand:'M8 12V5a2 2 0 1 1 4 0v6h1V3a2 2 0 1 1 4 0v8h1V6a2 2 0 1 1 4 0v10a6 6 0 0 1-6 6h-3a6 6 0 0 1-6-6v-4a2 2 0 1 1 4 0Z',
+  grid:'M3 3h18v18H3V3Zm2 6h4V5H5v4Zm6 0h2V5h-2v4Zm4 0h4V5h-4v4ZM5 15h4v-4H5v4Zm6 0h2v-4h-2v4Zm4 0h4v-4h-4v4ZM5 19h4v-2H5v2Zm6 0h2v-2h-2v2Zm4 0h4v-2h-4v2Z',
+  crop:'M7 2v3H2v2h5v10h10v5h2v-5h3v-2h-3V5H7V2Zm10 5v10H9V7h8Z',
+  wand:'M14 2l1.5 3.5L19 7l-3.5 1.5L14 12l-1.5-3.5L9 7l3.5-1.5L14 2ZM6 12l1 2.2L9 15l-2 .8L6 18l-1-2.2L3 15l2-.8L6 12Zm12.5 1.5 1 2.3 2.3 1-2.3 1-1 2.3-1-2.3-2.3-1 2.3-1 1-2.3ZM2 21 12.5 10.5l1 1L3 22l-1-1Z',
+  eye:'M12 5c5 0 9 4.5 9 7s-4 7-9 7-9-4.5-9-7 4-7 9-7Zm0 2c-3.5 0-6.4 3-6.9 5 .5 2 3.4 5 6.9 5s6.4-3 6.9-5C18.4 10 15.5 7 12 7Zm0 1.8a3.2 3.2 0 1 1 0 6.4 3.2 3.2 0 0 1 0-6.4Z',
+  warn:'M12 2 1 21h22L12 2Zm0 5 7.5 12.9h-15L12 7Zm-1 4v5h2v-5h-2Zm0 6.5V19h2v-1.5h-2Z',
+  ok:'M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z',
+  no:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 2a8 8 0 0 1 4.9 1.7L5.7 16.9A8 8 0 0 1 12 4Zm0 16a8 8 0 0 1-4.9-1.7L18.3 7.1A8 8 0 0 1 12 20Z',
+  phone:'M7 1h10a2 2 0 0 1 2 2v18a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2Zm0 4v14h10V5H7Zm5 15.2a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Z',
+  bulb:'M12 2a7 7 0 0 1 4 12.7V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.3A7 7 0 0 1 12 2ZM9 19h6v1a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-1Z',
+  paint:'M19 3H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h8v3h-2a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-5a1 1 0 0 0-1-1h6a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Z',
+  cloud:'M6.5 19A4.5 4.5 0 0 1 6 10.1 6 6 0 0 1 17.7 9 4.5 4.5 0 0 1 17 19H6.5Z',
+  clock:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 10.6V6h-2v7.4l5 3 1-1.7-4-2.1Z',
+  tag:'M11 2 2 11l11 11 9-9V2h-11Zm6.5 5.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Z',
+  play:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-2 5.2 7 4.8-7 4.8V7.2Z',
+  film:'M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Zm2 3v2h2V6H5Zm12 0v2h2V6h-2ZM5 11v2h2v-2H5Zm12 0v2h2v-2h-2ZM5 16v2h2v-2H5Zm12 0v2h2v-2h-2ZM9 6v12h6V6H9Z',
+  cut:'M9.6 12 4 5.6l1.5-1.3 5.6 6.4 2-2.3 1.5 1.3-2 2.3 2 2.3-1.5 1.3-2-2.3-5.6 6.4L4 18.4 9.6 12Zm8.9 4a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm0-16a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z',
+  music:'M20 3v12.5a3.5 3.5 0 1 1-2-3.16V7l-8 1.6v9.9a3.5 3.5 0 1 1-2-3.16V6l12-3Z',
+  list:'M4 5h2v2H4V5Zm4 0h12v2H8V5ZM4 11h2v2H4v-2Zm4 0h12v2H8v-2ZM4 17h2v2H4v-2Zm4 0h12v2H8v-2Z',
+  move:'M12 2 8.5 5.5 11 5.5v5.5H5.5V8.5L2 12l3.5 3.5V13H11v5.5H8.5L12 22l3.5-3.5H13V13h5.5v2.5L22 12l-3.5-3.5V11H13V5.5h2.5L12 2Z',
+  people:'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM2 20c0-3.3 3.1-6 7-6s7 2.7 7 6v1H2v-1Zm16.3-4.8c2.2.8 3.7 2.5 3.7 4.8v1h-4v-1c0-1.7-.6-3.2-1.6-4.4l1.9-.4Z'
+};
+ART.icon = (k, s = 30, c = C.clay) =>
+  `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="${c}"><path d="${IC[k]}"/></svg>`;
+
+/* ── 背景樣式 ────────────────────────────────────────────────────── */
+const BG = {
+  wood:`repeating-linear-gradient(91deg,
+          rgba(120,80,48,.16) 0 3px, rgba(120,80,48,0) 3px 13px),
+        linear-gradient(#c9a271,#b98f5c)`,
+  white:`radial-gradient(120% 110% at 50% 20%, #ffffff 0%, #f3f0ea 100%)`,
+  gray :`radial-gradient(120% 110% at 50% 20%, #eceae6 0%, #ddd9d2 100%)`,
+  cloth:`repeating-linear-gradient(45deg, rgba(255,255,255,.20) 0 2px, rgba(255,255,255,0) 2px 5px),
+         repeating-linear-gradient(-45deg, rgba(0,0,0,.045) 0 2px, rgba(0,0,0,0) 2px 5px),
+         linear-gradient(#ded3c2,#cfc2ae)`,
+  dark :`radial-gradient(130% 110% at 30% 12%, #4a3f45 0%, #241d22 70%)`,
+  flour:`radial-gradient(26% 20% at 18% 82%, rgba(255,255,255,.95) 0%, rgba(255,255,255,0) 70%),
+         radial-gradient(20% 15% at 74% 88%, rgba(255,255,255,.85) 0%, rgba(255,255,255,0) 72%),
+         radial-gradient(13% 10% at 46% 92%, rgba(255,255,255,.8) 0%, rgba(255,255,255,0) 74%),
+         radial-gradient(16% 12% at 86% 34%, rgba(255,255,255,.6) 0%, rgba(255,255,255,0) 76%),
+         radial-gradient(11% 8% at 12% 30%, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 78%),
+         linear-gradient(#8f7f6b,#7d6d5b)`
+};
+
+/* ── 核心：場景模擬器 ─────────────────────────────────────────────
+   opts = { w,h, bg, light, angle, pos, zoom, clutter, sim, cap, mark, cls }
+   bg    : wood | white | gray | cloth | dark | flour
+   light : front | side | back | harsh | flat（flat＝無方向性）
+   angle : side | a45 | top
+   pos   : center | third | low | edge
+   zoom  : 0.6 – 1.4（畫面中商品的相對大小）
+   clutter: 0–3（背景雜物數量）
+   sim   : blur | dark | bright | warmcast | flat | soft
+   ------------------------------------------------------------------ */
+ART.scene = (o = {}) => {
+  const w = o.w || 300, h = o.h || 210;
+  const bg = BG[o.bg || 'wood'];
+  const zoom = o.zoom == null ? 1 : o.zoom;
+  const jarFn = o.angle === 'top' ? ART.jarTop : o.angle === 'a45' ? ART.jar45 : ART.jarSide;
+  const js = Math.round(o.px != null ? o.px : Math.min(w, h) * 0.62 * zoom);
+
+  const posCss = {
+    center: `left:50%; top:52%; transform:translate(-50%,-50%);`,
+    third:  `left:34%; top:54%; transform:translate(-50%,-50%);`,
+    low:    `left:50%; top:74%; transform:translate(-50%,-50%);`,
+    edge:   `left:82%; top:60%; transform:translate(-50%,-50%);`
+  }[o.pos || 'center'];
+
+  /* 投影方向跟著光線走 */
+  const shadow = {
+    front: `filter:drop-shadow(0 ${js*0.05}px ${js*0.07}px rgba(40,24,12,.30));`,
+    side:  `filter:drop-shadow(${js*0.13}px ${js*0.05}px ${js*0.08}px rgba(40,24,12,.42));`,
+    back:  `filter:drop-shadow(0 ${js*0.03}px ${js*0.05}px rgba(40,24,12,.20));`,
+    harsh: `filter:drop-shadow(${js*0.2}px ${js*0.07}px ${js*0.02}px rgba(20,10,4,.62));`,
+    flat:  `filter:drop-shadow(0 ${js*0.04}px ${js*0.09}px rgba(40,24,12,.22));`
+  }[o.light || 'flat'];
+
+  const clutterN = o.clutter || 0;
+  const bits = [
+    `<div style="position:absolute;left:6%;top:8%">${ART.keys(js*0.34)}</div>`,
+    `<div style="position:absolute;right:5%;bottom:9%">${ART.cup(js*0.44)}</div>`,
+    `<div style="position:absolute;right:16%;top:6%">${ART.spoon(js*0.32,'#a8968a')}</div>`
+  ].slice(0, clutterN).join('');
+
+  const simCls = o.sim ? ` sim-${o.sim}` : '';
+  const litCls = (o.light && o.light !== 'flat') ? `<div class="lit lit-${o.light}"></div>` : '';
+
+  return `<div class="fr${o.cls ? ' ' + o.cls : ''}${simCls}"
+      style="width:${w}px;height:${h}px">
+    <div class="fr-in" style="background:${bg}">
+      ${bits}
+      <div style="position:absolute;${posCss}${shadow}">${jarFn(js, o.body, o.lid)}</div>
+      ${litCls}
+    </div>
+    ${o.mark ? `<span class="fr-mark">${o.mark}</span>` : ''}
+    ${o.cap ? `<span class="fr-cap">${o.cap}</span>` : ''}
+  </div>`;
+};
+
+/* ── 可替換照片版位 ───────────────────────────────────────────────
+   講師要換成實拍照時，把整塊 .slot-ph 換成 <img> 即可。 */
+ART.slot = (o = {}) => `
+<div class="slot-ph" style="width:${o.w || 300}px;height:${o.h || 210}px${o.style ? ';' + o.style : ''}">
+  ${o.tag ? `<span class="sp-tag">${o.tag}</span>` : ''}
+  <span class="sp-ic">${ART.icon('cam', o.ic || 34, C.muted)}</span>
+  <span class="sp-t">${o.t || '放實拍照'}</span>
+  ${o.s ? `<span class="sp-s">${o.s}</span>` : ''}
+</div>`;
+
+/* ── 手機外框 ────────────────────────────────────────────────────── */
+ART.phone = (inner, o = {}) => {
+  const w = o.w || 232, h = o.h || 464;
+  return `<div class="baked" style="width:${w}px;height:${h}px;border-radius:30px;background:#1b1512;
+    padding:9px 7px;box-shadow:0 20px 44px -22px rgba(40,26,16,.6);flex:0 0 auto">
+    <div style="position:relative;width:100%;height:100%;border-radius:23px;
+      background:${o.bg || C.white};overflow:hidden;text-align:left">${inner}</div>
+  </div>`;
+};
+
+/* 相機取景畫面（含格線、對焦框、太陽圖示） */
+ART.camView = (o = {}) => {
+  const grid = o.grid ? `
+    <div style="position:absolute;inset:0;pointer-events:none">
+      <div style="position:absolute;left:33.33%;top:0;bottom:0;width:1px;background:rgba(255,255,255,.55)"></div>
+      <div style="position:absolute;left:66.66%;top:0;bottom:0;width:1px;background:rgba(255,255,255,.55)"></div>
+      <div style="position:absolute;top:33.33%;left:0;right:0;height:1px;background:rgba(255,255,255,.55)"></div>
+      <div style="position:absolute;top:66.66%;left:0;right:0;height:1px;background:rgba(255,255,255,.55)"></div>
+    </div>` : '';
+  const focus = o.focus ? `
+    <div style="position:absolute;left:${o.focus[0]}%;top:${o.focus[1]}%;
+      transform:translate(-50%,-50%);width:66px;height:66px;
+      border:2px solid ${C.gold};border-radius:6px">
+      ${o.sun ? `<div style="position:absolute;left:100%;top:50%;transform:translate(6px,-50%)">
+        ${ART.icon('sun', 22, C.gold)}</div>` : ''}
+    </div>` : '';
+  return `
+  <div style="position:relative;width:100%;height:100%;background:#12100e">
+    <div style="position:absolute;left:0;right:0;top:0;height:54px;background:#12100e;
+      display:flex;align-items:center;justify-content:space-between;padding:0 14px">
+      <span style="font-size:16px;font-weight:800;color:rgba(255,255,255,.55)">${o.ratio || '4:3'}</span>
+      <span style="font-size:16px;font-weight:800;color:rgba(255,255,255,.55)">${o.top || ''}</span>
+    </div>
+    <div style="position:absolute;left:0;right:0;top:54px;bottom:96px;overflow:hidden">
+      ${o.view || ''}${grid}${focus}
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;height:96px;background:#12100e;
+      display:flex;align-items:center;justify-content:center;gap:22px">
+      <span style="font-size:15px;font-weight:800;color:rgba(255,255,255,.5)">0.5x</span>
+      <span style="width:52px;height:52px;border-radius:50%;background:#fff;
+        box-shadow:0 0 0 3px #12100e,0 0 0 5px rgba(255,255,255,.85)"></span>
+      <span style="font-size:15px;font-weight:800;color:rgba(255,255,255,.5)">2x</span>
+    </div>
+  </div>`;
+};
+
+/* ── 感覺卡 ──────────────────────────────────────────────────────── */
+ART.feelCard = (f, mini) => `
+<div class="feel-card">
+  <div class="fc-top" style="background:${f.c}"></div>
+  ${mini ? ART.scene(Object.assign({ w:mini, h:Math.round(mini*0.66), px:Math.round(mini*0.42) }, f.sim)) : ''}
+  <h5 style="color:${f.c}">${f.name}</h5>
+  ${[['光線',f.light],['背景',f.bg],['角度',f.angle],['構圖',f.comp]]
+    .map(([k,v])=>`<div class="fc-r"><span class="fc-k">${k}</span><span class="fc-v">${v}</span></div>`).join('')}
+</div>`;
+
+/* 頁尾呼應帶 */
+ART.feelStrip = (label, items) => `
+<div class="feel-strip" data-r>
+  <span class="fs-lab">${ART.icon('bulb', 24, C.gold)} ${label}</span>
+  <span class="fs-items">
+    ${items.map(([n,v,cls])=>`<span class="fs-i ${cls}"><b>${n}</b> → ${v}</span>`).join('')}
+  </span>
+</div>`;
+
+/* 四種感覺的定義（全課共用） */
+ART.FEEL = [
+  { key:'warm',  name:'溫暖手作', c:C.warm,  cls:'f-warm',
+    light:'側光',        bg:'木質、素色布',      angle:'45 度',        comp:'留一點手的動作',
+    sim:{ bg:'wood',  light:'side',  angle:'a45',  pos:'center' } },
+  { key:'clean', name:'乾淨專業', c:C.clean, cls:'f-clean',
+    light:'順光',        bg:'白或淺灰',          angle:'平拍或正俯拍', comp:'置中、不加濾鏡',
+    sim:{ bg:'white', light:'front', angle:'side', pos:'center' } },
+  { key:'fresh', name:'新鮮現做', c:C.fresh, cls:'f-fresh',
+    light:'窗邊自然光',  bg:'有製作痕跡的檯面',  angle:'俯拍或 45 度', comp:'加肢體動作',
+    sim:{ bg:'flour', light:'front', angle:'a45', pos:'center' } },
+  { key:'lux',   name:'高級精緻', c:C.lux,   cls:'f-lux',
+    light:'側光或逆光',  bg:'深色',              angle:'特寫',         comp:'大量留白',
+    sim:{ bg:'dark',  light:'back',  angle:'a45',  pos:'center', zoom:1.15 } }
+];
+
+/* ── OX 判讀題頭 ─────────────────────────────────────────────────── */
+ART.oxQ = (n, q, tip) => `
+<div class="ox-q" data-r>
+  <span class="oq-n">Q${n}</span>
+  <span><span class="oq-t">${q}</span>${tip ? `<br><span class="oq-tip">提示：${tip}</span>` : ''}</span>
+</div>`;
+
+/* ── 修圖滑桿 ────────────────────────────────────────────────────── */
+ART.slider = (t, pct, val) => `
+<div class="slider">
+  <span class="sl-t">${t}</span>
+  <span class="sl-bar"><span class="sl-fill" style="width:${pct}%"></span>
+    <span class="sl-dot" style="left:${pct}%"></span></span>
+  <span class="sl-v">${val}</span>
+</div>`;
+
+/* ── 紅線卡 ──────────────────────────────────────────────────────── */
+ART.redline = (n, h, p) => `
+<div class="redline" data-r>
+  <span class="rl-n">${n}</span>
+  <span><h5>${h}</h5><p>${p}</p></span>
+</div>`;
+
+/* ── 步驟列 ──────────────────────────────────────────────────────── */
+ART.steps = (list) => `
+<div style="display:flex;gap:14px;align-items:stretch">
+  ${list.map((s,i)=>`
+    <div style="flex:1;background:#fff;border:1px solid rgba(36,28,23,.12);
+      border-radius:16px;padding:16px 15px;display:flex;flex-direction:column;gap:8px">
+      <span style="width:30px;height:30px;border-radius:50%;background:${C.clay};color:#fff;
+        font-size:18px;font-weight:900;display:flex;align-items:center;justify-content:center">${i+1}</span>
+      <span style="font-size:22px;font-weight:900;color:${C.ink};line-height:1.3">${s[0]}</span>
+      <span style="font-size:20px;font-weight:700;color:${C.ink2};line-height:1.4">${s[1]}</span>
+    </div>`).join('')}
+</div>`;
+
+/* ── 構圖示意圖（教材 P.21–23 八種） ─────────────────────────────────
+   kind: third | quarter | symmetry | diagonal | center | frame | curve | space | repeat  */
+ART.comp = (kind, w = 232, h = 168) => {
+  const j = (x, y, s) =>
+    `<div style="position:absolute;left:${x}%;top:${y}%;transform:translate(-50%,-50%)">
+       ${ART.jar45(s)}</div>`;
+  const line = css => `<div style="position:absolute;${css};background:${C.gold};opacity:.75"></div>`;
+  const S = Math.round(Math.min(w, h) * 0.46);
+  const s2 = Math.round(S * 0.72), s3 = Math.round(S * 0.56);
+
+  const G3 = line('left:33.33%;top:0;bottom:0;width:1.5px') + line('left:66.66%;top:0;bottom:0;width:1.5px')
+           + line('top:33.33%;left:0;right:0;height:1.5px') + line('top:66.66%;left:0;right:0;height:1.5px');
+  const G4 = [25,50,75].map(p => line(`left:${p}%;top:0;bottom:0;width:1.2px`)).join('')
+           + [25,50,75].map(p => line(`top:${p}%;left:0;right:0;height:1.2px`)).join('');
+
+  const art = {
+    third:    G3 + j(33.33, 55, S),
+    quarter:  G4 + j(25, 60, S),
+    symmetry: j(30, 55, s2) + j(70, 55, s2)
+              + line('left:50%;top:0;bottom:0;width:1.5px'),
+    diagonal: `<div style="position:absolute;inset:0;overflow:hidden">
+                 <div style="position:absolute;left:-10%;top:-10%;width:140%;height:2px;
+                      background:${C.gold};opacity:.75;transform:rotate(28deg);
+                      transform-origin:left center"></div></div>`
+              + j(24, 34, s3) + j(50, 56, s3) + j(76, 78, s3),
+    center:   j(50, 55, S) + line('left:50%;top:0;bottom:0;width:1.2px')
+              + line('top:50%;left:0;right:0;height:1.2px'),
+    frame:    `<div style="position:absolute;left:12%;top:10%;right:12%;bottom:10%;
+                    border:${Math.round(S*0.16)}px solid rgba(60,40,26,.55);border-radius:6px"></div>`
+              + j(50, 55, s2),
+    curve:    `<svg style="position:absolute;inset:0" viewBox="0 0 100 100" preserveAspectRatio="none">
+                 <path d="M4 78 C 30 34, 70 34, 96 74" stroke="${C.gold}" stroke-width="1.6"
+                       fill="none" opacity=".75"/></svg>`
+              + j(16, 68, s3) + j(50, 44, s3) + j(84, 66, s3),
+    repeat:   j(22, 38, s3) + j(50, 38, s3) + j(78, 38, s3)
+              + j(36, 74, s3) + j(64, 74, s3),
+    space:    j(76, 58, s2)
+              + `<div style="position:absolute;left:8%;top:30%;width:38%;height:8px;
+                      background:${C.gold};opacity:.35;border-radius:6px"></div>
+                 <div style="position:absolute;left:8%;top:46%;width:28%;height:8px;
+                      background:${C.gold};opacity:.28;border-radius:6px"></div>`
+  }[kind] || '';
+
+  return `<div class="fr" style="width:${w}px;height:${h}px">
+    <div class="fr-in" style="background:linear-gradient(#e6d9c4,#d8c7ad)">${art}</div>
+  </div>`;
+};
+
+/* =========================================================================
+   短影音課專用元件
+   ========================================================================= */
+
+/* ── 景別：同一個商品，四種距離 ─────────────────────────────────── */
+const SHOT = {
+  wide:   { px:0.30, pos:'center', clutter:1, label:'全景',  en:'看整體' },
+  medium: { px:0.52, pos:'center', clutter:0, label:'中景',  en:'商品＋手' },
+  close:  { px:0.78, pos:'center', clutter:0, label:'近景',  en:'商品是主角' },
+  detail: { px:1.35, pos:'center', clutter:0, label:'特寫',  en:'只看一個細節' }
+};
+ART.shot = (kind, w = 250, h = 320, o = {}) => {
+  const s = SHOT[kind] || SHOT.medium;
+  return ART.scene(Object.assign({
+    w, h, px: Math.round(Math.min(w, h) * s.px),
+    bg: o.bg || 'wood', light: o.light || 'side', angle: o.angle || 'a45',
+    pos: s.pos, clutter: o.clutter != null ? o.clutter : s.clutter,
+    cap: o.cap === null ? undefined : (o.cap || `${s.label}　${s.en}`),
+    cls: o.cls, mark: o.mark
+  }));
+};
+ART.SHOTS = SHOT;
+
+/* ── 運鏡：靠近／離開／平移 ─────────────────────────────────────── */
+ART.move = (kind, w = 300, h = 200) => {
+  const arrow = {
+    in:  `<svg style="position:absolute;inset:0" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <path d="M14 50h58" stroke="${C.gold}" stroke-width="3.4" fill="none"/>
+            <path d="M64 42l12 8-12 8z" fill="${C.gold}"/>
+            <rect x="8" y="20" width="84" height="60" fill="none" stroke="#fff"
+                  stroke-width="1.6" stroke-dasharray="4 3" opacity=".7"/>
+            <rect x="30" y="34" width="40" height="32" fill="none" stroke="${C.gold}"
+                  stroke-width="2.2"/></svg>`,
+    out: `<svg style="position:absolute;inset:0" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <path d="M86 50H28" stroke="${C.gold}" stroke-width="3.4" fill="none"/>
+            <path d="M36 42l-12 8 12 8z" fill="${C.gold}"/>
+            <rect x="30" y="34" width="40" height="32" fill="none" stroke="#fff"
+                  stroke-width="1.6" stroke-dasharray="4 3" opacity=".7"/>
+            <rect x="8" y="20" width="84" height="60" fill="none" stroke="${C.gold}"
+                  stroke-width="2.2"/></svg>`,
+    pan: `<svg style="position:absolute;inset:0" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <path d="M16 50h62" stroke="${C.gold}" stroke-width="3.4" fill="none"/>
+            <path d="M70 42l12 8-12 8z" fill="${C.gold}"/>
+            <rect x="6" y="24" width="42" height="52" fill="none" stroke="#fff"
+                  stroke-width="1.6" stroke-dasharray="4 3" opacity=".7"/>
+            <rect x="52" y="24" width="42" height="52" fill="none" stroke="${C.gold}"
+                  stroke-width="2.2"/></svg>`
+  }[kind] || '';
+  return `<div class="fr" style="width:${w}px;height:${h}px">
+    <div class="fr-in" style="background:linear-gradient(#c9a271,#b98f5c)">
+      <div style="position:absolute;left:50%;top:52%;transform:translate(-50%,-50%)">
+        ${ART.jar45(Math.round(Math.min(w,h)*0.42))}</div>
+      ${arrow}
+    </div></div>`;
+};
+
+/* ── 分鏡表 ─────────────────────────────────────────────────────── */
+ART.board = (rows, o = {}) => `
+<table class="tbl${o.compact ? ' compact' : ''}" style="font-size:${o.fs || 20}px">
+  <thead><tr>
+    <th style="width:78px">鏡頭</th><th style="width:270px">我要拍什麼</th>
+    <th style="width:150px">畫面</th><th style="width:110px">秒數</th>
+  </tr></thead>
+  <tbody>
+    ${rows.map((r,i)=>`
+    <tr><td class="lead-col" style="text-align:center">${r[0] || (i+1)}</td>
+      <td>${r[1]}</td><td><b>${r[2]}</b></td><td>${r[3]}</td></tr>`).join('')}
+  </tbody></table>`;
+
+/* 空白分鏡表（附錄用） */
+ART.boardBlank = (n = 8) => ART.board(
+  Array.from({length:n}, (_,i)=>[i+1,'&nbsp;','&nbsp;','&nbsp;']), { compact:true, fs:19 });
+
+/* ── InShot 介面示意 ────────────────────────────────────────────── */
+ART.inshot = (o = {}) => {
+  const clips = o.clips || [3,2,4,2,3];
+  const total = clips.reduce((a,b)=>a+b,0);
+  /* 預覽區高度＝手機高 − 頂列 44 − 底部（時間軸＋工具列）150 */
+  const ph = Math.max(120, Math.round((o.h || 420) - 44 - 150 - 14));
+  const pw = Math.round(ph * 9 / 16);
+  return `
+  <div style="position:relative;width:100%;height:100%;background:#0f0f12">
+    <div style="position:absolute;left:0;right:0;top:0;height:44px;display:flex;
+         align-items:center;justify-content:space-between;padding:0 14px">
+      <span style="font-size:16px;font-weight:700;color:rgba(255,255,255,.55)">${o.left || '⟨'}</span>
+      <span style="font-size:16px;font-weight:800;color:${C.gold}">${o.right || '儲存'}</span>
+    </div>
+    <div style="position:absolute;left:0;right:0;top:44px;bottom:150px;
+         display:grid;place-items:center;background:#17171b">
+      <div style="position:relative;width:${pw}px;height:${ph}px;
+           border-radius:8px;overflow:hidden">
+        ${ART.scene({ w:pw, h:ph, bg:'wood', light:'side', angle:'a45', px:Math.round(pw*0.5) })}
+        ${o.caption ? `<div style="position:absolute;left:0;right:0;bottom:14px;text-align:center;
+             font-size:13px;font-weight:900;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.8)">
+             ${o.caption}</div>` : ''}
+      </div>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:62px;height:52px;padding:0 10px;
+         display:flex;align-items:center;gap:3px">
+      ${clips.map((c,i)=>`
+        <div style="flex:${c};height:40px;border-radius:5px;overflow:hidden;position:relative;
+             border:${o.sel===i?`2px solid ${C.gold}`:'1px solid rgba(255,255,255,.18)'}">
+          <div style="position:absolute;inset:0;background:linear-gradient(${
+            ['#b98f5c','#8f7f6b','#c9a271','#7d6d5b','#a98f6c'][i%5]},#6d5c4a)"></div>
+          <span style="position:absolute;right:3px;bottom:2px;font-size:10px;font-weight:800;
+                color:rgba(255,255,255,.75)">${c}s</span>
+        </div>`).join('')}
+    </div>
+    <div style="position:absolute;left:10px;bottom:118px;font-size:12px;font-weight:800;
+         color:rgba(255,255,255,.5)">共 ${total} 秒</div>
+    <div class="edit-bar" style="position:absolute;left:0;right:0;bottom:0;border-radius:0;
+         gap:3px;padding:8px 6px">
+      ${['剪輯','文字','貼圖','音樂','濾鏡','畫布'].map((t,i)=>`
+        <span class="eb-i${o.tab===i?' on':''}"
+              style="flex:1;width:auto;min-width:0;padding:0;font-size:12px;
+                     letter-spacing:0;white-space:nowrap">${t}</span>`).join('')}
+    </div>
+  </div>`;
+};
+
+/* ── 直式 9:16 影格 ─────────────────────────────────────────────── */
+ART.vshot = (o = {}) => {
+  const w = o.w || 176, h = Math.round(w * 16 / 9);
+  return ART.scene(Object.assign({ w, h, px: Math.round(w * (o.k || 0.62)) }, o.sim || {},
+    { cap: o.cap, cls: o.cls, mark: o.mark }));
+};
+
+/* ── 系列卡（流量用） ───────────────────────────────────────────── */
+ART.seriesCard = (name, items, c) => `
+<div class="card" style="padding:18px 20px;border-top:5px solid ${c}">
+  <p class="k" style="font-size:23px;color:${c};margin-bottom:9px">${name}</p>
+  ${items.map(t=>`<div class="yes" style="margin-bottom:6px;font-size:20px">
+    <i style="color:${c}">●</i><span>${t}</span></div>`).join('')}
+</div>`;
+</script>
+<script>/* =========================================================================
+   slides-a.js — PART 0 開場 ～ PART 5 故事感
+   第 1–44 頁
+   ========================================================================= */
+const DECK = [];
+const S = o => DECK.push(o);
+
+const divider = (no, title, sub, ic) => `
+  <div class="wrap">
+    <p class="pno" data-r>${no}</p>
+    <h2 data-r>${title}</h2>
+    <p class="d-sub" data-r>${sub}</p>
+  </div>
+  <div class="d-art">${ic}</div>`;
+
+/* 十一種短影音主題 */
+const TOPICS = [
+  ['商品介紹','商品是什麼？特色在哪裡？'],
+  ['試吃／試用心得','吃起來、用起來什麼感覺？'],
+  ['使用方式','怎麼用？怎麼搭配？'],
+  ['製作過程','從原料到完成'],
+  ['幕後花絮','平常看不到的準備工作'],
+  ['前後對比','使用前後、原料與成品'],
+  ['開箱','從收到、打開到看見'],
+  ['商品細節','材質、紋理、包裝'],
+  ['顧客情境','什麼時候適合用？'],
+  ['常見問題','回答一個客人常問的'],
+  ['推薦理由','為什麼推薦這個商品']
+];
+
+/* =========================================================================
+   PART 0　開場（1–5）
+   ========================================================================= */
+S({ part:'開場', time:'09:00', kind:'cover', title:'封面：商品短影音腳本、拍攝與剪輯',
+  html:`
+  <div class="cover-wrap">
+    <div class="cover-l">
+      <h1 class="mega" data-r style="font-size:62px">商品短影音<br>腳本、拍攝與剪輯</h1>
+      <p class="lead" data-r style="margin-top:18px;font-size:26px">
+        今天不是學剪輯 App。<br>
+        你會<b class="hl">先想清楚要說什麼</b>，再拍，最後才剪。</p>
+      <div data-r style="display:flex;gap:10px;margin-top:26px;flex-wrap:wrap">
+        <span class="tag sm">想</span><span class="tag sm">寫</span>
+        <span class="tag sm">畫</span><span class="tag on sm">拍</span><span class="tag sm">剪</span>
+      </div>
+    </div>
+    <div class="cover-r" data-r>
+      ${ART.vshot({ w:196, k:0.6, sim:{ bg:'wood', light:'side', angle:'a45' } })}
+    </div>
+  </div>`,
+  notes:{
+    say:['開場先確認三件事：手機電量、儲存空間、InShot 有沒有裝好。',
+         '沒裝 InShot 的請助教立刻協助，不要等到下午才發現。',
+         '這堂課的主軸是攝影，剪輯只佔最後 40 分鐘——這件事現在就要講清楚，學員才知道重點在哪。'],
+    ask:['問：有帶商品來的舉手？有裝好 InShot 的舉手？'],
+    do:['確認電量、空間、InShot。'],
+    diff:['學員知道今天是拍片不是學 App。'],
+    more:['請一兩位說自己想拍什麼，後面舉例用得到。'],
+    less:['自我介紹一分鐘帶過。']
+  }});
+
+S({ part:'開場', time:'09:02', kind:'std', title:'今天結束時，你會有一支影片',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:38px">不是學會軟體，是做出一支成品</h2></div>
+    <div class="cards c4" data-r style="gap:18px">
+      ${[['一句主題','一句話說清楚這支影片要幹嘛',ART.icon('bulb',40,C.clay),'tint'],
+         ['一張分鏡表','5–8 個鏡頭，拍之前就決定好',ART.icon('grid',40,C.gold),'gold'],
+         ['一批拍好的素材','六個必備鏡頭，加上補拍的',ART.icon('cam',40,C.sage),'sage'],
+         ['一支 15–30 秒影片','剪好、輸出、存在手機裡',ART.icon('play',40,C.plum),'plum']]
+        .map(([k,v,ic,cls])=>`
+        <div class="card ${cls}" style="padding:24px 20px">
+          <span class="ico">${ic}</span>
+          <p class="k" style="font-size:23px">${k}</p>
+          <p class="v" style="font-size:20px">${v}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout gold" data-r>${ART.icon('warn',34,C.gold)}
+      <span class="txt">今天最花時間的是<b>拍</b>，不是剪。
+      素材拍得好，剪輯只要四十分鐘就夠。</span></div>
+  </div>`,
+  notes:{
+    say:['四樣成果講具體，學員才有安全感。',
+         '最後那句要講：素材好，剪輯就快。這是今天時間分配的理由。'],
+    ask:['問：你們拍過影片嗎？最後有剪出來嗎？（多數人拍了一堆沒剪）'],
+    do:[],
+    diff:['學員理解為什麼上午都在「想」。'],
+    more:['問拍了沒剪的原因，多半是「素材亂七八糟不知道從何剪起」。'],
+    less:['只講四張卡片標題。']
+  }});
+
+S({ part:'開場', time:'09:05', kind:'std', title:'今天的節奏',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:38px">想 → 寫 → 畫 → 拍 → 剪</h2></div>
+    <div data-r style="display:flex;align-items:center;gap:11px">
+      ${[['想','這支要拍什麼',C.clay],
+         ['寫','開始、過程、完成',C.gold],
+         ['畫','分鏡表 5–8 個鏡頭',C.sage],
+         ['拍','照分鏡表拍',C.plum],
+         ['剪','InShot 組起來',C.clean]]
+        .map(([k,v,c],i)=>`
+        ${i?`<span style="font-size:30px;color:${C.muted};font-weight:300">→</span>`:''}
+        <div style="flex:1;background:#fff;border:1px solid rgba(36,28,23,.12);border-top:5px solid ${c};
+             border-radius:18px;padding:20px 15px;box-shadow:0 14px 34px -20px rgba(60,40,28,.45)">
+          <p style="margin:0 0 7px;font-size:26px;font-weight:900;color:${c}">${k}</p>
+          <p style="margin:0;font-size:20px;font-weight:650;color:${C.ink2};line-height:1.4">${v}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout" data-r>${ART.icon('warn',34)}
+      <span class="txt">最常見的失敗：<b class="hl">跳過前面三步，直接拿手機開始拍</b>。
+      拍了一堆素材，回來發現剪不出一支完整的影片。</span></div>
+  </div>`,
+  notes:{
+    say:['五步照順序講，每一步都對應今天的一個時段。',
+         '「跳過前三步直接拍」是幾乎所有人的習慣，要點破。'],
+    ask:['問：你以前拍影片，是先想好還是先拍再說？'],
+    do:[],
+    diff:['學員接受上午不碰相機這件事。'],
+    more:[], less:['直接進下一頁。']
+  }});
+
+S({ part:'開場', time:'09:08', kind:'std', title:'四個核心觀念',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">這四句話，今天會一直回來</h2></div>
+    <div class="cards c2" data-r style="gap:17px">
+      ${[['影片不是拿起手機就開始拍',
+          '是先想好要說什麼。想清楚的人，拍二十分鐘就夠；沒想清楚的，拍兩小時也剪不出來。',C.clay],
+         ['一支短影片，先講清楚一件事',
+          '十五秒講三件事，觀眾一件都記不住。想講很多，就拍很多支。',C.sage],
+         ['不要只拍商品，也要拍商品正在發生什麼',
+          '商品轉一圈沒有人想看。手在做、東西在動、過程在跑，才有人停下來。',C.gold],
+         ['先想、再寫、再拍，最後才剪',
+          '剪輯救不回沒拍到的鏡頭。今天的順序就是這句話。',C.plum]]
+        .map(([k,v,c])=>`
+        <div class="card" style="padding:22px 24px;border-left:5px solid ${c}">
+          <p class="k" style="font-size:24px;color:${c}">${k}</p>
+          <p class="v" style="font-size:20px">${v}</p>
+        </div>`).join('')}
+    </div>
+  </div>`,
+  notes:{
+    say:['四句都是原則，講完就往下，不要展開太久。',
+         '第三句「不要只拍商品」是今天故事感那一段的伏筆。',
+         '第四句是整天的順序，下午拍攝時會一直回來提醒。'],
+    ask:['問：你看過的短影音裡，哪一種會讓你停下來看完？'],
+    do:[],
+    diff:['學員開始意識到影片和照片不一樣：影片要有「事情在發生」。'],
+    more:['舉例：一支只有商品轉圈的影片 vs 一支手在包裝的影片。'],
+    less:['只講第一句和第四句。']
+  }});
+
+S({ part:'開場', time:'09:12', kind:'std', title:'上午想清楚，下午才拍得順',
+  html:`
+  <div class="split" style="gap:38px">
+    <div class="card" data-r style="padding:26px 28px;border-top:6px solid ${C.gold}">
+      <p class="cap" style="color:${C.gold};font-size:21px">上午　全部在「想」</p>
+      <ul class="list">
+        <li>這支影片要拍什麼</li>
+        <li>開始、過程、完成怎麼分</li>
+        <li>遠、中、近、特寫各拍什麼</li>
+        <li>分鏡表與素材清單</li>
+        <li>怎麼拍出故事感</li>
+      </ul>
+      <div class="rule"></div>
+      <p class="v" style="font-size:20px"><b>上午不碰相機。</b></p>
+    </div>
+    <div class="card" data-r style="padding:26px 28px;border-top:6px solid ${C.clay}">
+      <p class="cap" style="color:${C.clay};font-size:21px">下午　全部在「做」</p>
+      <ul class="list">
+        <li>錄影長度與三種運鏡</li>
+        <li><b>正式拍攝（今天最長的一段）</b></li>
+        <li>InShot 剪輯九個步驟</li>
+        <li>輸出、成果放映、檢視</li>
+      </ul>
+      <div class="rule"></div>
+      <p class="v" style="font-size:20px"><b>下午幾乎不聽課。</b></p>
+    </div>
+  </div>`,
+  notes:{
+    say:['這一頁是在跟學員談條件：上午請忍耐，下午都是你的。',
+         '中高齡學員坐一上午聽課會累，先講明白換來的是什麼，接受度會高很多。',
+         '強調下午的拍攝是今天最長的一段。'],
+    ask:['問：可以接受上午先不拿相機嗎？'],
+    do:[],
+    diff:['上午的秩序會好很多。'],
+    more:[], less:['一句話帶過。']
+  }});
+
+/* =========================================================================
+   PART 1　這支影片要拍什麼（6–14）
+   ========================================================================= */
+S({ part:'PART 1', time:'09:15', kind:'divider', title:'PART 1｜這支影片要拍什麼',
+  html: divider('01','這支影片<br>要拍什麼',
+    '先決定主題，再決定怎麼拍。<br>主題不清楚，後面每一步都會卡。',
+    ART.icon('bulb',130,'rgba(255,255,255,.13)')),
+  notes:{ say:['這一段是整天的地基，不要急著往下。'], ask:[], do:[] }});
+
+S({ part:'PART 1', time:'09:16', kind:'std', title:'十一種短影音主題',
+  html:`
+  <div class="stack gap-s pad-tight">
+    <div><h2 class="h" data-r style="font-size:34px;margin-bottom:4px">
+      你的商品，可以拍成這十一種影片</h2></div>
+    <div data-r style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+      ${TOPICS.map(([k,v],i)=>`
+        <div class="card flat" style="padding:14px 16px">
+          <p style="margin:0 0 4px;font-size:21px;font-weight:900;color:${
+            [C.clay,C.sage,C.gold,C.plum,C.clean][i%5]}">${k}</p>
+          <p style="margin:0;font-size:18px;font-weight:650;color:${C.ink2};line-height:1.35">${v}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout" data-r style="padding:13px 22px">${ART.icon('warn',28)}
+      <span class="txt">今天<b>只選一種</b>來拍。貪心想全部拍，一種都拍不好。</span></div>
+  </div>`,
+  notes:{
+    say:['十一種念過去就好，不要每一種都解釋。',
+         '重點是讓學員看到「原來有這麼多種可以拍」，而不是只會拍商品照。',
+         '最後那句「今天只選一種」要講清楚。'],
+    ask:['問：這十一種裡，哪一種你從來沒想過可以拍？'],
+    do:['在講義上圈出兩三種你想拍的。'],
+    diff:['學員會發現自己一直只拍「商品介紹」這一種。'],
+    more:['每種舉一個你看過的例子。'],
+    less:['只念前六種。']
+  }});
+
+S({ part:'PART 1', time:'09:19', kind:'std', title:'這十一種不是選一種，是十一個系列',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">
+      想要流量，靠的是<span class="hl">很多支影片</span>，不是一支</h2></div>
+    <div class="cards c3" data-r style="gap:18px">
+      ${[['一支影片沒流量，很正常',
+          '不要因為第一支只有二十個人看就放棄。流量是累積來的，不是一支爆出來的。',C.clay],
+         ['觀眾要知道下次看得到什麼',
+          '同一種主題持續拍，就變成一個「系列」。有系列，別人才會追蹤你。',C.sage],
+         ['系列對你自己好處更大',
+          '定了系列，就不用每次重新想題材——照著同一個格式換商品拍就好。',C.gold]]
+        .map(([k,v,c])=>`
+        <div class="card" style="padding:22px 20px;border-top:5px solid ${c}">
+          <p class="k" style="font-size:23px;color:${c}">${k}</p>
+          <p class="v" style="font-size:20px">${v}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout gold" data-r>${ART.icon('bulb',32,C.gold)}
+      <span class="txt">建議做法：<b>從十一種裡挑 2–3 種當固定系列，輪流發</b>。
+      十一種各拍一次，不如三種各拍四次。收尾時我們會排一個月的計畫。</span></div>
+  </div>`,
+  notes:{
+    say:['這一頁是今天關於「流量」的第一次講，收尾第 79、80 頁會完整收。',
+         '中高齡學員最容易第一支沒人看就放棄，這一頁是在打預防針。',
+         '「三種各拍四次，勝過十一種各拍一次」這句話要講。'],
+    ask:['問：你有沒有發過影片，結果沒什麼人看？當時什麼感覺？',
+         '問：你追蹤的帳號，是不是每次都發類似的東西？'],
+    do:['先想想哪 2–3 種可以變成你的固定系列。'],
+    diff:['學員的期待值會調整成「長期累積」，不是「一支爆紅」。'],
+    more:['舉一個學員知道的帳號，分析它固定發哪幾種系列。'],
+    less:['只講最後那句建議做法。']
+  }});
+
+S({ part:'PART 1', time:'09:22', kind:'std', title:'你的商品適合哪一種',
+  html:`
+  <div class="stack gap-s pad-tight">
+    <div><h2 class="h" data-r style="font-size:34px;margin-bottom:4px">不知道拍什麼，先看你的商品類型</h2></div>
+    <table class="tbl compact" data-r style="font-size:19px">
+      <thead><tr><th style="width:150px">你的商品</th><th>最好拍的三種</th><th style="width:290px">為什麼</th></tr></thead>
+      <tbody>
+        <tr><td class="lead-col">食品、烘焙</td><td><b>製作過程</b>／試吃心得／商品細節</td><td>有火、有攪拌、有出爐，畫面本身就會動</td></tr>
+        <tr><td class="lead-col">手作、飾品</td><td><b>製作過程</b>／商品細節／使用方式</td><td>手的動作最好看，細節撐得起特寫</td></tr>
+        <tr><td class="lead-col">農產品</td><td><b>前後對比</b>／製作過程／顧客情境</td><td>從田裡到餐桌，落差最大</td></tr>
+        <tr><td class="lead-col">保養、生活用品</td><td><b>使用方式</b>／前後對比／常見問題</td><td>怎麼用最多人問，也最好示範</td></tr>
+        <tr><td class="lead-col">服務類</td><td><b>幕後花絮</b>／顧客情境／推薦理由</td><td>沒有實體商品，就拍你在做什麼</td></tr>
+      </tbody>
+    </table>
+    <div class="callout" data-r style="padding:13px 22px">${ART.icon('bulb',28)}
+      <span class="txt">粗體那一種是<b>最容易上手的起點</b>。今天就拍它。</span></div>
+  </div>`,
+  notes:{
+    say:['讓學員先對號入座，不知道拍什麼的人有個起點。',
+         '粗體那一種是建議今天拍的，因為最容易有畫面。',
+         '沒有實體商品的學員（服務類）要特別照顧到，她們最容易覺得自己沒東西拍。'],
+    ask:['問：你的商品屬於哪一類？粗體那一種你拍得出來嗎？'],
+    do:['選定今天要拍的主題。'],
+    diff:['卡住的學員有了明確方向。'],
+    more:['請不同類型的學員各說一個自己的點子。'],
+    less:['只講前三列。']
+  }});
+
+S({ part:'PART 1', time:'09:26', kind:'std', title:'一支影片，只講一件事',
+  html:`
+  <div class="split" style="gap:36px">
+    <div class="card" data-r style="padding:24px 26px;background:#fdf3f1;border-color:transparent">
+      <p class="cap" style="color:#c0392b">✕ 想講太多</p>
+      <p class="v" style="font-size:21px;line-height:1.6">
+        「我要介紹我的果醬，講一下怎麼做的，還有草莓是哪裡來的，
+        然後說一下怎麼吃，再講包裝很漂亮可以送禮，最後說現在有優惠⋯⋯」</p>
+      <div class="rule"></div>
+      <p class="v" style="font-size:20px"><b>結果</b>：十五秒塞六件事，
+      觀眾看完一件都沒記住，也不知道你在賣什麼。</p>
+    </div>
+    <div class="card sage" data-r style="padding:24px 26px">
+      <p class="cap" style="color:${C.sage}">✓ 只講一件</p>
+      <p class="v" style="font-size:21px;line-height:1.6">
+        「這支只講一件事：<b>我的草莓果醬是怎麼熬出來的</b>。」</p>
+      <div class="rule"></div>
+      <p class="v" style="font-size:20px"><b>結果</b>：觀眾看完記得「這個人自己熬果醬」。
+      其他五件事？<b>拍成另外五支</b>——這就是系列。</p>
+    </div>
+  </div>`,
+  notes:{
+    say:['左邊那段話要用學員平常說話的語氣念出來，會很有共鳴。',
+         '右邊最後那句「拍成另外五支」把前一頁的系列觀念接起來。'],
+    ask:['問：左邊那支影片看完，你記得什麼？'],
+    do:[],
+    diff:['學員理解「講不完」不是問題，是素材。'],
+    more:['把左邊那六件事列出來，變成六支影片的題目。'],
+    less:['只念右邊那句。']
+  }});
+
+S({ part:'PART 1', time:'09:29', kind:'std', title:'講太多的下場',
+  html:`
+  <div class="stack gap-m center" style="text-align:center">
+    <div><h2 class="h" data-r style="font-size:38px">觀眾滑走的三個瞬間</h2></div>
+    <div class="cards c3" data-r style="gap:20px;max-width:1020px;margin:0 auto">
+      ${[['前 3 秒看不懂在拍什麼','畫面一開始是天花板、是桌子、是你在調整手機',C.clay],
+         ['講到一半換了話題','本來在講怎麼做，突然講到包裝，觀眾跟不上',C.gold],
+         ['看完不知道要幹嘛','沒有結尾，最後一個畫面是你伸手去關手機',C.plum]]
+        .map(([k,v,c])=>`
+        <div class="card" style="padding:24px 20px;border-top:5px solid ${c}">
+          <p class="k" style="font-size:23px;color:${c}">${k}</p>
+          <p class="v" style="font-size:20px">${v}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout" data-r style="max-width:1020px">${ART.icon('eye',32)}
+      <span class="txt">這三個問題，<b class="hl">都是在拍之前就決定的</b>，
+      不是剪輯能救的。所以我們現在要先想清楚。</span></div>
+  </div>`,
+  notes:{
+    say:['三個瞬間都很具體，學員會認出自己拍過的影片。',
+         '最後那句是本段的結論：這些都是拍之前決定的。'],
+    ask:['問：你自己滑短影音的時候，什麼情況會直接滑掉？'],
+    do:[],
+    diff:['學員開始重視前 3 秒。'],
+    more:['現場滑一下自己的社群，找一支三秒內看不懂的影片。'],
+    less:['只講第一個瞬間。']
+  }});
+
+S({ part:'PART 1', time:'09:32', kind:'std', title:'【實作】填兩句話',
+  html:`
+  <div class="stack gap-m center" style="text-align:center">
+    <div>
+      <p class="eyebrow" data-r style="justify-content:center">實作　·　八分鐘</p>
+      <h2 class="h" data-r style="font-size:38px">寫下這兩句，今天就照這兩句拍</h2>
+    </div>
+    <div class="stack gap-s" data-r style="max-width:940px;margin:0 auto;width:100%">
+      ${[['我今天要拍的是','＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿',C.clay],
+         ['我希望觀眾看完知道','＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿',C.sage]]
+        .map(([k,v,c])=>`
+        <div class="card" style="padding:24px 28px;border-left:6px solid ${c};text-align:left">
+          <p style="margin:0 0 10px;font-size:24px;font-weight:900;color:${c}">${k}</p>
+          <p style="margin:0;font-size:26px;font-weight:700;color:${C.ink3};letter-spacing:.06em">${v}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout gold" data-r style="max-width:940px">${ART.icon('warn',30,C.gold)}
+      <span class="txt">兩句都要寫。<b>只有第一句的人，通常拍到一半就不知道要拍什麼了。</b></span></div>
+  </div>`,
+  notes:{
+    say:['給足八分鐘，這是今天最重要的八分鐘。',
+         '走動時看每個人的第二句——第二句寫不出來的，主題就是還沒想清楚。',
+         '第二句比第一句重要，它決定影片的結尾要放什麼。'],
+    ask:['問：有人願意念一下自己的兩句話嗎？'],
+    do:['在講義上寫下兩句話。'],
+    diff:['寫得出兩句的人，後面分鏡會很順；寫不出來的，現在就要處理。'],
+    more:['請三四位念出來，全班一起看清不清楚。'],
+    less:['縮到五分鐘，只寫第一句。']
+  }});
+
+S({ part:'PART 1', time:'09:36', kind:'std', title:'兩句話寫不出來，代表還沒想清楚',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">卡住的三種情況，這樣處理</h2></div>
+    <div class="stack gap-s" data-r>
+      ${[['想不到要拍什麼','回去看第 9 頁的商品類型對照，選粗體那一種。<br>真的沒想法就拍「製作過程」——最不會失敗。',C.clay],
+         ['想拍的東西太多','把它們列出來，<b>今天只拍第一個</b>，其他寫在旁邊當下週的題材。',C.gold],
+         ['第二句寫不出來','問自己：如果客人看完只記得一句話，你希望是哪一句？<br>那句就是答案。',C.sage]]
+        .map(([k,v,c])=>`
+        <div style="display:flex;gap:16px;align-items:flex-start;background:#fff;
+             border:1px solid rgba(36,28,23,.12);border-left:5px solid ${c};
+             border-radius:14px;padding:16px 20px">
+          <span style="font-size:22px;font-weight:900;color:${c};min-width:168px">${k}</span>
+          <span style="font-size:20px;font-weight:650;color:${C.ink2};line-height:1.5">${v}</span>
+        </div>`).join('')}
+    </div>
+    <div class="callout" data-r>${ART.icon('ok',30,C.sage)}
+      <span class="txt">寫不出來不是你的問題，是這一步本來就最難。
+      <b>但這一步跳過去，後面每一步都會更難。</b></span></div>
+  </div>`,
+  notes:{
+    say:['這一頁是給卡住的人的救生索，助教要拿著這一頁去個別協助。',
+         '「想拍太多」的人最好處理：多的變成下週題材，正好接系列的觀念。'],
+    ask:['問：現在還卡住的舉手？'],
+    do:['卡住的學員由助教一對一協助。'],
+    diff:['全班都有兩句話才往下走。'],
+    more:[], less:['跳過，直接個別處理。']
+  }});
+
+S({ part:'PART 1', time:'09:39', kind:'std', title:'清楚的一句話 vs 模糊的一句話',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">同樣是果醬，兩種寫法差很多</h2></div>
+    <div class="split" style="gap:30px">
+      <div class="stack gap-s" data-r>
+        <div class="prompt bad">
+          <span class="p-lab">模糊</span><br>
+          「我要拍我的果醬。」<br>
+          「我希望大家覺得很好吃。」</div>
+        <div class="card" style="padding:16px 20px;background:#fdf3f1;border-color:transparent">
+          <p class="v" style="font-size:19px">
+            拍的時候會卡：果醬的什麼？放在桌上拍嗎？拍多久？<br>
+            <b>什麼都可以，就等於什麼都不知道。</b></p>
+        </div>
+      </div>
+      <div class="stack gap-s" data-r>
+        <div class="prompt good">
+          <span class="p-lab">清楚</span><br>
+          「我要拍<em>草莓果醬從下鍋到裝瓶</em>的過程。」<br>
+          「我希望觀眾看完知道<em>這是我自己熬的，不是買現成的</em>。」</div>
+        <div class="card sage" style="padding:16px 20px">
+          <p class="v" style="font-size:19px">
+            拍什麼馬上就有答案：草莓下鍋、攪拌、裝瓶、貼標。<br>
+            <b>連結尾要拍什麼都決定了。</b></p>
+        </div>
+      </div>
+    </div>
+  </div>`,
+  notes:{
+    say:['左右對照念，讓學員自己聽出差別。',
+         '重點：清楚的一句話會直接生出分鏡，模糊的不會。這是下一段的伏筆。'],
+    ask:['問：你的兩句話比較像左邊還是右邊？'],
+    do:['回去修自己的兩句話，改得更具體。'],
+    diff:['學員會把「我要拍果醬」改成「我要拍果醬的某個過程」。'],
+    more:['用學員的實例現場改一次。'],
+    less:['只念右邊。']
+  }});
+
+/* =========================================================================
+   PART 2　三段式腳本（15–21）
+   ========================================================================= */
+S({ part:'PART 2', time:'09:45', kind:'divider', title:'PART 2｜三段式腳本',
+  html: divider('02','三段式腳本',
+    '不用學正式劇本格式。<br>只要三段：開始、過程、完成。',
+    ART.icon('note',130,'rgba(255,255,255,.13)')),
+  notes:{ say:['強調：這不是編劇課，三段就夠。'], ask:[], do:[] }});
+
+S({ part:'PART 2', time:'09:46', kind:'std', title:'開始 → 過程 → 完成',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:38px">一支短影片，就這三段</h2></div>
+    <div data-r style="display:flex;align-items:stretch;gap:14px">
+      ${[['開始','先讓人知道今天要看什麼','前 3 秒決定觀眾留不留',C.clay],
+         ['過程','主要內容、動作、特色','這一段最長，也最好看',C.gold],
+         ['完成','留下印象、完成畫面或一句重點','沒有結尾，觀眾會覺得斷掉',C.sage]]
+        .map(([k,v,w,c],i)=>`
+        ${i?`<span style="font-size:32px;color:${C.muted};font-weight:300;align-self:center">→</span>`:''}
+        <div style="flex:1;background:#fff;border:1px solid rgba(36,28,23,.12);border-top:6px solid ${c};
+             border-radius:18px;padding:24px 20px;box-shadow:0 14px 34px -20px rgba(60,40,28,.45)">
+          <p style="margin:0 0 9px;font-size:30px;font-weight:900;color:${c}">${k}</p>
+          <p style="margin:0 0 10px;font-size:21px;font-weight:700;color:${C.ink};line-height:1.4">${v}</p>
+          <p style="margin:0;font-size:19px;font-weight:650;color:${C.ink3};line-height:1.4">${w}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout" data-r>${ART.icon('bulb',32)}
+      <span class="txt">口訣就三個字：<b class="hl">開始、過程、完成</b>。
+      接下來三頁看三個實際例子。</span></div>
+  </div>`,
+  notes:{
+    say:['三段講完就進範例，不要在抽象概念停留。',
+         '「完成」這一段最多人漏掉，要特別強調：沒有結尾，觀眾會覺得影片斷掉。'],
+    ask:['問：你看過那種看完覺得「就這樣？」的影片嗎？那就是沒有完成段。'],
+    do:[],
+    diff:['學員有了一個可以套用的框架。'],
+    more:[], less:['直接進範例。']
+  }});
+
+const threeAct = (title, rows, c) => `
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">${title}</h2></div>
+    <div data-r style="display:flex;gap:18px">
+      ${rows.map(([seg,what,shot,sec],i)=>`
+        <div style="flex:1;background:#fff;border:1px solid rgba(36,28,23,.12);
+             border-top:5px solid ${[C.clay,C.gold,C.sage][i]};border-radius:16px;padding:18px 16px">
+          <p style="margin:0 0 10px;font-size:22px;font-weight:900;color:${[C.clay,C.gold,C.sage][i]}">${seg}</p>
+          ${ART.vshot({ w:132, k:[0.34,0.6,0.5][i],
+                        sim:{ bg:'wood', light:'side', angle:i===1?'a45':'a45' } })}
+          <p style="margin:11px 0 4px;font-size:20px;font-weight:800;color:${C.ink};line-height:1.35">${what}</p>
+          <p style="margin:0;font-size:18px;font-weight:650;color:${C.ink3}">${shot}　·　${sec}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout" data-r style="padding:14px 22px">${ART.icon('clock',28)}
+      <span class="txt">${c}</span></div>
+  </div>`;
+
+S({ part:'PART 2', time:'09:50', kind:'std', title:'範例一：商品介紹的三段',
+  html: threeAct('商品介紹：完整 → 特色 → 情境',
+    [['開始','桌上的完整商品','全景','3 秒'],
+     ['過程','手拿起來、轉一面、指出特色','中景＋近景','8 秒'],
+     ['完成','商品放在使用情境裡','中景','4 秒']],
+    '總長約 <b>15 秒</b>。開始那 3 秒就要讓人看出這是什麼東西。'),
+  notes:{
+    say:['三個例子都用同一個結構講，學員會很快抓到規律。',
+         '注意每一段標的「畫面」欄，這是下一段景別的伏筆。'],
+    ask:['問：如果開始那 3 秒拍的是你在調整手機，會怎樣？'],
+    do:[], diff:['學員看到三段各配什麼畫面。'],
+    more:['問學員自己的商品，開始那 3 秒要拍什麼。'],
+    less:['三個範例只講這一個。']
+  }});
+
+S({ part:'PART 2', time:'09:54', kind:'std', title:'範例二：試吃心得的三段',
+  html: threeAct('試吃心得：拿起 → 試吃 → 推薦',
+    [['開始','手拿起商品，鏡頭帶到臉','中景','3 秒'],
+     ['過程','打開、聞、吃，臉上的反應','近景＋特寫','12 秒'],
+     ['完成','比一個手勢，或說一句心得','中景','5 秒']],
+    '總長約 <b>20 秒</b>。過程那一段的<b>反應</b>是重點，不是商品。'),
+  notes:{
+    say:['試吃類的重點在「反應」不在商品，這一點要講。',
+         '中高齡學員最怕入鏡，可以只拍手不拍臉，效果一樣好。'],
+    ask:['問：怕入鏡的舉手？（只拍手也可以，等一下講）'],
+    do:[], diff:['怕鏡頭的學員知道有替代方案。'],
+    more:['示範只拍手的試吃怎麼拍。'],
+    less:['跳過這個範例。']
+  }});
+
+S({ part:'PART 2', time:'09:58', kind:'std', title:'範例三：製作過程的三段',
+  html: threeAct('製作過程：原料 → 製作 → 成品',
+    [['開始','桌上攤開的原料','全景','3 秒'],
+     ['過程','切、攪、下鍋、裝瓶（多個短鏡頭）','近景＋特寫','15 秒'],
+     ['完成','完成的商品，貼上標籤','近景','4 秒']],
+    '總長約 <b>22 秒</b>。過程那一段可以拆成<b>四五個 3 秒的小鏡頭</b>，節奏才會好。'),
+  notes:{
+    say:['製作過程是最推薦的類型，也是今天多數人會拍的。',
+         '「過程拆成四五個小鏡頭」是這一頁的重點，接下午的錄影長度那一段。'],
+    ask:['問：你的商品，製作過程有哪幾個步驟？'],
+    do:[], diff:['學員理解一段過程可以拆成很多鏡頭。'],
+    more:['請學員口頭說出自己的四五個步驟。'],
+    less:['只講「原料→製作→成品」六個字。']
+  }});
+
+S({ part:'PART 2', time:'10:02', kind:'std', title:'【實作】寫出你的三段',
+  html:`
+  <div class="stack gap-m center" style="text-align:center">
+    <div>
+      <p class="eyebrow" data-r style="justify-content:center">實作　·　八分鐘</p>
+      <h2 class="h" data-r style="font-size:38px">照著你的兩句話，寫出三段</h2>
+    </div>
+    <div class="stack gap-s" data-r style="max-width:960px;margin:0 auto;width:100%">
+      ${[['開始','＿＿＿＿＿＿＿＿＿＿＿＿＿＿　約 3 秒',C.clay],
+         ['過程','＿＿＿＿＿＿＿＿＿＿＿＿＿＿　約 10–15 秒',C.gold],
+         ['完成','＿＿＿＿＿＿＿＿＿＿＿＿＿＿　約 4 秒',C.sage]]
+        .map(([k,v,c])=>`
+        <div class="card" style="padding:18px 24px;border-left:6px solid ${c};text-align:left;
+             display:flex;gap:20px;align-items:center">
+          <span style="font-size:24px;font-weight:900;color:${c};min-width:70px">${k}</span>
+          <span style="font-size:22px;font-weight:700;color:${C.ink3};letter-spacing:.04em">${v}</span>
+        </div>`).join('')}
+    </div>
+    <div class="callout" data-r style="max-width:960px">${ART.icon('bulb',30)}
+      <span class="txt">每一段<b>一句話就好</b>，不要寫成作文。
+      這三句話等一下要變成分鏡表。</span></div>
+  </div>`,
+  notes:{
+    say:['八分鐘，走動協助。',
+         '常見問題：過程那一段寫太籠統（「做果醬」），要引導寫成具體動作（「切草莓、下鍋、攪拌、裝瓶」）。'],
+    ask:['問：過程那一段，你寫了幾個動作？'],
+    do:['寫出三段。'],
+    diff:['三段寫具體的人，等一下分鏡幾乎自動生成。'],
+    more:['請兩位念自己的三段，全班一起看夠不夠具體。'],
+    less:['只寫開始和完成兩段。']
+  }});
+
+S({ part:'PART 2', time:'10:06', kind:'std', title:'檢查：每一段能不能用一句話說完',
+  html:`
+  <div class="stack gap-m center" style="text-align:center">
+    <div><h2 class="h" data-r style="font-size:38px">三個檢查，過了才往下</h2></div>
+    <div class="cards c3" data-r style="gap:20px;max-width:1020px;margin:0 auto">
+      ${[['1','開始那一段，3 秒內看得出在拍什麼嗎？','看不出來，就換一個更明顯的畫面',C.clay],
+         ['2','過程那一段，有幾個具體動作？','少於三個，影片會很單調',C.gold],
+         ['3','完成那一段，有東西可以拍嗎？','沒有的話，補一個「成品放好」的畫面',C.sage]]
+        .map(([n,q,v,c])=>`
+        <div class="card" style="padding:22px 20px">
+          <span class="num-badge" style="background:${c};margin-bottom:11px">${n}</span>
+          <p class="k" style="font-size:22px">${q}</p>
+          <p class="v" style="font-size:19px">${v}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout sage" data-r style="max-width:1020px">${ART.icon('ok',30,C.sage)}
+      <span class="txt">三個都過了，你的腳本就完成了。<b>接下來把它畫成分鏡。</b></span></div>
+  </div>`,
+  notes:{
+    say:['三個檢查一起走一遍，這是進入分鏡前的關卡。',
+         '第二個檢查最重要：少於三個動作的，過程段一定會很無聊。'],
+    ask:['問：三個檢查都過的舉手？'],
+    do:['自己檢查一次，沒過的補寫。'],
+    diff:['進入分鏡段時，每個人都有可用的腳本。'],
+    more:[], less:['只做第二個檢查。']
+  }});
+
+/* =========================================================================
+   PART 3　遠、中、近、特寫（22–30）
+   ========================================================================= */
+S({ part:'PART 3', time:'10:20', kind:'divider', title:'PART 3｜遠、中、近、特寫',
+  html: divider('03','遠、中、近<br>特寫',
+    '同一件事情，多拍幾種距離，影片才有變化。<br>這是短影音和照片最大的不同。',
+    ART.icon('cam',130,'rgba(255,255,255,.13)')),
+  notes:{ say:['這一段是攝影的核心，時間給足。'], ask:[], do:[] }});
+
+S({ part:'PART 3', time:'10:21', kind:'std', title:'同一件事，四種距離',
+  html:`
+  <div class="stack gap-m center" style="text-align:center">
+    <div><h2 class="h" data-r style="font-size:36px">
+      同一罐果醬、同一個位置，只有<span class="hl">距離不同</span></h2></div>
+    <div data-r style="display:flex;gap:18px;justify-content:center">
+      ${['wide','medium','close','detail'].map(k => ART.shot(k, 246, 300)).join('')}
+    </div>
+    <p class="lead" data-r style="font-size:22px;max-width:1000px">
+      四張都是同一支影片可以用的畫面。<br>
+      <b class="hl">一支影片只有一種距離，看三秒就膩了。</b></p>
+  </div>`,
+  notes:{
+    say:['四張並排先讓學員看，不要先講定義。',
+         '重點：這四張不是「選一張」，是「四張都要拍」。'],
+    ask:['問：這四張，哪一張最像你平常拍的？（多數是全景或中景）',
+         '問：如果一支影片從頭到尾都是第一張那種距離，你看得下去嗎？'],
+    do:[],
+    diff:['學員意識到自己拍影片時距離從來沒變過。'],
+    more:['放一支真實短影音，數它換了幾次距離。'],
+    less:['直接進下一頁。']
+  }});
+
+const shotPage = (kind, title, uses, tip, c) => `
+  <div class="split" style="gap:38px">
+    <div data-r style="display:flex;justify-content:center;align-items:center">
+      ${ART.shot(kind, 300, 380, { cap:null })}
+    </div>
+    <div class="stack gap-m">
+      <div><h2 class="h" data-r style="font-size:36px">${title}</h2></div>
+      <div class="stack gap-s" data-r>
+        <p class="cap" style="color:${C.muted};font-size:20px;letter-spacing:.08em">最適合拍</p>
+        ${uses.map(u=>`
+          <div style="display:flex;gap:12px;align-items:center;background:#fff;
+               border:1px solid rgba(36,28,23,.12);border-left:4px solid ${c};
+               border-radius:13px;padding:12px 18px;font-size:21px;font-weight:700;color:${C.ink2}">
+            ${u}</div>`).join('')}
+      </div>
+      <div class="callout" data-r style="padding:14px 22px">${ART.icon('bulb',28)}
+        <span class="txt">${tip}</span></div>
+    </div>
+  </div>`;
+
+S({ part:'PART 3', time:'10:25', kind:'std', title:'全景：看整體',
+  html: shotPage('wide','全景<br>讓人看見整個場面',
+    ['工作環境、你的工作檯','整桌的商品','完整的包裝與周邊'],
+    '全景通常放在<b>開頭</b>，用來交代「這是在哪裡、有什麼」。', C.clean),
+  notes:{
+    say:['全景的功能是「交代環境」，不是「看清楚商品」。',
+         '全景放開頭最有效，因為觀眾需要先知道場景。'],
+    ask:['問：你的工作檯拍成全景好看嗎？（不好看就先整理）'],
+    do:[], diff:['學員知道全景不是隨便拍遠一點。'],
+    more:['提醒全景最容易拍到雜物，開拍前先整理桌面。'],
+    less:['四種景別合併成一頁講。']
+  }});
+
+S({ part:'PART 3', time:'10:29', kind:'std', title:'中景：商品＋手',
+  html: shotPage('medium','中景<br>看得到動作在發生',
+    ['手在操作、包裝、攪拌','使用方式的示範','商品和人的關係'],
+    '中景是短影音<b>用得最多</b>的距離。有手、有動作，畫面才活。', C.warm),
+  notes:{
+    say:['中景是短影音的主力，多數鏡頭都是中景。',
+         '「有手就有動作，有動作就有人看」——這句話要講。'],
+    ask:['問：你的商品，手可以怎麼跟它互動？'],
+    do:[], diff:['學員開始想到把手放進畫面。'],
+    more:['提醒手要乾淨，指甲要整理，這是很多人忽略的。'],
+    less:['與近景合併。']
+  }});
+
+S({ part:'PART 3', time:'10:33', kind:'std', title:'近景：商品是主角',
+  html: shotPage('close','近景<br>商品占滿畫面',
+    ['商品主體的完整樣子','包裝正面、標籤','商品的顏色與形狀'],
+    '近景適合<b>結尾</b>，讓觀眾最後記住商品長什麼樣。', C.fresh),
+  notes:{
+    say:['近景和中景最容易混淆：中景有手，近景商品占滿。',
+         '近景放結尾，讓人記住商品——這跟開頭的全景剛好對稱。'],
+    ask:['問：中景和近景差在哪裡？（有沒有手）'],
+    do:[], diff:['學員分得出中景和近景。'],
+    more:[], less:['與中景合併。']
+  }});
+
+S({ part:'PART 3', time:'10:37', kind:'std', title:'特寫：只看一個細節',
+  html: shotPage('detail','特寫<br>只給一個細節',
+    ['食物的切面、拉絲、流動','飾品的紋理與扣環','標籤、封口、材質','手部的細微動作'],
+    '特寫是<b>最有說服力</b>的畫面，也是最多人沒拍的。一支影片至少要有一個。', C.lux),
+  notes:{
+    say:['特寫是今天最想讓學員學會的一種，因為最多人沒拍過。',
+         '特寫要走近拍，不要用手指放大——這是（1）教過的原則。',
+         '手機最近對焦距離大約 8–10 公分，太近會對不到焦。'],
+    ask:['問：你的商品，最值得特寫的細節是什麼？'],
+    do:['想一個自己商品的特寫點。'],
+    diff:['學員會開始注意商品的細節，而不只是整體。'],
+    more:['示範一次特寫，讓學員看對焦怎麼點。'],
+    less:['只講「一支影片至少要有一個特寫」。']
+  }});
+
+S({ part:'PART 3', time:'10:41', kind:'std', title:'四種距離分別回答什麼問題',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">觀眾心裡的四個問題</h2></div>
+    <table class="tbl" data-r>
+      <thead><tr><th style="width:130px">距離</th><th style="width:300px">回答的問題</th>
+        <th style="width:190px">通常放在</th><th>一支影片要幾個</th></tr></thead>
+      <tbody>
+        <tr><td class="lead-col" style="color:${C.clean}">全景</td><td>這是在哪裡？有什麼？</td><td>開頭</td><td>1 個</td></tr>
+        <tr><td class="lead-col" style="color:${C.warm}">中景</td><td>正在發生什麼事？</td><td>過程，最多</td><td>2–3 個</td></tr>
+        <tr><td class="lead-col" style="color:${C.fresh}">近景</td><td>這個商品長什麼樣？</td><td>結尾</td><td>1–2 個</td></tr>
+        <tr><td class="lead-col" style="color:${C.lux}">特寫</td><td>細節到底好不好？</td><td>過程中間穿插</td><td><b>至少 1 個</b></td></tr>
+      </tbody>
+    </table>
+    <div class="callout gold" data-r>${ART.icon('bulb',32,C.gold)}
+      <span class="txt">最後一欄加起來大約<b>五到七個鏡頭</b>——
+      這剛好就是等一下分鏡表要填的數量。</span></div>
+  </div>`,
+  notes:{
+    say:['這一頁把四種景別變成可執行的數量，是進入分鏡前的橋樑。',
+         '最後那句「五到七個鏡頭」直接接下一段。'],
+    ask:['問：你打算拍幾個鏡頭？'],
+    do:[], diff:['學員有了具體的鏡頭數目標。'],
+    more:[], less:['只講最後那句。']
+  }});
+
+S({ part:'PART 3', time:'10:45', kind:'std', title:'同一個動作，四種畫面',
+  html:`
+  <div class="stack gap-m center" style="text-align:center">
+    <div><h2 class="h" data-r style="font-size:36px">
+      「包裝商品」這一個動作，可以拍成四個鏡頭</h2></div>
+    <div data-r style="display:flex;gap:16px;justify-content:center">
+      ${[['wide','① 整個桌面'],['medium','② 手＋盒子'],
+         ['detail','③ 綁帶、貼紙'],['close','④ 完整包裝']]
+        .map(([k,cap])=>ART.shot(k, 246, 268, { cap })).join('')}
+    </div>
+    <p class="lead" data-r style="font-size:22px;max-width:1020px">
+      不要只錄一段十秒的包裝過程。<br>
+      <b class="hl">同一個動作拆成四個鏡頭，剪起來才有節奏。</b></p>
+  </div>`,
+  notes:{
+    say:['這一頁是本段最實用的一頁，直接給了可複製的做法。',
+         '「同一個動作拍四次」是很多人沒想過的——他們以為要拍四件不同的事。'],
+    ask:['問：你的過程裡，哪一個動作可以這樣拆成四個鏡頭？'],
+    do:[],
+    diff:['學員的分鏡表會從三四個鏡頭變成六七個。'],
+    more:['講可以請旁邊的人幫忙重複同一個動作四次。'],
+    less:['只講「同一個動作多拍幾種距離」一句。']
+  }});
+
+S({ part:'PART 3', time:'10:48', kind:'std', title:'【實作】同一個動作拍四種距離',
+  html:`
+  <div class="stack gap-m center" style="text-align:center">
+    <div>
+      <p class="eyebrow" data-r style="justify-content:center">實作　·　六分鐘　·　今天第一次拿相機</p>
+      <h2 class="h" data-r style="font-size:38px">挑一個動作，拍四張照片就好</h2>
+    </div>
+    <div data-r style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;max-width:1000px">
+      <span class="tag">① 全景</span><span class="tag">② 中景</span>
+      <span class="tag">③ 近景</span><span class="tag on">④ 特寫</span>
+      <span class="tag g">拍照就好，先不要錄影</span>
+    </div>
+    <p class="lead" data-r style="font-size:22px;max-width:1000px">
+      這一次<b>只拍照片</b>，練習距離的感覺。<br>
+      四張排在一起看：<b class="hl">如果四張長得很像，代表距離沒有真的變。</b></p>
+  </div>`,
+  notes:{
+    say:['刻意只拍照不錄影，因為現在練的是「距離」不是「錄影」。',
+         '拍完一定要四張排一起看，這是判斷有沒有做到的唯一方法。',
+         '常見錯誤：四張距離差太少，看起來像同一張。'],
+    ask:['問：四張排一起，看得出距離不同嗎？'],
+    do:['挑一個動作，四種距離各拍一張照片。'],
+    diff:['學員會發現自己以為變了距離，其實只差一點點。'],
+    more:['請差異最明顯的一位投影出來。'],
+    less:['只拍中景和特寫兩張。']
+  }});
+
+/* =========================================================================
+   PART 4　分鏡與素材清單（31–38）
+   ========================================================================= */
+S({ part:'PART 4', time:'10:50', kind:'divider', title:'PART 4｜分鏡與素材清單',
+  html: divider('04','分鏡與<br>素材清單',
+    '拍之前就決定要拍哪些畫面。<br>這是今天最重要的一張表。',
+    ART.icon('grid',130,'rgba(255,255,255,.13)')),
+  notes:{ say:['分鏡表是今天的核心產出，下午拍攝完全照它走。'], ask:[], do:[] }});
+
+S({ part:'PART 4', time:'10:51', kind:'std', title:'不要先拍一堆，再回來想怎麼剪',
+  html:`
+  <div class="split" style="gap:36px">
+    <div class="card" data-r style="padding:24px 26px;background:#fdf3f1;border-color:transparent">
+      <p class="cap" style="color:#c0392b">✕ 多數人的做法</p>
+      <div class="stack gap-s">
+        <div class="no"><i>1</i><span>拿起手機，看到什麼拍什麼</span></div>
+        <div class="no"><i>2</i><span>拍了二三十段，每段都很長</span></div>
+        <div class="no"><i>3</i><span>打開剪輯 App，不知道從哪一段開始</span></div>
+        <div class="no"><i>4</i><span>剪到一半發現少了關鍵鏡頭</span></div>
+        <div class="no"><i>5</i><span>放棄</span></div>
+      </div>
+    </div>
+    <div class="card sage" data-r style="padding:24px 26px">
+      <p class="cap" style="color:${C.sage}">✓ 今天要學的做法</p>
+      <div class="stack gap-s">
+        <div class="yes"><i>1</i><span>先寫三段腳本</span></div>
+        <div class="yes"><i>2</i><span>拆成 5–8 個鏡頭，寫進分鏡表</span></div>
+        <div class="yes"><i>3</i><span>照表拍，拍完一個打一個勾</span></div>
+        <div class="yes"><i>4</i><span>拍完就知道素材是齊的</span></div>
+        <div class="yes"><i>5</i><span>剪輯只要照順序接起來</span></div>
+      </div>
+    </div>
+  </div>`,
+  notes:{
+    say:['左邊那五步要念得像在講學員自己的故事，會很有共鳴。',
+         '第 4 步「剪到一半發現少了關鍵鏡頭」是最痛的，因為東西已經收了、材料已經用完了。'],
+    ask:['問：左邊這五步，你走過幾步？'],
+    do:[],
+    diff:['學員接受花時間寫分鏡表。'],
+    more:[], less:['只講左邊第 4 步和右邊第 3 步。']
+  }});
+
+S({ part:'PART 4', time:'10:55', kind:'std', title:'分鏡表長這樣',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">四欄就夠，不用畫圖</h2></div>
+    <div data-r>
+      ${ART.board([
+        ['1','完整商品','全景','2 秒'],
+        ['2','手拿商品','中景','3 秒'],
+        ['3','商品細節','特寫','2 秒'],
+        ['4','使用／製作','近景','4 秒'],
+        ['5','完成畫面','全景','3 秒']
+      ])}
+    </div>
+    <div class="callout" data-r>${ART.icon('bulb',32)}
+      <span class="txt">分鏡不用畫得漂亮，<b>能看懂就好</b>。
+      重點是拍之前你就知道要拍幾個、拍什麼、每個多久。</span></div>
+  </div>`,
+  notes:{
+    say:['先說清楚：不用畫圖，寫字就好。很多學員一聽到分鏡就緊張。',
+         '四欄逐欄解釋，尤其「畫面」那欄就是剛才學的四種距離。'],
+    ask:['問：這五個鏡頭加起來幾秒？（14 秒，剛好一支短影音）'],
+    do:[],
+    diff:['學員發現分鏡表比想像中簡單。'],
+    more:['講可以加第五欄「備註」寫提醒事項。'],
+    less:['只講四欄的欄名。']
+  }});
+
+S({ part:'PART 4', time:'10:59', kind:'std', title:'完整範例：手工果醬六個鏡頭',
+  html:`
+  <div class="stack gap-s pad-tight">
+    <div><h2 class="h" data-r style="font-size:33px;margin-bottom:4px">
+      主題：草莓果醬從下鍋到裝瓶</h2></div>
+    <div data-r>
+      ${ART.board([
+        ['1','桌上攤開的草莓與砂糖','全景','3 秒'],
+        ['2','手把草莓倒進鍋裡','中景','3 秒'],
+        ['3','鍋裡冒泡、木匙攪拌','特寫','4 秒'],
+        ['4','果醬從鍋裡舀進玻璃瓶','中景','4 秒'],
+        ['5','瓶口的果醬質地','特寫','3 秒'],
+        ['6','貼上標籤的完成品','近景','3 秒']
+      ], { compact:true, fs:19 })}
+    </div>
+    <div class="callout gold" data-r style="padding:13px 22px">${ART.icon('clock',28,C.gold)}
+      <span class="txt">總長 <b>20 秒</b>　·　全景 1、中景 2、特寫 2、近景 1　·
+      <b>四種距離都有，而且過程佔了四個鏡頭</b>。</span></div>
+  </div>`,
+  notes:{
+    say:['這是今天的標準範本，學員照這個格式填自己的就對了。',
+         '指出距離的分布：全景1、中景2、特寫2、近景1，這是很好的比例。',
+         '過程佔四個鏡頭，呼應「不要只拍結果」。'],
+    ask:['問：如果拿掉第 3 和第 5 個特寫，這支影片會變怎樣？（變得很平）'],
+    do:[],
+    diff:['學員有了可以直接模仿的範本。'],
+    more:['把這六個鏡頭換成學員自己的商品，現場示範一次。'],
+    less:['只看表，不解釋比例。']
+  }});
+
+S({ part:'PART 4', time:'11:03', kind:'std', title:'秒數怎麼抓',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">不用精準，抓個大概就好</h2></div>
+    <div class="cards c3" data-r style="gap:18px">
+      ${[['2–3 秒','靜態畫面：完整商品、成品、包裝','看清楚就夠了',C.clean],
+         ['3–5 秒','有動作的畫面：攪拌、包裝、倒東西','要讓動作走完',C.warm],
+         ['2–3 秒','特寫：細節、紋理、質地','太久會膩',C.lux]]
+        .map(([k,v,w,c])=>`
+        <div class="card" style="padding:24px 20px;border-top:5px solid ${c}">
+          <p class="k" style="font-size:30px;color:${c}">${k}</p>
+          <p class="v" style="font-size:20px">${v}</p>
+          <div class="rule"></div>
+          <p class="v" style="font-size:19px;color:${C.ink3}">${w}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout" data-r>${ART.icon('warn',32)}
+      <span class="txt">六個鏡頭 × 平均 3 秒＝<b>18 秒</b>，剛好。<br>
+      如果你算出來超過 40 秒，<b class="hl">代表鏡頭太多或每個太長</b>，回去刪。</span></div>
+  </div>`,
+  notes:{
+    say:['秒數不用精準，這一頁的目的是讓學員知道「大概多久」。',
+         '最後那句提供一個自我檢查：算出來超過 40 秒就是太多。'],
+    ask:['問：你的分鏡表加起來幾秒？'],
+    do:['把自己分鏡表的秒數加起來。'],
+    diff:['學員會主動刪掉多餘的鏡頭。'],
+    more:['講實際錄的時候要比計畫多錄一兩秒，好剪。'],
+    less:['只講「每個鏡頭 3 秒左右」。']
+  }});
+
+S({ part:'PART 4', time:'11:07', kind:'std', title:'素材清單：拍之前先列',
+  html:`
+  <div class="split w-left" style="gap:40px">
+    <div class="stack gap-m">
+      <div><h2 class="h" data-r style="font-size:36px">分鏡表管「畫面」<br>素材清單管「東西」</h2></div>
+      <p class="lead" data-r style="font-size:21px">
+        分鏡表告訴你要拍哪些畫面，<br>
+        素材清單告訴你<b>要準備哪些東西、做哪些動作</b>。</p>
+      <div class="callout" data-r style="padding:15px 22px">${ART.icon('warn',30)}
+        <span class="txt">沒列清單最常見的下場：<b>草莓已經全部下鍋了，
+        才想到忘記拍「完整的草莓」。</b></span></div>
+    </div>
+    <div class="card" data-r style="padding:18px 24px;border-top:5px solid ${C.sage}">
+      <p class="cap" style="color:${C.sage};font-size:20px">手工果醬　素材清單</p>
+      <div class="checks" style="grid-template-columns:1fr;gap:7px">
+        ${['完整的草莓','清洗草莓','切草莓','下鍋','攪拌','裝瓶','貼標籤','完成的商品','手拿商品']
+          .map(t=>`<div class="check" style="justify-content:flex-start;padding:10px 16px">
+            <span class="box"></span>
+            <span style="font-size:19px;font-weight:700;color:${C.ink2}">${t}</span></div>`).join('')}
+      </div>
+    </div>
+  </div>`,
+  notes:{
+    say:['素材清單和分鏡表的差別要講清楚：一個管畫面，一個管東西和動作。',
+         '「草莓全下鍋了才想到沒拍完整的草莓」這個例子很具體，學員會記住。',
+         '清單要比分鏡表多，因為要留備用素材。'],
+    ask:['問：你的商品，有哪些東西一旦用掉就補不回來？'],
+    do:[],
+    diff:['學員會在拍之前先把東西擺好。'],
+    more:['講「不可逆的動作先拍」：切開、下鍋、拆封這類。'],
+    less:['只講最後那個例子。']
+  }});
+
+S({ part:'PART 4', time:'11:11', kind:'std', title:'【實作】完成 5–8 個分鏡',
+  html:`
+  <div class="stack gap-s pad-tight center" style="text-align:center">
+    <div>
+      <p class="eyebrow" data-r style="justify-content:center">實作　·　十二分鐘　·　今天最重要的一張表</p>
+      <h2 class="h" data-r style="font-size:34px;margin-bottom:4px">把你的三段，拆成 5–8 個鏡頭</h2>
+    </div>
+    <div data-r style="width:100%;max-width:1020px;margin:0 auto">
+      ${ART.boardBlank(7)}
+    </div>
+    <div class="callout gold" data-r style="max-width:1020px;padding:13px 22px">${ART.icon('bulb',28,C.gold)}
+      <span class="txt">卡住的話回頭看第 34 頁的果醬範例，<b>照它的格式換成你的商品</b>。</span></div>
+  </div>`,
+  notes:{
+    say:['十二分鐘，這是上午最長的一次實作，走動協助每一個人。',
+         '檢查三件事：有沒有五個以上、四種距離有沒有都出現、過程段是不是最多。',
+         '寫不出來的，直接把果醬範例的六個鏡頭換成她的商品。'],
+    ask:['問：你的分鏡表裡，特寫有幾個？（至少要一個）'],
+    do:['完成 5–8 個鏡頭的分鏡表。'],
+    diff:['每個人手上都有一張下午可以照著拍的表。'],
+    more:['請兩位投影自己的分鏡表，全班一起看。'],
+    less:['降到 5 個鏡頭就好。']
+  }});
+
+S({ part:'PART 4', time:'11:19', kind:'std', title:'【實作】完成素材清單',
+  html:`
+  <div class="stack gap-m center" style="text-align:center">
+    <div>
+      <p class="eyebrow" data-r style="justify-content:center">實作　·　六分鐘</p>
+      <h2 class="h" data-r style="font-size:38px">下午要用到的東西，全部列出來</h2>
+    </div>
+    <div class="cards c3" data-r style="gap:20px;max-width:1020px;margin:0 auto">
+      ${[['要準備的東西','商品、原料、道具、包裝材料',C.clay],
+         ['要做的動作','切、攪、包、拿、放、打開',C.gold],
+         ['不可逆的先拍','切開、下鍋、拆封——做了就回不去',C.sage]]
+        .map(([k,v,c])=>`
+        <div class="card" style="padding:22px 20px;border-top:5px solid ${c}">
+          <p class="k" style="font-size:22px;color:${c}">${k}</p>
+          <p class="v" style="font-size:20px">${v}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout" data-r style="max-width:1020px">${ART.icon('warn',30)}
+      <span class="txt">第三欄最重要。<b class="hl">不可逆的動作，一定要先確認鏡頭準備好了再做。</b></span></div>
+  </div>`,
+  notes:{
+    say:['第三點「不可逆的先拍」是實務上最有價值的一句話。',
+         '午休前提醒：下午要用的東西，午休時先擺好。'],
+    ask:['問：你的清單裡，哪一項是不可逆的？'],
+    do:['完成素材清單，並在不可逆的項目前面畫星號。'],
+    diff:['下午拍攝時不會發生「東西用掉了才想到沒拍」。'],
+    more:[], less:['口頭提醒，不寫清單。']
+  }});
+
+/* =========================================================================
+   PART 5　故事感（39–44）
+   ========================================================================= */
+S({ part:'PART 5', time:'11:25', kind:'divider', title:'PART 5｜故事感',
+  html: divider('05','故事感',
+    '商品影片不要只有商品轉一圈。<br>有人、有手、有過程，才有人看得下去。',
+    ART.icon('hand',130,'rgba(255,255,255,.13)')),
+  notes:{ say:['這一段是上午最後一段，也是最能提升成品質感的一段。'], ask:[], do:[] }});
+
+S({ part:'PART 5', time:'11:26', kind:'std', title:'不要只拍結果，也要拍過程',
+  html:`
+  <div class="stack gap-m center" style="text-align:center">
+    <div><h2 class="h" data-r style="font-size:36px">同一罐果醬，兩種拍法</h2></div>
+    <div data-r style="display:flex;gap:30px;justify-content:center;align-items:center">
+      <div>
+        ${ART.vshot({ w:200, k:0.62, sim:{ bg:'white', light:'front', angle:'a45' },
+                      cls:'bad', mark:'✕', cap:'只有成品轉一圈' })}
+        <p style="margin:10px 0 0;font-size:20px;font-weight:700;color:${C.ink3}">
+          好看，但沒有人想看完</p>
+      </div>
+      <span style="font-size:36px;color:${C.muted};font-weight:300">vs</span>
+      <div>
+        ${ART.vshot({ w:200, k:0.62, sim:{ bg:'flour', light:'side', angle:'a45', clutter:1 },
+                      cls:'good', mark:'✓', cap:'手正在做，東西正在動' })}
+        <p style="margin:10px 0 0;font-size:20px;font-weight:700;color:${C.ink2}">
+          會讓人想知道<b>接下來會怎樣</b></p>
+      </div>
+    </div>
+    <p class="lead" data-r style="font-size:22px;max-width:1000px">
+      短影音跟照片最大的差別：<b class="hl">照片показ結果，影片показ過程。</b></p>
+  </div>`,
+  notes:{
+    say:['這一頁的核心：影片的優勢是「時間」，能拍到過程，照片不行。',
+         '如果只拍成品，那不如拍照片就好——這句話可以講。'],
+    ask:['問：你看短影音的時候，會看完的通常是哪一種？'],
+    do:[],
+    diff:['學員理解影片不是「會動的照片」。'],
+    more:['講「懸念」：讓人想知道接下來會怎樣，就會看完。'],
+    less:['只講最後那句。']
+  }});
+
+S({ part:'PART 5', time:'11:30', kind:'std', title:'餅乾的五個鏡頭',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">從原料到包裝，五個鏡頭就是一個故事</h2></div>
+    <div data-r style="display:flex;gap:14px;align-items:stretch">
+      ${[['原料','麵粉、奶油攤在檯面','全景',C.clean],
+         ['整形','手在壓模、排盤','中景',C.warm],
+         ['烘烤','烤箱裡上色的過程','特寫',C.gold],
+         ['出爐','熱氣、剛出爐的樣子','近景',C.fresh],
+         ['包裝','裝袋、綁帶、貼標','中景',C.lux]]
+        .map(([k,v,shot,c],i)=>`
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:7px">
+            <span style="width:26px;height:26px;border-radius:50%;background:${c};color:#fff;
+                  font-size:16px;font-weight:900;display:flex;align-items:center;
+                  justify-content:center">${i+1}</span>
+            <span style="font-size:22px;font-weight:900;color:${c}">${k}</span>
+          </div>
+          ${ART.vshot({ w:186, k:[0.34,0.55,1.1,0.72,0.55][i],
+                        sim:{ bg:['flour','flour','wood','wood','cloth'][i],
+                              light:['front','side','side','side','side'][i], angle:'a45' } })}
+          <p style="margin:0;font-size:19px;font-weight:700;color:${C.ink2};line-height:1.35">${v}</p>
+          <p style="margin:0;font-size:18px;font-weight:800;color:${C.ink3}">${shot}</p>
+        </div>`).join('')}
+    </div>
+  </div>`,
+  notes:{
+    say:['五個鏡頭排出來，就是一個完整的故事，不需要旁白也看得懂。',
+         '注意第三個「烘烤」用特寫，因為那是最有懸念的一刻。'],
+    ask:['問：這五個鏡頭如果只留三個，你會留哪三個？'],
+    do:[], diff:['學員看到「順序本身就是故事」。'],
+    more:['講可以加第六個：有人吃下去的反應。'],
+    less:['只講三個鏡頭。']
+  }});
+
+S({ part:'PART 5', time:'11:34', kind:'std', title:'飾品的五個鏡頭',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">沒有火、沒有熱氣，一樣有故事</h2></div>
+    <div data-r style="display:flex;gap:14px;align-items:stretch">
+      ${[['材料','珠子、線材、工具攤開','全景',C.clean],
+         ['組裝','手在穿線、扣環','中景',C.warm],
+         ['細節','扣環、紋路、光澤','特寫',C.lux],
+         ['戴上','戴在手上或脖子上','近景',C.fresh],
+         ['完成','放回盒子裡的樣子','近景',C.gold]]
+        .map(([k,v,shot,c],i)=>`
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:7px">
+            <span style="width:26px;height:26px;border-radius:50%;background:${c};color:#fff;
+                  font-size:16px;font-weight:900;display:flex;align-items:center;
+                  justify-content:center">${i+1}</span>
+            <span style="font-size:22px;font-weight:900;color:${c}">${k}</span>
+          </div>
+          ${ART.vshot({ w:186, k:[0.34,0.55,1.15,0.7,0.6][i],
+                        sim:{ bg:['cloth','cloth','dark','white','cloth'][i],
+                              light:['front','side','back','front','side'][i], angle:'a45' } })}
+          <p style="margin:0;font-size:19px;font-weight:700;color:${C.ink2};line-height:1.35">${v}</p>
+          <p style="margin:0;font-size:18px;font-weight:800;color:${C.ink3}">${shot}</p>
+        </div>`).join('')}
+    </div>
+  </div>`,
+  notes:{
+    say:['這一頁是給沒有「烹飪類」商品的學員看的，證明任何商品都有過程。',
+         '第四個「戴上」是飾品類最重要的鏡頭，讓人想像自己戴的樣子。'],
+    ask:['問：做飾品、手工藝的舉手？你的組裝過程有哪幾步？'],
+    do:[], diff:['非食品類的學員不再覺得自己沒東西拍。'],
+    more:['問服務類的學員，她們的「過程」是什麼。'],
+    less:['與上一頁合併。']
+  }});
+
+S({ part:'PART 5', time:'11:38', kind:'std', title:'故事感來自哪裡',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">八個地方可以找到故事感</h2></div>
+    <div data-r style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+      ${[['人','有人在畫面裡，不用露臉',C.clay],
+         ['手','手的動作最好拍也最好看',C.warm],
+         ['製作','正在做的過程',C.gold],
+         ['動作','倒、切、攪、拉、撒',C.sage],
+         ['前後','原料 vs 成品、使用前 vs 後',C.fresh],
+         ['空間','工作檯、廚房、店裡',C.clean],
+         ['細節','紋理、切面、質地',C.lux],
+         ['完成','包好、放好、擺上桌',C.plum]]
+        .map(([k,v,c])=>`
+        <div class="card flat" style="padding:16px 18px;border-left:4px solid ${c}">
+          <p style="margin:0 0 4px;font-size:23px;font-weight:900;color:${c}">${k}</p>
+          <p style="margin:0;font-size:19px;font-weight:650;color:${C.ink2};line-height:1.35">${v}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout gold" data-r>${ART.icon('bulb',32,C.gold)}
+      <span class="txt">最容易做到的是<b>「手」</b>。
+      怕入鏡的人，<b class="hl">整支影片只拍手就好</b>——效果一樣，而且不用化妝。</span></div>
+  </div>`,
+  notes:{
+    say:['八個來源快速念過，重點在最後那句「只拍手就好」。',
+         '中高齡女性學員最大的心理障礙就是怕入鏡，這句話會鬆一大口氣。'],
+    ask:['問：怕入鏡的舉手？（幾乎全班）'],
+    do:[],
+    diff:['原本說「我不要入鏡所以不拍」的學員願意試了。'],
+    more:['示範只拍手的畫面怎麼取景。'],
+    less:['只講「手」這一項。']
+  }});
+
+S({ part:'PART 5', time:'11:42', kind:'std', title:'你的商品，過程在哪裡？',
+  html:`
+  <div class="stack gap-m center" style="text-align:center">
+    <div>
+      <p class="eyebrow" data-r style="justify-content:center">互動　·　三分鐘</p>
+      <h2 class="h" data-r style="font-size:38px">回去看你的分鏡表，<span class="hl">過程有幾個鏡頭？</span></h2>
+    </div>
+    <div class="cards c3" data-r style="gap:20px;max-width:1020px;margin:0 auto">
+      ${[['0–1 個','過程太少，影片會很平。<br>回去加兩個動作的鏡頭。','#c0392b'],
+         ['2–3 個','剛剛好。<br>這支影片會有東西可看。',C.sage],
+         ['4 個以上','很好，但注意總長。<br>超過 30 秒就刪掉一兩個。',C.gold]]
+        .map(([k,v,c])=>`
+        <div class="card" style="padding:24px 20px;border-top:5px solid ${c}">
+          <p class="k" style="font-size:26px;color:${c}">${k}</p>
+          <p class="v" style="font-size:20px">${v}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout" data-r style="max-width:1020px">${ART.icon('warn',30)}
+      <span class="txt">午休前把分鏡表補好。<b>下午就照這張表拍，不再改。</b></span></div>
+  </div>`,
+  notes:{
+    say:['這是上午的收尾，讓學員自己檢查分鏡表。',
+         '「下午就照這張表拍，不再改」要明確講，不然下午會有人一直改。',
+         '午休前提醒：要用的東西午休時先擺好。'],
+    ask:['問：過程有幾個鏡頭？0–1 個的舉手？（這些人要優先協助）'],
+    do:['補完分鏡表，午休時擺好道具。'],
+    diff:['下午拍攝可以直接開始，不用再花時間規劃。'],
+    more:[], less:['口頭提醒即可。']
+  }});
+</script>
+<script>/* =========================================================================
+   slides-b.js — PART 6 鏡頭複習 ～ PART 9 正式拍攝實作
+   第 45–64 頁
+   ========================================================================= */
+
+/* 必備六個鏡頭（PART 9 與附錄共用） */
+const SIX = [
+  ['完整商品', '全景', '看得出來這是什麼、有多大', 'wide'],
+  ['商品＋手', '中景', '有人在用它、在做它',       'medium'],
+  ['商品主角', '近景', '商品填滿畫面',             'close'],
+  ['一個細節', '特寫', '質地、切面、扣環、紋路',   'detail'],
+  ['過程或幕後', '中景', '正在做的那一刻',         'medium'],
+  ['完成畫面', '近景', '包好、擺好、可以帶走了',   'close']
+];
+
+/* =========================================================================
+   PART 6　鏡頭與直橫式（複習）（45–48）
+   ========================================================================= */
+S({ part:'PART 6', time:'11:50', kind:'divider', title:'PART 6｜鏡頭與直橫式（複習）',
+  html: divider('06','鏡頭與直式<span style="font-size:.5em;font-weight:800;opacity:.7">（複習）</span>',
+    '這一段上次課程教過，今天只花十分鐘複習，<br>並補充「錄影的時候」有什麼不一樣。',
+    ART.icon('phone',130,'rgba(255,255,255,.13)')),
+  notes:{
+    say:['這段是複習，不要重講一次。十分鐘，講完就吃飯。',
+         '重點只有兩個：錄影中不要變焦、短影音一律直式。'],
+    ask:[], do:[],
+    diff:['上次沒來的學員也能跟上。'],
+    more:['請上次有來的學員說一句 0.5x 是做什麼用的。'],
+    less:['把 46、47 合併，只講直式那一頁。']
+  }});
+
+S({ part:'PART 6', time:'11:51', kind:'std', title:'複習：0.5x、1x、2x',
+  html:`
+  <div class="stack gap-s pad-tight">
+    <div><h2 class="h" data-r style="font-size:34px;margin-bottom:2px">
+      三個鏡頭，用途完全不同</h2></div>
+    <div data-r style="display:flex;gap:20px;align-items:flex-start;justify-content:center">
+      ${[['0.5x　廣角','裝得下整個桌面、整個空間。<br><b>但邊邊會變形，商品會被拉長。</b>',0.30,C.clean],
+         ['1x　主力','形狀最正確，<b class="hl">九成的畫面用這個</b>。',0.55,C.sage],
+         ['2x　望遠','壓縮背景、突顯單一商品。<br><b>畫質會下降，光不夠時會有顆粒。</b>',1.05,C.plum]]
+        .map(([k,v,px,c])=>`
+        <div style="flex:1;max-width:300px;display:flex;flex-direction:column;gap:9px">
+          <p style="margin:0;font-size:24px;font-weight:900;color:${c}">${k}</p>
+          ${ART.scene({ w:290, h:200, bg:'wood', light:'side', angle:'a45',
+                        px:Math.round(290*px), clutter:px < 0.4 ? 2 : 0 })}
+          <p style="margin:0;font-size:19px;font-weight:650;color:${C.ink2};line-height:1.4">${v}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout gold" data-r style="padding:13px 22px">${ART.icon('warn',30,C.gold)}
+      <span class="txt"><b>錄影的時候多一條規則：不要錄到一半才變焦。</b>
+      畫面會晃、會重新對焦、聲音也會錄到手指的摩擦聲。要換就<b class="hl">停下來，重錄一顆</b>。</span></div>
+  </div>`,
+  notes:{
+    say:['三個鏡頭快速帶過，上次課程講過了。',
+         '真正的重點是最後那句：錄影中變焦是新手最常見的毛病，畫面一定會晃。',
+         '正確做法是停止錄影、換好鏡頭、重新錄一顆。反正等一下要剪開。'],
+    ask:['問：上次課程之後，有人用過 0.5x 嗎？'],
+    do:[],
+    diff:['學員錄影時不再邊錄邊放大。'],
+    more:['示範一次「邊錄邊變焦」有多晃，再示範分兩顆錄。'],
+    less:['只講最後那句提醒。']
+  }});
+
+S({ part:'PART 6', time:'11:54', kind:'std', title:'很多商品一起拍：用 1x',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">一次拍好幾樣東西，用 1x 退後拍</h2></div>
+    <div class="split" data-r style="gap:26px">
+      <div style="text-align:center">
+        <p style="margin:0 0 8px;font-size:22px;font-weight:900;color:#c0392b">0.5x 靠近拍</p>
+        ${ART.scene({ w:400, h:250, bg:'wood', light:'side', angle:'a45', px:150, clutter:3 })}
+        <p style="margin:9px 0 0;font-size:19px;font-weight:650;color:${C.ink2};line-height:1.4">
+          裝得下，但<b>邊邊的東西被拉歪</b>，<br>看起來大小關係不對。</p>
+      </div>
+      <div style="text-align:center">
+        <p style="margin:0 0 8px;font-size:22px;font-weight:900;color:${C.sage}">1x 退兩步拍</p>
+        ${ART.scene({ w:400, h:250, bg:'wood', light:'side', angle:'a45', px:118, clutter:3 })}
+        <p style="margin:9px 0 0;font-size:19px;font-weight:650;color:${C.ink2};line-height:1.4">
+          一樣裝得下，<b class="hl">形狀是對的</b>，<br>誰大誰小、誰前誰後都看得出來。</p>
+      </div>
+    </div>
+    <div class="callout sage" data-r>${ART.icon('ok',30,C.sage)}
+      <span class="txt">口訣：<b>不要用鏡頭裝，要用腳退。</b>
+      人退兩步，比按 0.5x 好看很多。</span></div>
+  </div>`,
+  notes:{
+    say:['「不要用鏡頭裝，要用腳退」這句要重複兩次，學員會記得。',
+         '0.5x 的變形在拍一整桌商品時最明顯，邊角的東西會被拉歪。'],
+    ask:['問：有人拍全家福或一桌菜的時候，覺得旁邊的人變胖了嗎？就是這個原因。'],
+    do:['請學員把桌上的東西排成一排，用 0.5x 和 1x 各拍一張比較。'],
+    diff:['學員知道拍多樣商品要退後，不是按廣角。'],
+    more:['講手機腳架架高一點、往後拉的做法。'],
+    less:['只講口訣，跳過實作。']
+  }});
+
+S({ part:'PART 6', time:'11:57', kind:'std', title:'短影音一律直式 9:16',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">短影音<span class="hl">只拍直式</span>，這件事不用猶豫</h2></div>
+    <div data-r style="display:flex;gap:46px;align-items:flex-start;justify-content:center">
+      <div style="text-align:center">
+        <p style="margin:0 0 8px;font-size:20px;font-weight:800;color:${C.ink3}">在手機上打開，長這樣</p>
+        ${ART.phone(ART.scene({ w:150, h:267, bg:'wood', light:'side', angle:'a45', px:92 }),
+                    { w:158, h:275, bg:'#000' })}
+        <p style="margin:10px 0 0;font-size:22px;font-weight:900;color:${C.sage}">直式 9:16　✓</p>
+        <p style="margin:2px 0 0;font-size:19px;font-weight:650;color:${C.ink2}">佔滿整個手機畫面</p>
+      </div>
+      <div style="text-align:center">
+        <p style="margin:0 0 8px;font-size:20px;font-weight:800;color:${C.ink3}">同一支影片，橫著拍</p>
+        ${ART.phone(`<div style="position:absolute;inset:0;background:#000;display:flex;
+             align-items:center;justify-content:center">
+             ${ART.scene({ w:150, h:84, bg:'wood', light:'side', angle:'a45', px:52 })}</div>`,
+                    { w:158, h:275, bg:'#000' })}
+        <p style="margin:10px 0 0;font-size:22px;font-weight:900;color:#c0392b">橫式 16:9　✗</p>
+        <p style="margin:2px 0 0;font-size:19px;font-weight:650;color:${C.ink2}">上下一大片黑邊，沒人想看完</p>
+      </div>
+    </div>
+    <div class="callout" data-r>${ART.icon('phone',30)}
+      <span class="txt">Reels、限時動態、TikTok、YouTube Shorts <b>全部都是直式</b>。
+      今天下午拍的每一顆鏡頭，<b class="hl">手機都要直著拿</b>——這是今天唯一不能違反的規則。</span></div>
+  </div>`,
+  notes:{
+    say:['這一頁講死，不要留討論空間：今天全部直式。',
+         '中高齡學員習慣把手機打橫（因為以前的相機是橫的），下午一定要一直提醒。',
+         '助教走動時看到有人橫著拿，直接走過去把手機轉直。'],
+    ask:['問：平常錄影是直著拿還橫著拿？（多數人會說橫的）'],
+    do:['現在把手機直著拿起來，錄五秒鐘試試看。'],
+    diff:['下午拍攝時橫拍的人變少。'],
+    more:['講如果已經拍成橫的，InShot 可以補救但畫面會被裁掉一半。'],
+    less:['一句話講完：今天全部直式。']
+  }});
+
+/* =========================================================================
+   PART 7　錄影長度與運鏡（49–55）
+   ========================================================================= */
+S({ part:'PART 7', time:'13:00', kind:'divider', title:'PART 7｜錄影長度與運鏡',
+  html: divider('07','錄影長度<br>與運鏡',
+    '上午想清楚了，下午開始動手。<br>先講兩件會直接影響「好不好剪」的事。',
+    ART.icon('film',130,'rgba(255,255,255,.13)')),
+  notes:{
+    say:['下午第一段，先讓大家醒過來。',
+         '這一段的兩個重點——每顆 3–5 秒、前後各留一秒——是等一下拍攝的操作規則。'],
+    ask:[], do:[],
+    diff:['學員從「想」切換到「拍」的狀態。'],
+    more:[], less:[]
+  }});
+
+S({ part:'PART 7', time:'13:01', kind:'std', title:'一個鏡頭 3–5 秒就好',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">不要一鏡到底錄兩分鐘</h2></div>
+    <div class="stack gap-s" data-r>
+      ${[['一鏡到底錄 2 分鐘','剪的時候要看兩分鐘才找得到能用的三秒。<br>而且中途一定會晃、會失焦、會有雜音。','#c0392b','no'],
+         ['分成 6–8 顆，每顆 3–5 秒','每顆都是完整可用的素材，<b class="hl">直接排順序就是一支影片</b>。',C.sage,'ok']]
+        .map(([k,v,c,ic])=>`
+        <div style="display:flex;gap:16px;align-items:flex-start;background:#fff;
+             border:1px solid rgba(36,28,23,.12);border-left:6px solid ${c};
+             border-radius:14px;padding:18px 22px">
+          <span style="flex:0 0 auto;margin-top:2px">${ART.icon(ic,32,c)}</span>
+          <span style="flex:1">
+            <b style="display:block;font-size:24px;font-weight:900;color:${c};margin-bottom:5px">${k}</b>
+            <span style="font-size:20px;font-weight:650;color:${C.ink2};line-height:1.5">${v}</span>
+          </span>
+        </div>`).join('')}
+    </div>
+    <div class="split" data-r style="gap:20px;align-items:center">
+      <div class="callout gold" style="margin:0">${ART.icon('clock',30,C.gold)}
+        <span class="txt"><b>3 秒</b>：看得清楚的最短時間。<br>
+        <b>5 秒</b>：再長觀眾就開始滑走了。</span></div>
+      <div class="callout sage" style="margin:0">${ART.icon('bulb',30,C.sage)}
+        <span class="txt">實際錄的時候錄 <b>6–8 秒</b>，<br>
+        剪掉頭尾剛好剩 3–5 秒。</span></div>
+    </div>
+  </div>`,
+  notes:{
+    say:['「一鏡到底」是最常見的錯誤，而且是拍了不剪的主因。',
+         '錄 6–8 秒剪成 3–5 秒，這個數字要講清楚，等一下實作會用到。'],
+    ask:['問：有人錄過一鏡到底、後來完全沒剪的舉手？'],
+    do:['現在錄一顆 6 秒的鏡頭，數 1、2、3、4、5、6 再停。'],
+    diff:['學員錄的每一段都很短，剪輯時素材整齊。'],
+    more:['講「一顆鏡頭只做一件事」——手只做一個動作。'],
+    less:['只講 3–5 秒這個數字。']
+  }});
+
+S({ part:'PART 7', time:'13:06', kind:'std', title:'錄影前後各留一秒',
+  html:`
+  <div class="stack gap-m">
+    <div>
+      <p class="eyebrow" data-r>好剪的關鍵</p>
+      <h2 class="h" data-r style="font-size:36px">按下錄影 → <span class="hl">停一秒</span> → 開始動作 →
+        動作做完 → <span class="hl">再停一秒</span> → 才按停止</h2>
+    </div>
+    <div data-r style="display:flex;gap:0;align-items:stretch;border-radius:14px;overflow:hidden;
+         border:1px solid rgba(36,28,23,.14)">
+      ${[['前 1 秒','手還沒進畫面','留白',C.goldSoft,C.gold],
+         ['中間 3–5 秒','動作在這裡發生','要用的',C.sageSoft,C.sage],
+         ['後 1 秒','手已經離開','留白',C.goldSoft,C.gold]]
+        .map(([k,v,tag,bg,c],i)=>`
+        <div style="flex:${i===1?2.6:1};background:${bg};padding:20px 18px;text-align:center">
+          <p style="margin:0 0 6px;font-size:23px;font-weight:900;color:${c}">${k}</p>
+          <p style="margin:0 0 8px;font-size:19px;font-weight:650;color:${C.ink2}">${v}</p>
+          <span class="tag sm" style="background:${c};color:#fff;border-color:${c}">${tag}</span>
+        </div>`).join('')}
+    </div>
+    <div class="stack gap-s" data-r>
+      ${[['為什麼','剪的時候需要一點「可以切的餘地」。前後沒留，就會剪到手還在動、動作被切掉一半。'],
+         ['最常見的失敗','按下錄影的同時手就伸進去——剪出來永遠有一格是手的殘影。'],
+         ['多錄一點不吃虧','手機容量不是問題，<b>素材少才是問題</b>。']]
+        .map(([k,v])=>`
+        <div style="display:flex;gap:14px;align-items:baseline">
+          <span style="flex:0 0 132px;font-size:21px;font-weight:900;color:${C.clay}">${k}</span>
+          <span style="font-size:20px;font-weight:650;color:${C.ink2};line-height:1.5">${v}</span>
+        </div>`).join('')}
+    </div>
+  </div>`,
+  notes:{
+    say:['這一頁是整個下午最實用的一句話，但學員最容易忘記。',
+         '示範給大家看：不留一秒的素材，剪出來手是「跳」進畫面的。',
+         '下午拍攝的時候，助教走動要一直提醒「先停一秒再動」。'],
+    ask:['問：等一下按下錄影之後，第一件事要做什麼？（答：什麼都不做，數一秒）'],
+    do:['練習一次：按錄影 → 數一秒 → 把手伸進去拿商品 → 放回去 → 數一秒 → 停。'],
+    diff:['素材剪起來乾淨，不用一直微調起點。'],
+    more:['講如果忘了留，InShot 也可以用「分割」補救，但會少半秒。'],
+    less:['只講「前後各留一秒」六個字，然後示範一次。']
+  }});
+
+/* 運鏡三頁，共用模板 */
+const movePage = (no, name, en, kind, why, how, bad, c) => ({
+  part:'PART 7', time:'13:1' + no, kind:'std', title:'運鏡' + no + '：' + name,
+  html:`
+  <div class="stack gap-m">
+    <div>
+      <p class="eyebrow" data-r>運鏡 ${no} / 3</p>
+      <h2 class="h" data-r style="font-size:38px">${name}　<span style="font-size:.62em;
+        font-weight:800;color:${C.ink3}">${en}</span></h2>
+    </div>
+    <div class="split" data-r style="gap:30px;align-items:center">
+      <div style="display:flex;justify-content:center">${ART.move(kind, 420, 268)}</div>
+      <div class="stack gap-s">
+        <div class="card" style="padding:18px 22px;border-left:6px solid ${c}">
+          <p style="margin:0 0 5px;font-size:22px;font-weight:900;color:${c}">什麼時候用</p>
+          <p style="margin:0;font-size:20px;font-weight:650;color:${C.ink2};line-height:1.5">${why}</p>
+        </div>
+        <div class="card" style="padding:18px 22px;border-left:6px solid ${C.sage}">
+          <p style="margin:0 0 5px;font-size:22px;font-weight:900;color:${C.sage}">怎麼做</p>
+          <p style="margin:0;font-size:20px;font-weight:650;color:${C.ink2};line-height:1.5">${how}</p>
+        </div>
+      </div>
+    </div>
+    <div class="callout" data-r>${ART.icon('warn',30)}
+      <span class="txt">${bad}</span></div>
+  </div>`
+});
+
+S(Object.assign(movePage(1, '靠近', 'Push In', 'in',
+  '要讓觀眾<b>注意某個細節</b>：質地、封口、logo、切面。<br>也適合當影片的第一顆，把注意力抓進來。',
+  '手機<b class="hl">整台慢慢往前移</b>，不要用手指放大。<br>兩隻手拿穩，用腳往前走半步最穩。',
+  '最常見的錯：用手指縮放代替移動。畫質會掉，而且會晃。<b>要動的是手機，不是手指。</b>',
+  C.clay), {
+  notes:{
+    say:['三種運鏡，這是最好用的一種。',
+         '一定要強調：靠近是「人往前」不是「手指放大」。',
+         '示範一次慢慢往前，速度大約三秒走完。'],
+    ask:['問：這個動作看起來像什麼？（像我們自己走近去看清楚）'],
+    do:['對著自己的商品，錄一顆靠近的鏡頭。'],
+    diff:['學員不再用手指縮放。'],
+    more:['講可以配合對焦：先對遠的，靠近後點一下重新對焦。'],
+    less:['只示範不實作。']
+  }}));
+
+S(Object.assign(movePage(2, '離開', 'Pull Out', 'out',
+  '從一個細節<b>退出來看到全貌</b>，很適合<b class="hl">當結尾</b>。<br>「原來這是一整個做好的商品」的感覺。',
+  '從特寫開始，手機<b>慢慢往後退</b>，退到看得見全部。<br>退的時候盡量走直線，不要邊退邊轉。',
+  '退太快會像失誤。三秒退完就好，寧可慢也不要快。',
+  C.plum), {
+  notes:{
+    say:['離開和靠近是同一個動作反過來，示範一次就好。',
+         '重點是它適合當結尾——上午寫的第三段「完成」用這個運鏡最好看。'],
+    ask:['問：你的影片結尾要放什麼畫面？可以用這一招。'],
+    do:['錄一顆離開的鏡頭，當作影片結尾。'],
+    diff:['學員的影片有一個像樣的收尾。'],
+    more:['講可以在退到底時停住一秒，方便加最後一句字幕。'],
+    less:['跟上一頁合併講。']
+  }}));
+
+S(Object.assign(movePage(3, '平移', 'Pan', 'pan',
+  '一次<b>介紹好幾樣東西</b>，或者從左到右看過整個桌面。<br>適合開場，讓人知道「這裡有什麼」。',
+  '身體不動，<b class="hl">手臂帶著手機平平地移過去</b>。<br>速度要慢——比你以為的還要更慢。',
+  '平移最容易晃。手肘夾在身側、手臂當支點，比手腕轉穩十倍。有腳架就用腳架。',
+  C.clean), {
+  notes:{
+    say:['平移是三種裡面最難拍穩的，一定要示範。',
+         '「手肘夾在身側」這個動作要做給大家看，中高齡學員照做效果很明顯。',
+         '速度要一直強調慢，新手平移都太快。'],
+    ask:['問：有帶腳架的舉手？平移用腳架會穩很多。'],
+    do:['錄一顆平移的鏡頭，從左到右數五秒。'],
+    diff:['平移的畫面沒有明顯抖動。'],
+    more:['講也可以上下平移（從桌面往上帶到商品）。'],
+    less:['示範一次，不實作。']
+  }}));
+
+S({ part:'PART 7', time:'13:19', kind:'std', title:'【實作】三種運鏡各拍一次',
+  html:`
+  <div class="stack gap-m center" style="text-align:center">
+    <div>
+      <p class="eyebrow" data-r style="justify-content:center">實作　·　八分鐘</p>
+      <h2 class="h" data-r style="font-size:38px">用你自己的商品，<span class="hl">三種各錄一顆</span></h2>
+    </div>
+    <div class="cards c3" data-r style="gap:20px;max-width:1050px;margin:0 auto">
+      ${[['靠近','從全部 → 一個細節','in',C.clay],
+         ['離開','從一個細節 → 全部','out',C.plum],
+         ['平移','從左邊 → 右邊','pan',C.clean]]
+        .map(([k,v,kind,c])=>`
+        <div class="card" style="padding:16px;border-top:5px solid ${c}">
+          <p class="k" style="font-size:24px;color:${c};margin-bottom:9px">${k}</p>
+          ${ART.move(kind, 268, 168)}
+          <p class="v" style="font-size:19px;margin-top:9px">${v}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout gold" data-r style="max-width:1050px">${ART.icon('warn',30,C.gold)}
+      <span class="txt">每顆錄 <b>6–8 秒</b>，前後<b>各留一秒</b>，手機<b class="hl">直著拿</b>。
+      錄完馬上回放看有沒有晃——晃就重錄，現在重錄比回家重拍容易。</span></div>
+  </div>`,
+  notes:{
+    say:['八分鐘，三顆鏡頭。助教分頭走動。',
+         '走動時看三件事：手機有沒有直著拿、有沒有前後留一秒、平移會不會太快。',
+         '錄完一定要請她們自己回放，這個習慣比什麼都重要。'],
+    ask:['問：誰的平移最穩？請她示範一次給大家看。'],
+    do:['三種運鏡各錄一顆，錄完自己回放。'],
+    diff:['學員手上有三顆可用的運鏡素材，等一下可以直接用。'],
+    more:['請兩三位把畫面投影出來，全班一起看哪裡會晃。'],
+    less:['減成兩種：靠近和平移。']
+  }});
+
+/* =========================================================================
+   PART 8　15–30 秒怎麼組（56–58）
+   ========================================================================= */
+S({ part:'PART 8', time:'13:25', kind:'divider', title:'PART 8｜15–30 秒怎麼組',
+  html: divider('08','15–30 秒<br>怎麼組起來',
+    '鏡頭都會拍了，接下來是順序。<br>把上午的三段式，換算成秒數。',
+    ART.icon('clock',130,'rgba(255,255,255,.13)')),
+  notes:{
+    say:['很短的一段，十分鐘。講完就開始正式拍攝。'],
+    ask:[], do:[], diff:[], more:[], less:[]
+  }});
+
+S({ part:'PART 8', time:'13:26', kind:'std', title:'前 3 秒／中間／後面／結尾',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">一支 20 秒的影片，時間這樣分</h2></div>
+    <div data-r style="display:flex;align-items:stretch;border-radius:16px;overflow:hidden;
+         border:1px solid rgba(36,28,23,.14)">
+      ${[['前 3 秒','3 秒','最好看的那一顆<br>或者一句話字幕','決定人家滑不滑走',C.clay,1.5],
+         ['中間','8–12 秒','過程、動作、細節<br>2–3 顆鏡頭','影片的內容在這裡',C.gold,5],
+         ['後面','3–4 秒','完成的畫面','讓人看到結果',C.sage,2],
+         ['結尾','2–3 秒','一句話：怎麼買、<br>下一支拍什麼','告訴人家下一步',C.plum,1.5]]
+        .map(([k,sec,what,why,c,fl])=>`
+        <div style="flex:${fl};padding:18px 14px;text-align:center;background:#fff;
+             border-top:6px solid ${c}">
+          <p style="margin:0 0 3px;font-size:22px;font-weight:900;color:${c}">${k}</p>
+          <p style="margin:0 0 9px;font-size:26px;font-weight:900;color:${C.ink}">${sec}</p>
+          <p style="margin:0 0 7px;font-size:18px;font-weight:700;color:${C.ink2};line-height:1.35">${what}</p>
+          <p style="margin:0;font-size:17px;font-weight:650;color:${C.ink3};line-height:1.35">${why}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout gold" data-r>${ART.icon('warn',32,C.gold)}
+      <span class="txt"><b>前 3 秒決定一切。</b>
+      不要把最好的畫面留到最後——<b class="hl">留到最後就沒人看得到了</b>。
+      把你最滿意的那一顆，放第一個。</span></div>
+  </div>`,
+  notes:{
+    say:['「前三秒決定一切」是整個短影音最重要的一件事。',
+         '中高齡學員很習慣「慢慢鋪陳」，要明講：社群不是這樣看的，三秒沒抓住就滑走了。',
+         '最好的畫面放第一個——這句話等一下剪輯時會再講一次。'],
+    ask:['問：你滑手機的時候，一支影片你會看幾秒才決定要不要繼續？'],
+    do:['圈出你分鏡表上「最好看的那一顆」，等一下把它放第一個。'],
+    diff:['學員的影片開頭不再是空景或慢慢走近。'],
+    more:['講前三秒也可以放「問題」：一句字幕「這個要怎麼開？」'],
+    less:['只講前 3 秒那一格。']
+  }});
+
+S({ part:'PART 8', time:'13:30', kind:'std', title:'三種主題的秒數配置',
+  html:`
+  <div class="stack gap-s pad-tight">
+    <div><h2 class="h" data-r style="font-size:34px;margin-bottom:2px">
+      三個範例，照著抄就可以</h2></div>
+    <div data-r style="display:flex;gap:16px">
+      ${[['商品介紹','20 秒',C.clay,
+          [['3 秒','商品特寫，一句字幕'],['5 秒','商品全景，看得出大小'],
+           ['7 秒','手拿起來、轉一圈'],['3 秒','使用的樣子'],['2 秒','完成畫面＋怎麼買']]],
+         ['製作過程','25 秒',C.gold,
+          [['3 秒','原料排開'],['5 秒','第一個動作（切、倒）'],
+           ['6 秒','第二個動作（攪、煮）'],['6 秒','關鍵的一刻（特寫）'],
+           ['5 秒','完成品＋包起來']]],
+         ['試吃心得','18 秒',C.sage,
+          [['3 秒','商品在手上'],['4 秒','打開、拿出來'],
+           ['5 秒','吃／用的那一刻'],['4 秒','表情或反應'],['2 秒','一句評語']]]]
+        .map(([k,total,c,rows])=>`
+        <div style="flex:1;background:#fff;border:1px solid rgba(36,28,23,.12);
+             border-top:6px solid ${c};border-radius:14px;padding:16px 18px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px">
+            <span style="font-size:23px;font-weight:900;color:${c}">${k}</span>
+            <span style="font-size:20px;font-weight:900;color:${C.ink3}">共 ${total}</span>
+          </div>
+          ${rows.map(([s,t])=>`
+            <div style="display:flex;gap:10px;align-items:baseline;padding:5px 0;
+                 border-top:1px dashed rgba(36,28,23,.12)">
+              <span style="flex:0 0 54px;font-size:19px;font-weight:900;color:${c}">${s}</span>
+              <span style="font-size:19px;font-weight:650;color:${C.ink2};line-height:1.35">${t}</span>
+            </div>`).join('')}
+        </div>`).join('')}
+    </div>
+    <div class="callout sage" data-r style="padding:13px 22px">${ART.icon('ok',28,C.sage)}
+      <span class="txt">看得出來嗎？<b>每一種都是 5 顆鏡頭左右</b>。
+      這就是為什麼上午的分鏡表要寫 5–8 個。</span></div>
+  </div>`,
+  notes:{
+    say:['三個範例對應上午最多人選的三種主題。',
+         '重點是最後那句：五顆鏡頭就夠了，不要貪多。',
+         '請學員拿出自己的分鏡表，對照最接近的那一欄。'],
+    ask:['問：你的分鏡表有幾顆？超過八顆的舉手？（請她們刪到八顆以內）'],
+    do:['照最接近的範例，把自己的分鏡表標上秒數。'],
+    diff:['學員的分鏡表有秒數，總長落在 15–30 秒。'],
+    more:['講如果素材真的很好，可以做到 45 秒，但新手先做 20 秒。'],
+    less:['只講第一個範例。']
+  }});
+
+/* =========================================================================
+   PART 9　正式拍攝實作（59–64）★ 本課重點
+   ========================================================================= */
+S({ part:'PART 9', time:'13:35', kind:'divider', title:'PART 9｜正式拍攝實作',
+  html: divider('09','正式拍攝',
+    '今天最重要、時間最長的一段。<br>照著你的分鏡表，把素材拍完。',
+    ART.icon('cam',130,'rgba(255,255,255,.13)')),
+  notes:{
+    say:['這是今天的主戲，七十五分鐘。',
+         '講師和助教全程走動，台上不要再講課。',
+         '中間有一次全班的中場檢查，其餘時間都在拍。'],
+    ask:[], do:[],
+    diff:['每個人手上都有一批可以剪的素材。'],
+    more:[], less:['最少也要保留 50 分鐘給這一段，寧可刪剪輯。']
+  }});
+
+S({ part:'PART 9', time:'13:36', kind:'std', title:'拍之前，五樣東西準備好',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">開始拍之前，先花三分鐘擺好</h2></div>
+    <div data-r style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px">
+      ${[['商品','擦乾淨、標籤轉正面','tag',C.clay],
+         ['背景','素色布、木桌、白牆<br>把雜物移開','wood',C.gold],
+         ['光','靠窗，人不要背對窗<br>關掉頭頂的黃燈','sun',C.sage],
+         ['道具','1–3 樣就好<br>盤子、布、葉子','hand',C.clean],
+         ['手機','直著拿、擦鏡頭<br>清出儲存空間','phone',C.plum]]
+        .map(([k,v,ic,c])=>`
+        <div class="card" style="padding:18px 16px;text-align:center;border-top:5px solid ${c}">
+          <span style="display:block;margin-bottom:8px">${ART.icon(ic,38,c)}</span>
+          <p style="margin:0 0 5px;font-size:23px;font-weight:900;color:${c}">${k}</p>
+          <p style="margin:0;font-size:18px;font-weight:650;color:${C.ink2};line-height:1.4">${v}</p>
+        </div>`).join('')}
+    </div>
+    <div class="split" data-r style="gap:18px">
+      <div class="callout gold" style="margin:0">${ART.icon('warn',30,C.gold)}
+        <span class="txt"><b>最容易忘記：擦鏡頭。</b>
+        手機鏡頭上的指紋，會讓整支影片霧霧的。</span></div>
+      <div class="callout sage" style="margin:0">${ART.icon('ok',30,C.sage)}
+        <span class="txt">擺好之後<b class="hl">先拍一張照試光</b>，<br>
+        太暗就往窗邊移，不要直接開始錄。</span></div>
+    </div>
+  </div>`,
+  notes:{
+    say:['三分鐘擺場，不要跳過。擺得好，後面每一顆都好看。',
+         '擦鏡頭這件事一定要講，而且要請大家現在就擦。',
+         '「先拍一張照試光」是最快的檢查方式。'],
+    ask:['問：現在請大家擦一下鏡頭。擦完舉手。'],
+    do:['擺好五樣東西，拍一張照試光。'],
+    diff:['素材的畫質整齊，不會有人整支都是霧的。'],
+    more:['講補光燈的位置：放在側邊 45 度，不要正打。'],
+    less:['只講光和擦鏡頭兩項。']
+  }});
+
+S({ part:'PART 9', time:'13:40', kind:'std', title:'【總實作 A】先拍完必備六個鏡頭',
+  html:`
+  <div class="stack gap-s pad-tight">
+    <div>
+      <p class="eyebrow" data-r>總實作 A　·　三十五分鐘</p>
+      <h2 class="h" data-r style="font-size:34px;margin-bottom:2px">
+        不管你的主題是什麼，<span class="hl">這六顆一定要有</span></h2>
+    </div>
+    <div data-r style="display:flex;gap:11px">
+      ${SIX.map(([k,shot,v,kind],i)=>`
+        <div style="flex:1;display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="width:24px;height:24px;border-radius:50%;background:${C.clay};color:#fff;
+                  font-size:15px;font-weight:900;display:flex;align-items:center;
+                  justify-content:center;flex:0 0 auto">${i+1}</span>
+            <span style="font-size:20px;font-weight:900;color:${C.ink}">${k}</span>
+          </div>
+          ${ART.shot(kind, 176, 234, { cap:shot })}
+          <p style="margin:0;font-size:17px;font-weight:650;color:${C.ink2};line-height:1.35">${v}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout gold" data-r style="padding:12px 22px">${ART.icon('clock',28,C.gold)}
+      <span class="txt">每顆錄 <b>6–8 秒</b>，前後各留一秒，直式。
+      <b class="hl">六顆拍完再回來看這一頁</b>，不要邊拍邊改分鏡表。</span></div>
+  </div>`,
+  notes:{
+    say:['這六顆是保底。就算腳本寫得再爛，有這六顆也剪得出一支影片。',
+         '講完就放人開始拍，台上不要再說話。',
+         '三十五分鐘，中間第 18 分鐘左右做一次中場檢查。'],
+    ask:['問：六顆分別是什麼？請一位學員複述一次。'],
+    do:['照著六個鏡頭拍完，每顆 6–8 秒。'],
+    diff:['三十五分鐘後，每個人至少有六段影片在相簿裡。'],
+    more:['拍完的人可以開始換角度重拍第 3、4 顆（最好用的兩顆）。'],
+    less:['刪掉第 5 顆過程，先確保 1–4 顆拍完。']
+  }});
+
+S({ part:'PART 9', time:'13:58', kind:'std', title:'拍到一半的中場檢查',
+  html:`
+  <div class="stack gap-m center" style="text-align:center">
+    <div>
+      <p class="eyebrow" data-r style="justify-content:center">全班暫停　·　三分鐘</p>
+      <h2 class="h" data-r style="font-size:38px">停一下，<span class="hl">回放你剛剛拍的</span></h2>
+    </div>
+    <div class="cards c4" data-r style="gap:16px;max-width:1120px;margin:0 auto">
+      ${[['會晃嗎？','晃就重錄。手肘夾住身體、或者靠著桌邊。','#c0392b'],
+         ['對到焦了嗎？','商品糊糊的就重錄。錄之前先點一下商品。',C.gold],
+         ['夠亮嗎？','暗就往窗邊移一點，不要用手機自己調亮。',C.sage],
+         ['直式嗎？','橫的全部重錄。這一項沒有商量。',C.clay]]
+        .map(([k,v,c])=>`
+        <div class="card" style="padding:20px 16px;border-top:5px solid ${c}">
+          <p class="k" style="font-size:24px;color:${c}">${k}</p>
+          <p class="v" style="font-size:19px">${v}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout" data-r style="max-width:1120px">${ART.icon('bulb',30)}
+      <span class="txt">現在重錄，比回家重拍容易一百倍。
+      <b class="hl">四項有一項不過就重錄那一顆</b>——不用全部重來。</span></div>
+  </div>`,
+  notes:{
+    say:['這三分鐘一定要停下來做，不然會有人拍了三十五分鐘全部都是晃的。',
+         '四項唸一次，讓大家自己回放檢查。',
+         '看到有人整批都不行，助教過去一對一處理。'],
+    ask:['問：四項全過的舉手？有一項不過的舉手？（不過的先修那一顆）'],
+    do:['回放剛剛拍的六顆，四項自己檢查。'],
+    diff:['避免整段實作報廢，這是最有價值的三分鐘。'],
+    more:['請一位學員把「晃」和「不晃」的兩顆投影出來對比。'],
+    less:['只檢查「直式」和「會不會晃」兩項。']
+  }});
+
+S({ part:'PART 9', time:'14:03', kind:'std', title:'【總實作 B】補拍：多幾種距離、多拍過程',
+  html:`
+  <div class="stack gap-m">
+    <div>
+      <p class="eyebrow" data-r>總實作 B　·　三十分鐘</p>
+      <h2 class="h" data-r style="font-size:36px">六顆只是保底。<span class="hl">現在把素材變成兩倍</span></h2>
+    </div>
+    <div data-r style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+      ${[['同一個動作，換距離再拍一次','剛剛拍過的動作，退遠一點再拍一次、湊近一點再拍一次。<br>剪的時候就有三種可以挑。','wide',C.clay],
+         ['過程再多拍兩個','倒、切、攪、包、擦、放。<br><b>動作</b>比靜止的商品好看太多。','medium',C.gold],
+         ['加上三種運鏡','剛剛練的靠近、離開、平移，<br>各挑一個地方用上去。','close',C.sage]]
+        .map(([k,v,kind,c])=>`
+        <div class="card" style="padding:18px;border-top:5px solid ${c}">
+          <p style="margin:0 0 10px;font-size:22px;font-weight:900;color:${c};line-height:1.3">${k}</p>
+          <div style="display:flex;justify-content:center;margin-bottom:10px">
+            ${ART.shot(kind, 172, 200, { cap:null })}
+          </div>
+          <p style="margin:0;font-size:19px;font-weight:650;color:${C.ink2};line-height:1.45">${v}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout gold" data-r>${ART.icon('warn',32,C.gold)}
+      <span class="txt"><b>這三十分鐘是今天最有價值的三十分鐘。</b>
+      素材多一倍，剪的時候才有得挑。<b class="hl">拍得多的人，剪出來一定比較好看</b>——
+      這是攝影決定的，不是剪輯決定的。</span></div>
+  </div>`,
+  notes:{
+    say:['這一段的觀念要講清楚：好影片是拍出來的，不是剪出來的。',
+         '很多人以為剪輯可以救，實際上剪輯只能從你拍到的東西裡面挑。',
+         '三十分鐘全部放給學員拍，講師和助教走動。'],
+    ask:['問：現在手機裡有幾段影片？少於十段的請繼續拍。'],
+    do:['補拍到至少 12–15 段素材。'],
+    diff:['剪輯時每個人都有得挑，不會出現「只能全部用上」的窘境。'],
+    more:['拍很快的人：換一個完全不同的背景，同樣的商品再拍一輪。'],
+    less:['縮到 20 分鐘，只做第一項（換距離重拍）。']
+  }});
+
+S({ part:'PART 9', time:'14:35', kind:'std', title:'拍完自己檢查六項',
+  html:`
+  <div class="stack gap-s pad-tight">
+    <div><h2 class="h" data-r style="font-size:34px;margin-bottom:2px">
+      六項都打勾，才算拍完</h2></div>
+    <div class="stack gap-s" data-r>
+      ${[['素材有 12 段以上','少於 12 段，剪的時候會不夠用。'],
+         ['六個必備鏡頭都有','全景、中景、近景、特寫、過程、完成。'],
+         ['每段都是直式','橫的不能用，現在還來得及補。'],
+         ['每段 6–8 秒，前後有留白','太短的剪不動，要重錄。'],
+         ['回放過，沒有明顯晃動或糊掉','有一兩顆不行沒關係，刪掉就好。'],
+         ['最滿意的那一顆已經圈起來','等一下它要放影片的第一個。']]
+        .map(([k,v],i)=>`
+        <div style="display:flex;gap:14px;align-items:center;background:#fff;
+             border:1px solid rgba(36,28,23,.12);border-radius:12px;padding:12px 18px">
+          <span style="flex:0 0 auto;width:30px;height:30px;border-radius:8px;
+                border:2.5px solid ${C.sage};display:flex;align-items:center;
+                justify-content:center;font-size:16px;font-weight:900;color:${C.sage}">${i+1}</span>
+          <span style="flex:0 0 330px;font-size:21px;font-weight:900;color:${C.ink}">${k}</span>
+          <span style="font-size:19px;font-weight:650;color:${C.ink2}">${v}</span>
+        </div>`).join('')}
+    </div>
+    <div class="callout sage" data-r style="padding:12px 22px">${ART.icon('ok',28,C.sage)}
+      <span class="txt">全部打勾的人可以先休息。<b>還沒好的，休息時間繼續拍</b>——
+      素材沒拍夠，等一下剪輯會很痛苦。</span></div>
+  </div>`,
+  notes:{
+    say:['六項唸過去，讓學員自己對。',
+         '「素材沒拍夠，剪輯會很痛苦」這句要講，讓落後的人願意利用休息時間。',
+         '助教統計一下有幾個人沒達標，如果超過三分之一，剪輯段要放慢。'],
+    ask:['問：六項全過的舉手？（記下沒過的人，休息時優先協助）'],
+    do:['自我檢查六項，沒過的補拍。'],
+    diff:['進入剪輯段時，全班素材量接近，進度才跟得上。'],
+    more:['過關的人幫旁邊的人拍，或者當模特兒出借一雙手。'],
+    less:['只檢查前三項。']
+  }});
+</script>
+<script>/* =========================================================================
+   slides-c.js — PART 10 InShot 剪輯　·　PART 11 成果與流量　·　附錄
+   第 65–84 頁
+   ========================================================================= */
+
+/* 四週發片計畫（第 80 頁與附錄共用） */
+const PLAN = [
+  ['第 1 週', '草莓果醬怎麼熬', '—', '—'],
+  ['第 2 週', '—', '果醬的質地特寫', '—'],
+  ['第 3 週', '鳳梨果醬怎麼熬', '—', '—'],
+  ['第 4 週', '—', '—', '開封後可以放多久']
+];
+
+/* InShot 九步驟（第 74、附錄共用） */
+const NINE = [
+  ['建立專案，比例選 9:16', '一進去就先設，之後不能改'],
+  ['匯入今天拍的影片',     '一次全選，順序等一下再排'],
+  ['修剪：切掉頭尾',       '每段留 3–5 秒最精彩的'],
+  ['分割與刪除',           '中間不要的部分切開刪掉'],
+  ['調整順序',             '最好看的那顆放第一個'],
+  ['加文字',               '前 3 秒那一句最重要'],
+  ['加音樂並調音量',       '用 InShot 內建的'],
+  ['轉場：多數直接切',     '不要每個接縫都加效果'],
+  ['輸出 1080p／30fps',    '存到手機相簿']
+];
+
+/* =========================================================================
+   PART 10　InShot 剪輯（65–75）
+   ========================================================================= */
+S({ part:'PART 10', time:'15:00', kind:'divider', title:'PART 10｜InShot 剪輯',
+  html: divider('10','把拍好的素材<br>組成一支影片',
+    '剪輯只有九個步驟，四十分鐘做完。<br>今天不追求花俏，只求「能看、能發」。',
+    ART.icon('cut',130,'rgba(255,255,255,.13)')),
+  notes:{
+    say:['先講清楚這段只有四十分鐘，所以只教必要的九步。',
+         '花俏的功能（速度、濾鏡、貼圖）今天不教，不是不能用，是今天沒時間。',
+         '請大家先打開 InShot，沒裝的舉手，助教立刻處理。'],
+    ask:['問：InShot 打開了嗎？打開的舉手。'],
+    do:['打開 InShot。'],
+    diff:['全班在同一個畫面上。'],
+    more:[], less:['直接跳到第 67 頁開始操作。']
+  }});
+
+S({ part:'PART 10', time:'15:01', kind:'std', title:'InShot 介面：只有四個地方要記',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">畫面上東西很多，<span class="hl">但你只會用到四個</span></h2></div>
+    <div class="split" data-r style="gap:34px;align-items:center">
+      <div style="display:flex;justify-content:center">
+        ${ART.phone(ART.inshot({ tab:0, sel:1, h:428, caption:'手工草莓果醬' }), { w:232, h:428, bg:'#0f0f12' })}
+      </div>
+      <div class="stack gap-s">
+        ${[['上面：預覽','影片長什麼樣子，隨時看這裡。',C.clay],
+           ['中間：時間軸','你的每一段影片排成一條。<br><b>點一下就選中那一段。</b>',C.gold],
+           ['下面：功能列','剪輯、文字、貼圖、音樂、濾鏡、畫布。<br>今天用到<b class="hl">剪輯、文字、音樂</b>三個。',C.sage],
+           ['右上角：儲存','剪好之後按這裡輸出。',C.plum]]
+          .map(([k,v,c])=>`
+          <div style="display:flex;gap:14px;align-items:flex-start;background:#fff;
+               border:1px solid rgba(36,28,23,.12);border-left:5px solid ${c};
+               border-radius:12px;padding:13px 18px">
+            <span style="flex:0 0 128px;font-size:21px;font-weight:900;color:${c}">${k}</span>
+            <span style="font-size:19px;font-weight:650;color:${C.ink2};line-height:1.45">${v}</span>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="callout" data-r style="padding:12px 22px">${ART.icon('warn',28)}
+      <span class="txt">App 會改版，位置可能跟這張圖不完全一樣。
+      <b>重點是知道要找什麼，不是背按鈕在哪裡。</b></span></div>
+  </div>`,
+  notes:{
+    say:['介面只講四個位置，講多了學員會慌。',
+         '「App 會改版」這句一定要講，上次社群課也是這樣講的，學員會安心。',
+         '如果現場版本跟簡報不一樣，直接抓一位學員的手機投影。'],
+    ask:['問：找到時間軸的舉手？找到儲存的舉手？'],
+    do:['在自己手機上找到這四個位置。'],
+    diff:['學員知道等一下要按哪裡。'],
+    more:['講畫布功能可以改比例，但我們一開始就設 9:16 所以用不到。'],
+    less:['只指出時間軸和功能列。']
+  }});
+
+S({ part:'PART 10', time:'15:04', kind:'std', title:'步驟一、二：建立專案、匯入影片',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">開頭兩步，<span class="hl">9:16 一定要先設</span></h2></div>
+    <div class="split" data-r style="gap:26px">
+      ${[['① 建立專案，比例選 9:16',
+          ['打開 InShot，選「影片」','按「新建」','比例選 <b>9:16</b>（直式）',
+           '這一步<b class="hl">之後不能改</b>，一定要先選對'], C.clay],
+         ['② 匯入今天拍的影片',
+          ['從相簿裡選','把今天拍的<b>全部選進來</b>','順序亂沒關係，等一下再排',
+           '不確定要不要用的也先選，刪比補容易'], C.sage]]
+        .map(([k,list,c])=>`
+        <div class="card" style="padding:20px 24px;border-top:6px solid ${c}">
+          <p style="margin:0 0 12px;font-size:24px;font-weight:900;color:${c}">${k}</p>
+          ${list.map((t,i)=>`
+            <div style="display:flex;gap:12px;align-items:baseline;padding:7px 0;
+                 border-top:${i?'1px dashed rgba(36,28,23,.12)':'none'}">
+              <span style="flex:0 0 auto;width:22px;height:22px;border-radius:50%;
+                    background:${c};color:#fff;font-size:14px;font-weight:900;
+                    display:inline-flex;align-items:center;justify-content:center">${i+1}</span>
+              <span style="font-size:20px;font-weight:650;color:${C.ink2};line-height:1.45">${t}</span>
+            </div>`).join('')}
+        </div>`).join('')}
+    </div>
+    <div class="callout gold" data-r>${ART.icon('warn',32,C.gold)}
+      <span class="txt"><b>最常見的錯誤：忘記選 9:16，剪到一半才發現是方形的。</b>
+      現在請大家一起做這兩步，做完舉手，我等大家。</span></div>
+  </div>`,
+  notes:{
+    say:['這兩步一起做，等全班都完成再往下。',
+         '9:16 忘了選是最痛的錯誤，要重來。所以停下來等大家。',
+         '「一次全選」要講，不然學員會一段一段慢慢加。'],
+    ask:['問：影片都匯進去的舉手？'],
+    do:['建立 9:16 專案，把今天拍的全部匯入。'],
+    diff:['全班在同一個起點，後面才跟得上。'],
+    more:['講可以先在相簿裡把不要的刪掉，匯入會比較乾淨。'],
+    less:['講師示範一次，慢的人看旁邊的。']
+  }});
+
+S({ part:'PART 10', time:'15:09', kind:'std', title:'步驟三、四：修剪、分割與刪除',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">把每一段，剪成最精彩的 3–5 秒</h2></div>
+    <div class="split" data-r style="gap:30px;align-items:center">
+      <div style="display:flex;justify-content:center">
+        ${ART.phone(ART.inshot({ tab:0, sel:2, h:392, clips:[3,2,5,2,3,2] }), { w:212, h:392, bg:'#0f0f12' })}
+      </div>
+      <div class="stack gap-s">
+        <div class="card" style="padding:18px 22px;border-left:6px solid ${C.clay}">
+          <p style="margin:0 0 6px;font-size:23px;font-weight:900;color:${C.clay}">③ 修剪：切掉頭尾</p>
+          <p style="margin:0;font-size:20px;font-weight:650;color:${C.ink2};line-height:1.5">
+            點一段 → 選「剪輯」→ <b>拖曳兩端的把手</b>。<br>
+            把前面那一秒的留白、後面那一秒的留白切掉，<br>
+            <b class="hl">留下 3–5 秒動作最完整的部分</b>。</p>
+        </div>
+        <div class="card" style="padding:18px 22px;border-left:6px solid ${C.gold}">
+          <p style="margin:0 0 6px;font-size:23px;font-weight:900;color:${C.gold}">④ 分割與刪除</p>
+          <p style="margin:0;font-size:20px;font-weight:650;color:${C.ink2};line-height:1.5">
+            中間有一段不要（晃到、手擋住）：<br>
+            把游標移到那裡 → 按<b>「分割」</b> → 選中間那塊 → <b>刪除</b>。</p>
+        </div>
+      </div>
+    </div>
+    <div class="callout sage" data-r>${ART.icon('ok',30,C.sage)}
+      <span class="txt">剪的原則只有一個：<b>寧可短，不要拖</b>。
+      看的人不會嫌太短，只會嫌太長。</span></div>
+  </div>`,
+  notes:{
+    say:['修剪是整個剪輯裡最花時間的一步，也是最重要的一步。',
+         '「寧可短，不要拖」要講兩次，學員普遍捨不得剪。',
+         '如果有人素材太少，就把每段留長一點，不要硬剪到 3 秒。'],
+    ask:['問：有人捨不得剪的舉手？（幾乎都是）'],
+    do:['把每一段都修剪成 3–5 秒。'],
+    diff:['影片總長從三分鐘變成二十幾秒。'],
+    more:['講「分割」也可以用來讓同一段素材出現兩次。'],
+    less:['只教修剪，不教分割。']
+  }});
+
+S({ part:'PART 10', time:'15:14', kind:'std', title:'步驟五：調整順序',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">順序就是<span class="hl">上午寫的三段式</span></h2></div>
+    <div data-r style="display:flex;align-items:stretch;gap:12px">
+      ${[['開始','最好看的那一顆<br>或商品全景',C.clay],
+         ['過程','2–3 顆動作鏡頭<br>倒、切、攪、包',C.gold],
+         ['完成','成品的近景<br>或包好的樣子',C.sage],
+         ['結尾','一句話<br>怎麼買、下次見',C.plum]]
+        .map(([k,v,c],i)=>`
+        <div style="flex:1;display:flex;align-items:center;gap:12px">
+          <div style="flex:1;background:#fff;border:1px solid rgba(36,28,23,.12);
+               border-top:6px solid ${c};border-radius:14px;padding:18px 16px;text-align:center">
+            <p style="margin:0 0 7px;font-size:24px;font-weight:900;color:${c}">${k}</p>
+            <p style="margin:0;font-size:19px;font-weight:650;color:${C.ink2};line-height:1.4">${v}</p>
+          </div>
+          ${i < 3 ? `<span style="font-size:26px;font-weight:900;color:${C.muted};flex:0 0 auto">→</span>` : ''}
+        </div>`).join('')}
+    </div>
+    <div class="split" data-r style="gap:18px">
+      <div class="card" style="padding:16px 20px;border-left:5px solid ${C.ink3};margin:0">
+        <p style="margin:0 0 5px;font-size:21px;font-weight:900;color:${C.ink}">怎麼調</p>
+        <p style="margin:0;font-size:19px;font-weight:650;color:${C.ink2};line-height:1.45">
+          在時間軸上<b>長按一段不放</b>，拖到你要的位置放開。</p>
+      </div>
+      <div class="callout gold" style="margin:0">${ART.icon('warn',30,C.gold)}
+        <span class="txt"><b>最好看的那一顆，放第一個。</b><br>
+        不要留到最後——留到最後就沒人看得到了。</span></div>
+    </div>
+  </div>`,
+  notes:{
+    say:['這一頁把上午的三段式和下午的剪輯接起來，是整天的收束點。',
+         '「最好看的放第一個」第二次講了，這次要學員真的動手調。',
+         '長按拖曳這個動作，中高齡學員常按不夠久，要示範。'],
+    ask:['問：你的第一顆是哪一段？'],
+    do:['把時間軸的順序調成：開始 → 過程 → 完成 → 結尾。'],
+    diff:['影片有結構，不再是隨機排列。'],
+    more:['講可以先在紙上寫順序，再照著拖。'],
+    less:['只講「最好看的放第一個」。']
+  }});
+
+S({ part:'PART 10', time:'15:18', kind:'std', title:'【實作】把鏡頭排好',
+  html:`
+  <div class="stack gap-m center" style="text-align:center">
+    <div>
+      <p class="eyebrow" data-r style="justify-content:center">實作　·　十分鐘</p>
+      <h2 class="h" data-r style="font-size:38px">修剪完、排好順序，<span class="hl">先不要加文字和音樂</span></h2>
+    </div>
+    <div class="cards c3" data-r style="gap:20px;max-width:1050px;margin:0 auto">
+      ${[['每段 3–5 秒','頭尾的留白都切掉',C.clay],
+         ['順序照三段式','開始 → 過程 → 完成 → 結尾',C.gold],
+         ['總長 15–30 秒','超過就再刪一兩段',C.sage]]
+        .map(([k,v,c])=>`
+        <div class="card" style="padding:24px 20px;border-top:5px solid ${c}">
+          <p class="k" style="font-size:25px;color:${c}">${k}</p>
+          <p class="v" style="font-size:20px">${v}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout" data-r style="max-width:1050px">${ART.icon('play',30)}
+      <span class="txt">排好之後<b>從頭播一次</b>。
+      這時候它已經是一支影片了——<b class="hl">沒有文字沒有音樂，也看得懂</b>，那才叫拍得好。</span></div>
+  </div>`,
+  notes:{
+    say:['十分鐘，助教全場走動。',
+         '最後那句是今天的核心觀念：沒有音樂字幕也看得懂，代表拍攝有做對。',
+         '看得懂的請她們自己給自己拍拍手。'],
+    ask:['問：從頭播一次，看得懂在講什麼的舉手？'],
+    do:['修剪、排序、播一次。'],
+    diff:['每個人手上都有一支「毛片」，接下來只是加工。'],
+    more:['請一兩位投影播放，全班一起看順序順不順。'],
+    less:['縮到 6 分鐘，順序沒排完的先往下走。']
+  }});
+
+S({ part:'PART 10', time:'15:24', kind:'std', title:'步驟六：加文字',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">文字只加三個地方，<span class="hl">多了會亂</span></h2></div>
+    <div class="split" data-r style="gap:30px;align-items:center">
+      <div style="display:flex;justify-content:center">
+        ${ART.phone(ART.inshot({ tab:1, sel:0, h:392, caption:'熬三小時的草莓果醬' }), { w:212, h:392, bg:'#0f0f12' })}
+      </div>
+      <div class="stack gap-s">
+        ${[['前 3 秒：一句話','最重要的一句。<br>「熬三小時的草莓果醬」<br>「這個要怎麼開？」',C.clay],
+           ['中間：一兩個小標','「加糖」「小火慢煮」<br>不用每一段都加。',C.gold],
+           ['結尾：怎麼找到你','「私訊訂購」「每週三出貨」<br>或你的店名。',C.sage]]
+          .map(([k,v,c])=>`
+          <div style="display:flex;gap:14px;align-items:flex-start;background:#fff;
+               border:1px solid rgba(36,28,23,.12);border-left:5px solid ${c};
+               border-radius:12px;padding:14px 18px">
+            <span style="flex:0 0 132px;font-size:21px;font-weight:900;color:${c}">${k}</span>
+            <span style="font-size:19px;font-weight:650;color:${C.ink2};line-height:1.45">${v}</span>
+          </div>`).join('')}
+        <div class="callout" style="margin:0;padding:12px 18px">${ART.icon('warn',26)}
+          <span class="txt" style="font-size:19px">字要<b>大</b>、要<b>白底黑字或加陰影</b>、
+          <b>不要壓在商品上</b>。放上方或下方的空白處。</span></div>
+      </div>
+    </div>
+  </div>`,
+  notes:{
+    say:['文字最容易做過頭，講死：只有三個地方。',
+         '前 3 秒那一句最重要，等於影片的標題。',
+         '字太小是最常見的問題，手機上看得清楚才算數。'],
+    ask:['問：你的前 3 秒要放哪一句話？寫在講義上。'],
+    do:['加上前 3 秒那一句，其他有時間再加。'],
+    diff:['影片有標題，不再是純畫面。'],
+    more:['講文字出現的時間長度也可以拖曳調整。'],
+    less:['只加前 3 秒那一句。']
+  }});
+
+S({ part:'PART 10', time:'15:29', kind:'std', title:'步驟七：加音樂與調音量',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">用 InShot <span class="hl">內建的音樂</span>就好</h2></div>
+    <div data-r style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+      ${[['選音樂','按「音樂」→「音效」或內建曲庫。<br>選一首輕快、沒有人聲的。','music',C.clay],
+         ['調音量','原本的環境音<b>轉小或關掉</b>，<br>音樂大約 50–70%。','slider',C.gold],
+         ['對到結尾','音樂比影片長，<br><b>拖到影片結尾把它剪掉</b>。','cut',C.sage]]
+        .map(([k,v,ic,c])=>`
+        <div class="card" style="padding:20px 18px;border-top:5px solid ${c}">
+          <span style="display:block;margin-bottom:8px">${ART.icon(ic==='slider'?'wand':ic,36,c)}</span>
+          <p style="margin:0 0 6px;font-size:23px;font-weight:900;color:${c}">${k}</p>
+          <p style="margin:0;font-size:19px;font-weight:650;color:${C.ink2};line-height:1.45">${v}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout gold" data-r>${ART.icon('warn',32,C.gold)}
+      <span class="txt"><b>不要自己去抓流行歌來用。</b>
+      InShot 內建的音樂多半可以商用，流行歌發到 Facebook、Instagram
+      <b class="hl">可能被消音，甚至整支影片被下架</b>。<br>
+      有人聲的歌也會蓋掉你的字幕，內建的純音樂最安全。</span></div>
+  </div>`,
+  notes:{
+    say:['音樂版權這件事一定要講，學員很習慣直接用手機裡的流行歌。',
+         '講具體的後果：被消音、被下架，比講「有版權問題」有用。',
+         '如果影片有講話的聲音，音樂要更小，或者乾脆不加。'],
+    ask:['問：有人平常做影片會加流行歌的舉手？'],
+    do:['加一首內建音樂，音量調到 50–70%，結尾剪齊。'],
+    diff:['影片有配樂，而且不會被平台處理掉。'],
+    more:['講可以在影片結尾讓音樂淡出（fade out）。'],
+    less:['直接選第一首推薦音樂，不挑。']
+  }});
+
+S({ part:'PART 10', time:'15:33', kind:'std', title:'步驟八：轉場——多數直接切',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">不加轉場，<span class="hl">比亂加轉場好看</span></h2></div>
+    <div class="split" data-r style="gap:26px">
+      <div class="card" style="padding:20px 24px;border-top:6px solid ${C.sage}">
+        <p style="margin:0 0 10px;font-size:24px;font-weight:900;color:${C.sage}">直接切（建議）</p>
+        <p style="margin:0 0 10px;font-size:20px;font-weight:650;color:${C.ink2};line-height:1.5">
+          一顆接一顆，什麼效果都不加。<br>
+          你在社群上看到的短影音，<b class="hl">九成都是直接切</b>。</p>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${[C.clay,C.gold,C.sage,C.plum].map(c=>`
+            <span style="flex:1;height:34px;border-radius:6px;background:${c};opacity:.85"></span>`).join('')}
+        </div>
+      </div>
+      <div class="card" style="padding:20px 24px;border-top:6px solid ${C.ink3}">
+        <p style="margin:0 0 10px;font-size:24px;font-weight:900;color:${C.ink3}">要加也只加一種</p>
+        <p style="margin:0 0 10px;font-size:20px;font-weight:650;color:${C.ink2};line-height:1.5">
+          最多用<b>「淡入淡出」</b>，而且<b>只用在最後一個接縫</b>。<br>
+          旋轉、翻頁、閃光那些，加了會很像十年前的影片。</p>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${[C.clay,C.gold,C.sage,C.plum].map((c,i)=>`
+            <span style="flex:1;height:34px;border-radius:6px;
+                  background:${i===3?'linear-gradient(90deg,'+C.sage+','+c+')':c};opacity:.85"></span>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="callout" data-r>${ART.icon('bulb',30)}
+      <span class="txt">同一句話也適用於<b>速度、濾鏡、貼圖</b>：
+      今天全部不用。<b class="hl">效果加得少，影片反而比較專業。</b></span></div>
+  </div>`,
+  notes:{
+    say:['這一頁其實是在幫學員省時間，而且結果會比較好看。',
+         '中高齡學員最喜歡加特效，所以要明講「加了會像十年前的影片」。',
+         '速度、濾鏡、貼圖、子母畫面今天一律不教。'],
+    ask:['問：你們看的短影音，有很多轉場特效嗎？'],
+    do:['不加轉場（或只在結尾加一個淡出）。'],
+    diff:['影片乾淨，而且省下五分鐘。'],
+    more:['進度快的班可以示範「速度放慢」用在特寫的效果。'],
+    less:['一句話講完：今天不加轉場。']
+  }});
+
+S({ part:'PART 10', time:'15:36', kind:'std', title:'步驟九：輸出',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">按右上角「儲存」，設定選這兩個</h2></div>
+    <div class="split" data-r style="gap:30px;align-items:center">
+      <div class="stack gap-s">
+        ${[['解析度','<b>1080p</b>','再高檔案太大，上傳很久；再低會糊。',C.clay],
+           ['幀率','<b>30fps</b>','夠用了。60fps 檔案大一倍，看不出差別。',C.gold]]
+          .map(([k,v,note,c])=>`
+          <div class="card" style="padding:18px 22px;border-left:6px solid ${c}">
+            <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:5px">
+              <span style="font-size:22px;font-weight:900;color:${C.ink3}">${k}</span>
+              <span style="font-size:30px;font-weight:900;color:${c}">${v}</span>
+            </div>
+            <p style="margin:0;font-size:19px;font-weight:650;color:${C.ink2};line-height:1.45">${note}</p>
+          </div>`).join('')}
+        <div class="callout sage" style="margin:0">${ART.icon('ok',30,C.sage)}
+          <span class="txt">輸出完會自動存進<b>手機相簿</b>。<br>
+          從相簿就可以直接發到 Facebook、Instagram、LINE。</span></div>
+      </div>
+      <div style="display:flex;justify-content:center">
+        ${ART.phone(ART.inshot({ tab:0, right:'儲存中…', h:392, caption:'熬三小時的草莓果醬', clips:[3,4,5,3,4] }),
+                    { w:212, h:392, bg:'#0f0f12' })}
+      </div>
+    </div>
+    <div class="callout" data-r style="padding:12px 22px">${ART.icon('clock',28)}
+      <span class="txt">輸出要等一到三分鐘，<b>不要中途切出去或關螢幕</b>，會失敗要重來。</span></div>
+  </div>`,
+  notes:{
+    say:['1080p／30fps 這兩個數字寫在附錄，不用背。',
+         '「輸出時不要切出去」一定要講，不然一半的人會失敗。',
+         '輸出要等，可以趁這時候提醒下一頁的檢視點。'],
+    ask:['問：輸出完成、在相簿裡看得到的舉手？'],
+    do:['輸出 1080p／30fps。'],
+    diff:['每個人的手機相簿裡有一支成品。'],
+    more:['講 InShot 免費版結尾會有片頭 logo，可以在設定裡移除。'],
+    less:['直接用預設值輸出。']
+  }});
+
+S({ part:'PART 10', time:'15:38', kind:'std', title:'【實作】完成剪輯並輸出',
+  html:`
+  <div class="stack gap-m center" style="text-align:center">
+    <div>
+      <p class="eyebrow" data-r style="justify-content:center">實作　·　十二分鐘</p>
+      <h2 class="h" data-r style="font-size:38px">加文字、加音樂、輸出。<span class="hl">今天的成品就完成了</span></h2>
+    </div>
+    <div class="checks" data-r style="grid-template-columns:1fr 1fr;max-width:1050px;margin:0 auto">
+      ${['每段修剪成 3–5 秒','順序是開始→過程→完成→結尾',
+         '前 3 秒加了一句話','加了一首內建音樂',
+         '總長 15–30 秒','輸出 1080p／30fps 存進相簿']
+        .map(t=>`<div class="check"><span class="box"></span><span>${t}</span></div>`).join('')}
+    </div>
+    <div class="callout gold" data-r style="max-width:1050px">${ART.icon('warn',30,C.gold)}
+      <span class="txt">來不及的先<b>輸出目前的版本</b>，回家再修。
+      <b class="hl">存在手機裡的半成品，比留在 App 裡的完美作品有用。</b></span></div>
+  </div>`,
+  notes:{
+    say:['十二分鐘，這是最後的衝刺。助教全場走動。',
+         '一定要講「先輸出目前版本」，不然會有人剪到下課還沒輸出，回家就放棄了。',
+         '剩最後三分鐘時全班喊一次：現在還沒按輸出的請按輸出。'],
+    ask:['問：已經輸出完成的舉手？'],
+    do:['完成剪輯並輸出。'],
+    diff:['全班手機裡都有一支影片，這是今天的成果。'],
+    more:['做完的人可以幫旁邊的人，或者開始剪第二支。'],
+    less:['音樂可以不加，直接輸出。']
+  }});
+
+/* =========================================================================
+   PART 11　成果、檢視與流量（76–81）
+   ========================================================================= */
+S({ part:'PART 11', time:'15:40', kind:'std', title:'成果放映：一起看',
+  html:`
+  <div class="stack gap-m center" style="text-align:center">
+    <div>
+      <p class="eyebrow" data-r style="justify-content:center">成果放映　·　八分鐘</p>
+      <h2 class="h" data-r style="font-size:40px">先跟旁邊的人互看，<br>再挑幾支投影出來</h2>
+    </div>
+    <div class="split" data-r style="gap:24px;max-width:1060px;margin:0 auto">
+      <div class="card" style="padding:24px;border-top:6px solid ${C.clay}">
+        <p style="margin:0 0 8px;font-size:25px;font-weight:900;color:${C.clay}">先：兩兩互看</p>
+        <p style="margin:0;font-size:20px;font-weight:650;color:${C.ink2};line-height:1.5">
+          跟旁邊的人交換手機，<b>各看一支</b>。<br>
+          看完說<b class="hl">一句喜歡的地方</b>就好，不要挑毛病。</p>
+      </div>
+      <div class="card" style="padding:24px;border-top:6px solid ${C.sage}">
+        <p style="margin:0 0 8px;font-size:25px;font-weight:900;color:${C.sage}">再：投影 3–5 支</p>
+        <p style="margin:0;font-size:20px;font-weight:650;color:${C.ink2};line-height:1.5">
+          自願的優先。<br>
+          放的時候<b>大家一起找出「哪一顆最好看」</b>。</p>
+      </div>
+    </div>
+    <div class="callout" data-r style="max-width:1060px">${ART.icon('ok',30,C.sage)}
+      <span class="txt">今天早上你們手機裡什麼都沒有。<b>現在每個人都有一支影片了。</b></span></div>
+  </div>`,
+  notes:{
+    say:['三十個人不可能全部投影，先兩兩互看，再挑 3–5 支。',
+         '互看時規定「只說喜歡的地方」，中高齡學員被批評一次就不敢再拍了。',
+         '投影時盡量挑不同商品類型的，讓大家看到多樣性。'],
+    ask:['問：願意放給大家看的舉手？'],
+    do:['兩兩互看，各說一句喜歡的地方。'],
+    diff:['學員看到別人的成果，回家比較願意繼續拍。'],
+    more:['請被投影的學員說一句「最難的地方是什麼」。'],
+    less:['只做兩兩互看，不投影。']
+  }});
+
+S({ part:'PART 11', time:'15:45', kind:'std', title:'八個檢視點',
+  html:`
+  <div class="stack gap-s pad-tight">
+    <div><h2 class="h" data-r style="font-size:34px;margin-bottom:2px">
+      回家發之前，用這八項對一次</h2></div>
+    <div class="checks" data-r style="grid-template-columns:1fr 1fr;gap:9px 20px">
+      ${[['前 3 秒抓得住人嗎','第一顆是不是最好看的那一顆'],
+         ['一支只講一件事嗎','講兩件事就拆成兩支'],
+         ['總長 15–30 秒嗎','超過就再刪一兩顆'],
+         ['是直式 9:16 嗎','有黑邊就是設錯了'],
+         ['畫面穩、看得清楚嗎','晃的、糊的那一顆直接刪掉'],
+         ['有過程或動作嗎','全部靜止的商品會很平'],
+         ['字看得清楚嗎','手機上看，不是電腦上看'],
+         ['看完知道怎麼找到你嗎','結尾要有店名或訂購方式']]
+        .map(([k,v])=>`
+        <div class="check" style="align-items:flex-start;padding:11px 16px">
+          <span class="box" style="margin-top:3px"></span>
+          <span style="flex:1">
+            <b style="display:block;font-size:20px;font-weight:900;color:${C.ink}">${k}</b>
+            <span style="font-size:18px;font-weight:650;color:${C.ink3}">${v}</span>
+          </span>
+        </div>`).join('')}
+    </div>
+    <div class="callout sage" data-r style="padding:12px 22px">${ART.icon('ok',28,C.sage)}
+      <span class="txt"><b>八項不用全過。</b>過六項就可以發了——
+      發出去再慢慢進步，比放在手機裡永遠不發好。</span></div>
+  </div>`,
+  notes:{
+    say:['八項唸過去，這一頁附錄有，回家可以照著用。',
+         '最後那句最重要：不要追求完美，發出去比較重要。',
+         '前三項是最關鍵的，如果只記三項就記這三項。'],
+    ask:['問：你的影片八項過幾項？'],
+    do:['對照八項檢查自己的影片。'],
+    diff:['學員有一份回家能用的自我檢查標準。'],
+    more:['請學員挑一項自己最弱的，下一支重點改進。'],
+    less:['只講前三項。']
+  }});
+
+S({ part:'PART 11', time:'15:48', kind:'std', title:'最常見的三個問題與怎麼改',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">如果影片怪怪的，多半是這三個原因</h2></div>
+    <div class="stack gap-s" data-r>
+      ${[['看完不知道你在賣什麼','一支講了太多件事，<b>或者根本沒有商品的清楚畫面</b>。',
+          '回到上午的兩句話。刪到只剩一件事，中間補一顆商品全景。',C.clay],
+         ['很平、看不下去','全部都是靜止的商品，<b>沒有動作、沒有人、沒有過程</b>。',
+          '補拍兩顆「手在做事」的鏡頭。倒、切、攪、包，哪一個都好。',C.gold],
+         ['有點暈、有點糊','鏡頭一直在動，或者<b>錄影中途放大縮小</b>。',
+          '晃的那幾顆直接刪掉。運鏡要慢，變焦要在錄之前就決定好。',C.sage]]
+        .map(([k,why,fix,c],i)=>`
+        <div style="background:#fff;border:1px solid rgba(36,28,23,.12);
+             border-left:6px solid ${c};border-radius:14px;padding:16px 22px">
+          <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px">
+            <span style="width:26px;height:26px;border-radius:50%;background:${c};color:#fff;
+                  font-size:16px;font-weight:900;display:inline-flex;align-items:center;
+                  justify-content:center;flex:0 0 auto">${i+1}</span>
+            <span style="font-size:23px;font-weight:900;color:${c}">${k}</span>
+          </div>
+          <p style="margin:0 0 5px;font-size:19px;font-weight:650;color:${C.ink3};line-height:1.4">
+            原因：${why}</p>
+          <p style="margin:0;font-size:20px;font-weight:700;color:${C.ink2};line-height:1.45">
+            怎麼改：${fix}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout" data-r style="padding:12px 22px">${ART.icon('bulb',28)}
+      <span class="txt">三個問題的解法<b>都在拍攝，不在剪輯</b>。這就是今天為什麼把時間放在拍。</span></div>
+  </div>`,
+  notes:{
+    say:['三個問題涵蓋八成的新手影片。',
+         '最後那句是整天的總結：問題出在拍攝，剪輯救不了。'],
+    ask:['問：你的影片比較接近哪一個問題？'],
+    do:['圈出自己最像的那一個，下一支改進。'],
+    diff:['學員知道下一支要改什麼，不是茫然地再拍一次。'],
+    more:['補第四個問題：太長。超過一分鐘就沒人看完。'],
+    less:['只講第一個問題。']
+  }});
+
+S({ part:'PART 11', time:'15:51', kind:'std', title:'流量從哪裡來：一支不夠，要有系列',
+  html:`
+  <div class="stack gap-m">
+    <div>
+      <p class="eyebrow" data-r>回家之後最重要的一頁</p>
+      <h2 class="h" data-r style="font-size:36px">流量來自<span class="hl">累積</span>，不是來自單支爆紅</h2>
+    </div>
+    <div data-r style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+      ${[['一支影片沒流量是正常的','不要因為第一支只有二十個人看就放棄。<br><b>前十支都是在練習</b>。',C.ink3],
+         ['觀眾要「知道下次看得到什麼」','每次都拍不一樣的東西，人家不知道追蹤你要幹嘛。<br><b class="hl">系列會讓人想追蹤</b>。',C.clay],
+         ['對你自己的好處更大','有系列就<b>不用每次重新想題材</b>。<br>照著同一個公式再拍一次就好。',C.sage]]
+        .map(([k,v,c])=>`
+        <div class="card" style="padding:20px 18px;border-top:5px solid ${c}">
+          <p style="margin:0 0 8px;font-size:22px;font-weight:900;color:${c};line-height:1.3">${k}</p>
+          <p style="margin:0;font-size:19px;font-weight:650;color:${C.ink2};line-height:1.5">${v}</p>
+        </div>`).join('')}
+    </div>
+    <div data-r style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+      ${ART.seriesCard('系列 A：製作過程', ['草莓果醬怎麼熬','鳳梨果醬怎麼熬','為什麼要熬三小時'], C.clay)}
+      ${ART.seriesCard('系列 B：商品細節', ['果醬的質地','玻璃罐的封口','標籤是手寫的'], C.gold)}
+      ${ART.seriesCard('系列 C：客人常問', ['開封後放多久','可以配什麼吃','小朋友能吃嗎'], C.sage)}
+    </div>
+    <div class="callout gold" data-r style="padding:12px 22px">${ART.icon('warn',28,C.gold)}
+      <span class="txt">十一種主題<b>不是挑一種拍一次</b>，是十一條可以一直拍下去的路。
+      <b class="hl">選 2–3 種輪流發</b>，比十一種都做一次有用得多。</span></div>
+  </div>`,
+  notes:{
+    say:['這一頁接上午第 8 頁埋的伏筆，一定要回頭指一下。',
+         '重點順序：先安撫（沒流量正常）、再講原因（系列讓人想追蹤）、',
+         '最後講對自己的好處（不用一直想題材）——這一點對中高齡學員最有說服力。',
+         '三張系列卡是範例，請學員想自己的三個系列。'],
+    ask:['問：你的三個系列可以是什麼？跟旁邊的人說一個。'],
+    do:['在講義上寫下自己的 2–3 個系列名稱。'],
+    diff:['學員離開時不是只有一支影片，是有一個可以持續的計畫。'],
+    more:['講同一系列的影片開頭要長得像：同樣的字卡、同樣的第一顆鏡頭。'],
+    less:['只講「選 2–3 種輪流發」這一句。']
+  }});
+
+S({ part:'PART 11', time:'15:55', kind:'std', title:'一個月的發片計畫',
+  html:`
+  <div class="stack gap-s pad-tight">
+    <div><h2 class="h" data-r style="font-size:34px;margin-bottom:2px">
+      <span class="hl">一週一支就夠。</span>四週輪三個系列</h2></div>
+    <table class="tbl" data-r style="font-size:20px">
+      <thead><tr>
+        <th style="width:110px">週</th>
+        <th>系列 A：製作過程</th>
+        <th>系列 B：商品細節</th>
+        <th>系列 C：客人常問</th>
+      </tr></thead>
+      <tbody>
+        ${PLAN.map(r=>`
+        <tr><td class="lead-col" style="text-align:center">${r[0]}</td>
+          <td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('')}
+      </tbody>
+    </table>
+    <div class="split" data-r style="gap:18px">
+      <div class="callout sage" style="margin:0;padding:12px 18px">${ART.icon('ok',28,C.sage)}
+        <span class="txt" style="font-size:19px"><b>同一個系列的影片，開頭要長得像。</b>
+        同樣的字卡、同樣的第一顆鏡頭，觀眾才認得出來。</span></div>
+      <div class="callout gold" style="margin:0;padding:12px 18px">${ART.icon('clock',28,C.gold)}
+        <span class="txt" style="font-size:19px">一支影片大約<b>拍 30 分鐘、剪 20 分鐘</b>。
+        一週一次，一年五十支。</span></div>
+    </div>
+    <div class="callout" data-r style="padding:11px 20px">${ART.icon('bulb',26)}
+      <span class="txt" style="font-size:19px">今天拍的這一支，就是<b class="hl">第 1 週</b>。附錄有空白的計畫表，回家把四週填完。</span></div>
+  </div>`,
+  notes:{
+    say:['這張表是給學員回家照抄的，附錄有空白版。',
+         '「一年五十支」這個數字要講，會讓學員感覺到累積的力量。',
+         '一週一支不要加碼，中高齡學員答應太多就會全部放棄。'],
+    ask:['問：你的第 2 週要拍什麼？現在就決定。'],
+    do:['填四週計畫表的第 2 週。'],
+    diff:['學員離開教室時，下一支要拍什麼已經定了。'],
+    more:['講可以先把四支的素材一次拍完，再分四週發。'],
+    less:['只講「一週一支就夠」。']
+  }});
+
+S({ part:'PART 11', time:'15:58', kind:'std', title:'最後一句話',
+  html:`
+  <div class="stack gap-m center" style="text-align:center;justify-content:center">
+    <div>
+      <p class="eyebrow" data-r style="justify-content:center">今天到這裡</p>
+      <h2 class="mega" data-r style="font-size:52px;line-height:1.28">
+        影片好不好看，<br><span class="hl">八成在你按下錄影之前就決定了。</span></h2>
+    </div>
+    <div data-r style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:6px">
+      ${['先想','再寫','再畫','再拍','最後才剪']
+        .map((t,i)=>`<span class="tag${i===3?' on':''}" style="font-size:22px">${t}</span>`).join('')}
+    </div>
+    <div class="callout sage" data-r style="max-width:1000px;margin-top:8px">${ART.icon('ok',32,C.sage)}
+      <span class="txt">今天早上你手機裡什麼都沒有。現在你有<b>一張分鏡表</b>、
+      <b>十幾段素材</b>、<b class="hl">一支剪好的影片</b>，還有<b>接下來四週要拍什麼</b>。</span></div>
+    <p data-r style="margin:4px 0 0;font-size:26px;font-weight:800;color:${C.ink2}">
+      回家發出去。第一支沒人看沒關係，<b style="color:${C.clay}">拍到第十支就不一樣了。</b></p>
+  </div>`,
+  notes:{
+    say:['最後這句「八成在按下錄影之前就決定了」慢慢念，念完停三秒。',
+         '然後把四樣成果數一次給她們聽，讓她們知道今天帶走了什麼。',
+         '最後一句「拍到第十支就不一樣了」是給她們回家的動力。',
+         '發回饋單，鼓勵互相追蹤、互加好友——回家後的第一批觀眾就是彼此。'],
+    ask:['問：回家第一支要什麼時候發？（請她們說一個日期）'],
+    do:['互相追蹤、互加 LINE 好友。'],
+    diff:['學員帶著具體的下一步離開，而不是只帶著一支影片。'],
+    more:['留三分鐘讓大家互相交換帳號。'],
+    less:['直接念最後兩句話結束。']
+  }});
+
+/* =========================================================================
+   附錄（82–84）　可單獨列印
+   ========================================================================= */
+S({ part:'附錄', time:'—', kind:'std', title:'附錄①　分鏡表（空白）',
+  html:`
+  <div class="stack gap-s pad-tight">
+    <div style="display:flex;align-items:baseline;justify-content:space-between">
+      <h2 class="h" data-r style="font-size:30px;margin:0">分鏡表　　5–8 個鏡頭</h2>
+      <span style="font-size:19px;font-weight:700;color:${C.ink3}">
+        主題：＿＿＿＿＿＿＿　　　總長：＿＿＿ 秒</span>
+    </div>
+    <div data-r>${ART.boardBlank(8)}</div>
+    <div class="split" data-r style="gap:18px">
+      <div class="card flat" style="padding:12px 18px">
+        <p style="margin:0 0 4px;font-size:19px;font-weight:900;color:${C.clay}">「畫面」欄怎麼填</p>
+        <p style="margin:0;font-size:18px;font-weight:650;color:${C.ink2}">
+          全景／中景／近景／特寫，四選一。</p>
+      </div>
+      <div class="card flat" style="padding:12px 18px">
+        <p style="margin:0 0 4px;font-size:19px;font-weight:900;color:${C.sage}">「秒數」欄怎麼填</p>
+        <p style="margin:0;font-size:18px;font-weight:650;color:${C.ink2}">
+          每顆 3–5 秒，加起來 15–30 秒。</p>
+      </div>
+    </div>
+  </div>`,
+  notes:{ say:['這三頁附錄會單獨印成 A4 發給學員。'], ask:[], do:[] }});
+
+S({ part:'附錄', time:'—', kind:'std', title:'附錄②　素材清單 ＋ 必備六鏡',
+  html:`
+  <div class="stack gap-s pad-tight">
+    <div><h2 class="h" data-r style="font-size:30px;margin-bottom:2px">素材清單　　拍之前先列，拍完打勾</h2></div>
+    <div class="split" style="gap:22px">
+      <div class="card" data-r style="padding:16px 20px;border-top:5px solid ${C.clay}">
+        <p class="cap" style="color:${C.clay};margin-bottom:8px">必備六個鏡頭（一定要有）</p>
+        <div class="checks" style="grid-template-columns:1fr;gap:7px">
+          ${SIX.map(([k,shot,v])=>`
+            <div class="check" style="justify-content:flex-start;padding:9px 14px">
+              <span class="box"></span>
+              <span style="flex:1;font-size:18px;font-weight:700;color:${C.ink2}">
+                ${k}<span style="color:${C.ink3};font-weight:650">　${shot}　${v}</span></span>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div class="card" data-r style="padding:16px 20px;border-top:5px solid ${C.sage}">
+        <p class="cap" style="color:${C.sage};margin-bottom:8px">加分素材（有時間就補）</p>
+        <div class="checks" style="grid-template-columns:1fr;gap:7px">
+          ${['同一個動作換距離再拍一次','再多兩顆「手在做事」的過程',
+             '運鏡：靠近','運鏡：離開','運鏡：平移',
+             '換一個背景，同樣商品再拍一輪','空景（工作檯、窗邊）當開場']
+            .map(t=>`
+            <div class="check" style="justify-content:flex-start;padding:9px 14px">
+              <span class="box"></span>
+              <span style="font-size:18px;font-weight:700;color:${C.ink2}">${t}</span></div>`).join('')}
+        </div>
+        <div class="callout" style="padding:9px 14px;margin-top:9px">${ART.icon('warn',22)}
+          <span class="txt" style="font-size:17px">目標 <b>12–15 段</b>。素材多一倍，剪的時候才有得挑。</span></div>
+      </div>
+    </div>
+  </div>`,
+  notes:{ say:['素材清單是拍攝時最實用的一張，建議印在分鏡表背面。'], ask:[], do:[] }});
+
+S({ part:'附錄', time:'—', kind:'std', title:'附錄③　InShot 九步驟 ＋ 一個月發片計畫',
+  html:`
+  <div class="stack gap-s pad-tight">
+    <div class="split" style="gap:22px;align-items:flex-start">
+      <div class="card" data-r style="padding:16px 20px;border-top:5px solid ${C.clay}">
+        <p class="cap" style="color:${C.clay};margin-bottom:8px">InShot 九步驟</p>
+        ${NINE.map(([k,v],i)=>`
+          <div style="display:flex;gap:11px;align-items:baseline;padding:6px 0;
+               border-top:${i?'1px dashed rgba(36,28,23,.12)':'none'}">
+            <span style="flex:0 0 auto;width:21px;height:21px;border-radius:50%;background:${C.clay};
+                  color:#fff;font-size:13px;font-weight:900;display:inline-flex;
+                  align-items:center;justify-content:center">${i+1}</span>
+            <span style="flex:1;font-size:18px;font-weight:800;color:${C.ink}">${k}</span>
+            <span style="flex:0 0 210px;font-size:17px;font-weight:650;color:${C.ink3}">${v}</span>
+          </div>`).join('')}
+      </div>
+      <div class="stack gap-s" style="flex:1">
+        <div class="card" data-r style="padding:16px 20px;border-top:5px solid ${C.sage}">
+          <p class="cap" style="color:${C.sage};margin-bottom:8px">我的一個月發片計畫</p>
+          <table class="tbl compact" style="font-size:17px;table-layout:fixed;width:100%">
+            <thead><tr><th style="width:66px;white-space:nowrap">週</th>
+              <th style="white-space:nowrap">系列 A</th>
+              <th style="white-space:nowrap">系列 B</th>
+              <th style="white-space:nowrap">系列 C</th></tr></thead>
+            <tbody>
+              <tr><td class="lead-col" style="text-align:center;font-size:15px">名稱</td>
+                <td>＿＿＿</td><td>＿＿＿</td><td>＿＿＿</td></tr>
+              ${['第 1 週','第 2 週','第 3 週','第 4 週'].map(w=>`
+              <tr><td class="lead-col" style="text-align:center;white-space:nowrap">${w}</td>
+                <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>`).join('')}
+            </tbody></table>
+          <p style="margin:8px 0 0;font-size:17px;font-weight:650;color:${C.ink2}">
+            一週一支就夠。同一個系列的影片，<b>開頭要長得像</b>。</p>
+        </div>
+        <div class="card" data-r style="padding:14px 20px;border-top:5px solid ${C.gold}">
+          <p class="cap" style="color:${C.gold};margin-bottom:6px">發之前，八項對一次</p>
+          <p style="margin:0;font-size:17px;font-weight:650;color:${C.ink2};line-height:1.6">
+            前 3 秒抓得住人　·　只講一件事　·　15–30 秒　·　直式 9:16　·
+            畫面穩　·　有過程或動作　·　字看得清楚　·　看完知道怎麼找到你</p>
+        </div>
+      </div>
+    </div>
+  </div>`,
+  notes:{ say:['這一頁是回家用的，九步驟＋計畫表＋檢查點都在同一張。'], ask:[], do:[] }});
+</script>
+<script>/* =========================================================================
+   engine.js — 簡報引擎
+   ========================================================================= */
+(function(){
+  'use strict';
+
+  const stage   = document.getElementById('stage');
+  const chrome  = document.getElementById('chrome');
+  const elPart  = document.getElementById('cpart');
+  const elTime  = document.getElementById('ctime');
+  const elNum   = document.getElementById('pnum');
+  const bar     = document.getElementById('bar');
+  const ov      = document.getElementById('ov');
+  const ovg     = document.getElementById('ovg');
+  const notes   = document.getElementById('notes');
+  const help    = document.getElementById('help');
+  const timerEl = document.getElementById('timer');
+  const hint    = document.getElementById('hint');
+
+  const N = DECK.length;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let cur = 0, notesOn = false;
+
+  /* ---------- 舞台縮放 ---------- */
+  function fit(){
+    const pad = window.innerWidth < 900 ? 12 : 32;
+    const s = Math.min((window.innerWidth - pad*2)/1280, (window.innerHeight - pad*2)/720);
+    stage.style.transform = 'scale(' + s + ')';
+  }
+  addEventListener('resize', fit);
+
+  /* ---------- 繪製 ---------- */
+  function paint(i){
+    const d = DECK[i];
+    const old = stage.querySelector('.slide');
+    if (old) old.remove();
+
+    const s = document.createElement('section');
+    s.className = 'slide' + (d.kind === 'divider' ? ' divider' : '')
+                          + (d.kind === 'cover' ? ' cover' : '')
+                          + (/pad-tight/.test(d.html) ? ' pad-tight' : '');
+    s.innerHTML = d.html;
+
+    if (d.tag) {
+      const t = document.createElement('span');
+      t.className = 'act-tag ' + (d.tag.type || '');
+      t.textContent = d.tag.label;
+      s.appendChild(t);
+    }
+
+    stage.appendChild(s);
+    s.querySelectorAll('[data-r]').forEach((n, k) => n.style.setProperty('--i', k));
+
+    const dark = d.kind === 'divider';
+    chrome.classList.toggle('on-dark', dark);
+    if (elPart) elPart.textContent = d.part;
+    if (elTime) elTime.textContent = d.time;
+    if (elNum) elNum.innerHTML = String(i + 1) + ' <small>/ ' + N + '</small>';
+    bar.style.width = ((i + 1) / N * 100) + '%';
+
+    renderNotes(d, i);
+    if (!document.startViewTransition || reduce) {
+      s.classList.add('enter');
+    }
+    ovg.querySelectorAll('.ov-i').forEach((b, k) => b.classList.toggle('cur', k === i));
+    const c = ovg.querySelector('.ov-i.cur');
+    if (c && ov.classList.contains('on')) c.scrollIntoView({block:'nearest'});
+  }
+
+  function go(i, dir){
+    i = Math.max(0, Math.min(N - 1, i));
+    if (i === cur && stage.querySelector('.slide')) return;
+    const d = dir !== undefined ? dir : (i > cur ? 1 : -1);
+    cur = i;
+    history.replaceState(null, '', '#' + (i + 1));
+    document.documentElement.style.setProperty('--dir', d);
+    if (document.startViewTransition && !reduce) {
+      document.startViewTransition(() => paint(i));
+    } else {
+      paint(i);
+    }
+  }
+  const next = () => go(cur + 1, 1);
+  const prev = () => go(cur - 1, -1);
+
+  /* ---------- 講師備忘 ---------- */
+  function renderNotes(d, i){
+    const n = d.notes || {};
+    const block = (cls, title, arr) => {
+      if (!arr || !arr.length) return '';
+      return '<div class="nb ' + cls + '"><h5><s></s>' + title + '</h5>'
+        + (arr.length > 1
+            ? '<ul>' + arr.map(x => '<li>' + x + '</li>').join('') + '</ul>'
+            : '<p>' + arr[0] + '</p>') + '</div>';
+    };
+    notes.innerHTML =
+      '<div class="ng">'
+      + block('say',  '講師說明', n.say)
+      + block('ask',  '互動提問', n.ask)
+      + block('do',   '學員實作', n.do)
+      + block('diff', '預期看到的差異', n.diff)
+      + block('more', '進度快：可以補充', n.more)
+      + block('less', '進度慢：可以刪掉', n.less)
+      + '</div><p class="nn">' + d.part + '　·　' + d.time + '　·　第 ' + (i+1) + ' / ' + N + ' 頁　·　按 S 收合</p>';
+  }
+  function toggleNotes(){
+    notesOn = !notesOn;
+    notes.classList.toggle('on', notesOn);
+  }
+
+  /* ---------- 總覽 ---------- */
+  function buildOverview(){
+    ovg.innerHTML = DECK.map((d, i) =>
+      '<button class="ov-i' + (d.kind === 'divider' || d.kind === 'cover' ? ' div-i' : '') + '" data-i="' + i + '">'
+      + '<span class="n">' + String(i + 1).padStart(2, '0') + '　' + d.part + '</span>'
+      + '<span class="t">' + d.title.replace(/^Slide \d+｜/, '') + '</span></button>').join('');
+    ovg.querySelectorAll('.ov-i').forEach(b => b.addEventListener('click', () => {
+      ov.classList.remove('on');
+      go(+b.dataset.i);
+    }));
+  }
+  function toggleOv(){
+    ov.classList.toggle('on');
+    if (ov.classList.contains('on')) {
+      const c = ovg.querySelector('.ov-i.cur');
+      if (c) c.scrollIntoView({block:'center'});
+    }
+  }
+
+  /* ---------- 計時器 ---------- */
+  let tStart = null, tPaused = 0, tOn = false, tRun = false;
+  const tTxt = document.getElementById('ttxt');
+  const tDot = document.getElementById('tdot');
+  function tick(){
+    if (!tOn) return;
+    const ms = tRun ? (Date.now() - tStart + tPaused) : tPaused;
+    const s = Math.floor(ms / 1000);
+    tTxt.textContent =
+      String(Math.floor(s / 3600)).padStart(2,'0') + ':' +
+      String(Math.floor(s / 60) % 60).padStart(2,'0') + ':' +
+      String(s % 60).padStart(2,'0');
+    tDot.classList.toggle('run', tRun);
+  }
+  setInterval(tick, 500);
+  function toggleTimer(){
+    tOn = !tOn;
+    timerEl.classList.toggle('on', tOn);
+    if (tOn && tStart === null) { tStart = Date.now(); tRun = true; }
+    tick();
+  }
+  document.getElementById('tbtn').addEventListener('click', e => {
+    e.stopPropagation();
+    if (tRun) { tPaused += Date.now() - tStart; tRun = false; e.target.textContent = '繼續'; }
+    else { tStart = Date.now(); tRun = true; e.target.textContent = '暫停'; }
+    tick();
+  });
+  document.getElementById('trst').addEventListener('click', e => {
+    e.stopPropagation();
+    tStart = Date.now(); tPaused = 0; tRun = true;
+    document.getElementById('tbtn').textContent = '暫停';
+    tick();
+  });
+
+  /* ---------- 列印 ---------- */
+  let printing = false;
+  function printAll(){
+    if (printing) return;
+    printing = true;
+    const root = document.createElement('div');
+    root.id = 'printroot';
+    DECK.forEach((d, i) => {
+      const st = document.createElement('div');
+      st.className = 'stage-print';
+      const s = document.createElement('section');
+      s.className = 'slide' + (d.kind === 'divider' ? ' divider' : '') + (d.kind === 'cover' ? ' cover' : '');
+      s.innerHTML = d.html;
+      st.appendChild(s);
+      const f = document.createElement('div');
+      f.className = 'print-foot';
+      f.innerHTML = '<span>' + d.part + '　·　' + d.time + '</span><span>' + (i + 1) + ' / ' + N + '</span>';
+      st.appendChild(f);
+      root.appendChild(st);
+    });
+    document.body.appendChild(root);
+    document.body.classList.add('printing');
+    setTimeout(() => {
+      window.print();
+      document.body.classList.remove('printing');
+      root.remove();
+      printing = false;
+    }, 120);
+  }
+
+  /* ---------- 鍵盤 ---------- */
+  let buf = '';
+  addEventListener('keydown', e => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const k = e.key;
+
+    if (/^[0-9]$/.test(k)) { buf += k; return; }
+    if (k === 'Enter' && buf) { go(parseInt(buf, 10) - 1); buf = ''; return; }
+    buf = '';
+
+    switch (k) {
+      case 'ArrowRight': case 'ArrowDown': case ' ': case 'PageDown':
+        e.preventDefault(); next(); break;
+      case 'ArrowLeft': case 'ArrowUp': case 'PageUp':
+        e.preventDefault(); prev(); break;
+      case 'Home': go(0); break;
+      case 'End':  go(N - 1); break;
+      case 'o': case 'O': toggleOv(); break;
+      case 's': case 'S': toggleNotes(); break;
+      case 't': case 'T': toggleTimer(); break;
+      case 'p': case 'P': printAll(); break;
+      case 'f': case 'F':
+        if (document.fullscreenElement) document.exitFullscreen();
+        else document.documentElement.requestFullscreen();
+        break;
+      case '?': case '/': help.classList.toggle('on'); break;
+      case 'Escape':
+        if (help.classList.contains('on')) help.classList.remove('on');
+        else if (ov.classList.contains('on')) ov.classList.remove('on');
+        else if (notesOn) toggleNotes();
+        break;
+    }
+  });
+
+  /* ---------- 點擊 / 滑動 ---------- */
+  document.getElementById('viewport').addEventListener('click', e => {
+    if (ov.classList.contains('on') || help.classList.contains('on')) return;
+    if (e.target.closest('#notes') || e.target.closest('#timer')) return;
+    (e.clientX > window.innerWidth * 0.42) ? next() : prev();
+  });
+  help.addEventListener('click', e => { if (e.target === help) help.classList.remove('on'); });
+  ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('on'); });
+
+  let tx = 0, ty = 0;
+  addEventListener('touchstart', e => { tx = e.changedTouches[0].clientX; ty = e.changedTouches[0].clientY; }, {passive:true});
+  addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy)) (dx < 0) ? next() : prev();
+  }, {passive:true});
+
+  /* 網址列直接改頁碼也能跳頁 */
+  addEventListener('hashchange', () => {
+    const n = parseInt(location.hash.replace('#', ''), 10);
+    if (n >= 1 && n <= N && n - 1 !== cur) go(n - 1);
+  });
+
+  /* ---------- 啟動 ---------- */
+  buildOverview();
+  fit();
+  const h = parseInt(location.hash.replace('#', ''), 10);
+  cur = (h >= 1 && h <= N) ? h - 1 : 0;
+  paint(cur);
+  history.replaceState(null, '', '#' + (cur + 1));
+
+  setTimeout(() => hint.classList.add('gone'), 5200);
+  addEventListener('keydown', () => hint.classList.add('gone'), {once:true});
+})();
+</script>
+</body>
+</html>
