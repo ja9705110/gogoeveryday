@@ -1,47 +1,103 @@
-/* =========================================================================
-   slides-c.js — PART 10 InShot 剪輯　·　PART 11 成果與流量　·　附錄
-   第 65–84 頁
-   ========================================================================= */
-
-/* 四週發片計畫（第 80 頁與附錄共用） */
-const PLAN = [
-  ['第 1 週', '草莓果醬怎麼熬', '—', '—'],
-  ['第 2 週', '—', '果醬的質地特寫', '—'],
-  ['第 3 週', '鳳梨果醬怎麼熬', '—', '—'],
-  ['第 4 週', '—', '—', '開封後可以放多久']
-];
-
-/* InShot 九步驟（第 74、附錄共用） */
-const NINE = [
-  ['建立專案，比例選 9:16', '一進去就先設，之後不能改'],
-  ['匯入今天拍的影片',     '一次全選，順序等一下再排'],
-  ['修剪：切掉頭尾',       '每段留 3–5 秒最精彩的'],
-  ['分割與刪除',           '中間不要的部分切開刪掉'],
-  ['調整順序',             '最好看的那顆放第一個'],
-  ['加文字',               '前 3 秒那一句最重要'],
-  ['加音樂並調音量',       '用 InShot 內建的'],
-  ['轉場：多數直接切',     '不要每個接縫都加效果'],
-  ['輸出 1080p／30fps',    '存到手機相簿']
-];
 
 /* =========================================================================
-   PART 10　InShot 剪輯（65–75）
+   slides-c.js — 剪輯（47–59）　·　收尾（60–65）　·　附錄（66–68）　·　備用（69–80）
    ========================================================================= */
-S({ part:'PART 10', time:'15:00', kind:'divider', title:'PART 10｜InShot 剪輯',
-  html: divider('10','把拍好的素材<br>組成一支影片',
-    '剪輯只有九個步驟，四十分鐘做完。<br>今天不追求花俏，只求「能看、能發」。',
+S({ part:'剪輯', time:'14:30', kind:'divider', title:'剪輯：把素材組成一支影片',
+  html: divider('70<span style="font-size:.42em;letter-spacing:0"> 分</span>','把拍好的素材<br>組成一支影片',
+    '剪輯只有九個步驟，七十分鐘做完。<br>今天不追求花俏，只求「能看、能發」。',
     ART.icon('cut',130,'rgba(255,255,255,.13)')),
   notes:{
-    say:['先講清楚這段只有四十分鐘，所以只教必要的九步。',
+    say:['先講清楚這段只有七十分鐘，所以只教必要的九步。',
          '花俏的功能（速度、濾鏡、貼圖）今天不教，不是不能用，是今天沒時間。',
          '請大家先打開 InShot，沒裝的舉手，助教立刻處理。'],
     ask:['問：InShot 打開了嗎？打開的舉手。'],
     do:['打開 InShot。'],
     diff:['全班在同一個畫面上。'],
-    more:[], less:['直接跳到第 67 頁開始操作。']
+    more:[], less:['跳過秒數配置那兩頁，直接開始操作。']
   }});
 
-S({ part:'PART 10', time:'15:01', kind:'std', title:'InShot 介面：只有四個地方要記',
+S({ part:'剪輯', time:'14:31', kind:'std', title:'前 3 秒／中間／後面／結尾',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">一支 20 秒的影片，時間這樣分</h2></div>
+    <div data-r style="display:flex;align-items:stretch;border-radius:16px;overflow:hidden;
+         border:1px solid rgba(36,28,23,.14)">
+      ${[['前 3 秒','3 秒','最好看的那一顆<br>或者一句話字幕','決定人家滑不滑走',C.clay,1.5],
+         ['中間','8–12 秒','過程、動作、細節<br>2–3 顆鏡頭','影片的內容在這裡',C.gold,5],
+         ['後面','3–4 秒','完成的畫面','讓人看到結果',C.sage,2],
+         ['結尾','2–3 秒','一句話：怎麼買、<br>下一支拍什麼','告訴人家下一步',C.plum,1.5]]
+        .map(([k,sec,what,why,c,fl])=>`
+        <div style="flex:${fl};padding:18px 14px;text-align:center;background:#fff;
+             border-top:6px solid ${c}">
+          <p style="margin:0 0 3px;font-size:22px;font-weight:900;color:${c}">${k}</p>
+          <p style="margin:0 0 9px;font-size:26px;font-weight:900;color:${C.ink}">${sec}</p>
+          <p style="margin:0 0 7px;font-size:18px;font-weight:700;color:${C.ink2};line-height:1.35">${what}</p>
+          <p style="margin:0;font-size:17px;font-weight:650;color:${C.ink3};line-height:1.35">${why}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout gold" data-r>${ART.icon('warn',32,C.gold)}
+      <span class="txt"><b>前 3 秒決定一切。</b>
+      不要把最好的畫面留到最後——<b class="hl">留到最後就沒人看得到了</b>。
+      把你最滿意的那一顆，放第一個。</span></div>
+  </div>`,
+  notes:{
+    say:['「前三秒決定一切」是整個短影音最重要的一件事。',
+         '中高齡學員很習慣「慢慢鋪陳」，要明講：社群不是這樣看的，三秒沒抓住就滑走了。',
+         '最好的畫面放第一個——這句話等一下剪輯時會再講一次。'],
+    ask:['問：你滑手機的時候，一支影片你會看幾秒才決定要不要繼續？'],
+    do:['圈出你分鏡表上「最好看的那一顆」，等一下把它放第一個。'],
+    diff:['學員的影片開頭不再是空景或慢慢走近。'],
+    more:['講前三秒也可以放「問題」：一句字幕「這個要怎麼開？」'],
+    less:['只講前 3 秒那一格。']
+  }});
+
+S({ part:'剪輯', time:'14:34', kind:'std', title:'三種主題的秒數配置',
+  html:`
+  <div class="stack gap-s pad-tight">
+    <div><h2 class="h" data-r style="font-size:34px;margin-bottom:2px">
+      三個範例，照著抄就可以</h2></div>
+    <div data-r style="display:flex;gap:16px">
+      ${[['商品介紹','20 秒',C.clay,
+          [['3 秒','商品特寫，一句字幕'],['5 秒','商品全景，看得出大小'],
+           ['7 秒','手拿起來、轉一圈'],['3 秒','使用的樣子'],['2 秒','完成畫面＋怎麼買']]],
+         ['製作過程','25 秒',C.gold,
+          [['3 秒','原料排開'],['5 秒','第一個動作（切、倒）'],
+           ['6 秒','第二個動作（攪、煮）'],['6 秒','關鍵的一刻（特寫）'],
+           ['5 秒','完成品＋包起來']]],
+         ['試吃心得','18 秒',C.sage,
+          [['3 秒','商品在手上'],['4 秒','打開、拿出來'],
+           ['5 秒','吃／用的那一刻'],['4 秒','表情或反應'],['2 秒','一句評語']]]]
+        .map(([k,total,c,rows])=>`
+        <div style="flex:1;background:#fff;border:1px solid rgba(36,28,23,.12);
+             border-top:6px solid ${c};border-radius:14px;padding:16px 18px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px">
+            <span style="font-size:23px;font-weight:900;color:${c}">${k}</span>
+            <span style="font-size:20px;font-weight:900;color:${C.ink3}">共 ${total}</span>
+          </div>
+          ${rows.map(([s,t])=>`
+            <div style="display:flex;gap:10px;align-items:baseline;padding:5px 0;
+                 border-top:1px dashed rgba(36,28,23,.12)">
+              <span style="flex:0 0 54px;font-size:19px;font-weight:900;color:${c}">${s}</span>
+              <span style="font-size:19px;font-weight:650;color:${C.ink2};line-height:1.35">${t}</span>
+            </div>`).join('')}
+        </div>`).join('')}
+    </div>
+    <div class="callout sage" data-r style="padding:13px 22px">${ART.icon('ok',28,C.sage)}
+      <span class="txt">看得出來嗎？<b>每一種都是 5 顆鏡頭左右</b>。
+      這就是為什麼分鏡表只要寫 5–8 個。</span></div>
+  </div>`,
+  notes:{
+    say:['三個範例對應最多人選的三種主題。',
+         '重點是最後那句：五顆鏡頭就夠了，不要貪多。',
+         '請學員拿出自己的分鏡表，對照最接近的那一欄。'],
+    ask:['問：你的分鏡表有幾顆？超過八顆的舉手？（請她們刪到八顆以內）'],
+    do:['照最接近的範例，把自己的分鏡表標上秒數。'],
+    diff:['學員的分鏡表有秒數，總長落在 15–30 秒。'],
+    more:['講如果素材真的很好，可以做到 45 秒，但新手先做 20 秒。'],
+    less:['只講第一個範例。']
+  }});
+
+S({ part:'剪輯', time:'14:37', kind:'std', title:'InShot 介面：只有四個地方要記',
   html:`
   <div class="stack gap-m">
     <div><h2 class="h" data-r style="font-size:36px">畫面上東西很多，<span class="hl">但你只會用到四個</span></h2></div>
@@ -78,7 +134,7 @@ S({ part:'PART 10', time:'15:01', kind:'std', title:'InShot 介面：只有四�
     less:['只指出時間軸和功能列。']
   }});
 
-S({ part:'PART 10', time:'15:04', kind:'std', title:'步驟一、二：建立專案、匯入影片',
+S({ part:'剪輯', time:'14:40', kind:'std', title:'步驟一、二：建立專案、匯入影片',
   html:`
   <div class="stack gap-m">
     <div><h2 class="h" data-r style="font-size:36px">開頭兩步，<span class="hl">9:16 一定要先設</span></h2></div>
@@ -117,7 +173,7 @@ S({ part:'PART 10', time:'15:04', kind:'std', title:'步驟一、二：建立專
     less:['講師示範一次，慢的人看旁邊的。']
   }});
 
-S({ part:'PART 10', time:'15:09', kind:'std', title:'步驟三、四：修剪、分割與刪除',
+S({ part:'剪輯', time:'14:44', kind:'std', title:'步驟三、四：修剪、分割與刪除',
   html:`
   <div class="stack gap-m">
     <div><h2 class="h" data-r style="font-size:36px">把每一段，剪成最精彩的 3–5 秒</h2></div>
@@ -156,10 +212,10 @@ S({ part:'PART 10', time:'15:09', kind:'std', title:'步驟三、四：修剪、
     less:['只教修剪，不教分割。']
   }});
 
-S({ part:'PART 10', time:'15:14', kind:'std', title:'步驟五：調整順序',
+S({ part:'剪輯', time:'14:48', kind:'std', title:'步驟五：調整順序',
   html:`
   <div class="stack gap-m">
-    <div><h2 class="h" data-r style="font-size:36px">順序就是<span class="hl">上午寫的三段式</span></h2></div>
+    <div><h2 class="h" data-r style="font-size:36px">順序就是<span class="hl">早上寫的三段式</span></h2></div>
     <div data-r style="display:flex;align-items:stretch;gap:12px">
       ${[['開始','最好看的那一顆<br>或商品全景',C.clay],
          ['過程','2–3 顆動作鏡頭<br>倒、切、攪、包',C.gold],
@@ -187,7 +243,7 @@ S({ part:'PART 10', time:'15:14', kind:'std', title:'步驟五：調整順序',
     </div>
   </div>`,
   notes:{
-    say:['這一頁把上午的三段式和下午的剪輯接起來，是整天的收束點。',
+    say:['這一頁把第一個小時寫的三段式和剪輯接起來，是整天的收束點。',
          '「最好看的放第一個」第二次講了，這次要學員真的動手調。',
          '長按拖曳這個動作，中高齡學員常按不夠久，要示範。'],
     ask:['問：你的第一顆是哪一段？'],
@@ -197,7 +253,7 @@ S({ part:'PART 10', time:'15:14', kind:'std', title:'步驟五：調整順序',
     less:['只講「最好看的放第一個」。']
   }});
 
-S({ part:'PART 10', time:'15:18', kind:'std', title:'【實作】把鏡頭排好',
+S({ part:'剪輯', time:'14:51', kind:'std', title:'【實作】把鏡頭排好',
   html:`
   <div class="stack gap-m center" style="text-align:center">
     <div>
@@ -229,7 +285,7 @@ S({ part:'PART 10', time:'15:18', kind:'std', title:'【實作】把鏡頭排好
     less:['縮到 6 分鐘，順序沒排完的先往下走。']
   }});
 
-S({ part:'PART 10', time:'15:24', kind:'std', title:'步驟六：加文字',
+S({ part:'剪輯', time:'15:01', kind:'std', title:'步驟六：加文字',
   html:`
   <div class="stack gap-m">
     <div><h2 class="h" data-r style="font-size:36px">文字只加三個地方，<span class="hl">多了會亂</span></h2></div>
@@ -265,7 +321,7 @@ S({ part:'PART 10', time:'15:24', kind:'std', title:'步驟六：加文字',
     less:['只加前 3 秒那一句。']
   }});
 
-S({ part:'PART 10', time:'15:29', kind:'std', title:'步驟七：加音樂與調音量',
+S({ part:'剪輯', time:'15:05', kind:'std', title:'步驟七：加音樂與調音量',
   html:`
   <div class="stack gap-m">
     <div><h2 class="h" data-r style="font-size:36px">用 InShot <span class="hl">內建的音樂</span>就好</h2></div>
@@ -297,7 +353,7 @@ S({ part:'PART 10', time:'15:29', kind:'std', title:'步驟七：加音樂與調
     less:['直接選第一首推薦音樂，不挑。']
   }});
 
-S({ part:'PART 10', time:'15:33', kind:'std', title:'步驟八：轉場——多數直接切',
+S({ part:'剪輯', time:'15:08', kind:'std', title:'步驟八：轉場——多數直接切',
   html:`
   <div class="stack gap-m">
     <div><h2 class="h" data-r style="font-size:36px">不加轉場，<span class="hl">比亂加轉場好看</span></h2></div>
@@ -339,7 +395,7 @@ S({ part:'PART 10', time:'15:33', kind:'std', title:'步驟八：轉場——多
     less:['一句話講完：今天不加轉場。']
   }});
 
-S({ part:'PART 10', time:'15:36', kind:'std', title:'步驟九：輸出',
+S({ part:'剪輯', time:'15:10', kind:'std', title:'步驟九：輸出',
   html:`
   <div class="stack gap-m">
     <div><h2 class="h" data-r style="font-size:36px">按右上角「儲存」，設定選這兩個</h2></div>
@@ -378,11 +434,11 @@ S({ part:'PART 10', time:'15:36', kind:'std', title:'步驟九：輸出',
     less:['直接用預設值輸出。']
   }});
 
-S({ part:'PART 10', time:'15:38', kind:'std', title:'【實作】完成剪輯並輸出',
+S({ part:'剪輯', time:'15:13', kind:'std', title:'【實作】完成剪輯並輸出',
   html:`
   <div class="stack gap-m center" style="text-align:center">
     <div>
-      <p class="eyebrow" data-r style="justify-content:center">實作　·　十二分鐘</p>
+      <p class="eyebrow" data-r style="justify-content:center">實作　·　二十七分鐘　·　剪完就輸出</p>
       <h2 class="h" data-r style="font-size:38px">加文字、加音樂、輸出。<span class="hl">今天的成品就完成了</span></h2>
     </div>
     <div class="checks" data-r style="grid-template-columns:1fr 1fr;max-width:1050px;margin:0 auto">
@@ -396,7 +452,7 @@ S({ part:'PART 10', time:'15:38', kind:'std', title:'【實作】完成剪輯並
       <b class="hl">存在手機裡的半成品，比留在 App 裡的完美作品有用。</b></span></div>
   </div>`,
   notes:{
-    say:['十二分鐘，這是最後的衝刺。助教全場走動。',
+    say:['二十七分鐘，時間比舊版寬鬆，但還是要盯住輸出。助教全場走動。',
          '一定要講「先輸出目前版本」，不然會有人剪到下課還沒輸出，回家就放棄了。',
          '剩最後三分鐘時全班喊一次：現在還沒按輸出的請按輸出。'],
     ask:['問：已經輸出完成的舉手？'],
@@ -406,10 +462,7 @@ S({ part:'PART 10', time:'15:38', kind:'std', title:'【實作】完成剪輯並
     less:['音樂可以不加，直接輸出。']
   }});
 
-/* =========================================================================
-   PART 11　成果、檢視與流量（76–81）
-   ========================================================================= */
-S({ part:'PART 11', time:'15:40', kind:'std', title:'成果放映：一起看',
+S({ part:'收尾', time:'15:40', kind:'std', title:'成果放映：一起看',
   html:`
   <div class="stack gap-m center" style="text-align:center">
     <div>
@@ -444,7 +497,7 @@ S({ part:'PART 11', time:'15:40', kind:'std', title:'成果放映：一起看',
     less:['只做兩兩互看，不投影。']
   }});
 
-S({ part:'PART 11', time:'15:45', kind:'std', title:'八個檢視點',
+S({ part:'收尾', time:'15:44', kind:'std', title:'八個檢視點',
   html:`
   <div class="stack gap-s pad-tight">
     <div><h2 class="h" data-r style="font-size:34px;margin-bottom:2px">
@@ -482,13 +535,13 @@ S({ part:'PART 11', time:'15:45', kind:'std', title:'八個檢視點',
     less:['只講前三項。']
   }});
 
-S({ part:'PART 11', time:'15:48', kind:'std', title:'最常見的三個問題與怎麼改',
+S({ part:'收尾', time:'15:48', kind:'std', title:'最常見的三個問題與怎麼改',
   html:`
   <div class="stack gap-m">
     <div><h2 class="h" data-r style="font-size:36px">如果影片怪怪的，多半是這三個原因</h2></div>
     <div class="stack gap-s" data-r>
       ${[['看完不知道你在賣什麼','一支講了太多件事，<b>或者根本沒有商品的清楚畫面</b>。',
-          '回到上午的兩句話。刪到只剩一件事，中間補一顆商品全景。',C.clay],
+          '回到一開始寫的兩句話。刪到只剩一件事，中間補一顆商品全景。',C.clay],
          ['很平、看不下去','全部都是靜止的商品，<b>沒有動作、沒有人、沒有過程</b>。',
           '補拍兩顆「手在做事」的鏡頭。倒、切、攪、包，哪一個都好。',C.gold],
          ['有點暈、有點糊','鏡頭一直在動，或者<b>錄影中途放大縮小</b>。',
@@ -521,7 +574,7 @@ S({ part:'PART 11', time:'15:48', kind:'std', title:'最常見的三個問題與
     less:['只講第一個問題。']
   }});
 
-S({ part:'PART 11', time:'15:51', kind:'std', title:'流量從哪裡來：一支不夠，要有系列',
+S({ part:'收尾', time:'15:51', kind:'std', title:'流量從哪裡來：一支不夠，要有系列',
   html:`
   <div class="stack gap-m">
     <div>
@@ -548,7 +601,7 @@ S({ part:'PART 11', time:'15:51', kind:'std', title:'流量從哪裡來：一支
       <b class="hl">選 2–3 種輪流發</b>，比十一種都做一次有用得多。</span></div>
   </div>`,
   notes:{
-    say:['這一頁接上午第 8 頁埋的伏筆，一定要回頭指一下。',
+    say:['這一頁接第一個小時「十一個系列」那一頁埋的伏筆，一定要回頭指一下。',
          '重點順序：先安撫（沒流量正常）、再講原因（系列讓人想追蹤）、',
          '最後講對自己的好處（不用一直想題材）——這一點對中高齡學員最有說服力。',
          '三張系列卡是範例，請學員想自己的三個系列。'],
@@ -559,7 +612,7 @@ S({ part:'PART 11', time:'15:51', kind:'std', title:'流量從哪裡來：一支
     less:['只講「選 2–3 種輪流發」這一句。']
   }});
 
-S({ part:'PART 11', time:'15:55', kind:'std', title:'一個月的發片計畫',
+S({ part:'收尾', time:'15:55', kind:'std', title:'一個月的發片計畫',
   html:`
   <div class="stack gap-s pad-tight">
     <div><h2 class="h" data-r style="font-size:34px;margin-bottom:2px">
@@ -599,7 +652,7 @@ S({ part:'PART 11', time:'15:55', kind:'std', title:'一個月的發片計畫',
     less:['只講「一週一支就夠」。']
   }});
 
-S({ part:'PART 11', time:'15:58', kind:'std', title:'最後一句話',
+S({ part:'收尾', time:'15:58', kind:'std', title:'最後一句話',
   html:`
   <div class="stack gap-m center" style="text-align:center;justify-content:center">
     <div>
@@ -629,9 +682,6 @@ S({ part:'PART 11', time:'15:58', kind:'std', title:'最後一句話',
     less:['直接念最後兩句話結束。']
   }});
 
-/* =========================================================================
-   附錄（82–84）　可單獨列印
-   ========================================================================= */
 S({ part:'附錄', time:'—', kind:'std', title:'附錄①　分鏡表（空白）',
   html:`
   <div class="stack gap-s pad-tight">
@@ -734,3 +784,282 @@ S({ part:'附錄', time:'—', kind:'std', title:'附錄③　InShot 九步驟 �
     </div>
   </div>`,
   notes:{ say:['這一頁是回家用的，九步驟＋計畫表＋檢查點都在同一張。'], ask:[], do:[] }});
+
+S({ part:'備用', time:'—', kind:'divider', title:'備用頁（不排在流程裡）',
+  html: divider('＋','備用頁',
+    '以下頁面不排在今天的流程裡。<br>進度快、學員提問、或某一段需要多講的時候再翻出來。',
+    ART.icon('list',130,'rgba(255,255,255,.13)')),
+  notes:{
+    say:['這些頁原本在完整版的流程裡，改成一小時腳本後移到這裡。',
+         '用得到的時機：學員問到、某一組特別快、或者哪一段講不清楚需要補充。',
+         '按 O 可以直接跳到這些頁。'],
+    ask:[], do:[], diff:[], more:[], less:[]
+  }});
+
+S({ part:'備用', time:'—', kind:'std', title:'講太多的下場',
+  html:`
+  <div class="stack gap-m center" style="text-align:center">
+    <div><h2 class="h" data-r style="font-size:38px">觀眾滑走的三個瞬間</h2></div>
+    <div class="cards c3" data-r style="gap:20px;max-width:1020px;margin:0 auto">
+      ${[['前 3 秒看不懂在拍什麼','畫面一開始是天花板、是桌子、是你在調整手機',C.clay],
+         ['講到一半換了話題','本來在講怎麼做，突然講到包裝，觀眾跟不上',C.gold],
+         ['看完不知道要幹嘛','沒有結尾，最後一個畫面是你伸手去關手機',C.plum]]
+        .map(([k,v,c])=>`
+        <div class="card" style="padding:24px 20px;border-top:5px solid ${c}">
+          <p class="k" style="font-size:23px;color:${c}">${k}</p>
+          <p class="v" style="font-size:20px">${v}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout" data-r style="max-width:1020px">${ART.icon('eye',32)}
+      <span class="txt">這三個問題，<b class="hl">都是在拍之前就決定的</b>，
+      不是剪輯能救的。所以我們現在要先想清楚。</span></div>
+  </div>`,
+  notes:{
+    say:['三個瞬間都很具體，學員會認出自己拍過的影片。',
+         '最後那句是本段的結論：這些都是拍之前決定的。'],
+    ask:['問：你自己滑短影音的時候，什麼情況會直接滑掉？'],
+    do:[],
+    diff:['學員開始重視前 3 秒。'],
+    more:['現場滑一下自己的社群，找一支三秒內看不懂的影片。'],
+    less:['只講第一個瞬間。']
+  }});
+
+S({ part:'備用', time:'—', kind:'std', title:'清楚的一句話 vs 模糊的一句話',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">同樣是果醬，兩種寫法差很多</h2></div>
+    <div class="split" style="gap:30px">
+      <div class="stack gap-s" data-r>
+        <div class="prompt bad">
+          <span class="p-lab">模糊</span><br>
+          「我要拍我的果醬。」<br>
+          「我希望大家覺得很好吃。」</div>
+        <div class="card" style="padding:16px 20px;background:#fdf3f1;border-color:transparent">
+          <p class="v" style="font-size:19px">
+            拍的時候會卡：果醬的什麼？放在桌上拍嗎？拍多久？<br>
+            <b>什麼都可以，就等於什麼都不知道。</b></p>
+        </div>
+      </div>
+      <div class="stack gap-s" data-r>
+        <div class="prompt good">
+          <span class="p-lab">清楚</span><br>
+          「我要拍<em>草莓果醬從下鍋到裝瓶</em>的過程。」<br>
+          「我希望觀眾看完知道<em>這是我自己熬的，不是買現成的</em>。」</div>
+        <div class="card sage" style="padding:16px 20px">
+          <p class="v" style="font-size:19px">
+            拍什麼馬上就有答案：草莓下鍋、攪拌、裝瓶、貼標。<br>
+            <b>連結尾要拍什麼都決定了。</b></p>
+        </div>
+      </div>
+    </div>
+  </div>`,
+  notes:{
+    say:['左右對照念，讓學員自己聽出差別。',
+         '重點：清楚的一句話會直接生出分鏡，模糊的不會。這是下一段的伏筆。'],
+    ask:['問：你的兩句話比較像左邊還是右邊？'],
+    do:['回去修自己的兩句話，改得更具體。'],
+    diff:['學員會把「我要拍果醬」改成「我要拍果醬的某個過程」。'],
+    more:['用學員的實例現場改一次。'],
+    less:['只念右邊。']
+  }});
+
+S({ part:'備用', time:'—', kind:'std', title:'兩句話寫不出來，代表還沒想清楚',
+  html:`
+  <div class="stack gap-m">
+    <div><h2 class="h" data-r style="font-size:36px">卡住的三種情況，這樣處理</h2></div>
+    <div class="stack gap-s" data-r>
+      ${[['想不到要拍什麼','回去看商品類型對照那一頁，選粗體那一種。<br>真的沒想法就拍「製作過程」——最不會失敗。',C.clay],
+         ['想拍的東西太多','把它們列出來，<b>今天只拍第一個</b>，其他寫在旁邊當下週的題材。',C.gold],
+         ['第二句寫不出來','問自己：如果客人看完只記得一句話，你希望是哪一句？<br>那句就是答案。',C.sage]]
+        .map(([k,v,c])=>`
+        <div style="display:flex;gap:16px;align-items:flex-start;background:#fff;
+             border:1px solid rgba(36,28,23,.12);border-left:5px solid ${c};
+             border-radius:14px;padding:16px 20px">
+          <span style="font-size:22px;font-weight:900;color:${c};min-width:168px">${k}</span>
+          <span style="font-size:20px;font-weight:650;color:${C.ink2};line-height:1.5">${v}</span>
+        </div>`).join('')}
+    </div>
+    <div class="callout" data-r>${ART.icon('ok',30,C.sage)}
+      <span class="txt">寫不出來不是你的問題，是這一步本來就最難。
+      <b>但這一步跳過去，後面每一步都會更難。</b></span></div>
+  </div>`,
+  notes:{
+    say:['這一頁是給卡住的人的救生索，助教要拿著這一頁去個別協助。',
+         '「想拍太多」的人最好處理：多的變成下週題材，正好接系列的觀念。'],
+    ask:['問：現在還卡住的舉手？'],
+    do:['卡住的學員由助教一對一協助。'],
+    diff:['全班都有兩句話才往下走。'],
+    more:[], less:['跳過，直接個別處理。']
+  }});
+
+S({ part:'備用', time:'—', kind:'std', title:'檢查：每一段能不能用一句話說完',
+  html:`
+  <div class="stack gap-m center" style="text-align:center">
+    <div><h2 class="h" data-r style="font-size:38px">三個檢查，過了才往下</h2></div>
+    <div class="cards c3" data-r style="gap:20px;max-width:1020px;margin:0 auto">
+      ${[['1','開始那一段，3 秒內看得出在拍什麼嗎？','看不出來，就換一個更明顯的畫面',C.clay],
+         ['2','過程那一段，有幾個具體動作？','少於三個，影片會很單調',C.gold],
+         ['3','完成那一段，有東西可以拍嗎？','沒有的話，補一個「成品放好」的畫面',C.sage]]
+        .map(([n,q,v,c])=>`
+        <div class="card" style="padding:22px 20px">
+          <span class="num-badge" style="background:${c};margin-bottom:11px">${n}</span>
+          <p class="k" style="font-size:22px">${q}</p>
+          <p class="v" style="font-size:19px">${v}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout sage" data-r style="max-width:1020px">${ART.icon('ok',30,C.sage)}
+      <span class="txt">三個都過了，你的腳本就完成了。<b>接下來把它畫成分鏡。</b></span></div>
+  </div>`,
+  notes:{
+    say:['三個檢查一起走一遍，這是進入分鏡前的關卡。',
+         '第二個檢查最重要：少於三個動作的，過程段一定會很無聊。'],
+    ask:['問：三個檢查都過的舉手？'],
+    do:['自己檢查一次，沒過的補寫。'],
+    diff:['進入分鏡段時，每個人都有可用的腳本。'],
+    more:[], less:['只做第二個檢查。']
+  }});
+
+S({ part:'備用', time:'—', kind:'std', title:'不要先拍一堆，再回來想怎麼剪',
+  html:`
+  <div class="split" style="gap:36px">
+    <div class="card" data-r style="padding:24px 26px;background:#fdf3f1;border-color:transparent">
+      <p class="cap" style="color:#c0392b">✕ 多數人的做法</p>
+      <div class="stack gap-s">
+        <div class="no"><i>1</i><span>拿起手機，看到什麼拍什麼</span></div>
+        <div class="no"><i>2</i><span>拍了二三十段，每段都很長</span></div>
+        <div class="no"><i>3</i><span>打開剪輯 App，不知道從哪一段開始</span></div>
+        <div class="no"><i>4</i><span>剪到一半發現少了關鍵鏡頭</span></div>
+        <div class="no"><i>5</i><span>放棄</span></div>
+      </div>
+    </div>
+    <div class="card sage" data-r style="padding:24px 26px">
+      <p class="cap" style="color:${C.sage}">✓ 今天要學的做法</p>
+      <div class="stack gap-s">
+        <div class="yes"><i>1</i><span>先寫三段腳本</span></div>
+        <div class="yes"><i>2</i><span>拆成 5–8 個鏡頭，寫進分鏡表</span></div>
+        <div class="yes"><i>3</i><span>照表拍，拍完一個打一個勾</span></div>
+        <div class="yes"><i>4</i><span>拍完就知道素材是齊的</span></div>
+        <div class="yes"><i>5</i><span>剪輯只要照順序接起來</span></div>
+      </div>
+    </div>
+  </div>`,
+  notes:{
+    say:['左邊那五步要念得像在講學員自己的故事，會很有共鳴。',
+         '第 4 步「剪到一半發現少了關鍵鏡頭」是最痛的，因為東西已經收了、材料已經用完了。'],
+    ask:['問：左邊這五步，你走過幾步？'],
+    do:[],
+    diff:['學員接受花時間寫分鏡表。'],
+    more:[], less:['只講左邊第 4 步和右邊第 3 步。']
+  }});
+
+S({ part:'備用', time:'—', kind:'std', title:'全景：看整體',
+  html: shotPage('wide','全景<br>讓人看見整個場面',
+    ['工作環境、你的工作檯','整桌的商品','完整的包裝與周邊'],
+    '全景通常放在<b>開頭</b>，用來交代「這是在哪裡、有什麼」。', C.clean),
+  notes:{
+    say:['全景的功能是「交代環境」，不是「看清楚商品」。',
+         '全景放開頭最有效，因為觀眾需要先知道場景。'],
+    ask:['問：你的工作檯拍成全景好看嗎？（不好看就先整理）'],
+    do:[], diff:['學員知道全景不是隨便拍遠一點。'],
+    more:['提醒全景最容易拍到雜物，開拍前先整理桌面。'],
+    less:['四種景別合併成一頁講。']
+  }});
+
+S({ part:'備用', time:'—', kind:'std', title:'中景：商品＋手',
+  html: shotPage('medium','中景<br>看得到動作在發生',
+    ['手在操作、包裝、攪拌','使用方式的示範','商品和人的關係'],
+    '中景是短影音<b>用得最多</b>的距離。有手、有動作，畫面才活。', C.warm),
+  notes:{
+    say:['中景是短影音的主力，多數鏡頭都是中景。',
+         '「有手就有動作，有動作就有人看」——這句話要講。'],
+    ask:['問：你的商品，手可以怎麼跟它互動？'],
+    do:[], diff:['學員開始想到把手放進畫面。'],
+    more:['提醒手要乾淨，指甲要整理，這是很多人忽略的。'],
+    less:['與近景合併。']
+  }});
+
+S({ part:'備用', time:'—', kind:'std', title:'近景：商品是主角',
+  html: shotPage('close','近景<br>商品占滿畫面',
+    ['商品主體的完整樣子','包裝正面、標籤','商品的顏色與形狀'],
+    '近景適合<b>結尾</b>，讓觀眾最後記住商品長什麼樣。', C.fresh),
+  notes:{
+    say:['近景和中景最容易混淆：中景有手，近景商品占滿。',
+         '近景放結尾，讓人記住商品——這跟開頭的全景剛好對稱。'],
+    ask:['問：中景和近景差在哪裡？（有沒有手）'],
+    do:[], diff:['學員分得出中景和近景。'],
+    more:[], less:['與中景合併。']
+  }});
+
+S({ part:'備用', time:'—', kind:'std', title:'特寫：只看一個細節',
+  html: shotPage('detail','特寫<br>只給一個細節',
+    ['食物的切面、拉絲、流動','飾品的紋理與扣環','標籤、封口、材質','手部的細微動作'],
+    '特寫是<b>最有說服力</b>的畫面，也是最多人沒拍的。一支影片至少要有一個。', C.lux),
+  notes:{
+    say:['特寫是今天最想讓學員學會的一種，因為最多人沒拍過。',
+         '特寫要走近拍，不要用手指放大——這是（1）教過的原則。',
+         '手機最近對焦距離大約 8–10 公分，太近會對不到焦。'],
+    ask:['問：你的商品，最值得特寫的細節是什麼？'],
+    do:['想一個自己商品的特寫點。'],
+    diff:['學員會開始注意商品的細節，而不只是整體。'],
+    more:['示範一次特寫，讓學員看對焦怎麼點。'],
+    less:['只講「一支影片至少要有一個特寫」。']
+  }});
+
+S({ part:'備用', time:'—', kind:'std', title:'【實作】完成素材清單',
+  html:`
+  <div class="stack gap-m center" style="text-align:center">
+    <div>
+      <p class="eyebrow" data-r style="justify-content:center">實作　·　六分鐘</p>
+      <h2 class="h" data-r style="font-size:38px">等一下要用到的東西，全部列出來</h2>
+    </div>
+    <div class="cards c3" data-r style="gap:20px;max-width:1020px;margin:0 auto">
+      ${[['要準備的東西','商品、原料、道具、包裝材料',C.clay],
+         ['要做的動作','切、攪、包、拿、放、打開',C.gold],
+         ['不可逆的先拍','切開、下鍋、拆封——做了就回不去',C.sage]]
+        .map(([k,v,c])=>`
+        <div class="card" style="padding:22px 20px;border-top:5px solid ${c}">
+          <p class="k" style="font-size:22px;color:${c}">${k}</p>
+          <p class="v" style="font-size:20px">${v}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout" data-r style="max-width:1020px">${ART.icon('warn',30)}
+      <span class="txt">第三欄最重要。<b class="hl">不可逆的動作，一定要先確認鏡頭準備好了再做。</b></span></div>
+  </div>`,
+  notes:{
+    say:['第三點「不可逆的先拍」是實務上最有價值的一句話。',
+         '提醒：要用的東西，開始拍之前先擺好。'],
+    ask:['問：你的清單裡，哪一項是不可逆的？'],
+    do:['完成素材清單，並在不可逆的項目前面畫星號。'],
+    diff:['拍攝時不會發生「東西用掉了才想到沒拍」。'],
+    more:[], less:['口頭提醒，不寫清單。']
+  }});
+
+S({ part:'備用', time:'—', kind:'std', title:'你的商品，過程在哪裡？',
+  html:`
+  <div class="stack gap-m center" style="text-align:center">
+    <div>
+      <p class="eyebrow" data-r style="justify-content:center">互動　·　三分鐘</p>
+      <h2 class="h" data-r style="font-size:38px">回去看你的分鏡表，<span class="hl">過程有幾個鏡頭？</span></h2>
+    </div>
+    <div class="cards c3" data-r style="gap:20px;max-width:1020px;margin:0 auto">
+      ${[['0–1 個','過程太少，影片會很平。<br>回去加兩個動作的鏡頭。','#c0392b'],
+         ['2–3 個','剛剛好。<br>這支影片會有東西可看。',C.sage],
+         ['4 個以上','很好，但注意總長。<br>超過 30 秒就刪掉一兩個。',C.gold]]
+        .map(([k,v,c])=>`
+        <div class="card" style="padding:24px 20px;border-top:5px solid ${c}">
+          <p class="k" style="font-size:26px;color:${c}">${k}</p>
+          <p class="v" style="font-size:20px">${v}</p>
+        </div>`).join('')}
+    </div>
+    <div class="callout" data-r style="max-width:1020px">${ART.icon('warn',30)}
+      <span class="txt">現在把分鏡表補好。<b>接下來就照這張表拍，不再改。</b></span></div>
+  </div>`,
+  notes:{
+    say:['這是腳本段的收尾，讓學員自己檢查分鏡表。',
+         '「照這張表拍，不再改」要明確講，不然拍攝時會有人一直改。',
+         '午休前提醒：要用的東西午休時先擺好。'],
+    ask:['問：過程有幾個鏡頭？0–1 個的舉手？（這些人要優先協助）'],
+    do:['補完分鏡表，午休時擺好道具。'],
+    diff:['拍攝可以直接開始，不用再花時間規劃。'],
+    more:[], less:['口頭提醒即可。']
+  }});
