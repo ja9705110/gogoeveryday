@@ -56,9 +56,9 @@ LAYOUTS = {
     "arc": [(340, 474, 1.06), (960, 334, 1.22), (1580, 474, 1.06)],
 }
 
-TITLE = "毛孩每一天"
-SUBTITLE = "三隻毛孩 · KTV 版"
-END_LINE = "每一天　都和你在一起"
+TITLE = "一直都在"
+SUBTITLE = "給　曉萱（蹦蹦）"
+END_LINE = "給　曉萱（蹦蹦）"
 
 G = {}                          # per-process render assets
 
@@ -198,11 +198,15 @@ def load_pets(assets):
 # --------------------------------------------------------------------------- #
 # text layers
 # --------------------------------------------------------------------------- #
-def text_layers(text, size, stroke, grad=True):
+def text_layers(text, size, stroke, grad=True, max_w=1720):
     """Return (base, highlight) RGBA layers of identical size, text centred."""
-    font = ImageFont.truetype(FONT_PATH, size, index=FONT_TC)
     probe = ImageDraw.Draw(Image.new("RGBA", (8, 8)))
+    font = ImageFont.truetype(FONT_PATH, size, index=FONT_TC)
     box = probe.textbbox((0, 0), text, font=font, stroke_width=stroke)
+    if box[2] - box[0] > max_w:                       # shrink to fit the safe area
+        size = max(28, int(size * max_w / (box[2] - box[0])))
+        font = ImageFont.truetype(FONT_PATH, size, index=FONT_TC)
+        box = probe.textbbox((0, 0), text, font=font, stroke_width=stroke)
     pad = stroke * 3 + 8
     cw, ch = box[2] - box[0] + pad * 2, box[3] - box[1] + pad * 2
     org = (pad - box[0], pad - box[1])
