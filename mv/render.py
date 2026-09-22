@@ -31,6 +31,7 @@ HL_BOT = (255, 118, 168)
 LYRIC_Y = 876                   # centre of the active line
 NEXT_Y = 998
 SCRIM_TOP = 780
+LINE_HOLD = 2.6                 # seconds a finished phrase stays up
 
 # scene start, layout, energy (drives bounce height and particle rate)
 SCENES = [
@@ -488,11 +489,19 @@ def draw_lyrics(frame, t):
         end = G["endline"]
         paste_alpha(frame, end, ((W - end.width) // 2, 980 - end.height // 2), a * 0.95)
 
+    # A finished phrase lingers, fully lit, until the next one or the
+    # instrumental takes over -- the LRC's end is where singing stops, which
+    # is what the wipe follows, not how long the line stays up.
     idx = None
     for i, ln in enumerate(lines):
-        if ln["start"] <= t < ln["end"]:
+        if ln["start"] <= t:
             idx = i
+        else:
             break
+    if idx is not None:
+        nxt = lines[idx + 1]["start"] if idx + 1 < len(lines) else 1e9
+        if t >= min(nxt, lines[idx]["end"] + LINE_HOLD):
+            idx = None
     if idx is None:
         # show the upcoming line during a gap, plus the KTV count-in
         nxt = next((i for i, ln in enumerate(lines) if ln["start"] > t), None)
@@ -506,14 +515,14 @@ def draw_lyrics(frame, t):
     x0, y0 = (W - base.width) // 2, LYRIC_Y - base.height // 2
     paste_alpha(frame, base, (x0, y0))
 
-    # wipe: the phrase is sung over the first ~82% of its slot
-    span = max(0.25, (ln["end"] - ln["start"]) * 0.82)
+    # wipe across exactly the span the line is sung over
+    span = max(0.25, ln["end"] - ln["start"])
     k = min(1.0, max(0.0, (t - ln["start"]) / span))
     cut = int(round(hl.width * k))
     if cut > 0:
         paste_alpha(frame, hl.crop((0, 0, cut, hl.height)), (x0, y0))
 
-    if idx + 1 < len(lines) and lines[idx + 1]["start"] - ln["end"] < 2.0:
+    if idx + 1 < len(lines) and lines[idx + 1]["start"] - ln["end"] < 4.0:
         nb = G["next"][idx + 1]
         paste_alpha(frame, nb, ((W - nb.width) // 2, NEXT_Y - nb.height // 2), 0.62)
 
