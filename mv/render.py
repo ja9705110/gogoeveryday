@@ -43,20 +43,27 @@ CORNER_LAYOUT = [               # where the pets sit once photos take the stage
     (1570, 202, 0.28), (1700, 236, 0.30), (1820, 202, 0.28),
 ]
 
-# scene start, layout, energy (drives bounce height and particle rate)
+# start, layout, energy, pet held in the feature slot (None = natural order),
+# warmth. Boundaries are the lyric sections, not the loudness curve.
 SCENES = [
-    (0.00, "triangle", 0.22),
-    (27.57, "row", 0.55),
-    (55.00, "rowalt", 0.62),
-    (82.40, "huddle", 0.78),
-    (96.14, "arc", 1.00),
-    (123.60, "row", 0.60),
-    (151.00, "arc", 1.00),
-    (178.40, "huddle", 0.55),
-    (192.10, "arc", 1.10),
-    (219.60, "triangle", 0.28),
+    (0.00, "triangle", 0.22, 0, 0.00),      # intro: they arrive one at a time
+    (14.24, "row", 0.55, 1, 0.00),          # verse 1
+    (41.50, "huddle", 0.72, 2, 0.06),       # pre-chorus
+    (54.78, "arc", 1.00, 0, 0.00),          # chorus 1
+    (86.00, "rowalt", 0.60, 1, 0.00),       # verse 2
+    (113.32, "huddle", 0.75, 2, 0.06),      # pre-chorus 2
+    (127.00, "arc", 1.00, 0, 0.00),         # chorus 2
+    (157.94, "row", 0.55, 1, 0.12),         # bridge
+    (188.52, "together", 0.58, None, 1.00), # final chorus: shoulder to shoulder
+    (222.84, "together", 0.28, None, 0.88), # outro
 ]
-TRANS = 1.3                     # seconds to blend between layouts
+
+# Which slot the featured pet takes; the others fill the rest in order.
+FEATURE_SLOT = {"triangle": 0, "row": 1, "rowalt": 1,
+                "huddle": 1, "arc": 1, "together": 1}
+ENTRY = (2, 0, 1)               # intro arrival order, by pet
+
+TRANS = 1.7                     # seconds to blend between layouts
 
 LAYOUTS = {
     # (x, y, scale) per pet
@@ -65,6 +72,9 @@ LAYOUTS = {
     "rowalt": [(368, 500, 0.98), (960, 408, 0.94), (1552, 500, 0.98)],
     "huddle": [(486, 466, 1.06), (960, 512, 1.14), (1434, 466, 1.06)],
     "arc": [(340, 474, 1.06), (960, 334, 1.22), (1580, 474, 1.06)],
+    # Close enough that the sticker borders touch -- the point of the last
+    # chorus is that nobody is standing on their own.
+    "together": [(480, 478, 1.10), (960, 450, 1.16), (1440, 478, 1.10)],
 }
 
 TITLE = "一直都在"
@@ -363,6 +373,13 @@ def init(assets, lrc_path, photos=None, pets="full", energy_boost=1.0):
         (0.72, (226, 199, 240)), (1.00, (198, 198, 242)),
     ]).astype(np.uint8)
 
+    G["bg_warm"] = vgradient((W, H), [
+        (0.00, (255, 222, 166)), (0.38, (255, 190, 158)),
+        (0.72, (248, 182, 184)), (1.00, (232, 194, 212)),
+    ]).astype(np.uint8)
+    G["bgcache"] = {}
+    G["glow"] = soft_blob(940, (255, 196, 120), 0.52, 2.0)
+
     G["blobs"] = [
         (soft_blob(560, (185, 236, 216), 0.30), 300, 300, 520, 180, 31.0, 23.0, 0.0),
         (soft_blob(620, (255, 240, 176), 0.26), 1550, 260, 420, 200, 37.0, 27.0, 1.7),
@@ -436,10 +453,28 @@ def build_particles(beats):
 # --------------------------------------------------------------------------- #
 def scene_at(t):
     idx = 0
-    for i, (start, _, _) in enumerate(SCENES):
-        if t >= start:
+    for i, scene in enumerate(SCENES):
+        if t >= scene[0]:
             idx = i
     return SCENES[idx][1], SCENES[idx][2], idx
+
+
+def slots_for(idx):
+    """Layout slot each pet takes in this scene."""
+    name, centre = SCENES[idx][1], SCENES[idx][3]
+    if centre is None:
+        return (0, 1, 2)
+    slot = [None] * 3
+    slot[centre] = FEATURE_SLOT[name]
+    spare = [x for x in (0, 1, 2) if x != slot[centre]]
+    for pet in (p for p in range(3) if p != centre):
+        slot[pet] = spare.pop(0)
+    return tuple(slot)
+
+
+def targets(idx):
+    lay = LAYOUTS[SCENES[idx][1]]
+    return [lay[s] for s in slots_for(idx)]
 
 
 def smoothstep(x):
@@ -448,16 +483,19 @@ def smoothstep(x):
 
 
 def layout_at(t):
-    name, energy, idx = scene_at(t)
-    cur = LAYOUTS[name]
+    """Per-pet (x, y, scale) plus this moment's energy and warmth."""
+    _, energy, idx = scene_at(t)
+    warmth = SCENES[idx][4]
+    cur = targets(idx)
     start = SCENES[idx][0]
     if idx > 0 and t - start < TRANS:
-        prev = LAYOUTS[SCENES[idx - 1][1]]
         k = smoothstep((t - start) / TRANS)
+        prev = targets(idx - 1)
         cur = [tuple(p * (1 - k) + c * k for p, c in zip(pp, cc))
                for pp, cc in zip(prev, cur)]
         energy = SCENES[idx - 1][2] * (1 - k) + energy * k
-    return cur, energy
+        warmth = SCENES[idx - 1][4] * (1 - k) + warmth * k
+    return cur, energy, warmth
 
 
 def xform(i, scale, angle, sx=1.0, sy=1.0):
@@ -513,6 +551,19 @@ def paste_alpha(dst, src, xy, alpha=1.0):
 # --------------------------------------------------------------------------- #
 # frame
 # --------------------------------------------------------------------------- #
+def background(warmth):
+    """Gradient warmed toward gold, cached per quantised step."""
+    k = round(min(1.0, max(0.0, warmth)) / 0.05) * 0.05
+    arr = G["bgcache"].get(k)
+    if arr is None:
+        arr = (G["bg"] if k <= 0.0 else
+               (G["bg"] * (1 - k) + G["bg_warm"] * k).astype(np.uint8))
+        if len(G["bgcache"]) > 24:
+            G["bgcache"].clear()
+        G["bgcache"][k] = arr
+    return Image.fromarray(arr.copy(), "RGB")
+
+
 def render_frame(t):
     if G["photos"]:
         frame = photo_frame(t)
@@ -523,7 +574,8 @@ def render_frame(t):
         draw_lyrics(frame, t)
         return frame.convert("RGB")
 
-    frame = Image.fromarray(G["bg"].copy(), "RGB")
+    warmth = layout_at(t)[2]
+    frame = background(warmth)
 
     for sprite, cx, cy, ax, ay, tx, ty, ph in G["blobs"]:
         x = cx + ax * math.sin(2 * math.pi * t / tx + ph)
@@ -541,6 +593,11 @@ def render_frame(t):
             tw = 0.55 + 0.45 * math.sin(2 * math.pi * t / 3.3 + seed)
             paste_alpha(frame, sprite,
                         (int(x - sprite.width / 2), int(y - sprite.height / 2)), tw)
+
+    if warmth > 0.02:
+        glow = G["glow"]
+        paste_alpha(frame, glow, (W // 2 - glow.width // 2, 470 - glow.height // 2),
+                    warmth)
 
     draw_pets(frame, t)
 
@@ -573,9 +630,9 @@ def draw_pets(frame, t):
         return
     corner = G["pets_mode"] == "corner"
     if corner:
-        layout, energy = CORNER_LAYOUT, 0.45
+        layout, energy, warmth = CORNER_LAYOUT, 0.45, 0.0
     else:
-        layout, energy = layout_at(t)
+        layout, energy, warmth = layout_at(t)
     energy *= G["boost"]
     cycle = G["period"] * 2                  # one bounce every two beats
 
@@ -590,13 +647,21 @@ def draw_pets(frame, t):
         tilt = 7.0 * math.sin(2 * math.pi * t / 3.4 + i * 2.1) * (0.4 + 0.6 * energy)
         sway = (5 if corner else 16) * math.sin(2 * math.pi * t / 5.1 + i * 1.3)
 
-        sprite = xform(i, sc, tilt, sx, sy)
-        # staggered entrance during the intro
-        alpha = fade(t, 2.0 + i * 1.7, 4.0 + i * 1.7, G["duration"] - 8.0,
-                     G["duration"] - 2.0)
+        # One at a time over the intro: each rises into place and settles
+        # before the next arrives.
+        step = ENTRY[i]
+        alpha = fade(t, 2.4 + step * 3.2, 4.6 + step * 3.2,
+                     G["duration"] - 8.0, G["duration"] - 2.0)
+        arrive = smoothstep((t - (2.4 + step * 3.2)) / 2.2)
+        rise = (1.0 - arrive) * 150.0
+        grow = 0.80 + 0.20 * arrive
+        # a slow breath instead of a bounce once the warm section takes over
+        grow *= 1.0 + 0.014 * warmth * math.sin(2 * math.pi * t / 4.2 + i * 1.9)
+
+        sprite = xform(i, sc * grow, tilt, sx, sy)
         paste_alpha(frame, sprite,
                     (int(x + sway - sprite.width / 2),
-                     int(y - lift - sprite.height / 2)), alpha)
+                     int(y + rise - lift - sprite.height / 2)), alpha)
 
 
 def draw_lyrics(frame, t):
@@ -635,8 +700,10 @@ def draw_lyrics(frame, t):
             idx = None
     if idx is None:
         # show the upcoming line during a gap, plus the KTV count-in
+        # Only lead into the very first line. Mid-song the gaps are two or
+        # three seconds and a countdown popping up there just reads as a glitch.
         nxt = next((i for i, ln in enumerate(lines) if ln["start"] > t), None)
-        if nxt is not None and lines[nxt]["start"] - t <= 1.72 and t > first - 1.8:
+        if nxt == 0 and lines[0]["start"] - t <= 1.72:
             count_in(frame, lines[nxt]["start"] - t)
             base = layers[nxt][0]
             paste_alpha(frame, base, ((W - base.width) // 2, LYRIC_Y - base.height // 2), 0.75)

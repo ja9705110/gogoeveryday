@@ -90,9 +90,26 @@ Lines wider than the 1720px title-safe area are shrunk to fit.
 
 ## Timeline
 
-Scene layout and energy are keyed to the song's sections in `SCENES`; pets hop
-once every two beats, so the motion stays locked to the beat grid. Edit
-`SCENES` / `LAYOUTS` in `render.py` to re-stage the video.
+`SCENES` is keyed to the **lyric** sections, not the loudness curve, so a
+change of staging lands with a change of verse. Each row carries a layout, an
+energy, the pet to hold in the feature slot, and a warmth.
+
+Pets hop once every two beats, so the motion stays on the beat grid. They
+arrive one at a time over the intro, rising into place in `ENTRY` order.
+
+The feature pet rotates section by section, so each of the three takes a turn
+in the middle. Positions are resolved **per pet**, not per slot, so a change
+of feature glides: the two that swap walk past each other over `TRANS`
+seconds instead of cutting.
+
+`warmth` drives the last chorus. The gradient blends toward gold, a wide
+amber glow fades in behind the pets, the hop gives way to a slow breath, and
+the layout becomes `together` — close enough that the sticker borders touch,
+because the point of that section is that nobody is standing on their own.
+
+The count-in dots lead into the first line only. Mid-song the instrumental
+gaps are two to three seconds and a countdown appearing there reads as a
+glitch rather than a cue.
 
 ## Slideshow
 
