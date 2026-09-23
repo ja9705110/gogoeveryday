@@ -5,16 +5,18 @@ Pet motion is locked to the beat grid in assets/beats.json; subtitles come from
 an LRC file, so re-subtitling the video only means swapping lyrics.lrc.
 """
 import argparse
+import glob
 import json
 import math
 import os
+import random
 import re
 import subprocess
 import sys
 from multiprocessing import Pool
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
 from scipy import ndimage
 
 W, H = 1920, 1080
@@ -32,6 +34,12 @@ LYRIC_Y = 876                   # centre of the active line
 NEXT_Y = 998
 SCRIM_TOP = 780
 LINE_HOLD = 2.6                 # seconds a finished phrase stays up
+
+PHOTO_W, PHOTO_H = 2560, 1440   # working canvas; the extra area is pan headroom
+XFADE = 0.9                     # crossfade between slides
+CORNER_LAYOUT = [               # where the pets sit once photos take the stage
+    (1570, 202, 0.28), (1700, 236, 0.30), (1820, 202, 0.28),
+]
 
 # scene start, layout, energy (drives bounce height and particle rate)
 SCENES = [
@@ -181,6 +189,93 @@ def stickerize(im, ring=11, drop=12):
     return out
 
 
+# --------------------------------------------------------------------------- #
+# photo slideshow
+# --------------------------------------------------------------------------- #
+def load_photo(path):
+    """One slide on the working canvas, portrait shots filled out behind."""
+    im = ImageOps.exif_transpose(Image.open(path)).convert("RGB")
+    ratio = im.width / im.height
+    if 1.45 <= ratio <= 2.2:
+        # 16:9, 3:2 and friends: crop to full bleed, biased high so faces
+        # survive the trim.
+        return ImageOps.fit(im, (PHOTO_W, PHOTO_H), Image.LANCZOS,
+                            centering=(0.5, 0.42))
+
+    # Anything squarer, taller or panoramic keeps all of itself: a blurred,
+    # dimmed copy fills the frame behind, the photo is matted in front.
+    back = ImageOps.fit(im, (PHOTO_W, PHOTO_H), Image.LANCZOS, centering=(0.5, 0.45))
+    back = ImageEnhance.Brightness(back.filter(ImageFilter.GaussianBlur(44))).enhance(0.8)
+    front = im.copy()
+    front.thumbnail((int(PHOTO_W * 0.86), int(PHOTO_H * 0.93)), Image.LANCZOS)
+    x, y = (PHOTO_W - front.width) // 2, int(PHOTO_H * 0.5 - front.height / 2)
+    pad = 10
+    mat = Image.new("RGB", (front.width + pad * 2, front.height + pad * 2), CREAM)
+    shadow = Image.new("RGBA", back.size, (0, 0, 0, 0))
+    ImageDraw.Draw(shadow).rectangle(
+        [x - pad, y - pad + 14, x + front.width + pad, y + front.height + pad + 14],
+        fill=(40, 22, 38, 150))
+    back = Image.alpha_composite(
+        back.convert("RGBA"), shadow.filter(ImageFilter.GaussianBlur(22))).convert("RGB")
+    back.paste(mat, (x - pad, y - pad))
+    back.paste(front, (x, y))
+    return back
+
+
+def photo_schedule(count, duration, b0, bar):
+    """Even slots, each boundary pulled onto the nearest bar line."""
+    edges = []
+    for k in range(count + 1):
+        t = k * duration / count
+        edges.append(round((t - b0) / bar) * bar + b0)
+    edges[0], edges[-1] = 0.0, duration
+    for k in range(1, count):                       # keep them strictly rising
+        edges[k] = min(max(edges[k], edges[k - 1] + bar), duration - bar)
+    return list(zip(edges[:-1], edges[1:]))
+
+
+def ken_burns(idx):
+    """Slow push or pull across the slide, different every time but stable."""
+    rng = random.Random(9001 + idx * 7)
+    near = rng.uniform(0.84, 0.90)
+    far = min(1.0, near + rng.uniform(0.07, 0.13))
+    a, b = (near, far) if rng.random() < 0.5 else (far, near)
+    return ((a, rng.uniform(0.2, 0.8), rng.uniform(0.25, 0.75)),
+            (b, rng.uniform(0.2, 0.8), rng.uniform(0.25, 0.75)))
+
+
+def slide(idx, u):
+    """Frame `idx` of the slideshow, `u` in 0..1 across its slot."""
+    cache = G["slides"]
+    if idx not in cache:
+        cache[idx] = load_photo(G["photos"][idx])
+        for stale in sorted(cache)[:-4]:
+            if stale != idx:
+                del cache[stale]
+    base = cache[idx]
+
+    (z0, x0, y0), (z1, x1, y1) = G["moves"][idx]
+    k = smoothstep(u)
+    z, cx, cy = z0 + (z1 - z0) * k, x0 + (x1 - x0) * k, y0 + (y1 - y0) * k
+    cw, ch = PHOTO_W * z, PHOTO_H * z
+    left, top = (PHOTO_W - cw) * cx, (PHOTO_H - ch) * cy
+    box = (int(left), int(top), int(left + cw), int(top + ch))
+    return base.resize((W, H), Image.BICUBIC, box=box)
+
+
+def photo_frame(t):
+    for idx, (start, end) in enumerate(G["shots"]):
+        if start <= t < end or idx == len(G["shots"]) - 1:
+            frame = slide(idx, (t - start) / max(0.1, end - start))
+            if idx and t - start < XFADE:
+                prev_start, prev_end = G["shots"][idx - 1]
+                back = slide(idx - 1, min(1.0, (t - prev_start) /
+                                          max(0.1, prev_end - prev_start)))
+                frame = Image.blend(back, frame, smoothstep((t - start) / XFADE))
+            return frame
+    return Image.new("RGB", (W, H), (0, 0, 0))
+
+
 def load_pets(assets):
     out = []
     for name in PETS:
@@ -237,7 +332,7 @@ def text_layers(text, size, stroke, grad=True, max_w=1720):
 # --------------------------------------------------------------------------- #
 # per-process setup
 # --------------------------------------------------------------------------- #
-def init(assets, lrc_path, energy_boost=1.0):
+def init(assets, lrc_path, photos=None, pets="full", energy_boost=1.0):
     beats = json.load(open(os.path.join(assets, "beats.json")))
     G["beats"] = np.array(beats["beats"], dtype=np.float32)
     G["bpm"] = beats["bpm"]
@@ -245,6 +340,17 @@ def init(assets, lrc_path, energy_boost=1.0):
     G["period"] = 60.0 / beats["bpm"]
     G["duration"] = beats["duration"]
     G["boost"] = energy_boost
+    G["pets_mode"] = pets
+
+    G["photos"] = sorted(glob.glob(os.path.join(photos, "*"))) if photos else []
+    G["photos"] = [f for f in G["photos"]
+                   if os.path.splitext(f)[1].lower() in
+                   (".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff")]
+    if G["photos"]:
+        bar = 4 * G["period"]
+        G["shots"] = photo_schedule(len(G["photos"]), G["duration"], G["b0"], bar)
+        G["moves"] = [ken_burns(i) for i in range(len(G["photos"]))]
+        G["slides"] = {}
 
     G["bg"] = vgradient((W, H), [
         (0.00, (255, 219, 198)), (0.38, (255, 198, 214)),
@@ -277,7 +383,8 @@ def init(assets, lrc_path, energy_boost=1.0):
 
     scrim = np.zeros((H, W, 4), dtype=np.float32)
     ramp = np.clip((np.arange(H) - SCRIM_TOP) / (H - SCRIM_TOP), 0, 1) ** 1.4
-    scrim[..., 3] = (ramp * 0.34 * 255)[:, None]
+    weight = 0.58 if G["photos"] else 0.34   # photos need a firmer bed
+    scrim[..., 3] = (ramp * weight * 255)[:, None]
     scrim[..., 0], scrim[..., 1], scrim[..., 2] = 78, 46, 72
     G["scrim"] = Image.fromarray(scrim.astype(np.uint8), "RGBA")
 
@@ -402,6 +509,15 @@ def paste_alpha(dst, src, xy, alpha=1.0):
 # frame
 # --------------------------------------------------------------------------- #
 def render_frame(t):
+    if G["photos"]:
+        frame = photo_frame(t)
+        draw_pets(frame, t)
+        frame = frame.convert("RGBA")
+        frame.alpha_composite(G["vignette"])
+        frame.alpha_composite(G["scrim"])
+        draw_lyrics(frame, t)
+        return frame.convert("RGB")
+
     frame = Image.fromarray(G["bg"].copy(), "RGB")
 
     for sprite, cx, cy, ax, ay, tx, ty, ph in G["blobs"]:
@@ -421,29 +537,7 @@ def render_frame(t):
             paste_alpha(frame, sprite,
                         (int(x - sprite.width / 2), int(y - sprite.height / 2)), tw)
 
-    layout, energy = layout_at(t)
-    energy *= G["boost"]
-    period = G["period"]
-    cycle = period * 2                       # one bounce every two beats
-
-    for i, (x, y, sc) in enumerate(layout):
-        ph = (t - G["b0"]) / cycle + i / 3.0
-        f = ph % 1.0
-        hop = 1.0 - (2 * f - 1) ** 2         # parabolic arc
-        lift = 74 * energy * hop
-        land = max(0.0, 1.0 - abs(2 * f - 1) * 4.0)   # squash near touchdown
-        sx = 1.0 + 0.09 * land * energy
-        sy = 1.0 - 0.09 * land * energy
-        tilt = 7.0 * math.sin(2 * math.pi * t / 3.4 + i * 2.1) * (0.4 + 0.6 * energy)
-        sway = 16 * math.sin(2 * math.pi * t / 5.1 + i * 1.3)
-
-        sprite = xform(i, sc, tilt, sx, sy)
-        # staggered entrance during the intro
-        alpha = fade(t, 2.0 + i * 1.7, 4.0 + i * 1.7, G["duration"] - 8.0,
-                     G["duration"] - 2.0)
-        paste_alpha(frame, sprite,
-                    (int(x + sway - sprite.width / 2),
-                     int(y - lift - sprite.height / 2)), alpha)
+    draw_pets(frame, t)
 
     # particles
     for p in G["particles"]:
@@ -466,6 +560,38 @@ def render_frame(t):
     frame.alpha_composite(G["scrim"])
     draw_lyrics(frame, t)
     return frame.convert("RGB")
+
+
+def draw_pets(frame, t):
+    """Beat-locked hop; a small corner huddle once photos hold the frame."""
+    if G["pets_mode"] == "none":
+        return
+    corner = G["pets_mode"] == "corner"
+    if corner:
+        layout, energy = CORNER_LAYOUT, 0.45
+    else:
+        layout, energy = layout_at(t)
+    energy *= G["boost"]
+    cycle = G["period"] * 2                  # one bounce every two beats
+
+    for i, (x, y, sc) in enumerate(layout):
+        ph = (t - G["b0"]) / cycle + i / 3.0
+        f = ph % 1.0
+        hop = 1.0 - (2 * f - 1) ** 2         # parabolic arc
+        lift = (26 if corner else 74) * energy * hop
+        land = max(0.0, 1.0 - abs(2 * f - 1) * 4.0)   # squash near touchdown
+        sx = 1.0 + 0.09 * land * energy
+        sy = 1.0 - 0.09 * land * energy
+        tilt = 7.0 * math.sin(2 * math.pi * t / 3.4 + i * 2.1) * (0.4 + 0.6 * energy)
+        sway = (5 if corner else 16) * math.sin(2 * math.pi * t / 5.1 + i * 1.3)
+
+        sprite = xform(i, sc, tilt, sx, sy)
+        # staggered entrance during the intro
+        alpha = fade(t, 2.0 + i * 1.7, 4.0 + i * 1.7, G["duration"] - 8.0,
+                     G["duration"] - 2.0)
+        paste_alpha(frame, sprite,
+                    (int(x + sway - sprite.width / 2),
+                     int(y - lift - sprite.height / 2)), alpha)
 
 
 def draw_lyrics(frame, t):
@@ -576,9 +702,14 @@ def main():
     ap.add_argument("--jobs", type=int, default=max(1, os.cpu_count() or 1))
     ap.add_argument("--start", type=float, default=0.0)
     ap.add_argument("--dur", type=float, default=None, help="preview length")
+    ap.add_argument("--photos", default=None,
+                    help="directory of slideshow stills, shown in filename order")
+    ap.add_argument("--pets", default=None, choices=("full", "corner", "none"),
+                    help="default: full without photos, corner with them")
     ap.add_argument("--tmp", default=None)
     args = ap.parse_args()
 
+    pets = args.pets or ("corner" if args.photos else "full")
     beats = json.load(open(os.path.join(args.assets, "beats.json")))
     duration = beats["duration"] if args.dur is None else args.dur
     f0 = int(round(args.start * args.fps))
@@ -594,8 +725,13 @@ def main():
              os.path.join(tmp, f"seg{i:03d}.mp4"))
             for i in range(nseg) if edges[i + 1] > edges[i]]
 
+    if args.photos:
+        n = len([f for f in sorted(glob.glob(os.path.join(args.photos, "*")))
+                 if os.path.splitext(f)[1].lower() in
+                 (".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff")])
+        print(f"slideshow: {n} photos, {duration / max(1, n):.1f}s each, pets={pets}")
     print(f"frames {f0}..{f1} ({f1 - f0}) in {len(jobs)} segments on {args.jobs} workers")
-    with Pool(args.jobs, initializer=init, initargs=(args.assets, args.lrc)) as pool:
+    with Pool(args.jobs, initializer=init, initargs=(args.assets, args.lrc, args.photos, pets)) as pool:
         for i, path in enumerate(pool.imap(render_segment, jobs), 1):
             print(f"  segment {i}/{len(jobs)} done", flush=True)
 

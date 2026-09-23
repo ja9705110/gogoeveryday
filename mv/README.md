@@ -20,6 +20,7 @@ assets/* ──────────┴─render.py─> out/yizhidouzai_1080p
 ```sh
 python3 cutout.py assets/source.png assets           # re-cut the pets
 python3 render.py --audio /path/to/song.mp3          # full render (~6 min, 4 cores)
+python3 render.py --audio song.mp3 --photos photos/  # slideshow instead of pastel
 python3 render.py --audio song.mp3 --start 92 --dur 16 --out out/preview.mp4
 ```
 
@@ -72,3 +73,21 @@ Lines wider than the 1720px title-safe area are shrunk to fit.
 Scene layout and energy are keyed to the song's sections in `SCENES`; pets hop
 once every two beats, so the motion stays locked to the beat grid. Edit
 `SCENES` / `LAYOUTS` in `render.py` to re-stage the video.
+
+## Slideshow
+
+`--photos DIR` puts stills behind the lyrics instead of the pastel stage, in
+filename order. Slots are even and each boundary is pulled onto the nearest
+bar line, so slides turn over with the music rather than against it; every
+slide gets its own slow push or pull and an `XFADE`-second dissolve.
+
+Aspect is handled per photo. Between 1.45 and 2.2 (16:9, 3:2) a photo is
+cropped to full bleed, biased high so faces survive the trim. Squarer, taller
+or panoramic photos keep all of themselves: a blurred, dimmed copy of the same
+photo fills the frame behind, and the photo is matted in front. Orientation
+follows the EXIF tag.
+
+`--pets full|corner|none` says what becomes of the three cut-outs. With photos
+the default is `corner`: a small huddle in the top right that still hops on
+the beat. The lyric scrim deepens automatically so text stays legible over
+whatever is underneath.
