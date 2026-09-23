@@ -23,7 +23,10 @@ W, H = 1920, 1080
 FONT_PATH = "/usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc"
 FONT_TC = 3
 PETS = ["pet1_bunny_brown", "pet2_dog", "pet3_bunny_white"]
-PET_H = 380                     # height in px at scale 1.0
+PET_W = 420                     # width in px at scale 1.0
+
+# Width, not height: the white bunny's ears are half its bounding box, so
+# matching heights would shrink its face against the other two.
 
 INK = (74, 43, 69)              # outline / text shadow plum
 CREAM = (255, 252, 248)
@@ -58,10 +61,10 @@ TRANS = 1.3                     # seconds to blend between layouts
 
 LAYOUTS = {
     # (x, y, scale) per pet
-    "triangle": [(960, 286, 1.02), (548, 546, 0.96), (1372, 546, 0.96)],
+    "triangle": [(960, 282, 1.02), (500, 520, 0.96), (1420, 520, 0.96)],
     "row": [(356, 448, 0.94), (960, 492, 1.00), (1564, 448, 0.94)],
     "rowalt": [(368, 500, 0.98), (960, 408, 0.94), (1552, 500, 0.98)],
-    "huddle": [(520, 470, 1.06), (960, 516, 1.14), (1400, 470, 1.06)],
+    "huddle": [(486, 466, 1.06), (960, 512, 1.14), (1434, 466, 1.06)],
     "arc": [(340, 474, 1.06), (960, 334, 1.22), (1580, 474, 1.06)],
 }
 
@@ -284,8 +287,8 @@ def load_pets(assets):
         if not os.path.exists(path):
             path = os.path.join(assets, name + ".png")
         im = Image.open(path).convert("RGBA")
-        scale = PET_H / im.height
-        im = im.resize((max(1, round(im.width * scale)), PET_H), Image.LANCZOS)
+        scale = PET_W / im.width
+        im = im.resize((PET_W, max(1, round(im.height * scale))), Image.LANCZOS)
         # Sharpen colour only; sharpening alpha would re-introduce a fringe.
         rgb, a = im.convert("RGB"), im.getchannel("A")
         rgb = rgb.filter(ImageFilter.UnsharpMask(radius=1.6, percent=55, threshold=3))

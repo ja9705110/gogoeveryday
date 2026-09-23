@@ -5,13 +5,13 @@ cut-outs plus an LRC subtitle file, with a KTV-style karaoke wipe.
 
 ## Output
 
-`out/yizhidouzai_1080p.mp4` — H.264 High / yuv420p, AAC 320k @ 48kHz, `+faststart`.
+`out/yizhidouzai_1080p.mp4` — H.264 High / yuv420p, AAC @ 48kHz, `+faststart`. The fur detail is
+expensive: the CRF 17 master runs ~186 MB for 4:13.
 
 ## Pipeline
 
 ```
-assets/source.png ───cutout.py───> assets/pet*.png  (alpha cut-outs)
-assets/pet*.png ─────upscale_pets.py─> assets/pet*_x4.png  (super-resolved)
+assets/hires/*.png ──cutout.py───> assets/pet*.png  (alpha cut-outs)
 audio (mp3) ────────analysis────> assets/beats.json (140.00 BPM grid + energy)
 lyrics_source.txt ──align_lyrics.py─> lyrics.lrc  (forced-aligned to the vocal)
 lyrics.lrc ────────┐
@@ -19,8 +19,10 @@ assets/* ──────────┴─render.py─> out/yizhidouzai_1080p
 ```
 
 ```sh
-python3 cutout.py assets/source.png assets           # re-cut the pets
-python3 upscale_pets.py --model EDSR_x4.pb           # rebuild them at 4x
+python3 cutout.py --out assets --single \
+    pet1_bunny_brown=assets/hires/brown_bunny.png \
+    pet2_dog=assets/hires/dog.png \
+    pet3_bunny_white=assets/hires/white_bunny.png
 python3 render.py --audio /path/to/song.mp3          # full render (~6 min, 4 cores)
 python3 render.py --audio song.mp3 --photos photos/  # slideshow instead of pastel
 python3 render.py --audio song.mp3 --start 92 --dur 16 --out out/preview.mp4
@@ -94,17 +96,22 @@ the default is `corner`: a small huddle in the top right that still hops on
 the beat. The lyric scrim deepens automatically so text stays legible over
 whatever is underneath.
 
-## Pet resolution
+## Pets
 
-The sheet gives each subject roughly 120px, so the render was scaling about
-3x and the fur went blocky. `upscale_pets.py` rebuilds the cut-outs at 4x with
-EDSR (`cv2.dnn_superres`), and `load_pets` prefers `*_x4.png` when present, so
-the layout now scales *down* into place. The 1x mask is resized and lightly
-blurred at the new size, since a mask traced at 1x carries its stair-steps up.
+`assets/hires/` holds one ~1250px portrait per animal on a flat white
+backdrop; `cutout.py --single` lifts each onto alpha. The white bunny is the
+hard case, white fur on near-white, so the alpha ramp starts just above the
+backdrop's measured grain rather than at a fixed threshold.
 
-Tracing the pets to real vectors was tried and rejected: at this source size a
-colour trace turns fur into flat blobs with contour lines, which reads as a
-poster, not as these animals.
+`upscale_pets.py` (EDSR via `cv2.dnn_superres`) remains for low-resolution
+sources — it rebuilt the earlier ~120px cut-outs at 4x — and `load_pets`
+prefers `*_x4.png` when one exists. The current sources need no upscale.
+Tracing to real vectors was tried and rejected: a colour trace turns fur into
+flat blobs with contour lines, which reads as a poster, not as these animals.
+
+Sprites are normalised to `PET_W`, not to a common height: the white bunny's
+ears are half its bounding box, so matching heights shrinks its face against
+the other two.
 
 ## Checking the timings
 
