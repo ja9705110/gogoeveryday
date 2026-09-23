@@ -174,11 +174,22 @@ def monotonic(anchors):
 
 
 def line_bounds(owner, n_lines, xs, ts):
+    """Start and end of each line, in the vocal's own time.
+
+    The end is one character past the last one, *not* wherever the next line
+    begins -- interpolating to the next character hands a line the whole
+    instrumental behind it, and the wipe then crawls a beat behind the voice.
+    """
     starts, ends = [], []
     for idx in range(n_lines):
         where = np.flatnonzero(owner == idx)
-        starts.append(float(np.interp(where[0], xs, ts)))
-        ends.append(float(np.interp(where[-1] + 1, xs, ts)))
+        first = float(np.interp(where[0], xs, ts))
+        last = float(np.interp(where[-1], xs, ts))
+        step = (last - first) / (len(where) - 1) if len(where) > 1 else 0.33
+        tail = max(0.18, min(0.8, step))
+        starts.append(first)
+        ends.append(max(min(float(np.interp(where[-1] + 1, xs, ts)), last + tail),
+                        first + 0.4))
     return starts, ends
 
 
@@ -195,13 +206,22 @@ def suspect_lines(lines, counts, starts, ends):
     return out
 
 
-def verify_line(rec, audio, t, text, to_s):
-    """Listen at t and say whether this line is what is actually sung there."""
+def verify_line(rec, audio, t, text, to_s, tol=1.0):
+    """Is this line sung *at* t -- not merely somewhere nearby?
+
+    Checking only that the words turn up in the window passes a line that is
+    seconds early, which is exactly the error worth catching, so the opening
+    characters have to land within `tol` of the proposed time.
+    """
     want = "".join(c for c in to_s.convert(text) if CJK.fullmatch(c))[:3]
     if not want:
         return True
-    heard = "".join(c for c, _ in hear(rec, audio, max(0.0, t - 0.3), t + 4.0))
-    return want in heard[:8] or sum(c in heard[:9] for c in want) >= 2
+    heard = hear(rec, audio, max(0.0, t - 2.5), t + 4.0)
+    for i in range(len(heard) - len(want) + 1):
+        hit = sum(heard[i + k][0] == want[k] for k in range(len(want)))
+        if hit >= max(2, len(want) - 1) and abs(heard[i][1] - t) <= tol:
+            return True
+    return False
 
 
 def refine_gaps(rec, variants, lines, ref, owner, base, bad, starts, ends, dur, to_s):
@@ -233,12 +253,19 @@ def refine_gaps(rec, variants, lines, ref, owner, base, bad, starts, ends, dur, 
 
         # Two framings: the hole alone, and the hole plus its neighbours.
         # Short windows decode better, but a bare hole can be too tight.
+        # Three framings. The neighbours' own bounds can be wrong -- a
+        # repeated phrase stretches the line before the hole -- so one shape
+        # reaches back well before them rather than trusting that edge.
         shapes = []
-        tight_a = (ends[idx - 1] if idx else starts[idx] - 3.0) - 0.8
-        tight_b = (starts[stop + 1] if stop + 1 < n else ends[stop] + 3.0) + 0.8
-        wide_a = starts[idx - 1] if idx else tight_a
-        wide_b = ends[stop + 1] if stop + 1 < n else tight_b
-        for a, b in ((tight_a, tight_b), (wide_a, wide_b)):
+        prev_end = ends[idx - 1] if idx else starts[idx] - 3.0
+        next_start = starts[stop + 1] if stop + 1 < n else ends[stop] + 3.0
+        candidates = [
+            (prev_end - 0.8, next_start + 0.8),
+            (prev_end - 3.0, next_start + 1.5),
+            (starts[idx - 1] if idx else prev_end - 0.8,
+             ends[stop + 1] if stop + 1 < n else next_start + 0.8),
+        ]
+        for a, b in candidates:
             if b - a < 6.0:
                 mid = (a + b) / 2.0
                 a, b = mid - 3.0, mid + 3.0
@@ -275,6 +302,52 @@ def refine_gaps(rec, variants, lines, ref, owner, base, bad, starts, ends, dur, 
     return extra, redone
 
 
+def snap_lines(rec, variants, lines, ref, owner, starts, ends, dur, to_s):
+    """Last pass: re-measure the start of any line that fails the check.
+
+    Interpolation reads at a steady rate, so a line that follows a held note
+    or a short instrumental gets pulled a second or two early. Here the line
+    is re-decoded on its own and its start is taken from the recogniser's
+    timestamps -- and only kept if the result then verifies.
+    """
+    moved = 0
+    for i, text in enumerate(lines):
+        if verify_line(rec, variants[0], starts[i], text, to_s):
+            continue
+        lo, hi = max(0.0, starts[i] - 3.5), min(dur, starts[i] + 6.5)
+        span = np.flatnonzero(owner == i)
+        sub = [ref[j] for j in span]
+        best = None
+        for audio in variants:
+            heard = hear(rec, audio, lo, hi)
+            hyp = [to_s.convert(c)[0] for c, _ in heard]
+            times = [t for _, t in heard]
+            pairs = align(sub, hyp)
+            if not pairs:
+                continue
+            (r0, h0), (r1, h1) = pairs[0], pairs[-1]
+            rate = ((times[h1] - times[h0]) / (r1 - r0)) if r1 > r0 else 0.3
+            t0 = times[h0] - r0 * max(0.12, min(0.6, rate))
+            if not verify_line(rec, variants[0], t0, text, to_s):
+                continue
+            cand = (abs(t0 - starts[i]), t0)
+            if best is None or cand < best:
+                best = cand
+        if best:
+            print(f"  line {i + 1}: {starts[i]:.2f} -> {best[1]:.2f}", file=sys.stderr)
+            starts[i] = best[1]
+            moved += 1
+
+    # keep the sequence sane after the moves
+    chars = [sum(1 for c in t if CJK.fullmatch(c)) for t in lines]
+    for i in range(len(lines)):
+        if i and starts[i] < starts[i - 1]:
+            starts[i] = starts[i - 1] + 0.3
+        nxt = starts[i + 1] if i + 1 < len(lines) else dur
+        ends[i] = min(max(ends[i], starts[i] + 0.22 * chars[i], starts[i] + 0.4), nxt)
+    return moved
+
+
 def main():
     here = os.path.dirname(os.path.abspath(__file__))
     ap = argparse.ArgumentParser()
@@ -284,7 +357,7 @@ def main():
     ap.add_argument("--out", default=os.path.join(here, "lyrics.lrc"))
     ap.add_argument("--title", default="一直都在")
     ap.add_argument("--album", default="給　曉萱（蹦蹦）")
-    ap.add_argument("--gap", type=float, default=0.8,
+    ap.add_argument("--gap", type=float, default=0.25,
                     help="close a phrase when the next line is this far off, so\n"
                          "the wipe spans only what is actually sung")
     ap.add_argument("--report", action="store_true")
@@ -328,12 +401,18 @@ def main():
     xs, ts = monotonic(anchors)
     starts, ends = line_bounds(owner, len(lines), xs, ts)
 
+    moved = snap_lines(rec, variants, lines, ref, owner, starts, ends, dur, to_s)
+    checked = sum(verify_line(rec, variants[0], starts[i], lines[i], to_s)
+                  for i in range(len(lines)))
+    print(f"snapped {moved} lines; {checked}/{len(lines)} verified against the vocal",
+          file=sys.stderr)
+
     rows = []
     for idx, text in enumerate(lines):
         rows.append((starts[idx], text))
         nxt = starts[idx + 1] if idx + 1 < len(lines) else ends[idx] + args.gap
         if nxt - ends[idx] > args.gap:
-            rows.append((ends[idx] + 0.35, ""))
+            rows.append((ends[idx], ""))
     rows.append((min(dur, ends[-1] + 0.6), ""))
 
     body = [

@@ -279,12 +279,16 @@ def photo_frame(t):
 def load_pets(assets):
     out = []
     for name in PETS:
-        im = Image.open(os.path.join(assets, name + ".png")).convert("RGBA")
+        # Prefer the super-resolved cut-out so the layout scales down, not up.
+        path = os.path.join(assets, name + "_x4.png")
+        if not os.path.exists(path):
+            path = os.path.join(assets, name + ".png")
+        im = Image.open(path).convert("RGBA")
         scale = PET_H / im.height
         im = im.resize((max(1, round(im.width * scale)), PET_H), Image.LANCZOS)
         # Sharpen colour only; sharpening alpha would re-introduce a fringe.
         rgb, a = im.convert("RGB"), im.getchannel("A")
-        rgb = rgb.filter(ImageFilter.UnsharpMask(radius=2.5, percent=85, threshold=3))
+        rgb = rgb.filter(ImageFilter.UnsharpMask(radius=1.6, percent=55, threshold=3))
         im = rgb.convert("RGBA")
         im.putalpha(a)
         out.append(stickerize(im))

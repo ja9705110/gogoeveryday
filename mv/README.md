@@ -11,6 +11,7 @@ cut-outs plus an LRC subtitle file, with a KTV-style karaoke wipe.
 
 ```
 assets/source.png ───cutout.py───> assets/pet*.png  (alpha cut-outs)
+assets/pet*.png ─────upscale_pets.py─> assets/pet*_x4.png  (super-resolved)
 audio (mp3) ────────analysis────> assets/beats.json (140.00 BPM grid + energy)
 lyrics_source.txt ──align_lyrics.py─> lyrics.lrc  (forced-aligned to the vocal)
 lyrics.lrc ────────┐
@@ -19,6 +20,7 @@ assets/* ──────────┴─render.py─> out/yizhidouzai_1080p
 
 ```sh
 python3 cutout.py assets/source.png assets           # re-cut the pets
+python3 upscale_pets.py --model EDSR_x4.pb           # rebuild them at 4x
 python3 render.py --audio /path/to/song.mp3          # full render (~6 min, 4 cores)
 python3 render.py --audio song.mp3 --photos photos/  # slideshow instead of pastel
 python3 render.py --audio song.mp3 --start 92 --dur 16 --out out/preview.mp4
@@ -91,3 +93,25 @@ follows the EXIF tag.
 the default is `corner`: a small huddle in the top right that still hops on
 the beat. The lyric scrim deepens automatically so text stays legible over
 whatever is underneath.
+
+## Pet resolution
+
+The sheet gives each subject roughly 120px, so the render was scaling about
+3x and the fur went blocky. `upscale_pets.py` rebuilds the cut-outs at 4x with
+EDSR (`cv2.dnn_superres`), and `load_pets` prefers `*_x4.png` when present, so
+the layout now scales *down* into place. The 1x mask is resized and lightly
+blurred at the new size, since a mask traced at 1x carries its stair-steps up.
+
+Tracing the pets to real vectors was tried and rejected: at this source size a
+colour trace turns fur into flat blobs with contour lines, which reads as a
+poster, not as these animals.
+
+## Checking the timings
+
+`align_lyrics.py` verifies its own work. `verify_line` re-decodes a window and
+requires the line's opening characters to land **within a second of the
+proposed time** — checking only that the words appear somewhere nearby passes
+a line that is seconds early, which is the error worth catching. Lines that
+fail get their start re-measured from the recogniser's timestamps
+(`snap_lines`) and are kept only if the new time verifies. The run prints
+`N/66 verified against the vocal`; anything under 66 names the lines.
