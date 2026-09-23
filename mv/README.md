@@ -68,10 +68,15 @@ anchor. Two details earn their keep:
 ```
 
 They outrank everything the recogniser proposes and come through to the LRC
-exactly. A marked **end** leaves that line's start free, so the aligner still
-places it; a marked end that runs past the next line's start wins, and the
-next line is pushed back to meet it — the author timed the phrase, the
-aligner only guessed where the next one began.
+exactly.
+
+A **start** is a real position in the lyric, so it anchors the fit. An **end**
+is not fed to the fit at all: "just past the last character of this line" and
+"the first character of the next" are the same position, so anchoring an end
+there drags the following line's start back onto the moment this one stopped.
+An end is applied to its own line's end alone. A marked end that still runs
+past the next line's start wins, and that line is pushed back to meet it —
+the author timed the phrase, the aligner only guessed where the next began.
 
 `--report` prints every line with its span and pace, which is the fastest way
 to spot a line that drifted. To hand-correct one, add a row to `anchors.txt`
@@ -149,8 +154,8 @@ the other two.
 ## Checking the timings
 
 `align_lyrics.py` verifies its own work. `verify_line` re-decodes a window and
-requires the line's opening characters to land **within a second of the
-proposed time** — checking only that the words appear somewhere nearby passes
+requires the line's opening characters to land **within `tol` of the
+proposed time** (0.6s) — checking only that the words appear somewhere nearby passes
 a line that is seconds early, which is the error worth catching. Lines that
 fail get their start re-measured from the recogniser's timestamps
 (`snap_lines`) and are kept only if the new time verifies. The run prints

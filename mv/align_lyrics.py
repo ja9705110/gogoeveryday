@@ -226,7 +226,7 @@ def suspect_lines(lines, counts, starts, ends):
     return out
 
 
-def verify_line(rec, audio, t, text, to_s, tol=1.0):
+def verify_line(rec, audio, t, text, to_s, tol=0.6):
     """Is this line sung *at* t -- not merely somewhere nearby?
 
     Checking only that the words turn up in the window passes a line that is
@@ -412,12 +412,16 @@ def main():
     # Hand-placed marks outrank anything the recogniser proposes.
     fixed, pinned = {}, set()
     for idx, bound, when in load_anchors(args.anchors):
-        where = np.flatnonzero(owner == idx)
-        pos = where[0] if bound == "start" else where[-1] + 1
-        anchors.append((int(pos), when, 50.0))
         fixed[(idx, bound)] = when
         if bound == "start":
+            # A start is a real position in the lyric, so it anchors the fit.
+            anchors.append((int(np.flatnonzero(owner == idx)[0]), when, 50.0))
             pinned.add(idx)          # a marked END still leaves the start free
+        # An END is deliberately NOT fed to the fit. "Just past the last
+        # character of this line" and "the first character of the next" are
+        # the same position, so anchoring it there drags the next line's
+        # start back onto the moment this one stopped. It is applied to this
+        # line's end alone, further down.
     if fixed:
         print(f"{len(fixed)} hand-placed marks", file=sys.stderr)
     counts = np.zeros(len(lines), dtype=int)

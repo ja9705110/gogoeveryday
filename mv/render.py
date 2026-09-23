@@ -54,7 +54,8 @@ SCENES = [
     (113.32, "huddle", 0.75, 2, 0.06),      # pre-chorus 2
     (127.00, "arc", 1.00, 0, 0.00),         # chorus 2
     (157.94, "row", 0.55, 1, 0.12),         # bridge
-    (188.52, "together", 0.58, None, 1.00), # final chorus: shoulder to shoulder
+    (188.52, "together", 0.62, None, 0.18), # final chorus: they close ranks
+    (202.52, "together", 0.55, None, 1.00), # its peak line: the warmth blooms
     (222.84, "together", 0.28, None, 0.88), # outro
 ]
 
@@ -64,6 +65,7 @@ FEATURE_SLOT = {"triangle": 0, "row": 1, "rowalt": 1,
 ENTRY = (2, 0, 1)               # intro arrival order, by pet
 
 TRANS = 1.7                     # seconds to blend between layouts
+WARM_TRANS = 4.5                # warmth swells slower than the staging
 
 LAYOUTS = {
     # (x, y, scale) per pet
@@ -488,13 +490,14 @@ def layout_at(t):
     warmth = SCENES[idx][4]
     cur = targets(idx)
     start = SCENES[idx][0]
-    if idx > 0 and t - start < TRANS:
+    if idx > 0 and t - start < max(TRANS, WARM_TRANS):
         k = smoothstep((t - start) / TRANS)
         prev = targets(idx - 1)
         cur = [tuple(p * (1 - k) + c * k for p, c in zip(pp, cc))
                for pp, cc in zip(prev, cur)]
         energy = SCENES[idx - 1][2] * (1 - k) + energy * k
-        warmth = SCENES[idx - 1][4] * (1 - k) + warmth * k
+        kw = smoothstep((t - start) / WARM_TRANS)
+        warmth = SCENES[idx - 1][4] * (1 - kw) + warmth * kw
     return cur, energy, warmth
 
 
@@ -670,7 +673,8 @@ def draw_lyrics(frame, t):
     last_end = lines[-1]["end"] if lines else 0.0
 
     # title card before the first line
-    a = fade(t, 1.2, 3.4, first - 3.0, first - 0.6)
+    # Clear the title before the count-in arrives, or the two stack up.
+    a = fade(t, 1.2, 3.4, first - 5.0, first - 2.4)
     if a > 0:
         ttl = G["title"]
         paste_alpha(frame, ttl, ((W - ttl.width) // 2, 846 - ttl.height // 2), a)
