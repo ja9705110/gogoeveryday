@@ -85,6 +85,22 @@ def transcribe(rec, audio, chunk=16.0, hop=8.0):
     return clean
 
 
+def load_anchors(path):
+    """Hand-placed timings: `<line> start|end <m:ss>`, 1-based line numbers."""
+    marks = []
+    if not path or not os.path.exists(path):
+        return marks
+    with open(path, encoding="utf-8") as fh:
+        for raw in fh:
+            row = raw.split("#", 1)[0].split()
+            if len(row) != 3:
+                continue
+            idx, bound, clock = int(row[0]) - 1, row[1].lower(), row[2]
+            mins, _, secs = clock.rpartition(":")
+            marks.append((idx, bound, int(mins or 0) * 60 + float(secs)))
+    return marks
+
+
 def load_lines(path):
     lines = []
     with open(path, encoding="utf-8") as fh:
@@ -173,7 +189,7 @@ def monotonic(anchors):
             np.array([c[1] for c in chain], dtype=np.float64))
 
 
-def line_bounds(owner, n_lines, xs, ts):
+def line_bounds(owner, n_lines, xs, ts, fixed=None):
     """Start and end of each line, in the vocal's own time.
 
     The end is one character past the last one, *not* wherever the next line
@@ -187,9 +203,13 @@ def line_bounds(owner, n_lines, xs, ts):
         last = float(np.interp(where[-1], xs, ts))
         step = (last - first) / (len(where) - 1) if len(where) > 1 else 0.33
         tail = max(0.18, min(0.8, step))
+        end = max(min(float(np.interp(where[-1] + 1, xs, ts)), last + tail),
+                  first + 0.4)
+        if fixed:
+            first = fixed.get((idx, "start"), first)
+            end = max(fixed.get((idx, "end"), end), first + 0.4)
         starts.append(first)
-        ends.append(max(min(float(np.interp(where[-1] + 1, xs, ts)), last + tail),
-                        first + 0.4))
+        ends.append(end)
     return starts, ends
 
 
@@ -302,7 +322,8 @@ def refine_gaps(rec, variants, lines, ref, owner, base, bad, starts, ends, dur, 
     return extra, redone
 
 
-def snap_lines(rec, variants, lines, ref, owner, starts, ends, dur, to_s):
+def snap_lines(rec, variants, lines, ref, owner, starts, ends, dur, to_s,
+               keep=frozenset()):
     """Last pass: re-measure the start of any line that fails the check.
 
     Interpolation reads at a steady rate, so a line that follows a held note
@@ -312,7 +333,7 @@ def snap_lines(rec, variants, lines, ref, owner, starts, ends, dur, to_s):
     """
     moved = 0
     for i, text in enumerate(lines):
-        if verify_line(rec, variants[0], starts[i], text, to_s):
+        if i in keep or verify_line(rec, variants[0], starts[i], text, to_s):
             continue
         lo, hi = max(0.0, starts[i] - 3.5), min(dur, starts[i] + 6.5)
         span = np.flatnonzero(owner == i)
@@ -360,6 +381,8 @@ def main():
     ap.add_argument("--gap", type=float, default=0.25,
                     help="close a phrase when the next line is this far off, so\n"
                          "the wipe spans only what is actually sung")
+    ap.add_argument("--anchors", default=os.path.join(here, "anchors.txt"),
+                    help="hand-placed timings that win over the aligner")
     ap.add_argument("--report", action="store_true")
     args = ap.parse_args()
 
@@ -385,6 +408,18 @@ def main():
           f"({100 * len(pairs) / len(ref):.0f}%)", file=sys.stderr)
 
     anchors = [(r, times[h], 1.0) for r, h in pairs]
+
+    # Hand-placed marks outrank anything the recogniser proposes.
+    fixed, pinned = {}, set()
+    for idx, bound, when in load_anchors(args.anchors):
+        where = np.flatnonzero(owner == idx)
+        pos = where[0] if bound == "start" else where[-1] + 1
+        anchors.append((int(pos), when, 50.0))
+        fixed[(idx, bound)] = when
+        if bound == "start":
+            pinned.add(idx)          # a marked END still leaves the start free
+    if fixed:
+        print(f"{len(fixed)} hand-placed marks", file=sys.stderr)
     counts = np.zeros(len(lines), dtype=int)
     for r, _ in pairs:
         counts[owner[r]] += 1
@@ -399,9 +434,22 @@ def main():
         anchors = [a for a in anchors if owner[int(a[0])] not in redone] + extra
 
     xs, ts = monotonic(anchors)
-    starts, ends = line_bounds(owner, len(lines), xs, ts)
+    starts, ends = line_bounds(owner, len(lines), xs, ts, fixed)
 
-    moved = snap_lines(rec, variants, lines, ref, owner, starts, ends, dur, to_s)
+    moved = snap_lines(rec, variants, lines, ref, owner, starts, ends, dur, to_s, pinned)
+
+    # Re-assert the hand-placed marks, then make room for them: a marked end
+    # that runs past the next line's start wins, because the author timed the
+    # phrase and the aligner only guessed where the next one began.
+    for (idx, bound), when in fixed.items():
+        if bound == "start":
+            starts[idx] = when
+        else:
+            ends[idx] = max(when, starts[idx] + 0.4)
+    for idx in sorted({i for i, b in fixed if b == "end"}):
+        if idx + 1 < len(lines) and starts[idx + 1] < ends[idx]:
+            starts[idx + 1] = ends[idx]
+            ends[idx + 1] = max(ends[idx + 1], starts[idx + 1] + 0.4)
     checked = sum(verify_line(rec, variants[0], starts[i], lines[i], to_s)
                   for i in range(len(lines)))
     print(f"snapped {moved} lines; {checked}/{len(lines)} verified against the vocal",

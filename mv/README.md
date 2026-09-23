@@ -1,7 +1,7 @@
 # 一直都在 — Pet MV renderer
 
 Builds a 1920×1080 / 30fps YouTube-ready music video from the three pet
-cut-outs plus an LRC subtitle file, with a KTV-style karaoke wipe.
+cut-outs plus an LRC subtitle file, with a KTV-style karaoke wipe. One lyric line is on screen at a time.
 
 ## Output
 
@@ -13,7 +13,8 @@ expensive: the CRF 17 master runs ~186 MB for 4:13.
 ```
 assets/hires/*.png ──cutout.py───> assets/pet*.png  (alpha cut-outs)
 audio (mp3) ────────analysis────> assets/beats.json (140.00 BPM grid + energy)
-lyrics_source.txt ──align_lyrics.py─> lyrics.lrc  (forced-aligned to the vocal)
+lyrics_source.txt ─┐
+anchors.txt ───────┴─align_lyrics.py─> lyrics.lrc  (aligned to the vocal)
 lyrics.lrc ────────┐
 assets/* ──────────┴─render.py─> out/yizhidouzai_1080p.mp4
 ```
@@ -57,9 +58,24 @@ anchor. Two details earn their keep:
   proposed time — a confident wrong answer is exactly what needs rejecting,
   and a repeated phrase produces one.
 
+### Hand-placed marks
+
+`anchors.txt` holds timings the author took by ear, one per row:
+
+```
+ 1  end    0:17
+47  start  2:51
+```
+
+They outrank everything the recogniser proposes and come through to the LRC
+exactly. A marked **end** leaves that line's start free, so the aligner still
+places it; a marked end that runs past the next line's start wins, and the
+next line is pushed back to meet it — the author timed the phrase, the
+aligner only guessed where the next one began.
+
 `--report` prints every line with its span and pace, which is the fastest way
-to spot a line that drifted. To hand-correct one, edit its stamp in
-`lyrics.lrc` and re-render — the aligner does not need to run again.
+to spot a line that drifted. To hand-correct one, add a row to `anchors.txt`
+and re-run, or edit its stamp in `lyrics.lrc` and re-render.
 
 Any standard LRC file works. A stamp with no text after it closes the previous
 phrase, which stops the wipe from stretching across an instrumental break:

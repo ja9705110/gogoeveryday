@@ -33,8 +33,7 @@ CREAM = (255, 252, 248)
 HL_TOP = (255, 226, 112)        # karaoke wipe gradient
 HL_BOT = (255, 118, 168)
 
-LYRIC_Y = 876                   # centre of the active line
-NEXT_Y = 998
+LYRIC_Y = 920                   # centre of the active line (the only one)
 SCRIM_TOP = 780
 LINE_HOLD = 2.6                 # seconds a finished phrase stays up
 
@@ -382,7 +381,6 @@ def init(assets, lrc_path, photos=None, pets="full", energy_boost=1.0):
     lines = load_lrc(lrc_path)
     G["lines"] = lines
     G["layers"] = [text_layers(ln["text"], 88, 8) for ln in lines]
-    G["next"] = [text_layers(ln["text"], 50, 5, grad=False)[0] for ln in lines]
 
     G["title"] = text_layers(TITLE, 132, 10)[0]
     G["subtitle"] = text_layers(SUBTITLE, 46, 5)[0]
@@ -655,9 +653,6 @@ def draw_lyrics(frame, t):
     if cut > 0:
         paste_alpha(frame, hl.crop((0, 0, cut, hl.height)), (x0, y0))
 
-    if idx + 1 < len(lines) and lines[idx + 1]["start"] - ln["end"] < 4.0:
-        nb = G["next"][idx + 1]
-        paste_alpha(frame, nb, ((W - nb.width) // 2, NEXT_Y - nb.height // 2), 0.62)
 
 
 def count_in(frame, remain):
