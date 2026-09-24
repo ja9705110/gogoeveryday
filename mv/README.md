@@ -90,8 +90,28 @@ phrase, which stops the wipe from stretching across an instrumental break:
 [01:19.60]
 ```
 
-The wipe sweeps each line over the first 82% of its slot (`draw_lyrics`).
 Lines wider than the 1720px title-safe area are shrunk to fit.
+
+### Per-character wipe
+
+The LRC is enhanced LRC: `<mm:ss.xx>` before every sung character.
+
+```
+[00:28.00]<00:28.00>那<00:28.18>些<00:28.44>沒 ...
+```
+
+Those times are measured by re-hearing each line's own window, not read off
+the whole-song fit — a line whose start was corrected still carries the old
+spacing there, and rescaling it spreads the error across the line rather than
+removing it.
+
+`text_layers` returns each character's left edge alongside the two layers, so
+`init` can pair the stamps with x positions. `draw_lyrics` then interpolates
+the wipe to where the current character actually is. Delivery inside a line is
+rarely even — one line here fits seven characters into 1.3s and stretches the
+last three over a second — and a linear sweep falls behind wherever it is not.
+
+A line with no `<...>` stamps still works; it falls back to a linear sweep.
 
 ## Timeline
 

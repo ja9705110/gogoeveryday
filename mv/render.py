@@ -90,6 +90,19 @@ G = {}                          # per-process render assets
 # lyrics
 # --------------------------------------------------------------------------- #
 STAMP = re.compile(r"\[(\d+):(\d+(?:\.\d+)?)\]")
+WORD = re.compile(r"<(\d+):(\d+(?:\.\d+)?)>")
+
+
+def split_words(body):
+    """Enhanced-LRC body -> (plain text, [(time, index into plain text)])."""
+    plain, words, pos = [], [], 0
+    for m in WORD.finditer(body):
+        plain.append(body[pos:m.start()])
+        pos = m.end()
+        words.append((int(m.group(1)) * 60 + float(m.group(2)),
+                      sum(len(part) for part in plain)))
+    plain.append(body[pos:])
+    return "".join(plain), words
 
 
 def load_lrc(path):
@@ -103,17 +116,18 @@ def load_lrc(path):
             stamps = list(STAMP.finditer(line))
             if not stamps:
                 continue
-            text = line[stamps[-1].end():].strip()
+            body = line[stamps[-1].end():].strip()
             for m in stamps:
-                marks.append((int(m.group(1)) * 60 + float(m.group(2)), text))
+                marks.append((int(m.group(1)) * 60 + float(m.group(2)), body))
     marks.sort(key=lambda m: m[0])
 
     lines = []
-    for i, (t, text) in enumerate(marks):
-        if not text:
+    for i, (t, body) in enumerate(marks):
+        if not body:
             continue
         end = marks[i + 1][0] if i + 1 < len(marks) else t + 4.0
-        lines.append({"start": t, "end": end, "text": text})
+        text, words = split_words(body)
+        lines.append({"start": t, "end": end, "text": text, "words": words})
     return lines
 
 
@@ -313,7 +327,8 @@ def load_pets(assets):
 # text layers
 # --------------------------------------------------------------------------- #
 def text_layers(text, size, stroke, grad=True, max_w=1720):
-    """Return (base, highlight) RGBA layers of identical size, text centred."""
+    """(base, highlight, edges): identical layers plus each character's left
+    edge, which is what lets the wipe stop between two characters."""
     probe = ImageDraw.Draw(Image.new("RGBA", (8, 8)))
     font = ImageFont.truetype(FONT_PATH, size, index=FONT_TC)
     box = probe.textbbox((0, 0), text, font=font, stroke_width=stroke)
@@ -337,6 +352,9 @@ def text_layers(text, size, stroke, grad=True, max_w=1720):
     fill = Image.new("RGBA", (cw, ch), CREAM + (255,))
     base.paste(fill, (0, 0), mask)
 
+    edges = [org[0] + font.getlength(text[:i]) for i in range(len(text) + 1)]
+    edges[-1] = min(cw, edges[-1] + stroke + 6)     # cover the last stroke
+
     hl = outline.copy()
     if grad:
         arr = vgradient((cw, ch), [(0.0, HL_TOP), (1.0, HL_BOT)])
@@ -344,7 +362,7 @@ def text_layers(text, size, stroke, grad=True, max_w=1720):
     else:
         gfill = Image.new("RGBA", (cw, ch), HL_TOP + (255,))
     hl.paste(gfill, (0, 0), mask)
-    return base, hl
+    return base, hl, edges
 
 
 # --------------------------------------------------------------------------- #
@@ -400,6 +418,18 @@ def init(assets, lrc_path, photos=None, pets="full", energy_boost=1.0):
     lines = load_lrc(lrc_path)
     G["lines"] = lines
     G["layers"] = [text_layers(ln["text"], 88, 8) for ln in lines]
+
+    # Where the wipe should stand at any moment: the character stamps give
+    # the times, the layer gives the matching x.
+    G["wipe"] = []
+    for ln, (_, _, edges) in zip(lines, G["layers"]):
+        if ln["words"]:
+            when = [w[0] for w in ln["words"]] + [ln["end"]]
+            where = [edges[min(w[1], len(edges) - 1)] for w in ln["words"]] + [edges[-1]]
+        else:
+            when, where = [ln["start"], ln["end"]], [edges[0], edges[-1]]
+        G["wipe"].append((np.maximum.accumulate(np.array(when, dtype=np.float64)),
+                          np.array(where, dtype=np.float64)))
 
     G["title"] = text_layers(TITLE, 132, 10)[0]
     G["subtitle"] = text_layers(SUBTITLE, 46, 5)[0]
@@ -716,16 +746,16 @@ def draw_lyrics(frame, t):
             paste_alpha(frame, base, ((W - base.width) // 2, LYRIC_Y - base.height // 2), 0.75)
         return
 
-    ln, (base, hl) = lines[idx], layers[idx]
+    ln, (base, hl, _) = lines[idx], layers[idx]
     x0, y0 = (W - base.width) // 2, LYRIC_Y - base.height // 2
     paste_alpha(frame, base, (x0, y0))
 
-    # wipe across exactly the span the line is sung over
-    span = max(0.25, ln["end"] - ln["start"])
-    k = min(1.0, max(0.0, (t - ln["start"]) / span))
-    cut = int(round(hl.width * k))
+    # Wipe to where this character is, not to a share of the line: the
+    # delivery inside a line is rarely even and a linear sweep falls behind.
+    when, where = G["wipe"][idx]
+    cut = int(round(float(np.interp(t, when, where))))
     if cut > 0:
-        paste_alpha(frame, hl.crop((0, 0, cut, hl.height)), (x0, y0))
+        paste_alpha(frame, hl.crop((0, 0, min(cut, hl.width), hl.height)), (x0, y0))
 
 
 

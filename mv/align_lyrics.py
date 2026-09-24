@@ -160,6 +160,51 @@ def stamp(t):
     return f"[{m:02d}:{t - m * 60:05.2f}]"
 
 
+def word_stamp(t):
+    m = int(t // 60)
+    return f"<{m:02d}:{t - m * 60:05.2f}>"
+
+
+def char_times(rec, audio, text, start, end, to_s):
+    """When each character of this line is sung.
+
+    Measured from a re-hear of the line's own window rather than read off the
+    whole-song fit: a line whose start was corrected still carries the old,
+    wrong spacing in that fit, and rescaling it only spreads the error across
+    the line instead of removing it.
+    """
+    sung = [c for c in text if CJK.fullmatch(c)]
+    n = len(sung)
+    flat = np.linspace(start, end, n + 1)[:-1]
+    if n == 0:
+        return flat
+
+    heard = hear(rec, audio, max(0.0, start - 0.6), end + 0.8)
+    hyp = [to_s.convert(c)[0] for c, _ in heard]
+    stamps = [t for _, t in heard]
+    pairs = align([to_s.convert(c)[0] for c in sung], hyp)
+    if len(pairs) < 2:
+        return flat
+
+    at = np.array([p[0] for p in pairs], dtype=np.float64)
+    when = np.maximum.accumulate([stamps[p[1]] for p in pairs])
+    times = np.interp(np.arange(n), at, when)
+    times[0] = start                        # the line's own start wins
+    return np.maximum.accumulate(np.clip(times, start, end))
+
+
+def tag_line(text, times):
+    """Enhanced LRC: a stamp before every sung character, so the wipe follows
+    the syllables instead of averaging across the line."""
+    out, j = [], 0
+    for ch in text:
+        if CJK.fullmatch(ch):
+            out.append(word_stamp(float(times[j])))
+            j += 1
+        out.append(ch)
+    return "".join(out)
+
+
 def monotonic(anchors):
     """Heaviest run of anchors whose times rise with lyric position.
 
@@ -461,7 +506,8 @@ def main():
 
     rows = []
     for idx, text in enumerate(lines):
-        rows.append((starts[idx], text))
+        marks = char_times(rec, variants[0], text, starts[idx], ends[idx], to_s)
+        rows.append((starts[idx], tag_line(text, marks)))
         nxt = starts[idx + 1] if idx + 1 < len(lines) else ends[idx] + args.gap
         if nxt - ends[idx] > args.gap:
             rows.append((ends[idx], ""))
@@ -470,7 +516,8 @@ def main():
     body = [
         f"[ti:{args.title}]", f"[al:{args.album}]",
         "[re:mv/align_lyrics.py]", "[ve:2.0]",
-        "# Times are forced-aligned to the vocal, not estimated.",
+        "# Forced-aligned to the vocal. <mm:ss.xx> marks each character,",
+        "# so the karaoke wipe follows the syllables, not the line average.",
         "",
     ]
     body += [stamp(t) + text for t, text in rows]
