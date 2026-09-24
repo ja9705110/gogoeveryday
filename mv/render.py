@@ -654,7 +654,7 @@ def draw_pets(frame, t):
         # before the next arrives.
         step = ENTRY[i]
         alpha = fade(t, 2.4 + step * 3.2, 4.6 + step * 3.2,
-                     G["duration"] - 8.0, G["duration"] - 2.0)
+                     G["duration"] - 5.0, G["duration"] - 1.2)
         arrive = smoothstep((t - (2.4 + step * 3.2)) / 2.2)
         rise = (1.0 - arrive) * 150.0
         grow = 0.80 + 0.20 * arrive
@@ -681,8 +681,11 @@ def draw_lyrics(frame, t):
         sub = G["subtitle"]
         paste_alpha(frame, sub, ((W - sub.width) // 2, 974 - sub.height // 2), a * 0.95)
 
-    # end card
-    a = fade(t, last_end + 1.5, last_end + 3.2, G["duration"] - 5.0, G["duration"] - 1.5)
+    # End card. The last line lingers for LINE_HOLD after it stops being
+    # sung, so the card has to wait that out -- keyed off LINE_HOLD itself
+    # rather than a number that drifts away from it.
+    clear = last_end + LINE_HOLD + 0.6
+    a = fade(t, clear, clear + 1.6, G["duration"] - 3.0, G["duration"] - 0.8)
     if a > 0:
         ttl = G["title"]
         paste_alpha(frame, ttl, ((W - ttl.width) // 2, 848 - ttl.height // 2), a)

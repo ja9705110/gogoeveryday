@@ -112,6 +112,11 @@ amber glow fades in behind the pets, the hop gives way to a slow breath, and
 the layout becomes `together` — close enough that the sticker borders touch,
 because the point of that section is that nobody is standing on their own.
 
+Both cards are keyed off `LINE_HOLD`. A line stays up for that long after
+it stops being sung, so the title has to clear before the count-in appears
+and the end card has to wait for the last line to go — writing either as a
+fixed offset lets it drift back into an overlap.
+
 The count-in dots lead into the first line only. Mid-song the instrumental
 gaps are two to three seconds and a countdown appearing there reads as a
 glitch rather than a cue.
