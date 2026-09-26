@@ -1,0 +1,1360 @@
+{
+  "title": "一直都在",
+  "dedication": "給　曉萱",
+  "closing": "有些故事不必說完，\n也會一直留在心上。",
+  "principle": "一條線貫穿全片，每一景由上一景的線變形而來，最後線延伸出畫面不消失。",
+  "scenes": [
+    {
+      "id": "S01",
+      "name": "序幕：線的起點",
+      "start": 0.0,
+      "end": 14.24,
+      "duration": 14.24,
+      "section": "intro",
+      "lines": [],
+      "lyrics": [],
+      "visual": "米白紙面全空。一條墨線從左緣長出，緩慢向右延伸、微微起伏。線上逐漸長出幾個並肩前行的小人物輪廓。片名「一直都在」與「給　曉萱」以手寫筆跡逐字浮現，停留後淡出。",
+      "figures": "三到四個簡化人物沿線行走，步伐錯開，肩膀有輕微上下。",
+      "background": "紙張纖維質感極輕微浮動；線條邊緣有 1–2px 手繪抖動。",
+      "camera": "極緩 push in，從全景推到線的高度。",
+      "transition": "線繼續向右延伸，直接帶入下一景（不切）。",
+      "mood": "安靜、期待、尚未有情緒重量。",
+      "palette": "day",
+      "photo": null,
+      "components": [
+        "paper",
+        "guide_line",
+        "walker",
+        "title_text"
+      ]
+    },
+    {
+      "id": "S02",
+      "name": "一起往前跑",
+      "start": 14.24,
+      "end": 20.9,
+      "duration": 6.66,
+      "section": "verse1",
+      "lines": [
+        1,
+        2
+      ],
+      "lyrics": [
+        "我們曾把不可能走成日常",
+        "把跌跌撞撞走成一道光"
+      ],
+      "visual": "線變成一條起伏的路：有階梯、坑洞、彎折。一群人沿路奔跑。其中一人在坑洞處踉蹌，旁邊的人回身拉住她，兩人笑著繼續。",
+      "figures": "四人奔跑，手臂擺動；第三人絆一下、被第二人拉起；拉起後兩人並肩。",
+      "background": "路面線條隨鏡頭向左捲動；遠處幾筆山丘輪廓緩慢移動。",
+      "camera": "側向 pan 跟隨人群。",
+      "transition": "路的起伏拉平，向前延伸成逆向人潮的街道。",
+      "mood": "青春、衝勁、笑著的狼狽。",
+      "palette": "day",
+      "photo": null,
+      "components": [
+        "road_path",
+        "runner",
+        "step_obstacle",
+        "hill_outline"
+      ]
+    },
+    {
+      "id": "S03",
+      "name": "逆著人群",
+      "start": 20.9,
+      "end": 27.0,
+      "duration": 6.1,
+      "section": "verse1",
+      "lines": [
+        3,
+        4
+      ],
+      "lyrics": [
+        "多少次站在世界的逆向",
+        "還是笑著　把路走得漂亮"
+      ],
+      "visual": "街道上大量人形剪影朝同一方向流動。曉萱與朋友逆向而行。他們不沉重，邊走邊笑，其中一人回頭把落後的人拉上來。",
+      "figures": "人潮以半透明淡線表示、等速平移；主要三人逆向、步伐輕快，有回頭與招手。",
+      "background": "背景街屋輪廓以視差較慢的速度反向移動。",
+      "camera": "緩慢 pull out，讓人潮的量感顯現。",
+      "transition": "街道的水平線向下收攏成兩條平行線 → 鐵軌。",
+      "mood": "倔強、好玩、我們就是敢走自己的路。",
+      "palette": "day",
+      "photo": null,
+      "components": [
+        "crowd_silhouette",
+        "street_facade",
+        "walker",
+        "road_path"
+      ]
+    },
+    {
+      "id": "S04",
+      "name": "一站一站",
+      "start": 27.0,
+      "end": 33.66,
+      "duration": 6.66,
+      "section": "verse1",
+      "lines": [
+        5,
+        6
+      ],
+      "lyrics": [
+        "那些沒有人相信的遠方",
+        "我們真的一站一站抵達"
+      ],
+      "visual": "兩條平行線成為鐵軌。一列手繪小火車自右駛入，車窗裡坐著幾個朋友。沿途站牌一個個後退掠過，牌面寫「第一站」「下一站」「再遠一點」。",
+      "figures": "車窗內人物晃動、有人趴窗、有人回頭說話。",
+      "background": "鐵軌枕木等速後退；電線桿與雲以不同速度形成視差；車輪有輕微上下震動。",
+      "camera": "側跟鏡頭，與火車同速，末段微微 pull out。",
+      "transition": "最後一塊站牌的立柱向上抽長，成為下一景「看不到終點的路」的地平線。",
+      "mood": "期待、遠方、我們真的到了。",
+      "palette": "day",
+      "photo": "station_names",
+      "components": [
+        "rail_track",
+        "train",
+        "train_window",
+        "station_sign",
+        "pole",
+        "cloud"
+      ]
+    },
+    {
+      "id": "S05",
+      "name": "自己踏出的那一步",
+      "start": 33.66,
+      "end": 41.5,
+      "duration": 7.84,
+      "section": "verse1",
+      "lines": [
+        7,
+        8
+      ],
+      "lyrics": [
+        "不是因為從來都不害怕",
+        "是你讓勇敢　有了新的模樣"
+      ],
+      "visual": "前方是一段看不到終點的路，線在遠處淡去。曉萱停下。朋友一個個走到她身邊，沒有人推她，只是一起站著。停頓後她自己向前踏出一步，其他人跟上。",
+      "figures": "曉萱靜止兩拍；朋友側向靠攏、肩膀微碰；曉萱抬腳跨出，其餘人依序起步。",
+      "background": "遠方線條的淡出邊界緩慢呼吸；地面有細小碎石點。",
+      "camera": "緩慢 push in 到腳步，再輕輕 pull back。",
+      "transition": "踏出的那一步激起的線條向上捲成風。",
+      "mood": "不是無畏，是有人陪著才敢。",
+      "palette": "day",
+      "photo": null,
+      "components": [
+        "walker",
+        "road_path",
+        "horizon_fade",
+        "footstep"
+      ]
+    },
+    {
+      "id": "S06",
+      "name": "逆風",
+      "start": 41.5,
+      "end": 44.28,
+      "duration": 2.78,
+      "section": "pre1",
+      "lines": [
+        9
+      ],
+      "lyrics": [
+        "一路上有風　也有重量"
+      ],
+      "visual": "風以長弧線橫掃畫面。人物逆風前進，衣角、頭髮、路旁草葉全部被吹向後方。沒有人停下。",
+      "figures": "身體前傾、手護額；衣襬與髮絲高頻擺動。",
+      "background": "風線由右至左快速掠過，疏密不一；落葉幾片翻滾。",
+      "camera": "輕微手持感的晃動（±3px），其餘固定。",
+      "transition": "風線捲起地上一本相簿，吹開封面。",
+      "mood": "吃力，但沒有退。",
+      "palette": "day",
+      "photo": null,
+      "components": [
+        "wind_stroke",
+        "walker",
+        "hair",
+        "leaf"
+      ]
+    },
+    {
+      "id": "S07",
+      "name": "相簿被風吹開",
+      "start": 44.28,
+      "end": 47.98,
+      "duration": 3.7,
+      "section": "pre1",
+      "lines": [
+        10
+      ],
+      "lyrics": [
+        "有些故事說起來還會紅了眼眶"
+      ],
+      "visual": "一本手繪相簿在風中翻開。內頁浮出幾個空白照片框，框線逐一被畫出。框裡是笑著的人物輪廓。其中一張停留較久，輪廓稍微清晰一點。",
+      "figures": "照片框內人物為靜態速寫，僅有極輕微的線條呼吸。",
+      "background": "書頁翻動，紙緣捲曲；風線減弱。",
+      "camera": "緩慢 push in 到停留的那一張。",
+      "transition": "該照片的邊框線開始滲出暖金色。",
+      "mood": "想起來會笑，但喉頭會緊。",
+      "palette": "soft",
+      "photo": "album_photos",
+      "components": [
+        "album",
+        "photo_frame",
+        "page_curl",
+        "walker"
+      ]
+    },
+    {
+      "id": "S08",
+      "name": "金色流出來",
+      "start": 47.98,
+      "end": 54.78,
+      "duration": 6.8,
+      "section": "pre1",
+      "lines": [
+        11,
+        12
+      ],
+      "lyrics": [
+        "可那些我們一起走過的地方",
+        "到今天　依然在心裡發亮"
+      ],
+      "visual": "暖金色沿著照片邊框流動、溢出框外，在紙面上畫出一條發亮的路徑，穿過先前出現過的路、鐵軌、風線的殘影，一路向前。",
+      "figures": "無人物，或僅在金線經過處閃現半秒的人物剪影。",
+      "background": "金色沿線流動，亮度隨流動呼吸；紙面出現極淡的暖光暈。",
+      "camera": "跟著金線移動的橫向 pan。",
+      "transition": "金線抵達畫面中央，散開成曉萱站立的位置。",
+      "mood": "溫柔地亮起來。",
+      "palette": "soft",
+      "photo": null,
+      "components": [
+        "gold_flow",
+        "photo_frame",
+        "afterimage"
+      ]
+    },
+    {
+      "id": "S09",
+      "name": "她只是走著",
+      "start": 54.78,
+      "end": 57.96,
+      "duration": 3.18,
+      "section": "chorus1",
+      "lines": [
+        13
+      ],
+      "lyrics": [
+        "你一直都是那麼有力量"
+      ],
+      "visual": "第一次把曉萱放在畫面中心。不是英雄站姿——她只是很普通地笑著走路。身邊慢慢浮現幾段回憶的淡線（跑步、火車、照片框）。",
+      "figures": "自然行走，手臂自然擺動，偶爾側頭。",
+      "background": "周圍回憶淡線以極低透明度浮現又淡去。",
+      "camera": "極緩 push in。",
+      "transition": "她的腳步慢下來，最後停住坐下。",
+      "mood": "有力量，但很日常。",
+      "palette": "soft",
+      "photo": null,
+      "components": [
+        "walker",
+        "memory_ghost",
+        "gold_flow"
+      ]
+    },
+    {
+      "id": "S10",
+      "name": "只是陪著",
+      "start": 57.96,
+      "end": 61.6,
+      "duration": 3.64,
+      "section": "chorus1",
+      "lines": [
+        14
+      ],
+      "lyrics": [
+        "不是因為從來沒有受過傷"
+      ],
+      "visual": "她曾停下、曾坐著、曾低著頭。一個朋友安靜地坐到旁邊。沒有台詞，沒有安慰的動作，只是陪著。兩人之間留一點距離，但肩膀朝向彼此。",
+      "figures": "曉萱抱膝低頭；朋友走近、停頓、坐下；之後兩人幾乎不動，只有呼吸幅度。",
+      "background": "背景幾乎空白，僅地平線一筆；光線略暗。",
+      "camera": "完全靜止的固定鏡頭（全片唯一一次）。",
+      "transition": "地平線那一筆開始起伏，長成浪。",
+      "mood": "最安靜的支撐。",
+      "palette": "soft",
+      "photo": null,
+      "components": [
+        "sitting_figure",
+        "horizon_fade"
+      ]
+    },
+    {
+      "id": "S11",
+      "name": "穿過風浪，回頭伸手",
+      "start": 61.6,
+      "end": 68.73,
+      "duration": 7.13,
+      "section": "chorus1",
+      "lines": [
+        15,
+        16
+      ],
+      "lyrics": [
+        "是走過那麼多風浪",
+        "依然把溫柔留在身旁"
+      ],
+      "visual": "抽象的風與浪以粗細不一的長弧線翻捲。人物在浪線之間穿行。穿越後曉萱回頭，伸出手，把後面的朋友拉過來——這一拍是全片的種子。",
+      "figures": "浪中身體傾斜；穿出後曉萱轉身、手臂前伸；朋友的手搭上、被拉出。",
+      "background": "浪線分層前後捲動；水花以短促點線表示。",
+      "camera": "隨浪起伏的輕微上下運動，拉手時定住。",
+      "transition": "兩人交握的手，線條延伸成一面高牆的邊。",
+      "mood": "撐過去了，而且沒有丟下誰。",
+      "palette": "soft",
+      "photo": null,
+      "components": [
+        "wave_stroke",
+        "walker",
+        "reaching_hand"
+      ]
+    },
+    {
+      "id": "S12",
+      "name": "一起翻過那面牆",
+      "start": 68.73,
+      "end": 71.92,
+      "duration": 3.19,
+      "section": "chorus1",
+      "lines": [
+        17
+      ],
+      "lyrics": [
+        "我們一起闖過多少不可能的牆"
+      ],
+      "visual": "眼前一面很高的手繪牆。沒有人把牆撞破。有人蹲下當踏階、有人搭肩、有人在牆上回身拉人，最後所有人一起翻過去。",
+      "figures": "四人依序：蹲、踩、上、回身拉；動作有重量感與停頓。",
+      "background": "牆面磚紋以稀疏短線表示；牆頭有草。",
+      "camera": "緩慢向上 tilt，跟隨攀爬。",
+      "transition": "翻過牆後落地，地面線條散成許多日常小物的輪廓。",
+      "mood": "合作、笨拙、成功時的笑。",
+      "palette": "day",
+      "photo": null,
+      "components": [
+        "wall",
+        "climbing_figure",
+        "reaching_hand",
+        "grass"
+      ]
+    },
+    {
+      "id": "S13",
+      "name": "把平凡活得不一樣",
+      "start": 71.92,
+      "end": 75.16,
+      "duration": 3.24,
+      "section": "chorus1",
+      "lines": [
+        18
+      ],
+      "lyrics": [
+        "也一起把平凡活得不一樣"
+      ],
+      "visual": "快速切換的日常小格：一起吃東西、拍照、坐車、走路、聊天、大笑、深夜不睡、舉起手機自拍。每格都是幾筆速寫，不超過 0.4 秒。",
+      "figures": "每格一個明確動作，動作在該格內完成。",
+      "background": "格與格之間以手繪分隔線滑過，非硬切。",
+      "camera": "每格輕微不同的取景，整體不動鏡。",
+      "transition": "最後一格的桌面線條向下延伸成路面。",
+      "mood": "最珍貴的其實是普通的日子。",
+      "palette": "day",
+      "photo": "daily_moments",
+      "components": [
+        "vignette_frame",
+        "food",
+        "phone",
+        "bus_seat",
+        "chat_figures"
+      ]
+    },
+    {
+      "id": "S14",
+      "name": "腳印連成的路",
+      "start": 75.16,
+      "end": 86.06,
+      "duration": 10.9,
+      "section": "chorus1",
+      "lines": [
+        19,
+        20,
+        21
+      ],
+      "lyrics": [
+        "所以今天什麼都不用再證明",
+        "你走過的每一步",
+        "早已足夠有重量"
+      ],
+      "visual": "路面上慢慢浮現腳印——不只曉萱的，很多人的腳印交錯重疊。鏡頭持續拉遠，最後發現這些腳印本身組成了一條很長很長的路，一路通向畫面深處。",
+      "figures": "無行走人物，只有腳印依序浮現（與拍點同步）。",
+      "background": "腳印以墨點暈開的方式出現；遠景逐漸出現先前的山、軌道、牆的淡影。",
+      "camera": "全片最大幅的 pull out，等速、不停。",
+      "transition": "拉遠到極遠後，路的線條收成桌上一張紙條的邊。",
+      "mood": "累積起來的重量，安靜但確實。",
+      "palette": "soft",
+      "photo": null,
+      "components": [
+        "footstep",
+        "road_path",
+        "hill_outline",
+        "afterimage"
+      ]
+    },
+    {
+      "id": "S15",
+      "name": "任性的願望",
+      "start": 86.06,
+      "end": 89.0,
+      "duration": 2.94,
+      "section": "verse2",
+      "lines": [
+        22
+      ],
+      "lyrics": [
+        "還記得那些任性的願望"
+      ],
+      "visual": "桌面。幾隻手在小紙條上寫字。紙條上是簡單的塗鴉願望：海浪、飛機、山、碗、相機——不寫具體事件。",
+      "figures": "手部特寫，筆尖移動；寫完把紙條推到桌子中間。",
+      "background": "桌面木紋幾筆；紙條邊緣輕微翹起。",
+      "camera": "俯視固定，末段極緩 push in。",
+      "transition": "一張紙條被拿起，鏡頭跟著它被貼上牆。",
+      "mood": "胡鬧、真心、有點不好意思。",
+      "palette": "day",
+      "photo": null,
+      "components": [
+        "desk",
+        "wish_note",
+        "hand_writing",
+        "doodle_icon"
+      ]
+    },
+    {
+      "id": "S16",
+      "name": "貼到牆上",
+      "start": 89.0,
+      "end": 92.54,
+      "duration": 3.54,
+      "section": "verse2",
+      "lines": [
+        23
+      ],
+      "lyrics": [
+        "說出口時像玩笑一場"
+      ],
+      "visual": "大家看著紙條一起笑。有人踮腳把紙條貼到牆上，紙條愈貼愈多，形成一面願望牆。",
+      "figures": "笑的動作以肩膀抖動與頭部後仰表示，不畫誇張表情；踮腳、伸手貼紙。",
+      "background": "紙條被貼上時有輕微晃動後靜止；牆面淡淡的紋理。",
+      "camera": "緩慢 pull out 顯示整面牆。",
+      "transition": "牆上的紙條開始一張一張翻面。",
+      "mood": "笑鬧裡的認真。",
+      "palette": "day",
+      "photo": null,
+      "components": [
+        "wish_wall",
+        "wish_note",
+        "walker",
+        "hand_writing"
+      ]
+    },
+    {
+      "id": "S17",
+      "name": "願望真的變成了篇章",
+      "start": 92.54,
+      "end": 99.58,
+      "duration": 7.04,
+      "section": "verse2",
+      "lines": [
+        24,
+        25
+      ],
+      "lyrics": [
+        "後來才發現好多想像",
+        "竟然真的被我們寫成篇章"
+      ],
+      "visual": "牆上的願望紙一張張翻面，變成車票、照片、地圖、寫著日期的小卡、回憶卡。代表那些說著玩的事，真的做到了。",
+      "figures": "無主要人物，物件本身是主角。",
+      "background": "每張紙翻面時有紙的厚度與陰影；翻完後整面牆輕輕呼吸。",
+      "camera": "橫向 pan 掃過整面牆，速度隨歌詞句尾放慢。",
+      "transition": "其中一張車票被抽走，畫面跟著它甩向下一景。",
+      "mood": "驚訝、驕傲、我們真的做到了。",
+      "palette": "day",
+      "photo": "wish_wall_photos",
+      "components": [
+        "wish_wall",
+        "ticket",
+        "map",
+        "photo_frame",
+        "memory_card"
+      ]
+    },
+    {
+      "id": "S18",
+      "name": "瘋狂得不像話",
+      "start": 99.58,
+      "end": 102.54,
+      "duration": 2.96,
+      "section": "verse2",
+      "lines": [
+        26
+      ],
+      "lyrics": [
+        "有些日子瘋狂得不像話"
+      ],
+      "visual": "全片最活潑的一段。奔跑、大笑、亂跳、自拍、追逐、把人抬起來。動畫節奏明顯加快，線條也更放。",
+      "figures": "動作幅度最大；允許誇張的肢體弧線與殘影。",
+      "background": "背景僅幾筆速度線；紙面輕微搖晃。",
+      "camera": "快速的小幅 whip pan（但不炫技，仍是手繪感）。",
+      "transition": "最後一跳的高點定格半拍，畫面亮度降下來。",
+      "mood": "笑到不行的那種日子。",
+      "palette": "day",
+      "photo": null,
+      "components": [
+        "runner",
+        "jumping_figure",
+        "speed_line",
+        "phone"
+      ]
+    },
+    {
+      "id": "S19",
+      "name": "沉默很長的夜",
+      "start": 102.54,
+      "end": 113.32,
+      "duration": 10.78,
+      "section": "verse2",
+      "lines": [
+        27,
+        28,
+        29
+      ],
+      "lyrics": [
+        "有些夜晚也曾沉默很長",
+        "可是回頭看一路的形狀",
+        "每一段都有彼此站在身旁"
+      ],
+      "visual": "深夜。幾個朋友坐在便利商店外的台階、車內或窗邊。沒有人說話。只有路燈、風、遠處經過的車燈。安靜但不孤單——他們坐得很近。",
+      "figures": "幾乎靜止；偶爾有人換姿勢、有人低頭看手機再放下。",
+      "background": "路燈有極慢的明滅；遠處車燈由左至右掠過並在地面留下光帶；風吹動招牌。",
+      "camera": "極緩的 push in，最後停在兩個人的側影。",
+      "transition": "路燈的光暈擴散，覆蓋畫面，轉入下一段的晨光。",
+      "mood": "沉默也是一種陪伴。",
+      "palette": "dusk",
+      "photo": null,
+      "components": [
+        "street_lamp",
+        "storefront",
+        "sitting_figure",
+        "car_light",
+        "window"
+      ]
+    },
+    {
+      "id": "S20",
+      "name": "時間帶走一些模樣",
+      "start": 113.32,
+      "end": 116.34,
+      "duration": 3.02,
+      "section": "pre2",
+      "lines": [
+        30
+      ],
+      "lyrics": [
+        "時間帶走一些年少模樣"
+      ],
+      "visual": "人物沿線持續行走。外貌不明顯變老，改變的是衣服、髮型與背景的年份感：招牌樣式、路樹高度、天空顏色逐段變化。",
+      "figures": "同一組人物連續行走，每 0.8 秒換一次服裝與髮型的線稿版本。",
+      "background": "背景以橫向捲動的方式換代；路樹由小長到大。",
+      "camera": "等速側向 pan，不停。",
+      "transition": "行走中有人回頭。",
+      "mood": "時間過去了，但腳步沒斷。",
+      "palette": "soft",
+      "photo": null,
+      "components": [
+        "walker",
+        "street_facade",
+        "tree",
+        "sky_tone"
+      ]
+    },
+    {
+      "id": "S21",
+      "name": "熟悉的目光",
+      "start": 116.34,
+      "end": 120.18,
+      "duration": 3.84,
+      "section": "pre2",
+      "lines": [
+        31
+      ],
+      "lyrics": [
+        "卻帶不走我們熟悉的目光"
+      ],
+      "visual": "幾個人先後回頭。臉部只有最少的幾筆，但姿態與眼神方向讓人認得出——還是以前那個笑容。",
+      "figures": "回頭的動作分三次發生，時間錯開；回頭後定住約一拍。",
+      "background": "背景速度放慢至近乎停止。",
+      "camera": "緩慢 push in 到最後一個回頭的人。",
+      "transition": "回頭的視線方向拉出一條線，成為回憶冊的書脊。",
+      "mood": "認得出來的那種熟悉。",
+      "palette": "soft",
+      "photo": null,
+      "components": [
+        "walker",
+        "face_minimal"
+      ]
+    },
+    {
+      "id": "S22",
+      "name": "回憶冊闔上",
+      "start": 120.18,
+      "end": 127.0,
+      "duration": 6.82,
+      "section": "pre2",
+      "lines": [
+        32,
+        33
+      ],
+      "lyrics": [
+        "那些笑聲　那些倔強",
+        "都成了生命裡最真的收藏"
+      ],
+      "visual": "一本回憶冊攤開在紙面上，內頁閃過前面出現過的畫面速寫。冊子慢慢闔起，封面上手寫兩個字：「我們」。",
+      "figures": "無人物，僅翻頁的手（只畫手）。",
+      "background": "頁面翻動、紙緣捲曲、闔上時有輕微氣流吹動旁邊的紙屑。",
+      "camera": "俯視，緩慢 pull out。",
+      "transition": "封面「我們」兩字的最後一筆延伸出去，成為下一景伸出的手臂。",
+      "mood": "收藏起來的重量。",
+      "palette": "soft",
+      "photo": null,
+      "components": [
+        "album",
+        "page_curl",
+        "hand_writing",
+        "title_text"
+      ]
+    },
+    {
+      "id": "S23",
+      "name": "她拉起過我們",
+      "start": 127.0,
+      "end": 133.62,
+      "duration": 6.62,
+      "section": "chorus2",
+      "lines": [
+        34,
+        35
+      ],
+      "lyrics": [
+        "你一直都是那麼有力量",
+        "不是因為從來沒有受過傷"
+      ],
+      "visual": "回到那個拉手的動作，但這次看得更清楚：曉萱伸手，把一個坐在地上的人拉起來。動作平實，不戲劇化。",
+      "figures": "蹲下、伸手、握住、施力、把人帶起；被拉的人站穩後拍了拍衣服。",
+      "background": "背景僅地平線與幾筆草；暖金色從交握處微微透出。",
+      "camera": "中景固定，拉起時輕微 push in。",
+      "transition": "被拉起的那個人，轉身向另一個方向伸出手。",
+      "mood": "她做過的事。",
+      "palette": "warm",
+      "photo": null,
+      "components": [
+        "reaching_hand",
+        "sitting_figure",
+        "walker",
+        "gold_flow"
+      ]
+    },
+    {
+      "id": "S24",
+      "name": "傳下去",
+      "start": 133.62,
+      "end": 140.73,
+      "duration": 7.11,
+      "section": "chorus2",
+      "lines": [
+        36,
+        37
+      ],
+      "lyrics": [
+        "是走過那麼多風浪",
+        "依然把溫柔留在身旁"
+      ],
+      "visual": "剛剛被拉起的人，現在伸手拉起另一個人。同樣的動作，不同的人。畫面開始出現第三組、第四組。",
+      "figures": "三組拉手動作依序發生，節奏與拍點對齊；每組完成後保持牽著。",
+      "background": "暖金色沿著每一次交握點亮起，連成一條線。",
+      "camera": "緩慢橫向 pan，跟隨傳遞的方向。",
+      "transition": "所有交握的手連成一條不斷的線。",
+      "mood": "溫柔沒有停在她身上。",
+      "palette": "warm",
+      "photo": null,
+      "components": [
+        "reaching_hand",
+        "walker",
+        "gold_flow"
+      ]
+    },
+    {
+      "id": "S25",
+      "name": "手連成的線",
+      "start": 140.73,
+      "end": 147.14,
+      "duration": 6.41,
+      "section": "chorus2",
+      "lines": [
+        38,
+        39
+      ],
+      "lyrics": [
+        "我們一起闖過多少不可能的牆",
+        "也一起把平凡活得不一樣"
+      ],
+      "visual": "牽起的手形成一條橫貫畫面的線。這條線同時也是先前那面牆的頂端、那條路的邊、那道浪的稜——它們本來就是同一條線。",
+      "figures": "人物成為線上的節點，輕微上下呼吸。",
+      "background": "線的其他段落浮現牆、路、浪的淡影，證明是同一筆。",
+      "camera": "持續 pull out，人物逐漸變小。",
+      "transition": "線向下鋪平，成為地面。",
+      "mood": "原來一直是同一條。",
+      "palette": "warm",
+      "photo": null,
+      "components": [
+        "chain_of_hands",
+        "wall",
+        "road_path",
+        "wave_stroke"
+      ]
+    },
+    {
+      "id": "S26",
+      "name": "足夠有重量",
+      "start": 147.14,
+      "end": 157.94,
+      "duration": 10.8,
+      "section": "chorus2",
+      "lines": [
+        40,
+        41,
+        42
+      ],
+      "lyrics": [
+        "所以今天什麼都不用再證明",
+        "你走過的每一步",
+        "早已足夠有重量"
+      ],
+      "visual": "地面上腳印再次浮現，但這次密度更高、方向更多。鏡頭拉到最遠，整條路在紙面上顯現為一道長長的、有厚度的墨痕。",
+      "figures": "無人物。",
+      "background": "腳印與拍點同步浮現；紙面出現極淡的暖金底色。",
+      "camera": "極緩 pull out 至最遠，末段停住。",
+      "transition": "墨痕的顏色開始退去，紙面轉向深藍。",
+      "mood": "不必證明什麼了。",
+      "palette": "warm",
+      "photo": null,
+      "components": [
+        "footstep",
+        "road_path",
+        "paper"
+      ]
+    },
+    {
+      "id": "S27",
+      "name": "夜裡的肩膀",
+      "start": 157.94,
+      "end": 164.62,
+      "duration": 6.68,
+      "section": "bridge",
+      "lines": [
+        43,
+        44
+      ],
+      "lyrics": [
+        "如果有些話　不用說完",
+        "我們也懂沉默裡的答案"
+      ],
+      "visual": "背景轉為深藍夜色，線條改為米金色。兩個朋友坐在堤防上（或屋頂、海邊）。不說話。肩膀靠得很近。遠處有一點城市的光。",
+      "figures": "兩人幾乎靜止，只有呼吸與偶爾的側頭；其中一人把頭輕輕靠過去。",
+      "background": "海面（或遠景）有極緩的波動；星點極輕微閃動。",
+      "camera": "極緩 push in，幅度比前面都小。",
+      "transition": "堤防的水平線向遠方延伸。",
+      "mood": "不用說完的話。",
+      "palette": "night",
+      "photo": null,
+      "components": [
+        "embankment",
+        "sitting_figure",
+        "star",
+        "city_glow",
+        "wave_stroke"
+      ]
+    },
+    {
+      "id": "S28",
+      "name": "不必再趕",
+      "start": 164.62,
+      "end": 171.0,
+      "duration": 6.38,
+      "section": "bridge",
+      "lines": [
+        45,
+        46
+      ],
+      "lyrics": [
+        "如果有些路　不必再趕",
+        "就讓我們陪你慢慢地看"
+      ],
+      "visual": "所有人物第一次停止奔跑。大家只是慢慢走。步伐明顯放慢，畫面的所有動態都跟著慢下來。",
+      "figures": "行走速度降為前面的一半；手臂擺幅變小；有人停下看天空。",
+      "background": "夜色中的風線變得很長很慢。",
+      "camera": "鏡頭運動明顯放慢，接近靜止。",
+      "transition": "前方的地平線隆起。",
+      "mood": "允許自己慢下來。",
+      "palette": "night",
+      "photo": null,
+      "components": [
+        "walker",
+        "wind_stroke",
+        "star"
+      ]
+    },
+    {
+      "id": "S29",
+      "name": "那些翻過的山",
+      "start": 171.0,
+      "end": 174.5,
+      "duration": 3.5,
+      "section": "bridge",
+      "lines": [
+        47
+      ],
+      "lyrics": [
+        "看那些曾一起翻過的山"
+      ],
+      "visual": "前方的線隆起成連綿的山。山的稜線就是先前那條路的延續，可以看出是同一筆畫過來的。",
+      "figures": "山腳下有幾個極小的人物剪影在走。",
+      "background": "山的輪廓線由左至右被「畫」出來；雲影掠過山面。",
+      "camera": "緩慢橫向 pan 掃過山脈。",
+      "transition": "山的稜線落下，成為城市天際線。",
+      "mood": "回望來時路。",
+      "palette": "night",
+      "photo": null,
+      "components": [
+        "mountain",
+        "walker",
+        "cloud"
+      ]
+    },
+    {
+      "id": "S30",
+      "name": "笑到流淚的夜晚",
+      "start": 174.5,
+      "end": 178.1,
+      "duration": 3.6,
+      "section": "bridge",
+      "lines": [
+        48
+      ],
+      "lyrics": [
+        "看那些笑到流淚的夜晚"
+      ],
+      "visual": "山變成夜晚的城市天際線，一格一格的窗戶依序亮起。其中一扇窗裡，幾個人笑成一團。",
+      "figures": "窗內人物剪影互相推擠、後仰大笑。",
+      "background": "窗戶以不規則順序亮起；遠處有車燈流動。",
+      "camera": "push in 到那扇亮著的窗。",
+      "transition": "窗框放大，成為一張照片的邊框。",
+      "mood": "最好笑的那個晚上。",
+      "palette": "night",
+      "photo": "window_photo",
+      "components": [
+        "city_skyline",
+        "window",
+        "sitting_figure",
+        "car_light"
+      ]
+    },
+    {
+      "id": "S31",
+      "name": "路是回憶組成的",
+      "start": 178.1,
+      "end": 183.98,
+      "duration": 5.88,
+      "section": "bridge",
+      "lines": [
+        49,
+        50,
+        51
+      ],
+      "lyrics": [
+        "原來真正留下來的",
+        "從來不是終點有多遠",
+        "而是一路上"
+      ],
+      "visual": "鏡頭開始大幅拉遠。我們以為一直在看一條路，拉遠後才發現：這條路是由無數張小小的回憶卡、照片框、紙條、車票拼成的。",
+      "figures": "無人物。",
+      "background": "組成路面的每個小元件都有極輕微的獨立呼吸，整體像會動的鑲嵌。",
+      "camera": "全片第二大的 pull out，等速。",
+      "transition": "所有元件開始向畫面中央聚攏。",
+      "mood": "原來重要的從來不是終點。",
+      "palette": "night",
+      "photo": null,
+      "components": [
+        "memory_card",
+        "photo_frame",
+        "ticket",
+        "road_path"
+      ]
+    },
+    {
+      "id": "S32",
+      "name": "彼此陪伴",
+      "start": 183.98,
+      "end": 188.52,
+      "duration": 4.54,
+      "section": "bridge",
+      "lines": [
+        52
+      ],
+      "lyrics": [
+        "我們曾經彼此陪伴"
+      ],
+      "visual": "聚攏的元件散開，化成人物。所有曾出現過的人，一個一個站定，形成一大群人並肩站著的畫面。",
+      "figures": "人物依序落定，每個人落定時有一個小小的站穩動作。",
+      "background": "背景由深藍開始回暖，邊緣先亮。",
+      "camera": "定鏡，僅極輕微呼吸。",
+      "transition": "人群中央讓出視線，曉萱的剪影走進來。",
+      "mood": "我們都在這裡。",
+      "palette": "night",
+      "photo": null,
+      "components": [
+        "walker",
+        "memory_card",
+        "afterimage"
+      ]
+    },
+    {
+      "id": "S33",
+      "name": "不同時期的她",
+      "start": 188.52,
+      "end": 191.68,
+      "duration": 3.16,
+      "section": "final",
+      "lines": [
+        53
+      ],
+      "lyrics": [
+        "你一直都是那麼有力量"
+      ],
+      "visual": "不同時期的曉萱剪影，一個一個從畫面兩側走進來，走到中央時彼此疊合，最後成為我們記憶中的那一個她。",
+      "figures": "每個剪影走路的姿態略有不同；疊合時線條合併而非淡出。",
+      "background": "背景由深藍過渡到暖色，過程橫跨整個 S33–S35。",
+      "camera": "緩慢 push in。",
+      "transition": "疊合完成的她站定，腳邊的障礙物線條開始被擦掉。",
+      "mood": "她一直都是這樣的人。",
+      "palette": "warm",
+      "photo": null,
+      "components": [
+        "walker",
+        "afterimage",
+        "gold_flow"
+      ]
+    },
+    {
+      "id": "S34",
+      "name": "障礙被擦掉",
+      "start": 191.68,
+      "end": 195.12,
+      "duration": 3.44,
+      "section": "final",
+      "lines": [
+        54
+      ],
+      "lyrics": [
+        "早已不需要誰替你衡量"
+      ],
+      "visual": "先前出現過的牆、風、雨、坑洞，一樣一樣被橡皮擦式地擦去（線條反向消退），最後畫面上只剩下她走過的那條路。",
+      "figures": "她站著不動，看著這些東西消失。",
+      "background": "擦除以 stroke-dashoffset 反向動畫實現，殘留一點紙面擦痕。",
+      "camera": "定鏡。",
+      "transition": "剩下的那條路兩側，開始長出其他人的腳印。",
+      "mood": "不需要誰來衡量。",
+      "palette": "warm",
+      "photo": null,
+      "components": [
+        "wall",
+        "wind_stroke",
+        "road_path",
+        "eraser_mark"
+      ]
+    },
+    {
+      "id": "S35",
+      "name": "也成為我們",
+      "start": 195.12,
+      "end": 202.52,
+      "duration": 7.4,
+      "section": "final",
+      "lines": [
+        55,
+        56
+      ],
+      "lyrics": [
+        "那些一起走過的風浪",
+        "都讓我們成為今天的模樣"
+      ],
+      "visual": "朋友們一個一個出現在路上，與她並排。這一次主角不只是她——她也成為了現在的我們的一部分。",
+      "figures": "人物依序淡入並開始同步行走；隊伍逐漸變寬。",
+      "background": "暖金色從腳下的路面向上滲；背景完全回到暖色。",
+      "camera": "緩慢 pull out 讓整排人入鏡。",
+      "transition": "隊伍上方浮現一排空白的回憶卡。",
+      "mood": "她在我們身上。",
+      "palette": "warm",
+      "photo": null,
+      "components": [
+        "walker",
+        "road_path",
+        "gold_flow"
+      ]
+    },
+    {
+      "id": "S36",
+      "name": "回憶卡",
+      "start": 202.52,
+      "end": 205.66,
+      "duration": 3.14,
+      "section": "final",
+      "lines": [
+        57
+      ],
+      "lyrics": [
+        "我們一起創造多少不可能的篇章"
+      ],
+      "visual": "前面所有畫面以「一張一張手繪回憶卡」的方式快速回顧——不是影片剪輯，而是卡片翻飛。每張卡上是該場景的速寫。",
+      "figures": "無人物（人物在卡片內）。",
+      "background": "卡片以不同角度翻入畫面，帶輕微旋轉與紙張陰影。",
+      "camera": "鏡頭輕微後退，讓卡片有空間飛入。",
+      "transition": "卡片開始減速並尋找自己的位置。",
+      "mood": "全部都還在。",
+      "palette": "warm",
+      "photo": "memory_cards",
+      "components": [
+        "memory_card",
+        "photo_frame"
+      ]
+    },
+    {
+      "id": "S37",
+      "name": "排成四個字",
+      "start": 205.66,
+      "end": 212.18,
+      "duration": 6.52,
+      "section": "final",
+      "lines": [
+        58,
+        59
+      ],
+      "lyrics": [
+        "也一起讓彼此的人生不一樣",
+        "所以此刻什麼都不用再勉強"
+      ],
+      "visual": "回憶卡慢慢排列、對齊，最後由卡片本身拼出巨大的四個字：「一直都在」。字是由回憶組成的，不是寫出來的。",
+      "figures": "無人物。",
+      "background": "卡片逐一歸位，歸位時有輕微的吸附感；完成後整體輕輕呼吸。",
+      "camera": "緩慢 pull out 讓四個字完整入鏡。",
+      "transition": "字形的卡片一張張淡去，只剩下幾個坐著的人。",
+      "mood": "這就是答案。",
+      "palette": "warm",
+      "photo": null,
+      "components": [
+        "memory_card",
+        "title_text"
+      ]
+    },
+    {
+      "id": "S38",
+      "name": "就這樣坐著",
+      "start": 212.18,
+      "end": 217.57,
+      "duration": 5.39,
+      "section": "final",
+      "lines": [
+        60
+      ],
+      "lyrics": [
+        "不必回答　不必逞強"
+      ],
+      "visual": "其他文字全部消失。只剩下幾個朋友自然地坐在一起——不刻意留空位，就是一群人坐著。",
+      "figures": "坐姿自然、彼此距離不等；有人說話、有人聽、有人發呆。",
+      "background": "背景幾乎空白，只有一筆地平線與暖光。",
+      "camera": "定鏡。",
+      "transition": "地面的暖光開始向外擴散。",
+      "mood": "不必回答，不必逞強。",
+      "palette": "warm",
+      "photo": null,
+      "components": [
+        "sitting_figure",
+        "horizon_fade"
+      ]
+    },
+    {
+      "id": "S39",
+      "name": "我們就在你的身旁",
+      "start": 217.57,
+      "end": 223.09,
+      "duration": 5.52,
+      "section": "final",
+      "lines": [
+        61
+      ],
+      "lyrics": [
+        "我們就在你的身旁"
+      ],
+      "visual": "鏡頭慢慢向後拉。暖金色的燈光一盞一盞亮起，把這群人圍在中間。",
+      "figures": "坐著的人幾乎不動，只有呼吸與偶爾的側頭。",
+      "background": "燈一盞一盞亮，順序不規則；光暈相互重疊。",
+      "camera": "持續 pull out，速度極慢且不停。",
+      "transition": "最外圈的燈光淡去，畫面回到紙面。",
+      "mood": "謝謝妳真的來過。",
+      "palette": "warm",
+      "photo": null,
+      "components": [
+        "sitting_figure",
+        "lamp_glow"
+      ]
+    },
+    {
+      "id": "S40",
+      "name": "最後一頁",
+      "start": 223.09,
+      "end": 231.54,
+      "duration": 8.45,
+      "section": "outro",
+      "lines": [
+        62,
+        63
+      ],
+      "lyrics": [
+        "有些故事不必說完",
+        "也會一直留在心上"
+      ],
+      "visual": "回到最開始那本回憶冊。書頁一頁一頁翻過去，翻到最後一頁。上面不寫「完」，也不寫「The End」。只有一句手寫的：「一直都在。」",
+      "figures": "只出現翻頁的手。",
+      "background": "翻頁速度由快漸慢；最後一頁停住時紙面輕輕起伏。",
+      "camera": "俯視，緩慢 push in 到那一行字。",
+      "transition": "那行字的最後一筆向右拉長。",
+      "mood": "安靜地收下。",
+      "palette": "warm",
+      "photo": null,
+      "components": [
+        "album",
+        "page_curl",
+        "hand_writing",
+        "title_text"
+      ]
+    },
+    {
+      "id": "S41",
+      "name": "線又出現了",
+      "start": 231.54,
+      "end": 236.72,
+      "duration": 5.18,
+      "section": "outro",
+      "lines": [
+        64
+      ],
+      "lyrics": [
+        "你不用往哪裡趕"
+      ],
+      "visual": "最開始那條手繪線再次出現在空白的紙面上，從左緣緩慢向右延伸。跟序幕同一條線，同樣的筆觸。",
+      "figures": "線上慢慢長出幾個小小的人物，繼續走。",
+      "background": "紙面回到最初的米白；線的抖動與序幕一致。",
+      "camera": "極緩 push in，與序幕鏡位對稱。",
+      "transition": "人物的線稿逐漸簡化。",
+      "mood": "沒有要趕去哪裡。",
+      "palette": "warm",
+      "photo": null,
+      "components": [
+        "paper",
+        "guide_line",
+        "walker"
+      ]
+    },
+    {
+      "id": "S42",
+      "name": "線繼續延伸",
+      "start": 236.72,
+      "end": 243.6,
+      "duration": 6.88,
+      "section": "outro",
+      "lines": [
+        65,
+        66
+      ],
+      "lyrics": [
+        "我們都在",
+        "和從前一樣"
+      ],
+      "visual": "人物慢慢簡化成最單純的線稿。線繼續向右延伸，穿出畫面邊緣。人物沒有消失、沒有變成光點、沒有走向天空——他們只是繼續走。",
+      "figures": "人物以極簡筆畫行走，步伐穩定不停。",
+      "background": "線的末端持續超出畫面右緣；紙面靜止。",
+      "camera": "極緩 pull out，直到線細如一筆。",
+      "transition": "畫面保留線的痕跡，淡入最後字卡。",
+      "mood": "故事沒有真正結束。",
+      "palette": "warm",
+      "photo": null,
+      "components": [
+        "guide_line",
+        "walker",
+        "paper"
+      ]
+    },
+    {
+      "id": "S43",
+      "name": "最後字卡",
+      "start": 243.6,
+      "end": 250.6,
+      "duration": 7.0,
+      "section": "outro",
+      "lines": [],
+      "lyrics": [],
+      "visual": "米白背景。中央手寫：「一直都在」。下一行：「給　曉萱」。再下一行小字：「有些故事不必說完，也會一直留在心上。」畫面右緣仍留著那條線的末端。",
+      "figures": "無人物。",
+      "background": "字以手寫筆順逐字浮現；紙面極輕微呼吸。",
+      "camera": "完全靜止。",
+      "transition": "音樂結束後才開始淡黑。",
+      "mood": "想念，但平靜。",
+      "palette": "warm",
+      "photo": null,
+      "components": [
+        "paper",
+        "title_text",
+        "guide_line"
+      ]
+    },
+    {
+      "id": "S44",
+      "name": "留白",
+      "start": 250.6,
+      "end": 253.25,
+      "duration": 2.65,
+      "section": "outro",
+      "lines": [],
+      "lyrics": [],
+      "visual": "字卡持續停留。音樂完全結束後，畫面在最後 2 秒內緩慢淡入黑。",
+      "figures": "無。",
+      "background": "無，完全靜止。",
+      "camera": "靜止。",
+      "transition": "淡黑作結。",
+      "mood": "留白。",
+      "palette": "warm",
+      "photo": null,
+      "components": [
+        "paper",
+        "title_text"
+      ]
+    }
+  ],
+  "photo_slots": [
+    {
+      "key": "station_names",
+      "where": "S04 火車站牌",
+      "note": "站牌牌面可換成真實地名或真實回憶的地點，目前是「第一站／下一站／再遠一點」。",
+      "count": 3
+    },
+    {
+      "key": "album_photos",
+      "where": "S07 相簿內頁",
+      "note": "3–4 個照片框，可直接放入真實合照；停留較久的那一張建議放最有代表性的一張。",
+      "count": 4
+    },
+    {
+      "key": "daily_moments",
+      "where": "S13 日常小格",
+      "note": "8 格速寫中可換 2–3 格為真實生活照。",
+      "count": 3
+    },
+    {
+      "key": "wish_wall_photos",
+      "where": "S17 願望牆",
+      "note": "翻面後的車票／照片／地圖，可換成真實票根與照片的掃描。",
+      "count": 5
+    },
+    {
+      "key": "window_photo",
+      "where": "S30 亮著的那扇窗",
+      "note": "窗內畫面可換成一張真實的夜晚合照。",
+      "count": 1
+    },
+    {
+      "key": "memory_cards",
+      "where": "S36 回憶卡快速回顧",
+      "note": "卡片中可混入 4–6 張真實照片，與手繪卡交錯。",
+      "count": 6
+    }
+  ],
+  "components": [
+    "afterimage",
+    "album",
+    "bus_seat",
+    "car_light",
+    "chain_of_hands",
+    "chat_figures",
+    "city_glow",
+    "city_skyline",
+    "climbing_figure",
+    "cloud",
+    "crowd_silhouette",
+    "desk",
+    "doodle_icon",
+    "embankment",
+    "eraser_mark",
+    "face_minimal",
+    "food",
+    "footstep",
+    "gold_flow",
+    "grass",
+    "guide_line",
+    "hair",
+    "hand_writing",
+    "hill_outline",
+    "horizon_fade",
+    "jumping_figure",
+    "lamp_glow",
+    "leaf",
+    "map",
+    "memory_card",
+    "memory_ghost",
+    "mountain",
+    "page_curl",
+    "paper",
+    "phone",
+    "photo_frame",
+    "pole",
+    "rail_track",
+    "reaching_hand",
+    "road_path",
+    "runner",
+    "sitting_figure",
+    "sky_tone",
+    "speed_line",
+    "star",
+    "station_sign",
+    "step_obstacle",
+    "storefront",
+    "street_facade",
+    "street_lamp",
+    "ticket",
+    "title_text",
+    "train",
+    "train_window",
+    "tree",
+    "vignette_frame",
+    "walker",
+    "wall",
+    "wave_stroke",
+    "wind_stroke",
+    "window",
+    "wish_note",
+    "wish_wall"
+  ]
+}
