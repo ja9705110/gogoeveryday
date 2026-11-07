@@ -1,0 +1,76 @@
+name: PROJECT 030 deploy
+
+on:
+  push:
+    branches: [main]
+    paths: ['project030/**', '.github/workflows/project030-deploy.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: project030-pages
+  cancel-in-progress: false
+
+jobs:
+  backend:
+    # 需要 Repository secrets：SUPABASE_ACCESS_TOKEN、SUPABASE_PROJECT_REF、SUPABASE_DB_PASSWORD、
+    # ADMIN_EMAIL、CRON_SECRET、VAPID_PUBLIC_KEY、VAPID_PRIVATE_KEY
+    runs-on: ubuntu-latest
+    if: ${{ vars.P030_SKIP_BACKEND != 'true' }}
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with: { version: latest }
+      - name: Migrate database
+        working-directory: project030
+        run: |
+          supabase link --project-ref "$REF" -p "$SUPABASE_DB_PASSWORD"
+          supabase db push -p "$SUPABASE_DB_PASSWORD" --include-all
+      - name: Configure admin + push scheduler
+        env:
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          SQL="insert into public.admin_emails (email) values (lower('${ADMIN_EMAIL}')) on conflict do nothing;
+          insert into private.app_config (key, value) values ('push_function_url', 'https://${REF}.supabase.co/functions/v1/push-dispatch'), ('cron_secret', '${CRON_SECRET}') on conflict (key) do update set value = excluded.value;"
+          jq -n --arg q "$SQL" '{query: $q}' > /tmp/q.json
+          curl -sf -X POST "https://api.supabase.com/v1/projects/${REF}/database/query" \
+            -H "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" -H "Content-Type: application/json" --data @/tmp/q.json
+      - name: Deploy push function
+        working-directory: project030
+        run: |
+          supabase secrets set --project-ref "$REF" CRON_SECRET="${{ secrets.CRON_SECRET }}" VAPID_PUBLIC_KEY="${{ secrets.VAPID_PUBLIC_KEY }}" VAPID_PRIVATE_KEY="${{ secrets.VAPID_PRIVATE_KEY }}" VAPID_SUBJECT="mailto:${{ secrets.ADMIN_EMAIL }}"
+          supabase functions deploy push-dispatch --project-ref "$REF" --no-verify-jwt
+
+  pages:
+    runs-on: ubuntu-latest
+    needs: [backend]
+    if: ${{ always() && (needs.backend.result == 'success' || needs.backend.result == 'skipped') }}
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inject public config
+        run: |
+          cat > project030/web/js/config.js <<JS
+          export const CONFIG = {
+            SUPABASE_URL: 'https://${{ secrets.SUPABASE_PROJECT_REF }}.supabase.co',
+            SUPABASE_ANON_KEY: '${{ secrets.SUPABASE_ANON_KEY }}',
+            VAPID_PUBLIC_KEY: '${{ secrets.VAPID_PUBLIC_KEY }}',
+          };
+          JS
+          touch project030/web/.nojekyll
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: project030/web }
+      - id: deploy
+        uses: actions/deploy-pages@v4
