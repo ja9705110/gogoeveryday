@@ -87,17 +87,22 @@ export const stages = {
 
   // ───────── DAY 3 · 保險箱 ─────────
   3: {
+    scene: { hotspots: [
+      { id: 'c_safe', x: 50, y: 55, label: '保險箱的轉盤', clue: [{ type: 'note', text: '轉盤旁刻著兩行很小的字：\n「型號照抄。」\n「數字，依第一天的規則。」' }] },
+    ] },
     steps: [
       story('s_watch', ['守夜人：「卡片是我放的。提示我只說一次——」', '「找一個你每天都會打開，卻很少注意它的地方。」'],
         { speaker: '守夜人', when: { flag: 'watcher_met' }, ...S(1, '投影卡 A') }),
       story('s_note', ['桌上壓著一張紙條：', '「卡片在你每天都會打開，卻很少注意的地方。——守夜人」'], { when: { not: { flag: 'watcher_met' } }, ...S(1, '投影卡 A') }),
       { id: 's_scan', type: 'ar', title: '掃描投影卡 A', target: 0, card: 'A', overlay: 'safe', prompt: '找到實體卡片 A，用相機對準它。', ...S(1, '投影卡 A') },
-      { id: 's_open', type: 'keypad', title: '保險箱轉盤', length: 3, prompt: '輸入保險箱的密碼。', ...S(2, '保險箱') },
+      { id: 's_open', type: 'text', title: '保險箱密碼', placeholder: '輸入密碼（英文＋數字）', prompt: '投影指向的地方，有東西被遺落了。找到它們，打開保險箱。（先調查畫面裡的轉盤）', ...S(2, '保險箱') },
       story('s_inside', ['保險箱裡只有一張舊照片。', '照片背面寫著：「第 7 天，再用一次。」', '照片的角落，有一行很小的字：「座標未確認」。'], { ...S(2, '保險箱') }),
       { id: 's_coord', type: 'evidence', title: '座標確認', kinds: ['photo'], gate: true, ...S(3, '座標確認'),
         prompt: '系統需要確認投影卡的原始座標。', pending_text: '座標資料已送出。觀察站正在比對……' },
     ],
     secrets: {
+      s_scan: { fallback: 'VAULT-A', reveal: { overlay: 'safe', digits: '床邊' }, success: '卡片上方浮現一個保險箱，轉盤上亮著兩個字。' },
+      s_open: { answer: ['A168888483'], hints: ['投影卡上的保險箱指向一個地方。遺失物就在那裡。', '床邊有一支手機和一張收據。密碼 ＝ 手機型號 ＋ 收據上的統編。', '記得第一天的規則：1 不算。型號照抄，統編裡的 1 全部拿掉。'], success: '咔。保險箱開了。', wrong: '轉盤卡住了。' },
       s_coord: { hints: ['投影卡是在哪裡找到的？', '回到那個地方。', '拍一張「找到卡片的那個位置」上傳。'] },
     },
   },

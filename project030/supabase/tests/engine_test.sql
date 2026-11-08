@@ -119,8 +119,9 @@ select pg_temp.ok((public.submit_step(:'tp', 3, 's_note', '{}') ->> 'correct')::
 select pg_temp.ok(not (public.submit_step(:'tp', 3, 's_scan', '{"target":1}') ->> 'correct')::boolean, 'wrong AR target rejected');
 select pg_temp.fails($$select public.submit_step('$$ || :'tp' || $$', 3, 's_scan', '{"code":"VAULT-A"}')$$, 'P030_FALLBACK_DISABLED', 'fallback disabled by default');
 select public.admin_set_ar_fallback(3, 's_scan', true) \g /dev/null
-select pg_temp.ok((public.submit_step(:'tp', 3, 's_scan', '{"code":"vault-a"}') -> 'reveal' ->> 'digits') = '418', 'admin-enabled fallback + reveal');
-select pg_temp.ok((public.submit_step(:'tp', 3, 's_open', '{"value":"418"}') ->> 'correct')::boolean, 'safe opened');
+select pg_temp.ok((public.submit_step(:'tp', 3, 's_scan', '{"code":"vault-a"}') -> 'reveal' ->> 'digits') = '床邊', 'admin-enabled fallback + reveal points to bedside');
+select pg_temp.ok(not (public.submit_step(:'tp', 3, 's_open', '{"value":"A168888418311"}') ->> 'correct')::boolean, 'safe rejects tax id with 1s');
+select pg_temp.ok((public.submit_step(:'tp', 3, 's_open', '{"value":"a1688 88483"}') ->> 'correct')::boolean, 'safe opened with phone model + tax id minus 1s');
 select pg_temp.ok(not (public.submit_step(:'tp', 3, 's_inside', '{}') ->> 'completed')::boolean, 'day 3 needs stage 3');
 select (public.submit_evidence(:'tp', 3, 's_coord', 'photo', :'tp' || '/3/c.jpg', null) ->> 'id') as c3 \gset
 select public.admin_review_evidence(:'c3', 'APPROVED', 'ok') \g /dev/null
