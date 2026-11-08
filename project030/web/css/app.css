@@ -589,3 +589,5 @@ body { background: transparent !important; }
 .mz-reveal { position: fixed; inset: 0; z-index: 98; background: rgba(1,3,10,.96); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 16px; }
 .mz-reveal canvas { width: 100%; max-width: 900px; height: auto; box-shadow: 0 0 40px rgba(63,244,255,.3); }
 .mz-cap { font-family: var(--hud), 'Noto Sans TC'; color: var(--accent); letter-spacing: .1em; text-shadow: var(--glow); }
+.cer-sealed .cer-mem { animation: sealed 1.6s both; }
+@keyframes sealed { 0% { opacity: 0; transform: translateY(40px) scale(.6) rotate(0deg); filter: blur(12px) brightness(2.2); } 60% { filter: blur(0) brightness(1.4); } 100% { opacity: 1; transform: rotate(var(--tilt)); filter: none; } }

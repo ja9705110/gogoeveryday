@@ -540,9 +540,7 @@ async function maybeStageClear(L, s) {
   const same = L.steps.filter((x) => x.stage === s.stage && !x.optional);
   if (!same.every((x) => x.done)) return;
   const total = new Set(L.steps.filter((x) => x.stage).map((x) => x.stage)).size;
-  let photo = null;
-  try { photo = (await rpc('stage_photos', { p: S.pid, d: L.day })).find((x) => x.stage === s.stage) || null; } catch (_) {}
-  await stageClear(s.stage, total, s.stage_title, photo);
+  await stageClear(s.stage, total, s.stage_title);
 }
 
 // ── 佐證 ──
