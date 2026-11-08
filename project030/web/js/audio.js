@@ -66,6 +66,12 @@ export function unlock() {
 
 const noise = () => { const s = ctx.createBufferSource(); s.buffer = noiseBuf; s.loop = true; return s; };
 const osc = (type, f) => { const o = ctx.createOscillator(); o.type = type; o.frequency.value = f; return o; };
+// 房間殘響的脈衝響應：雙聲道、指數衰減的噪音
+const impulse = (sec) => {
+  const len = Math.floor(ctx.sampleRate * sec), b = ctx.createBuffer(2, len, ctx.sampleRate);
+  for (let ch = 0; ch < 2; ch++) { const d = b.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2); }
+  return b;
+};
 const lfo = (rate, depth, target) => { const o = osc('sine', rate); const g = ctx.createGain(); g.gain.value = depth; o.connect(g); g.connect(target); o.start(); return o; };
 
 document.addEventListener('visibilitychange', () => {
@@ -151,6 +157,46 @@ const LAYERS = {
     const id = setInterval(() => { if (sound.on) click(out, 0.015); }, 140);
     return [{ stop: () => clearInterval(id) }];
   },
+  memory(out) { // 回顧儀式：鋼琴感分解和弦 + 簡單旋律 + 房間殘響（沒有持續單音，不會有共振嗡鳴）
+    const bus = ctx.createGain(); bus.gain.value = 1.4; bus.connect(out);
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 3600; lp.Q.value = 0.5; lp.connect(bus);
+    const rev = ctx.createConvolver(); rev.buffer = impulse(2.6); const wet = ctx.createGain(); wet.gain.value = 0.8; rev.connect(wet); wet.connect(bus);
+    const dry = ctx.createGain(); dry.gain.value = 2.4; dry.connect(lp); dry.connect(rev);
+    // 遠方海潮（很輕）
+    const n = noise(); const nf = ctx.createBiquadFilter(); nf.type = 'lowpass'; nf.frequency.value = 650;
+    const ng = ctx.createGain(); ng.gain.value = 0.06; n.connect(nf); nf.connect(ng); ng.connect(bus); n.start(); const nl = lfo(0.05, 0.035, ng.gain);
+    // Fmaj7 → G → Em7 → Am7（C 大調，溫暖、帶一點懷舊）
+    const CH = [
+      { bass: 87.31, arp: [220, 261.63, 329.63, 349.23], mel: [[0, 659.25], [4, 523.25]] },
+      { bass: 98.0, arp: [246.94, 293.66, 392.0, 329.63], mel: [[0, 587.33], [4, 493.88]] },
+      { bass: 82.41, arp: [196.0, 246.94, 293.66, 329.63], mel: [[0, 493.88], [2, 523.25], [4, 587.33]] },
+      { bass: 110.0, arp: [261.63, 329.63, 392.0, 440.0], mel: [[0, 659.25], [6, 523.25]] },
+    ];
+    const PAT = [0, 1, 2, 3, 1, 2, 3, 2];
+    const E = 0.39; // 八分音符（約 77 BPM）
+    const note = (f, t, vol, dec) => {
+      const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + dec); g.connect(dry);
+      [[1, 1], [2, 0.22], [3, 0.06]].forEach(([m, a]) => { const o = osc('sine', f * m); const og = ctx.createGain(); og.gain.value = a; o.connect(og); og.connect(g); o.start(t); o.stop(t + dec + 0.05); });
+    };
+    const pad = (fs, t, len) => fs.forEach((f) => {
+      const o = osc('sine', f); const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.007, t + 1.2); g.gain.linearRampToValueAtTime(0.0001, t + len + 1.5);
+      o.connect(g); g.connect(dry); o.start(t); o.stop(t + len + 1.6);
+    });
+    let k = 0, next = ctx.currentTime + 0.15, alive = true;
+    const sched = () => {
+      if (!alive) return;
+      if (next < ctx.currentTime) next = ctx.currentTime + 0.05;
+      while (next < ctx.currentTime + 0.5) {
+        const ci = Math.floor(k / 8) % 4, pos = k % 8, cycle = Math.floor(k / 32), c = CH[ci];
+        if (pos === 0) { note(c.bass, next, 0.07, 3.6); pad(c.arp.slice(0, 3), next, E * 8); }
+        note(c.arp[PAT[pos]], next, pos === 0 ? 0.04 : 0.03, 2.2);
+        if (cycle % 2 === 1) for (const [p, f] of c.mel) if (p === pos) note(f, next, 0.045, 2.6);
+        next += E; k++;
+      }
+    };
+    sched(); const id = setInterval(sched, 120);
+    return [n, nl, { stop: () => { alive = false; clearInterval(id); setTimeout(() => bus.disconnect(), 4000); } }];
+  },
   choir(out) { // 檔案室：和聲墊
     const g = ctx.createGain(); g.gain.value = 0.05; g.connect(out);
     return [220, 277.2, 329.6, 440].map((fr) => { const o = osc('sine', fr); o.connect(g); o.start(); lfo(0.07, 1.5, o.frequency); return o; });
@@ -160,7 +206,7 @@ const SCENES = {
   base: ['music', 'waves', 'deep', 'sonar'],
   intake: ['music', 'buzz', 'waves'], radio: ['music', 'static', 'waves'], vault: ['music', 'deep', 'buzz'], mirror: ['music', 'shimmer'],
   greenhouse: ['music', 'drips', 'waves'], fault: ['music', 'rumble', 'deep'], gate: ['music', 'waves', 'sonar'], fork: ['music', 'deep', 'sonar'],
-  playback: ['music', 'tick'], core: ['music', 'pulse', 'shimmer'], archive: ['music', 'choir', 'waves'], prologue: ['music', 'waves', 'deep'], ceremony: ['music', 'choir', 'waves', 'shimmer'],
+  playback: ['music', 'tick'], core: ['music', 'pulse', 'shimmer'], archive: ['memory'], prologue: ['music', 'waves', 'deep'], ceremony: ['memory'],
 };
 
 export function ambience(name, force) {
