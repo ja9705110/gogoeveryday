@@ -31,7 +31,7 @@ export function mountPlanet(canvas, states, { highlight = null, size = null } = 
   let raf;
   const st = (d) => states[d] || 'none';
   const col = (d, full, alt) => (st(d) === 'alt' ? alt : full);
-  const appear = (d) => (highlight === d ? Math.min(1, (performance.now() - t0 - 600) / 1800) : 1);
+  const appear = (d) => (highlight === d ? Math.max(0.001, Math.min(1, (performance.now() - t0 - 600) / 1800)) : 1);
 
   function wire(radius, alpha) {
     g.strokeStyle = `rgba(63,244,255,${alpha})`; g.lineWidth = 0.7; g.setLineDash([2, 4]);
