@@ -2,19 +2,55 @@
 import { glyphSVG } from './glyphs.js';
 import { signedUrl } from './api.js';
 import { mountPlanet, layerStates, LAYERS } from './planet.js';
-import { sfx } from './audio.js';
+import { sfx, sound, ambience, unlock } from './audio.js';
 
+// 每天的結尾：呼應當天做過的事 ＋ 明天的預告（next）
+const PM = { p_tone: { mono: '黑白・永恆', film: '暖色・膠片', cool: '冷光・未來', cover: '高彩・封面' },
+  p_outfit: { formal: '正式', smart: '俐落', self: '本色', bold: '大膽' },
+  p_mood: { confident: '自信', gentle: '溫柔', calm: '冷靜', playful: '玩心' },
+  p_scene: { studio: '純色空間', city: '城市街角', retro: '復古房間', light: '光影抽象' } };
+const pick = (c, k) => PM[k][c['choice:' + k]];
 const EPILOGUE = {
-  1: { main: ['電力恢復。培養艙開始運轉。', '你取得了第一個符號。它的用途尚未解鎖。'], alt: ['備用通道已關閉。', '符號留下來了——但不是原本那一個。'] },
-  2: { main: ['頻率已鎖定。', '訊號源，原來一直在你的世界裡。'], alt: ['你沒有見到守夜人。', '但你知道他等過。'] },
-  3: { main: ['保險箱已歸檔。', '照片背面那行字，你會在第 7 天想起來。'], alt: ['你得到的不是原本的東西。', '但形狀還在。'] },
-  4: { main: ['鏡廳已歸檔。', '一封邀請函已送達「禮物」頁。'], alt: ['邀請函沒有消失。', '它只是換了一條路來找你。'] },
-  5: { main: ['溫室已歸檔。', '有些東西，要在夜裡才會打開。'], alt: ['有兩株長出了新葉。', '和原本的不一樣。'] },
-  6: { main: ['斷層已固定。', '修補過的地方，留下了痕跡。'], alt: ['你從另一個方向離開了斷層。'] },
-  7: { main: ['門已歸檔。', '門後的門，在你的世界裡。'], alt: ['有些門只開一次。', '有些門會在別處再出現。'] },
-  8: { main: ['岔路已歸檔。', '另一扇門並沒有消失。只是你沒有走進去。'], alt: ['選擇已被覆寫——或被保留。', '兩者都記錄在案。'] },
-  9: { main: ['回放結束。', '你取得了第九個符號。它是空白的。'], alt: ['回放中斷。'] },
-  10: { main: ['所有區域已歸檔。', '明天，第 030 號檔案室將會開啟。'], alt: ['環沒有完全閉合。', '也許它本來就不需要。'] },
+  1: { main: (c) => ['身分檔案：已建立。',
+      ...(pick(c, 'p_tone') ? [`識別影像：${[pick(c, 'p_tone'), pick(c, 'p_outfit'), pick(c, 'p_mood'), pick(c, 'p_scene')].filter(Boolean).join('・')}。系統記住了你想被看見的樣子。`] : []),
+      '停電的那一刻，你沒有停下。你找回了電，也找回了遺落在床邊的東西。',
+      '時間同步完成。從今天起，這裡的時間和你的世界一起前進。'],
+    alt: () => ['主電源沒有回來。但你在黑暗裡，自己找到了路。', '符號留下來了——只是換成了它的殘響。'],
+    next: '明天，一段倒著播放的訊號，會從某個你每天都聽得見的地方傳來。' },
+  2: { main: () => ['訊號源找到了。它一直都在你的世界裡，每天響起，只是你很少注意。',
+      '那 13 個數字，印在一樣你每天都會用完、又會再補上的東西上。', '有些訊號，要倒過來聽，才聽得懂。'],
+    alt: (c) => ['你沒有見到守夜人。但他把訊號抄下來，留給了你。', '等待，也是一種回應。'],
+    next: '明天，守夜人藏起的投影卡，會在這個家的「電的源頭」附近。' },
+  3: { main: () => ['保險箱打開了。裡面只有一張舊照片。', '照片背面寫著：「第 7 天，再用一次。」——把它記住。', '你回到找到卡片的地方。系統記下了那個座標。'],
+    alt: () => ['你沒有拿到照片，只拿到它的形狀。', '有時候，形狀就足夠記住一件事。'],
+    next: '明天，鏡子裡會出現一個房間——比外面多一盞燈。' },
+  4: { main: () => ['鏡子裡的時間，要翻過來讀才是真的。', '你留下了一張「另一邊」的自己。', '一封影像校正邀請函已送達。還記得第一天，你替自己選的樣子嗎？'],
+    alt: () => ['鏡子碎了，但你把它拼回來了。', '邀請函有一點刮痕——它還是找到了你。'],
+    next: '明天，溫室裡有一株植物病了。解藥，藏在你家的廚房。' },
+  5: { main: () => ['你從廚房那本書裡，找到了調配的方法。', '六個數字，是六種用法與肌膚。照顧一個人，從來都需要細節。', '你拍下了一個正在長大的東西。培養艙裡的樣本，好像也長大了一點。'],
+    alt: () => ['溫室枯了，但根還在。', '你澆了水。新長出來的葉子，和原本的不一樣——也沒有比較差。'],
+    next: '明天，第一天的紀錄，會出現在一個不該出現的地方。' },
+  6: { main: (c) => ['斷層停止擴大了。', '那十題曾經答錯的題目，你改回了正確答案。錯過的，不代表不能修補。',
+      c['choice:fault'] === 'keep' ? '你選擇保留那道裂縫。它會一直在那裡——提醒你走過哪裡。' : c['choice:fault'] === 'repair' ? '你選擇修復最早的紀錄。有些東西被覆寫了，但留下來的更完整。' : '你走進了裂縫裡面。那裡沒有地圖，你還是走出來了。',
+      '你拍下了一個修補過的東西。裂痕還在，它仍然被好好地使用著。'],
+    alt: () => ['裂縫比原本更深了。', '你沿著它走了一段，從另一個方向離開。'],
+    next: '明天，一扇門會出現。它需要的，不只一雙手。' },
+  7: { main: () => ['門的輪廓，是很多雙手一起描出來的。', '♥1118♥——原來這扇門，一直在等某一天。', '那些願意把手借給你的人，也被記錄在檔案 030 裡了。'],
+    alt: () => ['門消失了，只剩一道縫。', '你從縫隙裡看見了它——有些門會在別處再出現。'],
+    next: '明天，你會站在一個岔路口。只能選一扇門。' },
+  8: { main: (c) => [
+      ({ keep: '你選擇了「保存」。', release: '你選擇了「放手」。', stay: '你走進了那扇沒有名字的門。', system: '你保留了系統替你做的選擇。那也是一種選擇。' })[c['choice:fork']] || '你做了選擇。',
+      '沒有走的那條路，你用聲音記下來了。它沒有消失，只是換成了另一種存在。'],
+    alt: () => ['岔路沒有等你。系統替你選了一扇門。', '但你把它改寫了——或者決定不改。兩者都算數。'],
+    next: '明天，這八天的片段，會被倒回來播放一次。' },
+  9: { main: () => ['回放結束。你把這九天排回它們本來的順序——連空白，也有它的位置。', '你對十天前的自己說了一句話。系統替你保存了。'],
+    alt: () => ['回放中斷了。這一段，不會再播放。'],
+    next: '明天，是最後一個片段。所有符號，會一起發出聲音。' },
+  10: { main: (c) => ['核心顯示：030。', '你放進核心的最後一樣東西，會跟著你，一起走進下一個數字。',
+      c['choice:core'] === 'open' ? '你讓紀錄繼續寫下去。檔案 030，不會在這裡結束。' : '你選擇封存所有紀錄。它們會被好好保存，等你回來翻閱。',
+      '十個片段全部打撈完成。星球的十層結構，已經重建。'],
+    alt: () => ['環沒有完全閉合。', '也許它本來就不需要閉合。'],
+    next: '明天，第 030 號檔案室將會開啟。' },
 };
 const ACTION = { explore: '探索', preserve: '保存', adjust: '調整環境', rest: '靜置' };
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -44,11 +80,18 @@ export function playCeremony({ L, state, photos = [], onClose }) {
   const root = document.createElement('div');
   root.className = 'ceremony';
   root.innerHTML = `<canvas class="cer-bg"></canvas><div class="cer-body"></div>
-    <button class="btn ghost sm cer-skip">略過</button>`;
+    <button class="btn ghost sm cer-skip hidden">略過</button><button class="btn ghost sm cer-mute hidden"></button>
+    <div class="cer-gate"><div class="kicker">FRAGMENT ${String(L.day).padStart(2, '0')}</div>
+      <div class="cer-gate-t">一個碎片正在浮上海面</div>
+      <button class="btn primary cer-go">▶ 接收碎片</button>
+      <div class="dim" style="font-size:12px">建議開啟聲音</div></div>`;
   document.body.append(root);
   const body = root.querySelector('.cer-body');
   let alive = true, stopPlanet = null;
-  const close = () => { if (!alive) return; alive = false; stopPlanet && stopPlanet(); root.classList.add('cer-out'); setTimeout(() => root.remove(), 600); onClose && onClose(); };
+  const close = () => { if (!alive) return; alive = false; stopPlanet && stopPlanet(); ambience('base'); root.classList.add('cer-out'); setTimeout(() => root.remove(), 600); onClose && onClose(); };
+  const muteBtn = root.querySelector('.cer-mute');
+  const paintMute = () => { muteBtn.textContent = sound.on ? '🔊' : '🔇'; };
+  muteBtn.onclick = () => { sound.toggle(); if (sound.on) { unlock(); ambience('ceremony', true); } paintMute(); };
   root.querySelector('.cer-skip').onclick = () => { if (body.querySelector('.cer-end')) close(); else showAll(); };
 
   // 背景：海平面 + 浮起的光球
@@ -126,7 +169,11 @@ export function playCeremony({ L, state, photos = [], onClose }) {
       add(pc); stopPlanet = mountPlanet(pcv, layerStates(state.levels), { highlight: day, size: 200 }); sfx('complete');
       await wait(3000); if (!alive || all) return;
     }
-    for (const line of (EPILOGUE[day] || {})[alt ? 'alt' : 'main'] || []) { add(div('cer-epi', line)); await wait(1100); if (!alive || all) return; }
+    const ep = EPILOGUE[day] || {};
+    const lines = (ep[alt ? 'alt' : 'main'] || (() => []))(state.stats.choices || {});
+    add(div('cer-h', '檔案 030 · 今日紀錄'));
+    for (const line of lines) { add(div('cer-epi', line)); sfx('type'); await wait(1700); if (!alive || all) return; }
+    if (ep.next) { await wait(600); add(div('cer-next', `<span>NEXT SIGNAL</span>${ep.next}`)); sfx('ping'); await wait(1500); }
     end();
   }
   function end() {
@@ -144,10 +191,21 @@ export function playCeremony({ L, state, photos = [], onClose }) {
 
     symbols.forEach((s) => body.append(div('cer-sym', `<div class="g" style="color:${s.data.echo ? '#b48cff' : '#ffb547'}">${glyphSVG(s.data.symbol)}</div><div><div class="n">取得符號：${s.name}</div><div class="d">頻率 ${s.digit}</div></div>`)));
     if (layer) { const pc = div('cer-planet'); const pcv = document.createElement('canvas'); pcv.style.cssText = 'width:200px;height:200px;display:block;margin:0 auto'; pc.append(pcv, div('cer-pl-t', `星球第 ${layer.day} 層：${layer.name}`)); body.append(pc); stopPlanet && stopPlanet(); stopPlanet = mountPlanet(pcv, layerStates(state.levels), { size: 200 }); }
-    ((EPILOGUE[day] || {})[alt ? 'alt' : 'main'] || []).forEach((l) => body.append(div('cer-epi', l)));
+    const ep = EPILOGUE[day] || {};
+    body.append(div('cer-h', '檔案 030 · 今日紀錄'));
+    ((ep[alt ? 'alt' : 'main'] || (() => []))(state.stats.choices || {})).forEach((l) => body.append(div('cer-epi', l)));
+    if (ep.next) body.append(div('cer-next', `<span>NEXT SIGNAL</span>${ep.next}`));
     end();
   }
-  sequence();
+  // 點擊後才開始：iPhone 必須在手勢中啟動聲音
+  root.querySelector('.cer-go').onclick = () => {
+    if (sound.pref === null) sound.set(true); else unlock();
+    ambience('ceremony', true);
+    root.querySelector('.cer-gate').remove();
+    root.querySelector('.cer-skip').classList.remove('hidden');
+    muteBtn.classList.remove('hidden'); paintMute();
+    sequence();
+  };
 }
 
 // 每一關（stage）完成的小儀式；若管理者有上傳照片，接著展示照片
