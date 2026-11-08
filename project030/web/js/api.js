@@ -73,6 +73,19 @@ export async function passwordLogin(account, password) {
   if (error) throw error;
   return data.session;
 }
+// 玩家只輸入生日（月日）登入：對應固定的觀測者帳號，密碼由生日組成（帳號由管理者以 SQL 建立）
+export const PLAYER_ACCOUNT = 'observer@p030.game';
+export function birthdayToPassword(input) {
+  const d = String(input || '').replace(/\D/g, '');
+  const mmdd = d.length >= 8 ? d.slice(-4) : d.length === 3 ? '0' + d : d;
+  if (mmdd.length !== 4) throw new Error('請輸入生日的月與日，例如 1118。');
+  return 'p030-' + mmdd;
+}
+export async function birthdayLogin(input) {
+  const { data, error } = await sb.auth.signInWithPassword({ email: PLAYER_ACCOUNT, password: birthdayToPassword(input) });
+  if (error) throw error;
+  return data.session;
+}
 export async function signOut() { await sb.auth.signOut(); }
 
 // ── 檔案 ──
