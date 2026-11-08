@@ -9,6 +9,7 @@ import { playPrologue } from './prologue.js';
 import { sound, sfx, ambience, needsUnlock } from './audio.js';
 import { mountBackground } from './bg.js';
 import { mountPlanet, morphToPhoto, layerStates, LAYERS } from './planet.js';
+import { playCeremony, ceremonyKey, stageClear } from './ceremony.js';
 
 // 資料庫中舊稱呼的統一
 const T = (str) => String(str ?? '').replace(/觀測者|觀測員|觀察者/g, '觀察員').replace(/觀測/g, '觀察');
@@ -324,6 +325,7 @@ function home() {
   }
   wrap.append(list);
   shell('home', wrap);
+  pendingCeremony(st);
 }
 
 // ── 區域 ──
@@ -463,6 +465,7 @@ function makeCtx(L, s, el, msg, box) {
         const r = await rpc('submit_step', { p: S.pid, d: L.day, step_id: s.id, answer });
         if (r.correct) {
           sfx(r.completed ? 'complete' : 'ok');
+          if (!r.completed) await maybeStageClear(L, s);
           msg.className = 'msg good'; msg.textContent = T(r.success_text || '……');
           await afterSuccess(L, r);
           return r;
@@ -492,28 +495,36 @@ function makeCtx(L, s, el, msg, box) {
 async function afterSuccess(L, r) {
   await new Promise((res) => setTimeout(res, 700));
   if (r.completed) {
-    const c = r.completion || {};
-    const gained = (c.gained || []).filter((g) => g.kind !== 'lost');
-    const layer = LAYERS.find((x) => x.day === L.day);
-    let stopPlanet = null;
-    const pcv = layer ? h('canvas', { style: 'width:220px;height:220px;display:block;margin:0 auto' }) : null;
-    if (layer) {
-      try { await loadState(); } catch (_) {}
-      requestAnimationFrame(() => { stopPlanet = mountPlanet(pcv, layerStates(S.state.levels), { highlight: L.day, size: 220 }); });
-    }
-    modal(h('div', {},
-      h('div', { class: 'kicker' }, c.outcome === 'ALTERNATE' ? 'ARCHIVED · ALTERNATE' : 'ARCHIVED'),
-      layer ? h('div', { class: 'layer-new' }, pcv, h('div', { class: 'ln-t' }, `星球第 ${layer.day} 層結構已重建`), h('div', { class: 'ln-n' }, `${layer.name} · ${layer.en}`, c.outcome === 'ALTERNATE' ? h('span', { class: 'dim', style: 'font-size:12px' }, '（殘響）') : null)) : null,
-      h('div', { class: 'lines' }, ...(c.epilogue || []).map((t) => h('p', {}, T(t)))),
-      ...gained.map((g) => h('div', { class: 'row card' },
-        g.kind === 'symbol' ? h('div', { style: 'width:48px;color:' + (g.echo ? '#7d8e9c' : '#f2b84b'), html: glyphSVG(g.symbol) }) : null,
-        h('div', {}, h('div', {}, g.kind === 'gift' ? '影像校正邀請函' : (g.echo ? '殘響・' : '') + (g.name || g.key)),
-          g.kind === 'symbol' ? h('div', { class: 'dim mono', style: 'font-size:12px' }, '頻率 ' + g.digit) : null))),
-      h('a', { class: 'btn primary block', href: '#/', onclick: () => { stopPlanet && stopPlanet(); document.querySelector('.modal')?.remove(); } }, '返回終端')), { onClose: () => { stopPlanet && stopPlanet(); route(); } });
-    if (layer) setTimeout(() => sfx('unlock'), 900);
+    await openCeremony(L.day);
   } else {
     route();
   }
+}
+
+async function openCeremony(day, { replay = false } = {}) {
+  try {
+    await loadState();
+    const L2 = await rpc('open_level', { p: S.pid, d: day });
+    if (L2.status !== 'COMPLETED') return route();
+    localStorage.setItem(ceremonyKey(S.pid, day), '1');
+    playCeremony({ L: L2, state: S.state, onClose: () => { if (!replay) location.hash = '#/'; route(); } });
+  } catch (e) { toast(errText(e)); route(); }
+}
+
+// 破關後由管理者審核通過（玩家不在畫面上）→ 下次打開時補播回顧
+function pendingCeremony(st) {
+  if (document.querySelector('.prologue, .ceremony')) return;
+  const due = st.levels.filter((l) => l.day <= 10 && l.status === 'COMPLETED' && !localStorage.getItem(ceremonyKey(S.pid, l.day))).sort((x, y) => x.day - y.day)[0];
+  if (due) setTimeout(() => { if (!document.querySelector('.prologue, .ceremony')) openCeremony(due.day); }, 900);
+}
+
+async function maybeStageClear(L, s) {
+  if (!s.stage) return;
+  s.done = true;
+  const same = L.steps.filter((x) => x.stage === s.stage && !x.optional);
+  if (!same.every((x) => x.done)) return;
+  const total = new Set(L.steps.filter((x) => x.stage).map((x) => x.stage)).size;
+  await stageClear(s.stage, total, s.stage_title);
 }
 
 // ── 佐證 ──
@@ -561,6 +572,7 @@ function evidenceWidget(L, s, msg) {
       const r = await rpc('submit_evidence', { p: S.pid, d: L.day, step_id: s.id, kind, path, content: text || null });
       sfx(r.completed ? 'complete' : 'ok');
       msg.className = 'msg good'; msg.textContent = r.pending ? '證據已送出，觀察站比對中。' : '已提交，等待比對。';
+      if (!r.completed && !r.pending) await maybeStageClear(L, s);
       await afterSuccess(L, r);
     } catch (e) { msg.className = 'msg bad'; msg.textContent = errText(e); btn && (btn.disabled = false); }
   };
@@ -706,6 +718,11 @@ function log() {
   wrap.append(h('div', { class: 'grid2' },
     stat('完成（準時）', st.stats.ontime), stat('完成（全部）', st.stats.completed),
     stat('錯過的區域', st.stats.missed), stat('發現的隱藏物', st.stats.exploration)));
+  const doneDays = st.levels.filter((l) => l.day <= 10 && l.status === 'COMPLETED');
+  wrap.append(h('h2', {}, '每日回顧'));
+  if (!doneDays.length) wrap.append(h('p', { class: 'dim' }, '完成第一個區域後，回顧會出現在這裡。'));
+  else wrap.append(h('div', { class: 'recap-list' }, ...doneDays.map((l) => h('button', { class: 'recap ' + (l.outcome === 'ALTERNATE' ? 'alt' : ''), onclick: () => openCeremony(l.day, { replay: true }) },
+    h('span', { class: 'mono' }, `ZONE ${String(l.day).padStart(2, '0')}`), h('b', {}, l.title), h('span', { class: 'spacer' }), h('span', {}, '▶ 重播')))));
   wrap.append(h('h2', {}, '事件'));
   for (const e of st.events.filter((x) => x.type !== 'ROUTE' && x.type !== 'HINT')) {
     wrap.append(h('div', { class: 'row', style: 'border-bottom:1px solid var(--line);padding:8px 0;font-size:14px' },
