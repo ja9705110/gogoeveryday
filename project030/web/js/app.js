@@ -374,12 +374,34 @@ async function zone(day) {
   drawSteps(L, stepsBox);
 }
 
+function stageInfo(L) {
+  const map = new Map();
+  for (const s of L.steps) {
+    if (!s.stage) continue;
+    const st = map.get(s.stage) || { n: s.stage, title: s.stage_title, done: true };
+    if (!s.optional && !s.done) st.done = false;
+    map.set(s.stage, st);
+  }
+  return [...map.values()].sort((a, b) => a.n - b.n);
+}
+
 function drawSteps(L, box) {
   box.innerHTML = '';
-  let activeShown = false;
+  const stages = stageInfo(L);
+  if (stages.length) {
+    const cur = stages.find((x) => !x.done);
+    box.append(h('div', { class: 'stagebar' }, ...stages.map((x) => h('div', { class: 'sb ' + (x.done ? 'done' : x === cur ? 'cur' : '') },
+      h('div', { class: 'sb-n' }, `關卡 ${x.n}/${stages.length}`), h('div', { class: 'sb-t' }, x.title || '')))));
+  }
+  let activeShown = false, lastStage = null;
   for (const s of L.steps) {
     const done = s.done;
     if (!done && activeShown && !s.optional) break;
+    if (s.stage && s.stage !== lastStage) {
+      lastStage = s.stage;
+      const info = stages.find((x) => x.n === s.stage);
+      box.append(h('div', { class: 'stage-head' + (info && info.done ? ' done' : '') }, h('span', {}, `STAGE ${s.stage}/${stages.length}`), h('b', {}, s.stage_title || ''), info && info.done ? h('span', { class: 'sh-ok' }, 'CLEAR') : null));
+    }
     const el = h('div', { class: 'step ' + (done ? 'done' : 'active') });
     el.append(h('div', { class: 'st-title' }, s.title || (s.type === 'story' ? '' : s.type)));
     if (s.speaker) el.append(h('div', { class: 'speaker' }, s.speaker));
@@ -608,6 +630,13 @@ function lab() {
   const st = S.state, sm = st.sample;
   const wrap = h('div', { class: 'fade-in' });
   wrap.append(h('div', { class: 'kicker' }, 'SAMPLE 030'), h('h1', {}, T(sm.form)));
+  wrap.append(h('details', { class: 'lab-help', open: sm.total === 0 ? 'open' : null },
+    h('summary', {}, '培養艙怎麼用？'),
+    h('ul', {},
+      h('li', {}, '每天觀察一次，當天任何時間都可以（00:00–23:59），不用固定時間。'),
+      h('li', {}, '選一種觀察方式：探索讓它長出分岔、保存讓它長出殼層、調整環境讓它發光、靜置讓它往下扎根。'),
+      h('li', {}, '每天都來，它會越來越規律、對稱；漏掉某天不會死掉，只會長歪、留下一道紅色痕跡。'),
+      h('li', {}, '第 11 天，它的最終形態會出現在第 030 號檔案室。'))));
   const inc = h('div', { class: 'incubator' }); const cv = h('canvas');
   inc.append(cv); wrap.append(inc);
   const params = h('div', { class: 'params' });
