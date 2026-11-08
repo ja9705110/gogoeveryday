@@ -6,12 +6,17 @@ import { renderWidget, renderClue, renderRevealed, h } from './steps.js';
 import { glyphSVG, NAMES } from './glyphs.js';
 import { startAR } from './ar.js';
 import { playPrologue } from './prologue.js';
+import { sound, sfx, ambience } from './audio.js';
+import { mountBackground } from './bg.js';
+
+// 資料庫中舊稱呼的統一
+const T = (str) => String(str ?? '').replace(/觀測者|觀測員|觀察者/g, '觀察員').replace(/觀測/g, '觀察');
 
 const app = document.getElementById('app');
 const S = { boot: null, pid: null, state: null, skew: 0, cleanup: [] };
 const STATUS = { LOCKED: '未開放', AVAILABLE: '可進入', IN_PROGRESS: '進行中', COMPLETED: '已歸檔', MISSED: '已錯過', ALTERNATE: '替代路線' };
 const EVENT_TEXT = {
-  STARTED: '進入區域', COMPLETED: '區域歸檔', MISSED: '區域關閉（錯過）', OBSERVE: '觀測樣本', EVIDENCE: '提交紀錄', CHOICE: '做出選擇',
+  STARTED: '進入區域', COMPLETED: '區域歸檔', MISSED: '區域關閉（錯過）', OBSERVE: '觀察樣本', EVIDENCE: '提交紀錄', CHOICE: '做出選擇',
   SCAN: '掃描投影卡', EXPLORE: '調查', HINT: '請求提示', ITEM_LOST: '失去物品', SPECIAL_EVENT: '特殊事件', REVIEW: '紀錄比對',
   ROUTE: '路線判定', DEFINED: '填寫定義', HUNT: '現實座標', PORTRAIT_SAVED: '影像設定',
 };
@@ -39,11 +44,14 @@ async function typeLines(container, lines, speed = 22) {
 function cleanup() { S.cleanup.forEach((f) => { try { f(); } catch (_) {} }); S.cleanup = []; }
 
 // ── 啟動 ──
+document.addEventListener('click', (e) => { if (e.target.closest('.btn, .keypad button, .sw, .pick, .chip, .tile, .dial button, .choice button, .tabbar a, .zone, .hs')) sfx('tap'); }, true);
+
 async function boot() {
   if (!isConfigured()) {
     app.innerHTML = '<div class="card" style="margin-top:40px"><div class="kicker">PROJECT 030</div><h1>系統尚未設定</h1><p class="dim">管理者需要在部署設定中填入 Supabase 專案資訊（請見 project030/README.md）。</p></div>';
     return;
   }
+  mountBackground();
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   sb.auth.onAuthStateChange((ev) => { if (ev === 'SIGNED_OUT') location.hash = '#/'; });
   const sess = await session();
@@ -62,7 +70,7 @@ async function boot() {
   localStorage.setItem('p030.profile', S.pid);
   window.addEventListener('hashchange', route);
   route().then(() => {
-    const k = 'p030.prologue.v2.' + S.pid;
+    const k = 'p030.prologue.v3.' + S.pid;
     if (!localStorage.getItem(k) && S.state) {
       playPrologue({ startDate: S.state.start_date, onDone: () => { localStorage.setItem(k, '1'); if (!location.hash || location.hash === '#/') route(); } });
     }
@@ -78,7 +86,7 @@ function renderLogin() {
   const go = async (e) => {
     e.preventDefault(); btn.disabled = true; msg.className = 'msg'; msg.textContent = '比對中…';
     try { await birthdayLogin(bd.value); location.reload(); }
-    catch (err) { msg.className = 'msg bad'; msg.textContent = /Invalid login/i.test(err.message || '') ? '身分不符。這份檔案不屬於這個日期。' : errText(err); btn.disabled = false; }
+    catch (err) { msg.className = 'msg bad'; msg.textContent = /Invalid login/i.test(err.message || '') ? '編號不符。這片海不認得這個頻率。' : errText(err); btn.disabled = false; }
   };
   // 管理者／其他帳號
   const acc = h('input', { type: 'text', placeholder: '帳號', autocapitalize: 'none', autocomplete: 'username' });
@@ -91,8 +99,9 @@ function renderLogin() {
   } }, acc, h('div', { style: 'height:8px' }), pw, h('div', { style: 'height:8px' }), h('button', { class: 'btn block', type: 'submit' }, '登入'), msg2);
   app.append(h('div', { style: 'margin-top:12vh' },
     h('div', { class: 'kicker' }, 'PROJECT 030'),
-    h('h1', {}, '觀測者驗證'),
-    h('p', { class: 'dim' }, '這份檔案只屬於一個人。請輸入你的生日（月日）。'),
+    h('h1', {}, '觀察員驗證'),
+    h('p', { class: 'dim' }, '星海檔案館正在等待一位觀察員。請輸入你的觀察員編號。'),
+    h('p', { class: 'faint', style: 'font-size:12px' }, '提示：編號就是你的生日（月日，四位數）。'),
     h('form', { class: 'card glow', onsubmit: go }, bd, h('div', { style: 'height:10px' }), btn, msg),
     h('div', { style: 'text-align:center;margin-top:24px' }, h('button', { class: 'btn ghost sm', onclick: () => other.classList.toggle('hidden') }, '管理者登入')),
     other));
@@ -100,7 +109,7 @@ function renderLogin() {
 function renderNotInvited() {
   app.innerHTML = '';
   app.append(h('div', { class: 'card', style: 'margin-top:20vh' }, h('div', { class: 'kicker' }, 'ACCESS DENIED'),
-    h('h1', {}, '這個帳號不在觀測名單上'), h('p', { class: 'dim' }, S.boot.email),
+    h('h1', {}, '這個帳號不在觀察名單上'), h('p', { class: 'dim' }, S.boot.email),
     h('button', { class: 'btn', onclick: async () => { await signOut(); location.reload(); } }, '換一個帳號')));
 }
 function renderError(e) {
@@ -117,6 +126,14 @@ const ICONS = {
   log: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg>',
   inbox: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg>',
 };
+function soundToggle() {
+  const b = h('button', { class: 'snd', 'aria-label': '聲音開關' });
+  const paint = () => { b.innerHTML = sound.on ? '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/></svg>' : '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>'; b.classList.toggle('on', sound.on); };
+  b.onclick = (e) => { e.stopPropagation(); sound.toggle(); if (sound.on) ambience(S.amb || 'base', true); toast(sound.on ? '情境音效：開啟' : '情境音效：關閉', 1400); paint(); };
+  paint();
+  return b;
+}
+
 function shell(active, content) {
   cleanup();
   app.innerHTML = '';
@@ -130,7 +147,7 @@ function shell(active, content) {
   };
   tick(); const iv = setInterval(tick, 1000); S.cleanup.push(() => clearInterval(iv));
   app.append(h('div', { class: 'topbar' }, h('a', { class: 'brand', href: '#/', style: 'text-decoration:none' }, 'PROJECT 030'),
-    h('div', { class: 'row' }, clock, h('a', { href: '#/settings', 'aria-label': '設定', style: 'color:var(--dim);margin-left:10px', html: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>' }))));
+    h('div', { class: 'row' }, clock, soundToggle(), h('a', { href: '#/settings', 'aria-label': '設定', style: 'color:var(--dim);margin-left:10px', html: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>' }))));
   if (st?.is_test) app.append(h('div', { class: 'banner' }, `測試模式・模擬時間 ${fmtTime(st.server_now, { year: 'numeric' })}・不影響正式玩家`));
   app.append(content);
   const tabs = h('nav', { class: 'tabbar' });
@@ -155,6 +172,7 @@ async function route() {
   try {
     await loadState();
     const [, page, arg] = hash.split('/');
+    if (page !== 'zone') { S.amb = page === 'finale' ? 'archive' : 'base'; ambience(S.amb); }
     if (!page) return home();
     if (page === 'zone') return zone(Number(arg));
     if (page === 'lab') return lab();
@@ -184,13 +202,13 @@ function nextObjective(st) {
   const zoneDone = t.status === 'COMPLETED';
   const list = [
     { ok: zoneDone, text: `完成今天的區域：${zoneLabel(t)}` },
-    { ok: st.observed_today, text: '在「培養艙」觀測樣本一次' },
+    { ok: st.observed_today, text: '在「培養艙」觀察樣本一次' },
   ];
   if (alts.length) list.push({ ok: false, text: `（可選）替代路線：${alts.map((a) => '第 ' + a.day + ' 區').join('、')}` });
   if (st.portrait && !st.portrait.saved) list.push({ ok: false, text: '（可選）打開「影像校正邀請函」' });
   if (t.status === 'AVAILABLE') return { goal: `進入${zoneLabel(t)}`, desc: '今天 23:59:59 前完成。區域關閉後，不會以原本的樣子回來。', href: `#/zone/${d}`, cta: '進入區域', list };
   if (t.status === 'IN_PROGRESS') return { goal: `繼續${zoneLabel(t)}`, desc: '你上次停在這裡。進度已保存在伺服器上。', href: `#/zone/${d}`, cta: '繼續', list };
-  if (!st.observed_today) return { goal: '觀測樣本 030', desc: '今天還沒有觀測。選擇一種方式，它會記住。', href: '#/lab', cta: '前往培養艙', list };
+  if (!st.observed_today) return { goal: '觀察樣本 030', desc: '今天還沒有觀察。選擇一種方式，它會記住。', href: '#/lab', cta: '前往培養艙', list };
   if (alts.length) return { goal: `走替代路線：${zoneLabel(alts[0])}`, desc: '原本的區域已經關閉，但還有另一條路。', href: `#/zone/${alts[0].day}`, cta: '前往', list };
   if (st.portrait && !st.portrait.saved) return { goal: '打開影像校正邀請函', desc: '鏡面系統在等你的回覆。', href: '#/gift', cta: '查看邀請函', list };
   return { goal: '今天的任務已完成', desc: d < 10 ? '下一個區域將在午夜 00:00 開啟。' : '明天，第030號檔案室將會開啟。', href: '#/lab', cta: '看看樣本', list };
@@ -206,11 +224,11 @@ function missionStatus(st) {
   return h('div', { class: 'mission fade-in' },
     h('div', { class: 'row' }, h('span', { class: 'kicker' }, 'MISSION · 檔案 030 修復'), h('span', { class: 'spacer' }),
       h('button', { class: 'btn ghost sm', onclick: showBrief }, '任務簡報')),
-    h('div', { class: 'ms-id' }, '第 030 號觀測員', h('span', { class: 'ms-tag' }, st.is_test ? 'SIM' : 'ACTIVE')),
+    h('div', { class: 'ms-id' }, '第 1118 號觀察員', h('span', { class: 'ms-tag' }, st.is_test ? 'SIM' : 'ACTIVE')),
     h('div', { class: 'ms-grid' },
-      cell('片段回收', `${frags}/10`, lost ? `已沉沒 ${lost}` : null, true),
+      cell('片段打撈', `${frags}/10`, lost ? `已沉沒 ${lost}` : null, true),
       cell('符號', `${syms}/10`),
-      cell('樣本', st.sample.form.replace('樣本', '')),
+      cell('樣本', T(st.sample.form).replace('樣本', '')),
       cell('重新定義', left > 0 ? `T-${left}` : 'NOW', left > 0 ? '天' : null)));
 }
 
@@ -218,24 +236,24 @@ function showBrief() {
   modal(h('div', { class: 'manual' },
     h('div', { class: 'kicker' }, 'MISSION BRIEF'), h('h2', { style: 'color:var(--text);margin-top:4px' }, '任務簡報'),
     h('dl', { class: 'brief' },
-      h('dt', {}, '你是誰'), h('dd', {}, '時序檔案館的第 030 號觀測員。系統比對所有觀測員後，只有你的訊號頻率與檔案 030 完全一致——原因不明。'),
-      h('dt', {}, '發生了什麼'), h('dd', {}, '檔案館保存著每一個人的檔案。編號 030 的檔案正在崩解，碎成十個片段，散落在十天裡。每個片段只會浮現 24 小時。'),
-      h('dt', {}, '你的任務'), h('dd', {}, '每天進入當天浮現的片段區域，解開機關、回收符號；有些線索藏在你的現實世界裡。每天觀測一次檔案的核心——樣本 030。'),
-      h('dt', {}, '如果錯過'), h('dd', {}, '片段會沉回深處，不再以原本的樣子出現。系統會開啟替代路線，檔案會長成另一種樣子——但不會消失。'),
-      h('dt', {}, '最終目標'), h('dd', {}, '第 11 天，所有片段匯集到第 030 號檔案室，檔案 030 將被重新定義。'),
-      h('dt', {}, '協助者'), h('dd', {}, '守夜人——一位比你更早來到這裡的人。他知道的比他說的多。')),
+      h('dt', {}, '你是誰'), h('dd', {}, '星海檔案館的第 1118 號觀察員。系統比對所有觀察員後，只有你的頻率與檔案 030 完全一致——原因不明。'),
+      h('dt', {}, '發生了什麼'), h('dd', {}, '在星空與深海的交界，漂浮著每一個人的檔案。編號 030 的檔案正在下沉，碎成十個片段，沉入不同的深度。每個片段只會浮上海面 24 小時。'),
+      h('dt', {}, '你的任務'), h('dd', {}, '每天進入當天浮上海面的片段，解開機關、回收符號；有些線索藏在你的現實世界裡。每天觀察一次檔案的核心——樣本 030。'),
+      h('dt', {}, '如果錯過'), h('dd', {}, '片段會沉入更深的海，不再以原本的樣子出現。系統會開啟替代路線，檔案會長成另一種樣子——但不會消失。'),
+      h('dt', {}, '最終目標'), h('dd', {}, '第 11 天，所有片段將浮上同一片海面——第 030 號檔案室，檔案 030 將被重新定義。'),
+      h('dt', {}, '協助者'), h('dd', {}, '守夜人——一位比你更早來到這片海的人。他知道的比他說的多。')),
     h('button', { class: 'btn block', onclick: () => { document.querySelector('.modal')?.remove(); playPrologue({ startDate: S.state.start_date }); } }, '▶ 重播前導影片')));
 }
 
 function showManual() {
   modal(h('div', { class: 'manual' },
-    h('div', { class: 'kicker' }, 'OBSERVER MANUAL'), h('h2', { style: 'color:var(--text);margin-top:4px' }, '觀測手冊'),
+    h('div', { class: 'kicker' }, 'OBSERVER MANUAL'), h('h2', { style: 'color:var(--text);margin-top:4px' }, '觀察手冊'),
     h('ol', {},
       h('li', {}, '每天 00:00 會開啟一個新的「區域」，當天 23:59:59 關閉。首頁上方的「下一步」會告訴你現在該做什麼。'),
       h('li', {}, '進入區域後，閱讀畫面上的訊息與線索，操作機關（開關、密碼鎖、旋鈕……）。卡住時可以按「請求提示」。'),
       h('li', {}, '場景畫面裡偶爾閃一下的光點可以點，可能藏著東西。'),
       h('li', {}, '有些區域會要你拍照、錄音、寫一句話，或用相機掃描藏在你現實世界裡的卡片。'),
-      h('li', {}, '每天到「培養艙」觀測樣本 030 一次。觀測方式由你決定，它會依你的選擇長成不同的樣子。'),
+      h('li', {}, '每天到「培養艙」觀察樣本 030 一次。觀察方式由你決定，它會依你的選擇長成不同的樣子。'),
       h('li', {}, '取得的符號放在「物品」，每個符號都有一個頻率數字，之後會再用到。'),
       h('li', {}, '錯過的區域會永久改變，但會開啟另一條替代路線。故事不會因此結束。'),
       h('li', {}, '到右上角「設定」開啟通知，系統會在新區域開啟、即將關閉時提醒你。')),
@@ -249,11 +267,11 @@ function home() {
   const d = st.game_day;
   const before = d < 1;
   wrap.append(h('div', { class: 'kicker' }, before ? 'STANDBY' : d <= 10 ? `DAY ${String(d).padStart(2, '0')} / 10` : 'FILE 030'),
-    h('h1', {}, before ? '等待訊號' : d <= 10 ? '觀測進行中' : '第030號檔案室'));
+    h('h1', {}, before ? '等待訊號' : d <= 10 ? '星海觀察中' : '第030號檔案室'));
   if (d >= 1) wrap.append(missionStatus(st));
   const ob = nextObjective(st);
   wrap.append(h('div', { class: 'objective fade-in' },
-    h('div', { class: 'row' }, h('span', { class: 'kicker' }, '下一步'), h('span', { class: 'spacer' }), h('button', { class: 'btn ghost sm', onclick: showManual }, '觀測手冊')),
+    h('div', { class: 'row' }, h('span', { class: 'kicker' }, '下一步'), h('span', { class: 'spacer' }), h('button', { class: 'btn ghost sm', onclick: showManual }, '觀察手冊')),
     h('div', { class: 'goal' }, ob.goal), h('div', { class: 'dim', style: 'font-size:14px' }, ob.desc),
     ob.list.length ? h('ul', { class: 'checklist' }, ...ob.list.map((x) => h('li', { class: x.ok ? 'ok' : '' }, x.text))) : null,
     h('a', { class: 'btn primary block', style: 'margin-top:10px', href: ob.href }, ob.cta)));
@@ -280,6 +298,7 @@ function home() {
 async function zone(day) {
   let L;
   try { L = await rpc('open_level', { p: S.pid, d: day }); } catch (e) { toast(errText(e)); location.hash = '#/'; return; }
+  S.amb = L.scene?.theme || 'base'; ambience(S.amb);
   const wrap = h('div', { class: 'fade-in' });
   const isMissed = L.status === 'MISSED';
   wrap.append(h('div', { class: 'kicker' }, day <= 10 ? `檔案 030 · 片段 ${String(day).padStart(2, '0')}/10 · ${L.subtitle || ''}` : `${L.code} · ${L.subtitle || ''}`),
@@ -300,6 +319,7 @@ async function zone(day) {
   wrap.append(renderScene(L.scene, L.found, async (spot, btn) => {
     try {
       const r = await rpc('explore', { p: S.pid, d: day, spot: spot.id });
+      sfx('find');
       btn.classList.add('found');
       modal(h('div', {}, h('div', { class: 'kicker' }, spot.label || '調查'), h('p', {}, r.text || '這裡什麼也沒有。'),
         ...(r.gained || []).map((g) => h('p', { class: 'mono', style: 'color:var(--accent2)' }, '取得：' + (g.name || g.key)))));
@@ -316,8 +336,9 @@ async function zone(day) {
   wrap.append(stepsBox);
   shell('home', wrap);
   const seenKey = `p030.intro.${S.pid}.${day}.${L.route}`;
-  if (!localStorage.getItem(seenKey)) { await typeLines(intro, L.intro); localStorage.setItem(seenKey, '1'); }
-  else (L.intro || []).forEach((t) => intro.append(h('p', {}, t)));
+  const introLines = (L.intro || []).map(T);
+  if (!localStorage.getItem(seenKey)) { await typeLines(intro, introLines); localStorage.setItem(seenKey, '1'); }
+  else introLines.forEach((t) => intro.append(h('p', {}, t)));
   drawSteps(L, stepsBox);
 }
 
@@ -330,7 +351,7 @@ function drawSteps(L, box) {
     const el = h('div', { class: 'step ' + (done ? 'done' : 'active') });
     el.append(h('div', { class: 'st-title' }, s.title || (s.type === 'story' ? '' : s.type)));
     if (s.speaker) el.append(h('div', { class: 'speaker' }, s.speaker));
-    if (s.text) el.append(h('div', { class: 'lines' }, ...[].concat(s.text).map((t) => h('p', {}, t))));
+    if (s.text) el.append(h('div', { class: 'lines' }, ...[].concat(s.text).map((t) => h('p', {}, T(t)))));
     if (s.injected) el.append(injected(s.injected));
     if (s.options && done && s.type === 'choice') el.append(h('div', { class: 'dim', style: 'font-size:13px' }, '已選擇。'));
     if (!done) {
@@ -387,11 +408,13 @@ function makeCtx(L, s, el, msg, box) {
       try {
         const r = await rpc('submit_step', { p: S.pid, d: L.day, step_id: s.id, answer });
         if (r.correct) {
-          msg.className = 'msg good'; msg.textContent = r.success_text || '……';
+          sfx(r.completed ? 'complete' : 'ok');
+          msg.className = 'msg good'; msg.textContent = T(r.success_text || '……');
           await afterSuccess(L, r);
           return r;
         }
-        msg.className = r.started ? 'msg' : 'msg bad'; msg.textContent = r.message || '沒有反應。';
+        if (!r.started) sfx('bad');
+        msg.className = r.started ? 'msg' : 'msg bad'; msg.textContent = T(r.message || '沒有反應。');
         if (!r.started && !opts.silentFail) { el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
         if (r.attempts) s.attempts = r.attempts;
         return r;
@@ -419,7 +442,7 @@ async function afterSuccess(L, r) {
     const gained = (c.gained || []).filter((g) => g.kind !== 'lost');
     modal(h('div', {},
       h('div', { class: 'kicker' }, c.outcome === 'ALTERNATE' ? 'ARCHIVED · ALTERNATE' : 'ARCHIVED'),
-      h('div', { class: 'lines' }, ...(c.epilogue || []).map((t) => h('p', {}, t))),
+      h('div', { class: 'lines' }, ...(c.epilogue || []).map((t) => h('p', {}, T(t)))),
       ...gained.map((g) => h('div', { class: 'row card' },
         g.kind === 'symbol' ? h('div', { style: 'width:48px;color:' + (g.echo ? '#7d8e9c' : '#f2b84b'), html: glyphSVG(g.symbol) }) : null,
         h('div', {}, h('div', {}, g.kind === 'gift' ? '影像校正邀請函' : (g.echo ? '殘響・' : '') + (g.name || g.key)),
@@ -463,6 +486,7 @@ function evidenceWidget(L, s, msg) {
         await upload('evidence', path, blob, blob.type || (kind === 'photo' ? 'image/jpeg' : 'audio/webm'));
       }
       const r = await rpc('submit_evidence', { p: S.pid, d: L.day, step_id: s.id, kind, path, content: text || null });
+      sfx(r.completed ? 'complete' : 'ok');
       msg.className = 'msg good'; msg.textContent = '已提交，等待比對。';
       await afterSuccess(L, r);
     } catch (e) { msg.className = 'msg bad'; msg.textContent = errText(e); btn && (btn.disabled = false); }
@@ -532,7 +556,7 @@ function audioRecorder(onSubmit) {
 function lab() {
   const st = S.state, sm = st.sample;
   const wrap = h('div', { class: 'fade-in' });
-  wrap.append(h('div', { class: 'kicker' }, 'SAMPLE 030'), h('h1', {}, sm.form));
+  wrap.append(h('div', { class: 'kicker' }, 'SAMPLE 030'), h('h1', {}, T(sm.form)));
   const inc = h('div', { class: 'incubator' }); const cv = h('canvas');
   inc.append(cv); wrap.append(inc);
   const params = h('div', { class: 'params' });
@@ -541,29 +565,29 @@ function lab() {
   }
   wrap.append(params);
   wrap.append(h('div', { class: 'grid2' },
-    h('div', { class: 'card', style: 'margin:0' }, h('div', { class: 'dim', style: 'font-size:12px' }, '累積觀測'), h('div', { class: 'mono', style: 'font-size:22px' }, `${sm.total} 天`)),
-    h('div', { class: 'card', style: 'margin:0' }, h('div', { class: 'dim', style: 'font-size:12px' }, '連續觀測／中斷'), h('div', { class: 'mono', style: 'font-size:22px' }, `${sm.streak} ／ ${sm.breaks}`))));
+    h('div', { class: 'card', style: 'margin:0' }, h('div', { class: 'dim', style: 'font-size:12px' }, '累積觀察'), h('div', { class: 'mono', style: 'font-size:22px' }, `${sm.total} 天`)),
+    h('div', { class: 'card', style: 'margin:0' }, h('div', { class: 'dim', style: 'font-size:12px' }, '連續觀察／中斷'), h('div', { class: 'mono', style: 'font-size:22px' }, `${sm.streak} ／ ${sm.breaks}`))));
   const hist = h('div', { class: 'history' });
   for (let d = 1; d <= Math.min(Math.max(st.game_day, 1), 11); d++) {
     const o = sm.history.find((x) => x.day === d);
-    hist.append(h('span', { class: o ? '' : 'gap', title: o ? ACTION_LABEL[o.action] : '未觀測' }, o ? ACTION_LABEL[o.action][0] : '·'));
+    hist.append(h('span', { class: o ? '' : 'gap', title: o ? ACTION_LABEL[o.action] : '未觀察' }, o ? ACTION_LABEL[o.action][0] : '·'));
   }
-  wrap.append(h('h2', {}, '觀測歷程'), hist);
+  wrap.append(h('h2', {}, '觀察歷程'), hist);
   if (st.game_day >= 1 && st.game_day <= 11) {
-    if (st.observed_today) wrap.append(h('div', { class: 'card' }, h('div', { class: 'dim' }, '今天的觀測已記錄。樣本需要時間反應。')));
+    if (st.observed_today) wrap.append(h('div', { class: 'card' }, h('div', { class: 'dim' }, '今天的觀察已記錄。樣本需要時間反應。')));
     else {
       const acts = h('div', { class: 'obs-actions' });
       for (const a of ['explore', 'preserve', 'adjust', 'rest']) {
         acts.append(h('button', { class: 'btn', onclick: async (e) => {
           acts.querySelectorAll('button').forEach((b) => (b.disabled = true));
-          try { await rpc('observe', { p: S.pid, action: a }); toast('觀測已記錄。'); route(); }
+          try { await rpc('observe', { p: S.pid, action: a }); sfx('ping'); toast('觀察已記錄。'); route(); }
           catch (err) { toast(errText(err)); acts.querySelectorAll('button').forEach((b) => (b.disabled = false)); }
         } }, h('div', {}, h('b', {}, ACTION_LABEL[a]), h('small', {}, ACTION_DESC[a]))));
       }
-      wrap.append(h('h2', {}, '今天的觀測方式'), acts);
+      wrap.append(h('h2', {}, '今天的觀察方式'), acts);
     }
   }
-  if (sm.dormant > 0) wrap.append(h('p', { class: 'dim', style: 'font-size:13px' }, `樣本已有 ${sm.dormant} 天沒有被觀測。它沒有停止生長，只是長往別的方向。`));
+  if (sm.dormant > 0) wrap.append(h('p', { class: 'dim', style: 'font-size:13px' }, `樣本已有 ${sm.dormant} 天沒有被觀察。它沒有停止生長，只是長往別的方向。`));
   shell('lab', wrap);
   requestAnimationFrame(() => S.cleanup.push(mountSample(cv, sm)));
 }
@@ -598,7 +622,7 @@ function items() {
 function log() {
   const st = S.state;
   const wrap = h('div', { class: 'fade-in' });
-  wrap.append(h('div', { class: 'kicker' }, 'LOG'), h('h1', {}, '觀測紀錄'));
+  wrap.append(h('div', { class: 'kicker' }, 'LOG'), h('h1', {}, '觀察紀錄'));
   wrap.append(h('div', { class: 'grid2' },
     stat('完成（準時）', st.stats.ontime), stat('完成（全部）', st.stats.completed),
     stat('錯過的區域', st.stats.missed), stat('發現的隱藏物', st.stats.exploration)));
@@ -794,7 +818,7 @@ async function finale() {
   }
   // 2. 樣本最終形態
   const cv = h('canvas');
-  body.append(h('h2', {}, '樣本 030・最終形態'), h('div', { class: 'incubator' }, cv), h('p', { class: 'mono', style: 'text-align:center;color:var(--accent)' }, A.sample.form));
+  body.append(h('h2', {}, '樣本 030・最終形態'), h('div', { class: 'incubator' }, cv), h('p', { class: 'mono', style: 'text-align:center;color:var(--accent)' }, T(A.sample.form)));
   requestAnimationFrame(() => S.cleanup.push(mountSample(cv, A.sample)));
   // 3. 反轉
   const mono = h('div');
@@ -805,7 +829,7 @@ async function finale() {
   body.append(after);
   go.onclick = async () => {
     go.remove();
-    for (const line of A.monologue) {
+    for (const line of A.monologue.map(T)) {
       const p = h('p', { class: 'mono-line typing' }); mono.append(p);
       for (const ch of line) { p.textContent += ch; await new Promise((r) => setTimeout(r, 38)); }
       p.classList.remove('typing'); await new Promise((r) => setTimeout(r, 650));

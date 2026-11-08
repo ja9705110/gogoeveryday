@@ -195,7 +195,7 @@ W.choice = (s, ctx) => {
 
 W.observe = (s, ctx) => h('div', { class: 'row' },
   h('a', { class: 'btn', href: '#/lab' }, '前往培養艙'),
-  h('button', { class: 'btn primary spacer', onclick: (e) => ctx.send({}, e.target) }, '我已完成觀測'));
+  h('button', { class: 'btn primary spacer', onclick: (e) => ctx.send({}, e.target) }, '我已完成觀察'));
 
 W.find = (s, ctx) => {
   const box = h('div', { class: 'find' });

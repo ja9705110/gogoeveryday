@@ -1,4 +1,4 @@
-// 030 號樣本：完全由伺服器回傳的觀測資料（參數、歷程、中斷）繪製，不是固定圖片
+// 030 號樣本：完全由伺服器回傳的觀察資料（參數、歷程、中斷）繪製，不是固定圖片
 const ACTION_HUE = { explore: 172, preserve: 38, adjust: 268, rest: 128 };
 export const ACTION_LABEL = { explore: '探索', preserve: '保存', adjust: '調整環境', rest: '靜置' };
 export const ACTION_DESC = {
@@ -24,7 +24,7 @@ export function mountSample(canvas, state) {
   const total = state?.total || 0;
   const cx = size / 2, cy = size * 0.48;
 
-  // 色相：所有觀測行動的加權平均（每一次選擇都留下顏色）
+  // 色相：所有觀察行動的加權平均（每一次選擇都留下顏色）
   let hx = 0, hy = 0;
   hist.forEach((h, i) => { const a = (ACTION_HUE[h.action] / 180) * Math.PI; const w = 1 + i * 0.25; hx += Math.cos(a) * w; hy += Math.sin(a) * w; });
   const hue = hist.length ? ((Math.atan2(hy, hx) / Math.PI) * 180 + 360) % 360 : 190;
@@ -90,7 +90,7 @@ export function mountSample(canvas, state) {
       ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr);
       ctx.lineTo(cx + Math.cos(a) * (rr + 14 + s.gap * 6), cy + Math.sin(a) * (rr + 14 + s.gap * 6)); ctx.stroke();
     });
-    // 核心：每一次觀測一層
+    // 核心：每一次觀察一層
     for (let i = hist.length; i >= 0; i--) {
       const rr = Math.max(3, (base * (i + 1)) / (hist.length + 1)) + beat * (steady ? 1.5 : 2.5);
       const h = hist[i - 1] ? ACTION_HUE[hist[i - 1].action] : hue;

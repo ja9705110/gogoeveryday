@@ -1,6 +1,7 @@
 // PROJECT 030 · 管理後台（所有權限檢查在伺服器端：RLS + assert_admin）
 import { sb, rpc, errText, session, passwordLogin, accountToEmail, signOut, signedUrl, removeFile, isConfigured } from './api.js';
 import { h } from './steps.js';
+import { mountBackground } from './bg.js';
 
 const app = document.getElementById('app');
 const A = { tab: 'overview', ov: null };
@@ -11,6 +12,7 @@ const fromLocalInput = (v) => v ? new Date(v + ':00+08:00').toISOString() : null
 const STATUS_SHORT = { LOCKED: '·', AVAILABLE: '○', IN_PROGRESS: '◐', COMPLETED: '●', MISSED: '×', ALTERNATE: '◇' };
 
 async function boot() {
+  mountBackground();
   if (!isConfigured()) { app.innerHTML = '<div class="card">尚未設定 Supabase（見 README）。</div>'; return; }
   if (!(await session())) return login();
   let b;
