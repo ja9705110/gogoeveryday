@@ -44,7 +44,7 @@ function login() {
       h('label', { class: 'field' }, h('span', {}, '帳號'), acc), h('label', { class: 'field' }, h('span', {}, '密碼'), pw), btn, msg)));
 }
 
-const TABS = [['overview', '總覽'], ['settings', '壽星設定'], ['levels', '關卡內容'], ['review', '佐證審核'], ['events', '特殊事件'], ['photos', '關卡照片'], ['finale', '終章尋寶'], ['test', '測試模式'], ['print', 'AR 卡片'], ['backup', '備份']];
+const TABS = [['overview', '總覽'], ['settings', '壽星設定'], ['levels', '關卡內容'], ['review', '佐證審核'], ['events', '特殊事件'], ['photos', '每日照片'], ['finale', '終章尋寶'], ['test', '測試模式'], ['print', 'AR 卡片'], ['backup', '備份']];
 async function render() {
   app.innerHTML = '';
   app.append(h('div', { class: 'topbar' }, h('span', { class: 'brand' }, 'PROJECT 030 · CONTROL'),
@@ -264,40 +264,37 @@ async function shrinkToDataUrl(file, max = 1000) {
   return c.toDataURL('image/jpeg', 0.85);
 }
 async function photos(body) {
-  const [{ data: rows, error }, { data: lv }] = await Promise.all([
-    sb.from('reward_photos').select('*'), sb.from('levels').select('day,title,config').order('day')]);
+  const [{ data: rows, error }, { data: lv }] = await Promise.all([sb.from('reward_photos').select('*'), sb.from('levels').select('day,title').order('day')]);
   if (error) throw error;
   body.innerHTML = '';
-  body.append(h('p', { class: 'dim' }, '壽星每過一關，就會看到這裡設定的照片（沒上傳的那關不會顯示）。照片只存在資料庫，過關前玩家端拿不到。'));
+  body.append(h('p', { class: 'dim' }, '每天一張。壽星完成當天全部三關、回收碎片後，這張照片會在回顧儀式中「從碎片裡浮現」。照片只存在資料庫，當天沒完成前玩家端拿不到。'));
+  const grid = h('div', { class: 'photo-row' });
   for (const l of (lv || []).filter((x) => x.day <= 10)) {
-    const stages = [...new Map((l.config.steps || []).filter((x) => x.stage).map((x) => [x.stage, x.stage_title])).entries()];
-    const row = h('div', { class: 'photo-row' });
-    for (const [n, title] of stages) {
-      const cur = (rows || []).find((r) => r.day === l.day && r.stage === n);
-      const prev = h('div', { class: 'ph-prev' }, cur ? h('img', { src: cur.photo }) : h('span', { class: 'faint' }, '尚未上傳'));
-      const cap = h('input', { type: 'text', placeholder: '一句說明（可空白）', value: cur?.caption || '' });
-      const fin = h('input', { type: 'file', accept: 'image/*', class: 'hidden' });
-      const m = h('div', { class: 'msg', style: 'font-size:12px' });
-      const save = async (photo) => {
-        const { error: e } = await sb.from('reward_photos').upsert({ day: l.day, stage: n, photo, caption: cap.value, updated_at: new Date().toISOString() });
-        if (e) throw e;
-      };
-      fin.onchange = async () => {
-        const f = fin.files[0]; if (!f) return;
-        m.className = 'msg'; m.textContent = '上傳中…';
-        try { const url = await shrinkToDataUrl(f); await save(url); prev.innerHTML = ''; prev.append(h('img', { src: url })); m.className = 'msg good'; m.textContent = '已儲存'; }
-        catch (e) { m.className = 'msg bad'; m.textContent = errText(e); }
-      };
-      row.append(h('div', { class: 'ph-cell' }, h('div', { class: 'mono', style: 'font-size:11px;color:var(--accent)' }, `STAGE ${n}`), h('b', {}, title || ''),
-        prev, fin, cap,
-        h('div', { class: 'row wrap' },
-          h('button', { class: 'btn sm primary', onclick: () => fin.click() }, cur ? '更換' : '上傳'),
-          h('button', { class: 'btn sm', onclick: async () => { const r0 = (await sb.from('reward_photos').select('photo').eq('day', l.day).eq('stage', n)).data?.[0]; if (!r0) { m.textContent = '請先上傳照片'; return; } try { await save(r0.photo); m.className = 'msg good'; m.textContent = '說明已儲存'; } catch (e) { m.className = 'msg bad'; m.textContent = errText(e); } } }, '存說明'),
-          h('button', { class: 'btn sm ghost', onclick: async () => { if (!confirm('移除這張照片？')) return; await sb.from('reward_photos').delete().eq('day', l.day).eq('stage', n); render(); } }, '移除')),
-        m));
-    }
-    body.append(h('div', { class: 'card' }, h('h2', {}, `第 ${l.day} 天・${l.title}`), row));
+    const cur = (rows || []).filter((r) => r.day === l.day).sort((a, b) => a.stage - b.stage)[0];
+    const prev = h('div', { class: 'ph-prev' }, cur ? h('img', { src: cur.photo }) : h('span', { class: 'faint' }, '尚未上傳'));
+    const cap = h('input', { type: 'text', placeholder: '一句說明（可空白）', value: cur?.caption || '' });
+    const fin = h('input', { type: 'file', accept: 'image/*', class: 'hidden' });
+    const m = h('div', { class: 'msg', style: 'font-size:12px' });
+    const save = async (photo) => {
+      await sb.from('reward_photos').delete().eq('day', l.day).neq('stage', 1);
+      const { error: e } = await sb.from('reward_photos').upsert({ day: l.day, stage: 1, photo, caption: cap.value, updated_at: new Date().toISOString() });
+      if (e) throw e;
+    };
+    fin.onchange = async () => {
+      const f = fin.files[0]; if (!f) return;
+      m.className = 'msg'; m.textContent = '上傳中…';
+      try { const url = await shrinkToDataUrl(f); await save(url); prev.innerHTML = ''; prev.append(h('img', { src: url })); m.className = 'msg good'; m.textContent = '已儲存'; }
+      catch (e) { m.className = 'msg bad'; m.textContent = errText(e); }
+    };
+    grid.append(h('div', { class: 'ph-cell' }, h('div', { class: 'mono', style: 'font-size:11px;color:var(--accent2)' }, `FRAGMENT ${String(l.day).padStart(2, '0')}`), h('b', {}, `第 ${l.day} 天・${l.title}`),
+      prev, fin, cap,
+      h('div', { class: 'row wrap' },
+        h('button', { class: 'btn sm primary', onclick: () => fin.click() }, cur ? '更換' : '上傳'),
+        h('button', { class: 'btn sm', onclick: async () => { if (!cur && !prev.querySelector('img')) { m.textContent = '請先上傳照片'; return; } try { await save(prev.querySelector('img').src); m.className = 'msg good'; m.textContent = '說明已儲存'; } catch (e) { m.className = 'msg bad'; m.textContent = errText(e); } } }, '存說明'),
+        h('button', { class: 'btn sm ghost', onclick: async () => { if (!confirm('移除這張照片？')) return; await sb.from('reward_photos').delete().eq('day', l.day); render(); } }, '移除')),
+      m));
   }
+  body.append(grid);
 }
 
 // ── 終章尋寶 ──

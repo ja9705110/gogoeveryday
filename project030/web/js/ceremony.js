@@ -88,7 +88,7 @@ export function playCeremony({ L, state, photos = [], onClose }) {
   function photoCard(ph, i) {
     const c = div('cer-mem photo');
     c.style.setProperty('--tilt', `${(i % 2 ? -1 : 1) * (1 + (i % 3))}deg`);
-    c.append(div('cer-mem-t', `STAGE ${ph.stage}`));
+    c.append(div('cer-mem-t', `FRAGMENT ${String(day).padStart(2, '0')}`));
     const img = document.createElement('img'); img.src = ph.photo; c.append(img);
     if (ph.caption) c.append(div('cer-quote', ph.caption));
     return c;
@@ -103,15 +103,15 @@ export function playCeremony({ L, state, photos = [], onClose }) {
     add(div('cer-title', `${L.title}${L.route_title ? `｜${L.route_title}` : ''}`));
     add(div('cer-meta', [alt ? '以替代路線歸檔' : '準時歸檔', fmtT(L.completed_at), mins ? `用時 ${mins} 分鐘` : '', hints ? `提示 ${hints} 次` : '無提示'].filter(Boolean).join('　·　')));
     await wait(1600); if (!alive || all) return;
+    if (photos.length) {
+      add(div('cer-h', '碎片裡封存的影像'));
+      const pw = add(div('cer-mems cer-sealed'));
+      for (const [i, ph] of photos.entries()) { if (!alive || all) return; pw.append(photoCard(ph, i)); sfx('complete'); await wait(2600); }
+    }
     if (memories.length) {
       add(div('cer-h', '今日的紀錄'));
       const wrap = add(div('cer-mems'));
       for (const [i, m] of memories.entries()) { if (!alive || all) return; wrap.append(memoryCard(m, i)); sfx('type'); await wait(1100); }
-    }
-    if (photos.length) {
-      add(div('cer-h', '解鎖的影像'));
-      const pw = add(div('cer-mems'));
-      for (const [i, ph] of photos.entries()) { if (!alive || all) return; pw.append(photoCard(ph, i)); sfx('find'); await wait(1400); }
     }
     if (obs) { add(div('cer-line', `樣本今日的觀察：${ACTION[obs.action] || obs.action}`)); await wait(900); }
     if (!alive || all) return;
@@ -139,8 +139,9 @@ export function playCeremony({ L, state, photos = [], onClose }) {
   function showAll() { // 略過動畫：一次顯示全部
     all = true; body.innerHTML = '';
     body.append(div('cer-k', `FRAGMENT ${String(day).padStart(2, '0')} · RECOVERED`), div('cer-title', L.title), div('cer-meta', [alt ? '以替代路線歸檔' : '準時歸檔', fmtT(L.completed_at)].join('　·　')));
+    if (photos.length) { body.append(div('cer-h', '碎片裡封存的影像')); const w = div('cer-mems cer-sealed'); photos.forEach((ph, i) => w.append(photoCard(ph, i))); body.append(w); }
     if (memories.length) { body.append(div('cer-h', '今日的紀錄')); const w = div('cer-mems'); memories.forEach((m, i) => w.append(memoryCard(m, i))); body.append(w); }
-    if (photos.length) { body.append(div('cer-h', '解鎖的影像')); const w = div('cer-mems'); photos.forEach((ph, i) => w.append(photoCard(ph, i))); body.append(w); }
+
     symbols.forEach((s) => body.append(div('cer-sym', `<div class="g" style="color:${s.data.echo ? '#b48cff' : '#ffb547'}">${glyphSVG(s.data.symbol)}</div><div><div class="n">取得符號：${s.name}</div><div class="d">頻率 ${s.digit}</div></div>`)));
     if (layer) { const pc = div('cer-planet'); const pcv = document.createElement('canvas'); pcv.style.cssText = 'width:200px;height:200px;display:block;margin:0 auto'; pc.append(pcv, div('cer-pl-t', `星球第 ${layer.day} 層：${layer.name}`)); body.append(pc); stopPlanet && stopPlanet(); stopPlanet = mountPlanet(pcv, layerStates(state.levels), { size: 200 }); }
     ((EPILOGUE[day] || {})[alt ? 'alt' : 'main'] || []).forEach((l) => body.append(div('cer-epi', l)));

@@ -310,7 +310,7 @@ select public.submit_step(:'ph', 1, 's_outfit', '{"option":"formal"}') \g /dev/n
 select public.submit_step(:'ph', 1, 's_mood', '{"option":"calm"}') \g /dev/null
 select public.submit_step(:'ph', 1, 's_scene', '{"option":"studio"}') \g /dev/null
 select public.submit_step(:'ph', 1, 's_saved', '{}') \g /dev/null
-select pg_temp.ok(public.stage_photos(:'ph', 1) = '[{"stage":1,"photo":"data:image/jpeg;base64,AAA","caption":"第一關"}]'::jsonb, 'stage 1 photo only after stage 1 cleared');
+select pg_temp.ok(jsonb_array_length(public.stage_photos(:'ph', 1)) = 0, 'no photo until the whole day is completed');
 select public.admin_delete_test_profile(:'ph') \g /dev/null
 reset role; set search_path = public, extensions;
 select pg_temp.ok((select count(*) from public.reward_photos) = 3, 'admin can store photos');
