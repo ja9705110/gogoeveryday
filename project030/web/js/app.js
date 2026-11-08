@@ -10,6 +10,7 @@ import { sound, sfx, ambience, needsUnlock } from './audio.js';
 import { mountBackground } from './bg.js';
 import { mountPlanet, morphToPhoto, layerStates, LAYERS } from './planet.js';
 import { playCeremony, ceremonyKey, stageClear } from './ceremony.js';
+import { PORTRAIT_MAP, portraitFromChoices } from './portrait-map.js';
 
 // 資料庫中舊稱呼的統一
 const T = (str) => String(str ?? '').replace(/觀測者|觀測員|觀察者/g, '觀察員').replace(/觀測/g, '觀察');
@@ -398,7 +399,7 @@ function drawSteps(L, box) {
   let activeShown = false, lastStage = null;
   for (const s of L.steps) {
     const done = s.done;
-    if (!done && activeShown && !s.optional) break;
+    if (!done && activeShown) { if (s.optional) continue; break; }
     if (s.stage && s.stage !== lastStage) {
       lastStage = s.stage;
       const info = stages.find((x) => x.n === s.stage);
@@ -804,13 +805,7 @@ async function enablePush() {
 }
 
 // ── 禮物一：影像校正邀請函 ──
-const PORTRAIT_OPTIONS = {
-  style: ['自然紀實', '雜誌時尚', '黑白經典', '電影感', '極簡商務', '藝術概念'],
-  outfit: ['正式西裝／套裝', '俐落襯衫', '日常休閒', '個人風格穿搭', '還沒想好'],
-  mood: ['自信', '溫柔', '安靜', '玩心', '堅定', '神祕'],
-  scene: ['攝影棚純色背景', '城市街景', '自然戶外', '室內生活感', '工作場景'],
-};
-const PORTRAIT_LABEL = { style: '攝影風格', outfit: '服裝方向', mood: '拍攝氛圍', scene: '拍攝場景' };
+const PORTRAIT_LABEL = Object.fromEntries(Object.entries(PORTRAIT_MAP).map(([k, v]) => [k, v.label]));
 async function gift() {
   const g = await rpc('get_portrait', { p: S.pid });
   const wrap = h('div', { class: 'fade-in' });
@@ -818,20 +813,21 @@ async function gift() {
   if (!g) { wrap.append(h('p', { class: 'dim' }, '邀請函尚未送達。')); return shell('home', wrap); }
   wrap.append(h('p', { class: 'dim' }, '鏡面系統需要一份真正的影像。由你決定，影像中的你應該是什麼樣子。'),
     h('p', { class: 'mono', style: 'font-size:12px;color:var(--accent2)' }, `邀請編號 ${g.invitation_no}・送達途徑 ${{ 'complete:4': '鏡廳', 'alternate:4': '碎鏡', admin: '守夜人轉交' }[g.unlocked_via] || g.unlocked_via}`));
+  const day1 = portraitFromChoices(S.state.stats.choices);
   const choice = { ...(g.choice || {}) };
-  for (const [k, opts] of Object.entries(PORTRAIT_OPTIONS)) {
+  for (const k of Object.keys(PORTRAIT_MAP)) if (!choice[k] && day1[k]) choice[k] = day1[k].id;
+  if (Object.keys(day1).length) wrap.append(h('div', { class: 'card glow' }, h('div', { class: 'kicker' }, 'IDENTITY · 第 1 天的設定'),
+    h('p', {}, '還記得第一天的「識別影像校準」嗎？那些設定，就是這次影像的方向。'),
+    h('div', { class: 'dim', style: 'font-size:14px' }, Object.values(day1).map((x) => `${x.label}：${x.real}`).join('　/　'))));
+  for (const [k, def] of Object.entries(PORTRAIT_MAP)) {
+    const opts = Object.keys(def.options);
     const chips = h('div', { class: 'chips' });
-    const multi = k === 'mood';
     opts.forEach((o) => {
-      const on = multi ? (choice[k] || []).includes(o) : choice[k] === o;
-      const c = h('button', { class: 'chip' + (on ? ' on' : '') }, o);
-      c.onclick = () => {
-        if (multi) { const arr = new Set(choice[k] || []); arr.has(o) ? arr.delete(o) : arr.add(o); choice[k] = [...arr]; c.classList.toggle('on'); }
-        else { choice[k] = o; chips.querySelectorAll('.chip').forEach((x) => x.classList.remove('on')); c.classList.add('on'); }
-      };
+      const c = h('button', { class: 'chip' + (choice[k] === o ? ' on' : '') }, def.options[o].real);
+      c.onclick = () => { choice[k] = o; chips.querySelectorAll('.chip').forEach((x) => x.classList.remove('on')); c.classList.add('on'); };
       chips.append(c);
     });
-    wrap.append(h('h2', {}, PORTRAIT_LABEL[k] + (multi ? '（可複選）' : '')), chips);
+    wrap.append(h('h2', {}, def.label), chips);
   }
   const notes = h('textarea', { placeholder: '任何想法：想呈現的感覺、不想要的元素、想帶的物品……' }, choice.notes || '');
   wrap.append(h('h2', {}, '補充'), notes);
@@ -872,7 +868,7 @@ function showInvitation(g, choice) {
   x.fillText('一場專業形象照拍攝，依照你的選擇進行。', 110, 350);
   let y = 470;
   for (const [k, label] of Object.entries(PORTRAIT_LABEL)) {
-    const v = Array.isArray(choice[k]) ? choice[k].join('、') : choice[k] || '—';
+    const v = (PORTRAIT_MAP[k] && PORTRAIT_MAP[k].options[choice[k]] ? PORTRAIT_MAP[k].options[choice[k]].real : choice[k]) || '—';
     x.fillStyle = '#6fe3d2'; x.font = '500 30px "IBM Plex Mono", monospace'; x.fillText(label, 110, y);
     x.fillStyle = '#e8eef2'; x.font = '500 48px "Noto Sans TC", sans-serif'; x.fillText(v.slice(0, 18), 110, y + 66);
     y += 170;

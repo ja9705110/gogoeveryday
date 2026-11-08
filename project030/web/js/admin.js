@@ -2,6 +2,7 @@
 import { sb, rpc, errText, session, passwordLogin, accountToEmail, signOut, signedUrl, removeFile, isConfigured } from './api.js';
 import { h } from './steps.js';
 import { mountBackground } from './bg.js';
+import { portraitFromChoices } from './portrait-map.js';
 
 const app = document.getElementById('app');
 const A = { tab: 'overview', ov: null };
@@ -74,6 +75,13 @@ async function overview(body) {
       h('td', { class: 'mono', style: 'font-size:11px' }, fmt(p.game_now)), h('td', {}, cells),
       h('td', { class: 'mono' }, `${p.stats.ontime} / ${p.stats.missed}`), h('td', { class: 'mono' }, String(p.stats.exploration)),
       h('td', {}, p.sample.form), h('td', {}, h('button', { class: 'btn sm', onclick: () => detail(p) }, '詳細'))));
+  }
+  for (const p of ov.profiles.filter((x) => !x.is_test)) {
+    const pr = portraitFromChoices(p.stats.choices || {});
+    if (!Object.keys(pr).length) continue;
+    body.append(h('div', { class: 'card', style: 'border-color:rgba(255,181,71,.5)' }, h('h2', {}, `形象照方向・${ov.settings.player_name || '壽星'}`),
+      h('p', { class: 'dim', style: 'font-size:12px' }, '壽星在第 1 天「身分建檔」中選的（他以為是在設定遊戲角色）。可直接拿去跟照相館溝通。'),
+      h('table', { class: 't' }, ...Object.values(pr).map((x) => h('tr', {}, h('th', {}, x.label), h('td', {}, x.real), h('td', { class: 'faint' }, `遊戲中：${x.game}`))))));
   }
   body.append(h('div', { class: 'card', style: 'overflow-x:auto' }, t),
     h('p', { class: 'dim', style: 'font-size:12px' }, '圖例：· 未開放　○ 可進入　◐ 進行中　● 已完成　◇ 替代路線　× 已錯過'));
