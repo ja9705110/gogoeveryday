@@ -62,6 +62,8 @@ export async function startAR({ cardLabel, onDetect }) {
     const { Controller } = await loadMind();
     if (closed) return;
     const W = video.videoWidth, H = video.videoHeight;
+    // MindAR 以 video.width / video.height 屬性讀取畫面（不設定的話每一幀都是空白，永遠辨識不到）
+    video.width = W; video.height = H;
     controller = new Controller({
       inputWidth: W, inputHeight: H, maxTrack: 1, warmupTolerance: 3, missTolerance: 6,
       onUpdate: (d) => {
