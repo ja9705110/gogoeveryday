@@ -492,3 +492,19 @@ body { background: transparent !important; }
 .ps-cap { position: absolute; left: 0; right: 0; bottom: 12px; text-align: center; font-family: var(--hud), 'Noto Sans TC'; color: var(--accent); letter-spacing: .12em; text-shadow: var(--glow); }
 .gate-wait { padding: 12px; clip-path: var(--cut); border: 1px solid rgba(255,181,71,.5); background: linear-gradient(135deg, rgba(255,181,71,.10), rgba(5,14,24,.7)); }
 .gate-wait .kicker { color: var(--accent2); }
+
+/* ── 每日三關 ── */
+.stagebar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 4px 0 12px; }
+.sb { padding: 8px 6px; text-align: center; border: 1px solid var(--line); background: rgba(2,10,18,.7); clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); }
+.sb-n { font-family: var(--hud), 'Noto Sans TC'; font-size: 10px; letter-spacing: .12em; color: var(--dim); }
+.sb-t { font-size: 13px; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb.cur { border-color: var(--accent); box-shadow: var(--glow); } .sb.cur .sb-n, .sb.cur .sb-t { color: var(--accent); }
+.sb.done { border-color: rgba(93,255,168,.5); } .sb.done .sb-n, .sb.done .sb-t { color: var(--ok); }
+.stage-head { display: flex; gap: 10px; align-items: baseline; margin: 22px 0 4px; padding-bottom: 4px; border-bottom: 1px solid var(--line); }
+.stage-head span { font-family: var(--hud); font-size: 11px; letter-spacing: .2em; color: var(--accent); }
+.stage-head b { font-size: 16px; color: #fff; }
+.stage-head.done span, .stage-head.done b { color: var(--ok); }
+.stage-head .sh-ok { margin-left: auto; color: var(--ok); }
+.lab-help { margin: 6px 0 10px; padding: 10px 12px; border: 1px solid rgba(63,244,255,.35); background: rgba(3,14,24,.7); clip-path: var(--cut); font-size: 14px; }
+.lab-help summary { cursor: pointer; color: var(--accent); font-family: var(--hud), 'Noto Sans TC'; letter-spacing: .08em; }
+.lab-help li { margin: 6px 0; color: #dff5ff; }

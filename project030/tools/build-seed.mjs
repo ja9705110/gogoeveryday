@@ -2,7 +2,17 @@
 import { writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { levels, symbols } from '../supabase/content/levels.mjs';
+import { levels as baseLevels, symbols } from '../supabase/content/levels.mjs';
+import { stages } from '../supabase/content/stages.mjs';
+
+// 套用每日三關（stages.mjs）到主線內容
+export const levels = baseLevels.map((l) => {
+  const st = stages[l.day];
+  if (!st) return l;
+  const config = { ...l.config, steps: st.steps };
+  if (st.variant_steps && config.variants) config.variants = config.variants.map((v) => (st.variant_steps[v.id] ? { ...v, steps: st.variant_steps[v.id] } : v));
+  return { ...l, config, secrets: { ...(l.secrets || {}), ...(st.secrets || {}) } };
+});
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const q = (v) => (v === null || v === undefined ? 'null' : `'${String(v).replace(/'/g, "''")}'`);
@@ -25,6 +35,8 @@ sql += `update public.finale_config set
   final_body = '（請在管理後台設定最終訊息）'
 where id = 1 and hunt = '[]'::jsonb;\n`;
 
-const out = join(root, 'supabase/migrations/20261107000005_seed.sql');
-writeFileSync(out, sql);
-console.log('wrote', out, sql.length, 'bytes');
+if (process.argv[2] !== '--no-write') {
+  const out = join(root, 'supabase/migrations/20261107000005_seed.sql');
+  writeFileSync(out, sql);
+  console.log('wrote', out, sql.length, 'bytes');
+}

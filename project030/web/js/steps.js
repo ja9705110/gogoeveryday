@@ -22,7 +22,7 @@ export function renderClue(c) {
     case 'log': return h('div', { class: 'clue mono' }, c.lines.join('\n'));
     case 'clock': {
       const ha = ((c.h % 12) + c.m / 60) * 30, ma = c.m * 6;
-      return h('div', { class: 'clue', html: `<svg viewBox="-60 -60 120 120" width="150" height="150" style="display:block;margin:auto">
+      return h('div', { class: 'clue', html: `<svg viewBox="-60 -60 120 120" width="150" height="150" style="display:block;margin:auto;${c.mirror ? 'transform:scaleX(-1);filter:drop-shadow(0 0 10px rgba(160,255,240,.5))' : ''}">
         <circle r="54" fill="#e9e1cf" stroke="#3a3328" stroke-width="4"/>
         ${Array.from({ length: 12 }, (_, i) => `<line x1="0" y1="-46" x2="0" y2="${i % 3 ? -42 : -38}" stroke="#222" stroke-width="${i % 3 ? 1.5 : 3}" transform="rotate(${i * 30})"/>`).join('')}
         <line x1="0" y1="6" x2="0" y2="-26" stroke="#111" stroke-width="4.5" stroke-linecap="round" transform="rotate(${ha})"/>
