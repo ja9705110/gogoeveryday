@@ -474,3 +474,19 @@ html { background: #01020a; }
 body { background: transparent !important; }
 .topbar { background: linear-gradient(rgba(1,4,14,.92) 65%, transparent); }
 .snd.ask { color: var(--accent2); border-color: var(--accent2); animation: pulse 1.2s infinite; box-shadow: 0 0 14px rgba(255,181,71,.6); }
+
+/* ── 重建星球 ── */
+.planet-card { display: flex; gap: 12px; align-items: center; margin: 0 0 10px; padding: 10px 14px; cursor: pointer; clip-path: var(--cut);
+  border: 1px solid rgba(255,181,71,.4); background: radial-gradient(circle at 15% 50%, rgba(255,181,71,.12), rgba(5,14,24,.75) 60%); }
+.planet-card .kicker { color: var(--accent2); }
+.pc-n { font-family: var(--hud); font-size: 26px; color: #fff; text-shadow: 0 0 10px rgba(255,181,71,.6); }
+.pc-n span { font-size: 12px; color: var(--dim); font-family: 'Noto Sans TC'; }
+.layer-list { display: grid; gap: 4px; margin-top: 8px; font-size: 13px; }
+.ll { display: flex; gap: 10px; padding: 6px 8px; border: 1px solid var(--line); background: rgba(2,10,18,.6); }
+.ll.full { color: var(--accent2); } .ll.alt { color: var(--violet); } .ll.none { color: var(--faint); }
+.ll.new { border-color: var(--accent2); box-shadow: 0 0 12px rgba(255,181,71,.4); }
+.layer-new { text-align: center; margin: 6px 0 10px; }
+.ln-t { font-family: var(--hud), 'Noto Sans TC'; color: var(--accent2); letter-spacing: .1em; font-size: 14px; margin-top: 4px; text-shadow: 0 0 10px rgba(255,181,71,.6); }
+.ln-n { font-size: 18px; color: #fff; }
+.planet-stage { position: relative; width: 100%; aspect-ratio: 3 / 4; margin: 16px 0; clip-path: var(--cut); border: 1px solid rgba(63,244,255,.4); background: #01030c; box-shadow: var(--glow); }
+.ps-cap { position: absolute; left: 0; right: 0; bottom: 12px; text-align: center; font-family: var(--hud), 'Noto Sans TC'; color: var(--accent); letter-spacing: .12em; text-shadow: var(--glow); }

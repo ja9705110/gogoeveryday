@@ -8,6 +8,7 @@ import { startAR } from './ar.js';
 import { playPrologue } from './prologue.js';
 import { sound, sfx, ambience, needsUnlock } from './audio.js';
 import { mountBackground } from './bg.js';
+import { mountPlanet, morphToPhoto, layerStates, LAYERS } from './planet.js';
 
 // 資料庫中舊稱呼的統一
 const T = (str) => String(str ?? '').replace(/觀測者|觀測員|觀察者/g, '觀察員').replace(/觀測/g, '觀察');
@@ -234,6 +235,34 @@ function missionStatus(st) {
       cell('重新定義', left > 0 ? `T-${left}` : 'NOW', left > 0 ? '天' : null)));
 }
 
+function planetCard(st) {
+  const states = layerStates(st.levels);
+  const built = Object.values(states).filter((v) => v !== 'none').length;
+  const cv = h('canvas', { style: 'width:120px;height:120px;flex:none' });
+  const next = LAYERS.find((L) => states[L.day] === 'none' && st.levels.find((x) => x.day === L.day)?.status !== 'LOCKED') || LAYERS.find((L) => states[L.day] === 'none');
+  const card = h('div', { class: 'planet-card fade-in', onclick: () => showPlanet(st) },
+    cv, h('div', { style: 'flex:1;min-width:0' },
+      h('div', { class: 'kicker' }, 'PLANET 030 · 重建'),
+      h('div', { class: 'pc-n' }, `${built}`, h('span', {}, ' / 10 層')),
+      h('div', { class: 'dim', style: 'font-size:13px' }, next ? `下一層：${next.name}（第 ${next.day} 區）` : '十層結構全部重建完成。'),
+      h('div', { class: 'faint', style: 'font-size:11px;margin-top:2px' }, '點開查看')));
+  requestAnimationFrame(() => S.cleanup.push(mountPlanet(cv, states, { size: 120 })));
+  return card;
+}
+
+function showPlanet(st, highlight) {
+  const states = layerStates(st.levels);
+  const cv = h('canvas', { style: 'width:100%;aspect-ratio:1;display:block' });
+  const list = h('div', { class: 'layer-list' }, ...LAYERS.map((L) => h('div', { class: 'll ' + states[L.day] + (highlight === L.day ? ' new' : '') },
+    h('span', { class: 'mono' }, String(L.day).padStart(2, '0')), h('span', {}, L.name), h('span', { class: 'mono faint' }, L.en),
+    h('span', { class: 'spacer' }), h('span', {}, { full: '已重建', alt: '殘響重建', none: '—' }[states[L.day]]))));
+  let stop;
+  modal(h('div', {}, h('div', { class: 'kicker' }, 'PLANET 030'), h('h2', { style: 'color:var(--text);margin-top:4px' }, '重建中的星球'),
+    h('p', { class: 'dim', style: 'font-size:13px' }, '每回收一個片段，星球就會重建一層結構。錯過但走完替代路線的層，會以殘響的顏色重建。'),
+    cv, list), { onClose: () => stop && stop() });
+  requestAnimationFrame(() => { stop = mountPlanet(cv, states, { highlight }); });
+}
+
 function showBrief() {
   modal(h('div', { class: 'manual' },
     h('div', { class: 'kicker' }, 'MISSION BRIEF'), h('h2', { style: 'color:var(--text);margin-top:4px' }, '任務簡報'),
@@ -271,6 +300,7 @@ function home() {
   wrap.append(h('div', { class: 'kicker' }, before ? 'STANDBY' : d <= 10 ? `DAY ${String(d).padStart(2, '0')} / 10` : 'FILE 030'),
     h('h1', {}, before ? '等待訊號' : d <= 10 ? '星海觀察中' : '第030號檔案室'));
   if (d >= 1) wrap.append(missionStatus(st));
+  if (d >= 1) wrap.append(planetCard(st));
   const ob = nextObjective(st);
   wrap.append(h('div', { class: 'objective fade-in' },
     h('div', { class: 'row' }, h('span', { class: 'kicker' }, '下一步'), h('span', { class: 'spacer' }), h('button', { class: 'btn ghost sm', onclick: showManual }, '觀察手冊')),
@@ -442,14 +472,23 @@ async function afterSuccess(L, r) {
   if (r.completed) {
     const c = r.completion || {};
     const gained = (c.gained || []).filter((g) => g.kind !== 'lost');
+    const layer = LAYERS.find((x) => x.day === L.day);
+    let stopPlanet = null;
+    const pcv = layer ? h('canvas', { style: 'width:220px;height:220px;display:block;margin:0 auto' }) : null;
+    if (layer) {
+      try { await loadState(); } catch (_) {}
+      requestAnimationFrame(() => { stopPlanet = mountPlanet(pcv, layerStates(S.state.levels), { highlight: L.day, size: 220 }); });
+    }
     modal(h('div', {},
       h('div', { class: 'kicker' }, c.outcome === 'ALTERNATE' ? 'ARCHIVED · ALTERNATE' : 'ARCHIVED'),
+      layer ? h('div', { class: 'layer-new' }, pcv, h('div', { class: 'ln-t' }, `星球第 ${layer.day} 層結構已重建`), h('div', { class: 'ln-n' }, `${layer.name} · ${layer.en}`, c.outcome === 'ALTERNATE' ? h('span', { class: 'dim', style: 'font-size:12px' }, '（殘響）') : null)) : null,
       h('div', { class: 'lines' }, ...(c.epilogue || []).map((t) => h('p', {}, T(t)))),
       ...gained.map((g) => h('div', { class: 'row card' },
         g.kind === 'symbol' ? h('div', { style: 'width:48px;color:' + (g.echo ? '#7d8e9c' : '#f2b84b'), html: glyphSVG(g.symbol) }) : null,
         h('div', {}, h('div', {}, g.kind === 'gift' ? '影像校正邀請函' : (g.echo ? '殘響・' : '') + (g.name || g.key)),
           g.kind === 'symbol' ? h('div', { class: 'dim mono', style: 'font-size:12px' }, '頻率 ' + g.digit) : null))),
-      h('a', { class: 'btn primary block', href: '#/', onclick: () => document.querySelector('.modal')?.remove() }, '返回終端')), { onClose: route });
+      h('a', { class: 'btn primary block', href: '#/', onclick: () => { stopPlanet && stopPlanet(); document.querySelector('.modal')?.remove(); } }, '返回終端')), { onClose: () => { stopPlanet && stopPlanet(); route(); } });
+    if (layer) setTimeout(() => sfx('unlock'), 900);
   } else {
     route();
   }
@@ -852,6 +891,7 @@ function defineStep(box, prog) {
       const r = await rpc('submit_definition', { p: S.pid, definition: ta.value, skipped });
       box.innerHTML = '';
       for (const l of r.lines) { box.append(h('div', { class: 'final-line fade-in' }, l)); await new Promise((res) => setTimeout(res, 1600)); }
+      await planetFinale(box);
       hunt(box);
     } catch (e) { msg.className = 'msg bad'; msg.textContent = errText(e); btn.disabled = false; }
   };
@@ -859,6 +899,28 @@ function defineStep(box, prog) {
     h('div', { class: 'row', style: 'margin-top:8px' },
       h('button', { class: 'btn ghost', onclick: (e) => done(true, e.target) }, '暫時沒有答案'),
       h('button', { class: 'btn primary spacer', onclick: (e) => done(false, e.target) }, '寫入')), msg));
+}
+
+async function planetFinale(box) {
+  const states = layerStates(S.state.levels);
+  const stage = h('div', { class: 'planet-stage fade-in' });
+  const cv = h('canvas', { style: 'width:100%;height:100%;display:block' });
+  const cap = h('div', { class: 'ps-cap' }, '星球 030・十層結構');
+  stage.append(cv, cap);
+  box.append(stage);
+  stage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  let stop = mountPlanet(cv, states, { size: stage.clientWidth });
+  await new Promise((r) => setTimeout(r, 3500));
+  let photo = null;
+  try { photo = await rpc('finale_photo', { p: S.pid }); } catch (_) {}
+  if (!photo) { cap.textContent = '檔案 030：持續更新中'; return; }
+  cap.textContent = '正在重新定義……';
+  sfx('sink');
+  stop(); stop = null;
+  const ok = await morphToPhoto(cv, photo);
+  sfx('complete');
+  cap.textContent = ok ? '檔案 030：這就是你。' : '檔案 030：持續更新中';
+  await new Promise((r) => setTimeout(r, 2500));
 }
 
 async function hunt(box) {

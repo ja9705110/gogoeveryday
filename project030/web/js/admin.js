@@ -224,6 +224,31 @@ async function finale(body) {
   const { data, error } = await sb.from('finale_config').select('*').eq('id', 1).single();
   if (error) throw error;
   body.innerHTML = '';
+  // 最終照片：星球在終章會化為這張照片（只存在資料庫，生日當天才會送到玩家端）
+  const prev = h('img', { style: 'max-width:220px;max-height:280px;display:' + (data.photo ? 'block' : 'none') + ';margin:8px 0;border:1px solid var(--line)' });
+  if (data.photo) prev.src = data.photo;
+  const pin = h('input', { type: 'file', accept: 'image/*', class: 'hidden' });
+  const pmsg = h('div', { class: 'msg' });
+  pin.onchange = async () => {
+    const f = pin.files[0]; if (!f) return;
+    pmsg.className = 'msg'; pmsg.textContent = '處理中…';
+    try {
+      const bmp = await createImageBitmap(f);
+      const k = Math.min(1, 900 / Math.max(bmp.width, bmp.height));
+      const c = document.createElement('canvas'); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+      c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+      const url = c.toDataURL('image/jpeg', 0.85);
+      const { error: e } = await sb.from('finale_config').update({ photo: url, updated_at: new Date().toISOString() }).eq('id', 1);
+      if (e) throw e;
+      prev.src = url; prev.style.display = 'block'; pmsg.className = 'msg good'; pmsg.textContent = `已儲存（${Math.round(url.length / 1024)} KB）。生日當天之前，玩家端無法取得這張照片。`;
+    } catch (e) { pmsg.className = 'msg bad'; pmsg.textContent = errText(e); }
+  };
+  body.append(h('div', { class: 'card' }, h('h2', {}, '最終照片'),
+    h('p', { class: 'dim', style: 'font-size:13px' }, '終章時，重建完成的星球會化為光點，重新聚合成這張照片。建議直式、臉部清楚的照片。'),
+    prev, pin, h('div', { class: 'row wrap' },
+      h('button', { class: 'btn primary', onclick: () => pin.click() }, data.photo ? '更換照片' : '上傳照片'),
+      data.photo ? h('button', { class: 'btn ghost', onclick: async () => { if (!confirm('移除照片？')) return; await sb.from('finale_config').update({ photo: null }).eq('id', 1); render(); } }, '移除') : null),
+    pmsg));
   const steps = [...(data.hunt || [])];
   const list = h('div');
   const draw = () => {
