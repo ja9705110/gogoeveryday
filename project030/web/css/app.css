@@ -570,3 +570,22 @@ body { background: transparent !important; }
 .ph-cell { display: grid; gap: 6px; padding: 10px; border: 1px solid var(--line); background: rgba(2,10,18,.6); }
 .ph-prev { height: 140px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.4); overflow: hidden; }
 .ph-prev img { max-width: 100%; max-height: 140px; object-fit: contain; }
+
+/* ── 集結之手（拼圖拍照） ── */
+.mz-grid { display: grid; gap: 3px; margin: 8px 0; }
+.mz-cell { position: relative; aspect-ratio: 1; padding: 0; border: 1px solid var(--line); background: #02070d; cursor: pointer; overflow: hidden; }
+.mz-cell .mz-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
+.mz-cell.shot .mz-img { opacity: 1; }
+.mz-cell .mz-guide { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 0 4px #3ff4ff); }
+.mz-cell.shot .mz-guide { opacity: .35; }
+.mz-cell .mz-n { position: absolute; left: 3px; top: 1px; font: 9px var(--mono); color: var(--dim); }
+.mz-cell.shot { border-color: var(--ok); }
+.mz-cam { position: fixed; inset: 0; z-index: 97; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 16px; }
+.mz-stage { position: relative; border: 2px solid var(--accent); box-shadow: var(--glow); overflow: hidden; }
+.mz-stage video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.mz-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 0 8px #3ff4ff); }
+.mz-tip { color: #dff5ff; text-align: center; font-size: 15px; max-width: 520px; }
+.mz-bar { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.mz-reveal { position: fixed; inset: 0; z-index: 98; background: rgba(1,3,10,.96); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 16px; }
+.mz-reveal canvas { width: 100%; max-width: 900px; height: auto; box-shadow: 0 0 40px rgba(63,244,255,.3); }
+.mz-cap { font-family: var(--hud), 'Noto Sans TC'; color: var(--accent); letter-spacing: .1em; text-shadow: var(--glow); }

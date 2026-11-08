@@ -182,12 +182,13 @@ export const stages = {
     steps: [
       { id: 's_scan', type: 'ar', title: '掃描投影卡 B', target: 1, card: 'B', overlay: 'totem', prompt: '找到實體卡片 B，用相機對準它。', ...S(1, '投影卡 B') },
       { id: 's_rings', type: 'rings', title: '門環', rings: [[1, 2, 3, 4, 5, 6], [2, 3, 4, 5, 6, 7], [3, 4, 5, 6, 7, 1]], prompt: '轉動三個門環，對準圖騰上的符號。', ...S(2, '門環') },
-      story('s_through', ['門打開了。', '門後是一條走廊，盡頭還有一扇門——比這扇小。', '那扇門沒有影像。系統：「請提供參照。」'], { ...S(3, '最後一扇門') }),
-      { id: 's_door', type: 'evidence', title: '最後一扇門', kinds: ['photo'], gate: true, ...S(3, '最後一扇門'),
-        prompt: '門後還有一扇門。它在你的世界裡。', pending_text: '參照已送出。門正在辨識……' },
+      story('s_through', ['門打開了。', '門後是一條走廊，盡頭還有一扇門——它沒有輪廓，也沒有影像。', '系統：「這扇門需要被描出來。一雙手不夠。」'], { ...S(3, '集結之手') }),
+      { id: 's_hands', type: 'evidence', title: '集結之手', kinds: ['photo'], gate: true, mosaic: { cols: 9, rows: 2, text: '1118', hearts: true }, ...S(3, '集結之手'),
+        prompt: '每一格只露出門的一小段輪廓。讓手覆蓋發光的線，18 格全部完成，門才會出現。',
+        pending_text: '影像已拼合並送出。門正在辨識……' },
     ],
     secrets: {
-      s_door: { hints: ['你每天都會經過很多扇門。', '有一扇門，你每天都開，卻很少真正看它。', '拍下你家大門（從裡面看出去）上傳。'] },
+      s_hands: { hints: ['一雙手不夠。', '找朋友來幫忙：每一格請一個人把手放在發光的線上拍下來（同一個人拍好幾格也可以）。', '18 格全部拍完，按「拼合影像」，手就會拼出門的形狀。'] },
     },
   },
 
