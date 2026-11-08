@@ -6,7 +6,7 @@ import { renderWidget, renderClue, renderRevealed, h } from './steps.js';
 import { glyphSVG, NAMES } from './glyphs.js';
 import { startAR } from './ar.js';
 import { playPrologue } from './prologue.js';
-import { sound, sfx, ambience } from './audio.js';
+import { sound, sfx, ambience, needsUnlock } from './audio.js';
 import { mountBackground } from './bg.js';
 
 // 資料庫中舊稱呼的統一
@@ -71,6 +71,7 @@ async function boot() {
   window.addEventListener('hashchange', route);
   route().then(() => {
     const k = 'p030.prologue.v3.' + S.pid;
+    if (localStorage.getItem(k) && needsUnlock()) toast('輕觸畫面任一處，開始播放情境音效', 3500);
     if (!localStorage.getItem(k) && S.state) {
       playPrologue({ startDate: S.state.start_date, onDone: () => { localStorage.setItem(k, '1'); if (!location.hash || location.hash === '#/') route(); } });
     }
@@ -129,7 +130,8 @@ const ICONS = {
 function soundToggle() {
   const b = h('button', { class: 'snd', 'aria-label': '聲音開關' });
   const paint = () => { b.innerHTML = sound.on ? '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/></svg>' : '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>'; b.classList.toggle('on', sound.on); };
-  b.onclick = (e) => { e.stopPropagation(); sound.toggle(); if (sound.on) ambience(S.amb || 'base', true); toast(sound.on ? '情境音效：開啟' : '情境音效：關閉', 1400); paint(); };
+  if (sound.pref === null) b.classList.add('ask');
+  b.onclick = (e) => { e.stopPropagation(); b.classList.remove('ask'); sound.toggle(); if (sound.on) ambience(S.amb || 'base', true); toast(sound.on ? '情境音效：開啟' : '情境音效：關閉', 1400); paint(); };
   paint();
   return b;
 }

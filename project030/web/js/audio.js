@@ -4,12 +4,15 @@ let ctx = null, master = null, ambBus = null, sfxBus = null, noiseBuf = null;
 let current = null, currentName = null;
 const listeners = new Set();
 
+let unlocked = false;      // 是否已在使用者手勢中解鎖（iOS 主畫面 App 必須）
+let silentEl = null;
+
 export const sound = {
   get pref() { try { return localStorage.getItem(KEY); } catch { return null; } }, // 'on' | 'off' | null
   get on() { return this.pref === 'on'; },
   set(onOff) {
     try { localStorage.setItem(KEY, onOff ? 'on' : 'off'); } catch {}
-    if (onOff) { ensure(); ctx.resume(); master.gain.setTargetAtTime(0.9, ctx.currentTime, 0.3); if (currentName) ambience(currentName, true); }
+    if (onOff) { unlock(); if (ctx) { master.gain.setTargetAtTime(0.9, ctx.currentTime, 0.3); if (currentName) ambience(currentName, true); } }
     else if (master) master.gain.setTargetAtTime(0, ctx.currentTime, 0.2);
     listeners.forEach((f) => f(onOff));
   },
@@ -21,20 +24,45 @@ function ensure() {
   if (ctx) return;
   const C = window.AudioContext || window.webkitAudioContext;
   if (!C) return;
-  ctx = new C();
+  ctx = new C({ latencyHint: 'playback' });
   master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
   const comp = ctx.createDynamicsCompressor(); comp.connect(master);
   ambBus = ctx.createGain(); ambBus.gain.value = 0.55; ambBus.connect(comp);
   sfxBus = ctx.createGain(); sfxBus.gain.value = 0.8; sfxBus.connect(comp);
-  // 棕色噪音（海浪、低頻）
   noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 4, ctx.sampleRate);
   const d = noiseBuf.getChannelData(0); let last = 0;
   for (let i = 0; i < d.length; i++) { const w = Math.random() * 2 - 1; last = (last + 0.02 * w) / 1.02; d[i] = last * 3.5; }
+  // 被系統中斷（來電、切到背景）後，在下一次手勢時恢復
+  ctx.onstatechange = () => { if (ctx.state === 'running' && sound.on && currentName && !current) ambience(currentName, true); };
 }
-// iOS / Chrome：第一次手勢後才能發聲
-['pointerdown', 'keydown', 'touchend'].forEach((ev) => addEventListener(ev, () => {
-  if (sound.on) { ensure(); if (ctx && ctx.state !== 'running') ctx.resume(); if (master && master.gain.value < 0.1) master.gain.setTargetAtTime(0.9, ctx.currentTime, 0.3); }
-}, { passive: true }));
+
+// 產生 0.2 秒靜音 WAV（給 <audio> 元素用，讓 iOS 切換到「播放」音訊模式）
+function silentWavUrl() {
+  const n = 8820, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+  const w = (o, str) => [...str].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true);
+  v.setUint16(22, 1, true); v.setUint32(24, 44100, true); v.setUint32(28, 88200, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+  w(36, 'data'); v.setUint32(40, n * 2, true);
+  return URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
+}
+
+// 必須在使用者手勢（click / touchend）當下同步呼叫
+export function unlock() {
+  if (!sound.on) return;
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch {}  // iOS 16.4+：不受靜音撥桿影響
+  ensure(); if (!ctx) return;
+  if (ctx.state !== 'running') ctx.resume().catch(() => {});
+  try { // 經典 iOS 解鎖：播放一個極短的空白音
+    const src = ctx.createBufferSource(); src.buffer = ctx.createBuffer(1, 1, 22050); src.connect(ctx.destination); src.start(0);
+  } catch {}
+  try {
+    if (!silentEl) { silentEl = new Audio(silentWavUrl()); silentEl.setAttribute('playsinline', ''); silentEl.loop = true; silentEl.volume = 0.01; }
+    silentEl.play().catch(() => {});
+  } catch {}
+  if (master && master.gain.value < 0.1) master.gain.setTargetAtTime(0.9, ctx.currentTime, 0.3);
+  if (!unlocked) { unlocked = true; if (currentName && !current) ambience(currentName, true); }
+}
+['touchend', 'click', 'keydown'].forEach((ev) => addEventListener(ev, () => { if (sound.on && (!unlocked || !ctx || ctx.state !== 'running')) unlock(); }, { capture: true, passive: true }));
 
 const noise = () => { const s = ctx.createBufferSource(); s.buffer = noiseBuf; s.loop = true; return s; };
 const osc = (type, f) => { const o = ctx.createOscillator(); o.type = type; o.frequency.value = f; return o; };
@@ -42,7 +70,8 @@ const lfo = (rate, depth, target) => { const o = osc('sine', rate); const g = ct
 
 document.addEventListener('visibilitychange', () => {
   if (!ctx || !sound.on) return;
-  if (document.hidden) ctx.suspend(); else { ctx.resume(); if (!current && currentName) ambience(currentName, true); }
+  if (document.hidden) { ctx.suspend(); silentEl && silentEl.pause(); }
+  else { ctx.resume().catch(() => {}); silentEl && silentEl.play().catch(() => {}); if (!current && currentName) ambience(currentName, true); }
 });
 
 // ── 環境音層 ──
@@ -138,7 +167,7 @@ export function ambience(name, force) {
   if (!SCENES[name]) name = 'base';
   if (name === currentName && !force && current) return;
   currentName = name;
-  if (!sound.on) return;
+  if (!sound.on || !unlocked) return;   // 尚未在手勢中解鎖：等第一次點擊再開始
   ensure(); if (!ctx) return;
   const old = current;
   const bus = ctx.createGain(); bus.gain.value = 0; bus.connect(ambBus);
@@ -160,7 +189,7 @@ function click(out, vol) { const s = ctx.createBufferSource(); s.buffer = noiseB
 function tone(f, dur, vol, type = 'sine', at = 0) { const o = osc(type, f); const g = ctx.createGain(); const t = ctx.currentTime + at; g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); o.connect(g); g.connect(sfxBus); o.start(t); o.stop(t + dur + 0.05); }
 
 export function sfx(name) {
-  if (!sound.on) return;
+  if (!sound.on || !unlocked) return;
   ensure(); if (!ctx) return;
   switch (name) {
     case 'tap': tone(1600, 0.05, 0.05, 'square'); break;
@@ -185,3 +214,4 @@ export function outputLevel() {
   const a = new Float32Array(2048); master._an.getFloatTimeDomainData(a);
   return Math.sqrt(a.reduce((s, v) => s + v * v, 0) / a.length);
 }
+export const needsUnlock = () => sound.on && !unlocked;

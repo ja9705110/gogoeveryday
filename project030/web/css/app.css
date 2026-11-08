@@ -473,3 +473,4 @@ body::before { opacity: .35; }
 html { background: #01020a; }
 body { background: transparent !important; }
 .topbar { background: linear-gradient(rgba(1,4,14,.92) 65%, transparent); }
+.snd.ask { color: var(--accent2); border-color: var(--accent2); animation: pulse 1.2s infinite; box-shadow: 0 0 14px rgba(255,181,71,.6); }
