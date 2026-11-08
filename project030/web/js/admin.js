@@ -132,6 +132,29 @@ async function settings(body) {
       e.target.disabled = false;
     } }, '儲存'), msg,
     h('p', { class: 'faint', style: 'font-size:12px' }, '遊戲開始後再修改生日，已經開放或錯過的區域會依新日期重新計算；已錯過的紀錄不會恢復。')));
+  // 管理者密碼
+  const pw1 = h('input', { type: 'password', placeholder: '新密碼（至少 6 個字）', autocomplete: 'new-password' });
+  const pw2 = h('input', { type: 'password', placeholder: '再輸入一次', autocomplete: 'new-password' });
+  const pmsg = h('div', { class: 'msg' });
+  body.append(h('div', { class: 'card', style: 'max-width:520px' }, h('h2', {}, '管理者密碼'),
+    h('p', { class: 'dim', style: 'font-size:13px' }, `目前登入：${A.me?.email || ''}。修改後，下次在「管理者登入」改用新密碼。`),
+    pw1, h('div', { style: 'height:8px' }), pw2, h('div', { style: 'height:10px' }),
+    h('button', { class: 'btn block', onclick: async (e) => {
+      pmsg.className = 'msg bad';
+      if (pw1.value.length < 6) { pmsg.textContent = '密碼至少需要 6 個字。'; return; }
+      if (pw1.value !== pw2.value) { pmsg.textContent = '兩次輸入的密碼不一樣。'; return; }
+      e.target.disabled = true; pmsg.className = 'msg'; pmsg.textContent = '更新中…';
+      try {
+        const { error } = await sb.auth.updateUser({ password: pw1.value });
+        if (error) throw error;
+        pw1.value = pw2.value = ''; pmsg.className = 'msg good'; pmsg.textContent = '密碼已更新。';
+      } catch (err) {
+        pmsg.className = 'msg bad';
+        pmsg.textContent = /same|different from the old/i.test(err.message || '') ? '新密碼不能和舊密碼一樣。'
+          : /reauth|nonce|recent/i.test(err.message || '') ? '為了安全，請先登出再登入一次，然後馬上修改密碼。' : errText(err);
+      }
+      e.target.disabled = false;
+    } }, '更新密碼'), pmsg));
   const rmsg = h('div', { class: 'msg' });
   body.append(h('div', { class: 'card', style: 'max-width:520px;border-color:rgba(255,79,109,.4)' }, h('h2', {}, '重置壽星進度'),
     h('p', { class: 'dim', style: 'font-size:13px' }, '清除壽星的所有遊戲進度（關卡、符號、樣本、照片紀錄、星球），下次登入會從前導影片重新開始。名字、生日和登入方式不變。'),
