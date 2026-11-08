@@ -1,6 +1,6 @@
 // PROJECT 030 service worker：離線外殼快取 + 推播
-const CACHE = 'p030-v2';
-const SHELL = ['./', 'index.html', 'css/app.css', 'js/app.js', 'js/api.js', 'js/config.js', 'js/steps.js', 'js/scene.js', 'js/sample.js', 'js/glyphs.js', 'js/ar.js', 'js/prologue.js', 'vendor/supabase.js', 'icons/icon-192.png'];
+const CACHE = 'p030-v3';
+const SHELL = ['./', 'index.html', 'css/app.css', 'js/app.js', 'js/api.js', 'js/config.js', 'js/steps.js', 'js/scene.js', 'js/sample.js', 'js/glyphs.js', 'js/ar.js', 'js/prologue.js', 'js/audio.js', 'js/bg.js', 'vendor/supabase.js', 'icons/icon-192.png'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', (e) => {

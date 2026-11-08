@@ -461,3 +461,15 @@ dl.brief dd, .pl-brief dd { margin: 4px 0 0; color: #e6f8ff; }
 .pl-brief { top: calc(70px + env(safe-area-inset-top)); bottom: auto; transform: none; max-height: calc(100dvh - 110px); overflow-y: auto; }
 .pl-brief dd { font-size: 15px; }
 .pl-brief .pl-go { position: static; transform: none; width: 100%; margin-top: 16px; }
+
+/* ── 星海 ── */
+#p030-bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -3; pointer-events: none; }
+body::before { opacity: .35; }
+.snd { width: 34px; height: 34px; margin-left: 10px; display: inline-flex; align-items: center; justify-content: center; background: transparent;
+  border: 1px solid var(--line); color: var(--dim); cursor: pointer; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); }
+.snd.on { color: var(--accent); border-color: rgba(63,244,255,.6); box-shadow: var(--glow); }
+.pl-start { gap: 10px; text-align: center; padding: 20px; background: radial-gradient(ellipse at 50% 40%, rgba(6,38,74,.6), rgba(1,3,10,.92)); }
+.pl-start .btn { min-width: 240px; }
+html { background: #01020a; }
+body { background: transparent !important; }
+.topbar { background: linear-gradient(rgba(1,4,14,.92) 65%, transparent); }

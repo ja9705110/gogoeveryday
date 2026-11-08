@@ -1,0 +1,140 @@
+// 星海音效引擎：全部以 WebAudio 即時合成（無音檔），可隨時開關
+const KEY = 'p030.sound';
+let ctx = null, master = null, ambBus = null, sfxBus = null, noiseBuf = null;
+let current = null, currentName = null;
+const listeners = new Set();
+
+export const sound = {
+  get pref() { try { return localStorage.getItem(KEY); } catch { return null; } }, // 'on' | 'off' | null
+  get on() { return this.pref === 'on'; },
+  set(onOff) {
+    try { localStorage.setItem(KEY, onOff ? 'on' : 'off'); } catch {}
+    if (onOff) { ensure(); ctx.resume(); master.gain.setTargetAtTime(0.9, ctx.currentTime, 0.3); if (currentName) ambience(currentName, true); }
+    else if (master) master.gain.setTargetAtTime(0, ctx.currentTime, 0.2);
+    listeners.forEach((f) => f(onOff));
+  },
+  toggle() { this.set(!this.on); },
+  onChange(f) { listeners.add(f); return () => listeners.delete(f); },
+};
+
+function ensure() {
+  if (ctx) return;
+  const C = window.AudioContext || window.webkitAudioContext;
+  if (!C) return;
+  ctx = new C();
+  master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
+  const comp = ctx.createDynamicsCompressor(); comp.connect(master);
+  ambBus = ctx.createGain(); ambBus.gain.value = 0.55; ambBus.connect(comp);
+  sfxBus = ctx.createGain(); sfxBus.gain.value = 0.8; sfxBus.connect(comp);
+  // 棕色噪音（海浪、低頻）
+  noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 4, ctx.sampleRate);
+  const d = noiseBuf.getChannelData(0); let last = 0;
+  for (let i = 0; i < d.length; i++) { const w = Math.random() * 2 - 1; last = (last + 0.02 * w) / 1.02; d[i] = last * 3.5; }
+}
+// iOS / Chrome：第一次手勢後才能發聲
+['pointerdown', 'keydown', 'touchend'].forEach((ev) => addEventListener(ev, () => {
+  if (sound.on) { ensure(); if (ctx && ctx.state !== 'running') ctx.resume(); if (master && master.gain.value < 0.1) master.gain.setTargetAtTime(0.9, ctx.currentTime, 0.3); }
+}, { passive: true }));
+
+const noise = () => { const s = ctx.createBufferSource(); s.buffer = noiseBuf; s.loop = true; return s; };
+const osc = (type, f) => { const o = ctx.createOscillator(); o.type = type; o.frequency.value = f; return o; };
+const lfo = (rate, depth, target) => { const o = osc('sine', rate); const g = ctx.createGain(); g.gain.value = depth; o.connect(g); g.connect(target); o.start(); return o; };
+
+// ── 環境音層 ──
+const LAYERS = {
+  waves(out) { // 海浪：低通噪音 + 緩慢起伏
+    const n = noise(); const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 520;
+    const g = ctx.createGain(); g.gain.value = 0.35; n.connect(f); f.connect(g); g.connect(out); n.start();
+    lfo(0.09, 0.28, g.gain); lfo(0.05, 260, f.frequency); return [n];
+  },
+  deep(out) { // 深空低鳴
+    const g = ctx.createGain(); g.gain.value = 0.10; g.connect(out);
+    return [55, 82.5, 110.2, 164.8].map((fr, i) => { const o = osc(i ? 'sine' : 'triangle', fr); const og = ctx.createGain(); og.gain.value = i ? 0.35 / i : 0.6; o.connect(og); og.connect(g); o.start(); lfo(0.03 + i * 0.01, fr * 0.004, o.frequency); return o; });
+  },
+  sonar(out) { // 聲納脈衝
+    const id = setInterval(() => { if (!sound.on) return; ping(out, 1180, 0.08); setTimeout(() => ping(out, 1180, 0.03), 420); }, 7000);
+    return [{ stop: () => clearInterval(id) }];
+  },
+  buzz(out) { // 緊急電力嗡鳴
+    const o = osc('sawtooth', 60); const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 240;
+    const g = ctx.createGain(); g.gain.value = 0.05; o.connect(f); f.connect(g); g.connect(out); o.start(); lfo(0.7, 0.03, g.gain); return [o];
+  },
+  static(out) { // 收音機雜訊
+    const n = noise(); const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 2400; f.Q.value = 0.7;
+    const g = ctx.createGain(); g.gain.value = 0.05; n.connect(f); f.connect(g); g.connect(out); n.start(); lfo(0.3, 0.04, g.gain); return [n];
+  },
+  drips(out) { // 水滴
+    const id = setInterval(() => { if (sound.on && Math.random() < 0.6) blip(out, 900 + Math.random() * 900, 0.06); }, 1400);
+    return [{ stop: () => clearInterval(id) }];
+  },
+  shimmer(out) { // 玻璃泛音
+    const g = ctx.createGain(); g.gain.value = 0.03; g.connect(out);
+    return [1320, 1760, 2217].map((fr) => { const o = osc('sine', fr); o.connect(g); o.start(); lfo(0.2 + Math.random() * 0.3, 6, o.frequency); return o; });
+  },
+  rumble(out) { // 斷層低頻
+    const n = noise(); const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 90;
+    const g = ctx.createGain(); g.gain.value = 0.5; n.connect(f); f.connect(g); g.connect(out); n.start(); lfo(0.15, 0.35, g.gain); return [n];
+  },
+  pulse(out) { // 核心心跳
+    const id = setInterval(() => { if (sound.on) { thump(out, 0.25); setTimeout(() => thump(out, 0.15), 260); } }, 1600);
+    return [{ stop: () => clearInterval(id) }];
+  },
+  tick(out) { // 投影機轉動
+    const id = setInterval(() => { if (sound.on) click(out, 0.015); }, 140);
+    return [{ stop: () => clearInterval(id) }];
+  },
+  choir(out) { // 檔案室：和聲墊
+    const g = ctx.createGain(); g.gain.value = 0.05; g.connect(out);
+    return [220, 277.2, 329.6, 440].map((fr) => { const o = osc('sine', fr); o.connect(g); o.start(); lfo(0.07, 1.5, o.frequency); return o; });
+  },
+};
+const SCENES = {
+  base: ['waves', 'deep', 'sonar'],
+  intake: ['deep', 'buzz', 'waves'], radio: ['static', 'waves'], vault: ['deep', 'buzz'], mirror: ['shimmer', 'deep'],
+  greenhouse: ['drips', 'waves'], fault: ['rumble', 'deep'], gate: ['waves', 'deep', 'sonar'], fork: ['deep', 'sonar'],
+  playback: ['tick', 'deep'], core: ['pulse', 'deep', 'shimmer'], archive: ['choir', 'waves'], prologue: ['waves', 'deep'],
+};
+
+export function ambience(name, force) {
+  if (!SCENES[name]) name = 'base';
+  if (name === currentName && !force && current) return;
+  currentName = name;
+  if (!sound.on) return;
+  ensure(); if (!ctx) return;
+  const old = current;
+  const bus = ctx.createGain(); bus.gain.value = 0; bus.connect(ambBus);
+  const nodes = SCENES[name].flatMap((l) => LAYERS[l](bus));
+  bus.gain.setTargetAtTime(1, ctx.currentTime, 0.8);
+  current = { bus, nodes };
+  if (old) {
+    old.bus.gain.setTargetAtTime(0, ctx.currentTime, 0.5);
+    setTimeout(() => { old.nodes.forEach((n) => { try { n.stop(); } catch {} }); old.bus.disconnect(); }, 2500);
+  }
+}
+
+// ── 音效 ──
+function env(out, dur, vol) { const g = ctx.createGain(); g.gain.setValueAtTime(vol, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + dur); g.connect(out); return g; }
+function ping(out, f, vol) { const o = osc('sine', f); o.frequency.exponentialRampToValueAtTime(f * 0.92, ctx.currentTime + 1.2); o.connect(env(out, 1.4, vol)); o.start(); o.stop(ctx.currentTime + 1.5); }
+function blip(out, f, vol) { const o = osc('sine', f); o.frequency.exponentialRampToValueAtTime(f * 1.8, ctx.currentTime + 0.08); o.connect(env(out, 0.12, vol)); o.start(); o.stop(ctx.currentTime + 0.15); }
+function thump(out, vol) { const o = osc('sine', 70); o.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.2); o.connect(env(out, 0.25, vol)); o.start(); o.stop(ctx.currentTime + 0.3); }
+function click(out, vol) { const s = ctx.createBufferSource(); s.buffer = noiseBuf; const f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 3000; s.connect(f); f.connect(env(out, 0.03, vol)); s.start(); s.stop(ctx.currentTime + 0.04); }
+function tone(f, dur, vol, type = 'sine', at = 0) { const o = osc(type, f); const g = ctx.createGain(); const t = ctx.currentTime + at; g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); o.connect(g); g.connect(sfxBus); o.start(t); o.stop(t + dur + 0.05); }
+
+export function sfx(name) {
+  if (!sound.on) return;
+  ensure(); if (!ctx) return;
+  switch (name) {
+    case 'tap': tone(1600, 0.05, 0.05, 'square'); break;
+    case 'type': tone(1300 + Math.random() * 400, 0.02, 0.025, 'square'); break;
+    case 'ok': [660, 880, 1320].forEach((f, i) => tone(f, 0.25, 0.09, 'sine', i * 0.08)); break;
+    case 'bad': tone(140, 0.32, 0.12, 'sawtooth'); tone(110, 0.32, 0.1, 'sawtooth', 0.05); break;
+    case 'complete': [261.6, 329.6, 392, 523.3, 659.3].forEach((f, i) => tone(f, 1.6, 0.07, 'triangle', i * 0.12)); ping(sfxBus, 1568, 0.06); break;
+    case 'unlock': [523.3, 784].forEach((f, i) => tone(f, 0.4, 0.08, 'sine', i * 0.1)); break;
+    case 'find': tone(1046, 0.6, 0.07, 'sine'); tone(1568, 0.6, 0.05, 'sine', 0.08); break;
+    case 'ping': ping(sfxBus, 1180, 0.1); break;
+    case 'static': { const s = ctx.createBufferSource(); s.buffer = noiseBuf; const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 1800; s.connect(f); f.connect(env(sfxBus, 0.8, 0.25)); s.start(); s.stop(ctx.currentTime + 0.9); break; }
+    case 'match': tone(990, 0.4, 0.1, 'sine'); tone(1485, 0.6, 0.08, 'sine', 0.12); break;
+    case 'sink': { const o = osc('sine', 600); o.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 1.6); o.connect(env(sfxBus, 1.8, 0.1)); o.start(); o.stop(ctx.currentTime + 1.9); break; }
+    default: break;
+  }
+}
