@@ -40,12 +40,51 @@ const noise = () => { const s = ctx.createBufferSource(); s.buffer = noiseBuf; s
 const osc = (type, f) => { const o = ctx.createOscillator(); o.type = type; o.frequency.value = f; return o; };
 const lfo = (rate, depth, target) => { const o = osc('sine', rate); const g = ctx.createGain(); g.gain.value = depth; o.connect(g); g.connect(target); o.start(); return o; };
 
+document.addEventListener('visibilitychange', () => {
+  if (!ctx || !sound.on) return;
+  if (document.hidden) ctx.suspend(); else { ctx.resume(); if (!current && currentName) ambience(currentName, true); }
+});
+
 // ── 環境音層 ──
 const LAYERS = {
+  music(out) { // 背景音樂：和弦鋪底 + 五聲音階水晶鈴 + 回音（手機喇叭可清楚聽見的中高頻）
+    const bus = ctx.createGain(); bus.gain.value = 0.9; bus.connect(out);
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2400; lp.connect(bus);
+    const delay = ctx.createDelay(1.5); delay.delayTime.value = 0.42;
+    const fb = ctx.createGain(); fb.gain.value = 0.38; delay.connect(fb); fb.connect(delay); delay.connect(lp);
+    const CHORDS = [[220, 261.6, 329.6, 392, 493.9], [174.6, 220, 261.6, 329.6, 440], [130.8, 196, 246.9, 329.6, 392], [196, 246.9, 293.7, 329.6, 440]];
+    const SCALE = [523.3, 587.3, 659.3, 784, 880, 1046.5, 1174.7, 1318.5];
+    let ci = 0, alive = true;
+    const pad = () => {
+      if (!alive) return;
+      const t = ctx.currentTime, dur = 9;
+      CHORDS[ci % CHORDS.length].forEach((fr, i) => {
+        [fr, fr * 1.003].forEach((f2, j) => {
+          const o = osc(j ? 'sine' : 'triangle', f2); const g = ctx.createGain();
+          g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.022 / (1 + i * 0.25), t + 2.5); g.gain.linearRampToValueAtTime(0.0001, t + dur);
+          o.connect(g); g.connect(lp); o.start(t); o.stop(t + dur + 0.1);
+        });
+      });
+      ci++;
+    };
+    const bell = () => {
+      if (!alive) return;
+      const t = ctx.currentTime, fr = SCALE[Math.floor(Math.random() * SCALE.length)];
+      [[fr, 0.05], [fr * 2.01, 0.012]].forEach(([f2, v]) => {
+        const o = osc('sine', f2); const g = ctx.createGain();
+        g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + 2.8);
+        o.connect(g); g.connect(lp); g.connect(delay); o.start(t); o.stop(t + 3);
+      });
+    };
+    pad();
+    const padId = setInterval(pad, 8000);
+    let bellId; const loop = () => { bell(); if (Math.random() < 0.35) setTimeout(bell, 220); bellId = setTimeout(loop, 1200 + Math.random() * 1800); }; loop();
+    return [{ stop: () => { alive = false; clearInterval(padId); clearTimeout(bellId); setTimeout(() => bus.disconnect(), 4000); } }];
+  },
   waves(out) { // 海浪：低通噪音 + 緩慢起伏
-    const n = noise(); const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 520;
-    const g = ctx.createGain(); g.gain.value = 0.35; n.connect(f); f.connect(g); g.connect(out); n.start();
-    lfo(0.09, 0.28, g.gain); lfo(0.05, 260, f.frequency); return [n];
+    const n = noise(); const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 1100;
+    const g = ctx.createGain(); g.gain.value = 0.32; n.connect(f); f.connect(g); g.connect(out); n.start();
+    lfo(0.09, 0.26, g.gain); lfo(0.05, 600, f.frequency); return [n];
   },
   deep(out) { // 深空低鳴
     const g = ctx.createGain(); g.gain.value = 0.10; g.connect(out);
@@ -89,10 +128,10 @@ const LAYERS = {
   },
 };
 const SCENES = {
-  base: ['waves', 'deep', 'sonar'],
-  intake: ['deep', 'buzz', 'waves'], radio: ['static', 'waves'], vault: ['deep', 'buzz'], mirror: ['shimmer', 'deep'],
-  greenhouse: ['drips', 'waves'], fault: ['rumble', 'deep'], gate: ['waves', 'deep', 'sonar'], fork: ['deep', 'sonar'],
-  playback: ['tick', 'deep'], core: ['pulse', 'deep', 'shimmer'], archive: ['choir', 'waves'], prologue: ['waves', 'deep'],
+  base: ['music', 'waves', 'deep', 'sonar'],
+  intake: ['music', 'buzz', 'waves'], radio: ['music', 'static', 'waves'], vault: ['music', 'deep', 'buzz'], mirror: ['music', 'shimmer'],
+  greenhouse: ['music', 'drips', 'waves'], fault: ['music', 'rumble', 'deep'], gate: ['music', 'waves', 'sonar'], fork: ['music', 'deep', 'sonar'],
+  playback: ['music', 'tick'], core: ['music', 'pulse', 'shimmer'], archive: ['music', 'choir', 'waves'], prologue: ['music', 'waves', 'deep'],
 };
 
 export function ambience(name, force) {
@@ -137,4 +176,12 @@ export function sfx(name) {
     case 'sink': { const o = osc('sine', 600); o.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 1.6); o.connect(env(sfxBus, 1.8, 0.1)); o.start(); o.stop(ctx.currentTime + 1.9); break; }
     default: break;
   }
+}
+
+// 測試用：目前輸出音量（RMS）
+export function outputLevel() {
+  if (!ctx || !master) return 0;
+  if (!master._an) { master._an = ctx.createAnalyser(); master._an.fftSize = 2048; master.connect(master._an); }
+  const a = new Float32Array(2048); master._an.getFloatTimeDomainData(a);
+  return Math.sqrt(a.reduce((s, v) => s + v * v, 0) / a.length);
 }
