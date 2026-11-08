@@ -35,15 +35,16 @@ function sound() {
 
 const SCENES = [
   { t: 4500, v: 'noise', lines: ['偵測到未登記的訊號……'], sfx: 'static' },
-  { t: 6000, v: 'noise', lines: ['{date}', '一個訊號，找到了你。'], sfx: 'beep' },
-  { t: 5000, v: 'logo', lines: [], sfx: 'static' },
-  { t: 7000, v: 'file', lines: ['我們正在建立一份檔案。', '檔案編號：030。', '但有一部分已經損壞了。'], sfx: 'type' },
-  { t: 7500, v: 'zones', lines: ['接下來十天，每天午夜，會開啟一個新的區域。', '每個區域，只存在一天。'], sfx: 'type' },
-  { t: 7000, v: 'zones-solve', lines: ['區域裡有被鎖住的機關、損壞的紀錄，', '以及藏在你現實世界裡的線索。'], sfx: 'type' },
-  { t: 7000, v: 'sample', lines: ['你會收到一個樣本。', '每天觀測它一次。', '它會記得——你是怎麼看它的。'], sfx: 'pulse' },
-  { t: 6500, v: 'missed', lines: ['錯過的區域不會等你。', '但故事不會因此結束。', '它只會走向另一條路。'], sfx: 'static' },
-  { t: 6000, v: 'final', lines: ['第十一天，所有紀錄會匯集到同一個房間。'], sfx: 'type' },
-  { t: 0, v: 'ready', lines: ['你的權限：觀測、修復、紀錄。', '準備好了嗎，觀測者？'], sfx: 'beep' },
+  { t: 6000, v: 'noise', lines: ['{date}', '時序檔案館・緊急廣播'], sfx: 'beep' },
+  { t: 4500, v: 'logo', lines: [], sfx: 'static' },
+  { t: 8000, v: 'file', lines: ['這裡保存著每一個人的檔案。', '其中一份——編號 030——正在崩解。'], sfx: 'type' },
+  { t: 8500, v: 'zones', lines: ['它碎成了十個片段，散落在接下來的十天裡。', '每個片段只會浮現 24 小時，然後沉回深處。'], sfx: 'type' },
+  { t: 9500, v: 'id', lines: ['系統比對了所有觀測員。', '只有一個人的訊號頻率，和檔案 030 完全一致。', '那個人，是你。'], sfx: 'scan' },
+  { t: 8500, v: 'zones-solve', lines: ['你的任務：在每個片段消失前進入它，', '解開機關，回收裡面的符號。', '有些線索，藏在你的現實世界裡。'], sfx: 'type' },
+  { t: 8000, v: 'sample', lines: ['檔案的核心，會以「樣本」的形式交給你。', '每天觀測它一次——它會依照你的方式成長。'], sfx: 'pulse' },
+  { t: 7500, v: 'missed', lines: ['錯過的片段，不會再以原本的樣子出現。', '但檔案不會因此消失，它會長成另一種樣子。'], sfx: 'static' },
+  { t: 7000, v: 'final', lines: ['第十一天，所有片段將匯集到第 030 號檔案室。', '屆時，檔案 030 將被重新定義。'], sfx: 'type' },
+  { t: 0, v: 'ready', lines: ['第 030 號觀測員，連線已建立。', '你的第一個片段，正在浮現。'], sfx: 'beep' },
 ];
 
 export function playPrologue({ startDate, onDone }) {
@@ -92,11 +93,16 @@ export function playPrologue({ startDate, onDone }) {
     if (scene >= SCENES.length || !alive) return;
     const s = SCENES[scene];
     sceneStart = performance.now();
-    if (audio) { if (s.sfx === 'static') audio.static(0.8); if (s.sfx === 'beep') audio.beep(660, 0.15); if (s.sfx === 'pulse') audio.pulse(); }
+    if (audio) { if (s.sfx === 'static') audio.static(0.8); if (s.sfx === 'beep') audio.beep(660, 0.15); if (s.sfx === 'pulse') audio.pulse(); if (s.sfx === 'scan') audio.static(1.6, 0.12); }
     showLines(s.lines, s.sfx);
     if (s.v === 'ready') {
-      const btn = document.createElement('button'); btn.className = 'btn primary pl-go'; btn.textContent = '接入 PROJECT 030';
-      setTimeout(() => { if (alive) { root.append(btn); btn.onclick = finish; } }, 3200);
+      const brief = document.createElement('div'); brief.className = 'pl-brief';
+      brief.innerHTML = `<div class="kicker">MISSION BRIEF</div>
+        <dl><dt>身分</dt><dd>第 030 號觀測員</dd><dt>任務</dt><dd>回收檔案 030 的 10 個片段與符號</dd>
+        <dt>期限</dt><dd>每個片段只存在當天 00:00–23:59</dd><dt>每日</dt><dd>進入片段區域・觀測樣本一次</dd>
+        <dt>終點</dt><dd>第 11 天，第 030 號檔案室</dd></dl>`;
+      const btn = document.createElement('button'); btn.className = 'btn primary pl-go'; btn.textContent = '接受任務';
+      setTimeout(() => { if (alive) { text.innerHTML = ''; brief.append(btn); root.append(brief); btn.onclick = finish; } }, 4200);
     } else setTimeout(next, s.t);
   }
 
@@ -160,6 +166,16 @@ export function playPrologue({ startDate, onDone }) {
         const a = i * 1.05 + now * 0.0004; g.strokeStyle = 'rgba(183,156,255,.7)'; g.beginPath(); g.moveTo(cx, cy);
         g.quadraticCurveTo(cx + Math.cos(a) * 30, cy + Math.sin(a) * 30, cx + Math.cos(a + 0.4) * 60, cy + Math.sin(a + 0.4) * 60); g.stroke();
       }
+    }
+    if (s.v === 'id') {
+      const r0 = 64;
+      for (let i = 0; i < 7; i++) { g.strokeStyle = `rgba(63,244,255,${0.15 + i * 0.08})`; g.beginPath(); g.ellipse(cx, cy, r0 - i * 8, (r0 - i * 8) * 1.25, 0, Math.PI * (0.15 + i * 0.05), Math.PI * (1.85 - i * 0.04)); g.stroke(); }
+      const sy = cy - 80 + ((k * 60) % 160);
+      g.fillStyle = 'rgba(63,244,255,.25)'; g.fillRect(cx - 90, sy, 180, 2);
+      const pct = Math.min(100, Math.floor(k * 22));
+      g.font = '600 14px "Share Tech Mono", monospace'; g.textAlign = 'center';
+      g.fillStyle = pct >= 100 ? '#ffb547' : '#3ff4ff'; g.fillText(pct >= 100 ? 'MATCH 100% · OBSERVER 030' : `MATCHING ${pct}%`, cx, cy + 110);
+      if (pct >= 100 && !s._done && audio) { s._done = true; audio.beep(990, 0.25, 0.12); }
     }
     if (s.v === 'missed') {
       const size = 54;

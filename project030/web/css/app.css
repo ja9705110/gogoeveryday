@@ -442,3 +442,22 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); box-sha
 /* 頁面進場 */
 .fade-in { animation: hudin .5s both; }
 @keyframes hudin { from { opacity: 0; transform: translateY(8px); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
+
+/* ── 任務狀態 / 簡報 ── */
+.mission { position: relative; margin: 8px 0 10px; padding: 12px 14px; clip-path: var(--cut); border: 1px solid rgba(63,244,255,.45);
+  background: linear-gradient(135deg, rgba(63,244,255,.10), rgba(5,14,24,.75) 60%); box-shadow: inset 0 0 30px rgba(63,244,255,.06); }
+.ms-id { font-family: var(--hud), 'Noto Sans TC'; font-size: 17px; font-weight: 700; color: #fff; margin: 4px 0 8px; display: flex; align-items: center; gap: 8px; text-shadow: 0 0 10px rgba(63,244,255,.5); }
+.ms-tag { font-family: var(--hud); font-size: 9px; letter-spacing: .2em; padding: 2px 6px; border: 1px solid var(--ok); color: var(--ok); box-shadow: 0 0 8px rgba(93,255,168,.4) inset; }
+.ms-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.ms-cell { background: rgba(2,10,18,.7); border: 1px solid var(--line); padding: 6px 4px; text-align: center; }
+.ms-k { font-size: 10px; color: var(--dim); letter-spacing: .1em; }
+.ms-v { font-family: var(--hud), 'Noto Sans TC'; font-size: 15px; color: var(--accent); text-shadow: 0 0 8px rgba(63,244,255,.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ms-s { font-size: 10px; color: var(--warn); }
+dl.brief dt, .pl-brief dt { font-family: var(--hud), 'Noto Sans TC'; font-size: 11px; letter-spacing: .2em; color: var(--accent2); margin-top: 12px; }
+dl.brief dd, .pl-brief dd { margin: 4px 0 0; color: #e6f8ff; }
+.pl-brief { position: absolute; left: 20px; right: 20px; top: 50%; transform: translateY(-58%); padding: 18px; clip-path: var(--cut); border: 1px solid rgba(63,244,255,.5);
+  background: rgba(3,12,20,.88); box-shadow: 0 0 30px rgba(63,244,255,.2); animation: hudin .6s both; }
+.pl-brief dl { margin: 6px 0 0; }
+.pl-brief { top: calc(70px + env(safe-area-inset-top)); bottom: auto; transform: none; max-height: calc(100dvh - 110px); overflow-y: auto; }
+.pl-brief dd { font-size: 15px; }
+.pl-brief .pl-go { position: static; transform: none; width: 100%; margin-top: 16px; }
