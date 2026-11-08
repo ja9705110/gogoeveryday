@@ -1,5 +1,5 @@
 // PROJECT 030 · 玩家端
-import { sb, rpc, errText, session, sendCode, verifyCode, signOut, upload, signedUrl, isConfigured, vapidKey } from './api.js';
+import { sb, rpc, errText, session, passwordLogin, signOut, upload, signedUrl, isConfigured, vapidKey } from './api.js';
 import { renderScene } from './scene.js';
 import { mountSample, ACTION_LABEL, ACTION_DESC, PARAM_LABEL } from './sample.js';
 import { renderWidget, renderClue, renderRevealed, h } from './steps.js';
@@ -71,35 +71,27 @@ async function boot() {
 
 function renderLogin() {
   app.innerHTML = '';
-  const email = h('input', { type: 'email', placeholder: 'you@example.com', autocomplete: 'email' });
-  const code = h('input', { type: 'text', inputmode: 'numeric', placeholder: '6 位數驗證碼', autocomplete: 'one-time-code' });
+  const acc = h('input', { type: 'text', placeholder: '帳號', autocomplete: 'username', autocapitalize: 'none', value: localStorage.getItem('p030.account') || '' });
+  const pw = h('input', { type: 'password', placeholder: '密碼', autocomplete: 'current-password' });
   const msg = h('div', { class: 'msg' });
-  const step2 = h('div', { class: 'hidden' }, h('label', { class: 'field' }, h('span', {}, '驗證碼'), code),
-    h('button', { class: 'btn primary block', onclick: async (e) => {
-      e.target.disabled = true; msg.textContent = '驗證中…';
-      try { await verifyCode(email.value.trim(), code.value); location.reload(); }
-      catch (err) { msg.className = 'msg bad'; msg.textContent = errText(err); e.target.disabled = false; }
-    } }, '接入'));
+  const btn = h('button', { class: 'btn primary block', type: 'submit' }, '接入');
+  const go = async (e) => {
+    e.preventDefault(); btn.disabled = true; msg.className = 'msg'; msg.textContent = '驗證中…';
+    try { await passwordLogin(acc.value, pw.value); localStorage.setItem('p030.account', acc.value.trim()); location.reload(); }
+    catch (err) { msg.className = 'msg bad'; msg.textContent = /Invalid login/i.test(err.message || '') ? '帳號或密碼錯誤。' : errText(err); btn.disabled = false; }
+  };
   app.append(h('div', { style: 'margin-top:12vh' },
     h('div', { class: 'kicker' }, 'PROJECT 030'),
     h('h1', {}, '觀測者驗證'),
-    h('p', { class: 'dim' }, '你收到了一份邀請。請以受邀的電子郵件接入。'),
-    h('div', { class: 'card' },
-      h('label', { class: 'field' }, h('span', {}, '電子郵件'), email),
-      h('button', { class: 'btn block', onclick: async (e) => {
-        if (!email.value.includes('@')) { msg.textContent = '請輸入電子郵件。'; return; }
-        e.target.disabled = true; msg.className = 'msg'; msg.textContent = '傳送中…';
-        try { await sendCode(email.value.trim()); msg.className = 'msg good'; msg.textContent = '驗證碼已寄出。也可以直接點信中的連結。'; step2.classList.remove('hidden'); }
-        catch (err) { msg.className = 'msg bad'; msg.textContent = errText(err); }
-        e.target.disabled = false;
-      } }, '寄送驗證碼'),
-      step2, msg)));
+    h('p', { class: 'dim' }, '你收到了一份邀請。請輸入交給你的帳號與密碼。'),
+    h('form', { class: 'card', onsubmit: go },
+      h('label', { class: 'field' }, h('span', {}, '帳號'), acc), h('label', { class: 'field' }, h('span', {}, '密碼'), pw), btn, msg)));
 }
 function renderNotInvited() {
   app.innerHTML = '';
   app.append(h('div', { class: 'card', style: 'margin-top:20vh' }, h('div', { class: 'kicker' }, 'ACCESS DENIED'),
-    h('h1', {}, '這個信箱不在觀測名單上'), h('p', { class: 'dim' }, S.boot.email),
-    h('button', { class: 'btn', onclick: async () => { await signOut(); location.reload(); } }, '換一個信箱')));
+    h('h1', {}, '這個帳號不在觀測名單上'), h('p', { class: 'dim' }, S.boot.email),
+    h('button', { class: 'btn', onclick: async () => { await signOut(); location.reload(); } }, '換一個帳號')));
 }
 function renderError(e) {
   app.innerHTML = '';

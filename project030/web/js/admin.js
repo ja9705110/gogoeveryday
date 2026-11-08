@@ -1,5 +1,5 @@
 // PROJECT 030 · 管理後台（所有權限檢查在伺服器端：RLS + assert_admin）
-import { sb, rpc, errText, session, sendCode, verifyCode, passwordLogin, signOut, signedUrl, removeFile, isConfigured } from './api.js';
+import { sb, rpc, errText, session, passwordLogin, accountToEmail, signOut, signedUrl, removeFile, isConfigured } from './api.js';
 import { h } from './steps.js';
 
 const app = document.getElementById('app');
@@ -27,17 +27,18 @@ async function boot() {
 
 function login() {
   app.innerHTML = '';
-  const email = h('input', { type: 'email', placeholder: 'admin email' });
-  const pw = h('input', { type: 'password', placeholder: '密碼（若有設定）' });
-  const code = h('input', { type: 'text', placeholder: '驗證碼', inputmode: 'numeric' });
+  const acc = h('input', { type: 'text', placeholder: '帳號', autocomplete: 'username', autocapitalize: 'none', value: localStorage.getItem('p030.account') || '' });
+  const pw = h('input', { type: 'password', placeholder: '密碼', autocomplete: 'current-password' });
   const msg = h('div', { class: 'msg' });
+  const btn = h('button', { class: 'btn primary block', type: 'submit' }, '登入');
+  const go = async (e) => {
+    e.preventDefault(); btn.disabled = true; msg.className = 'msg'; msg.textContent = '驗證中…';
+    try { await passwordLogin(acc.value, pw.value); localStorage.setItem('p030.account', acc.value.trim()); location.reload(); }
+    catch (err) { msg.className = 'msg bad'; msg.textContent = /Invalid login/i.test(err.message || '') ? '帳號或密碼錯誤。' : errText(err); btn.disabled = false; }
+  };
   app.append(h('div', { style: 'max-width:420px;margin:12vh auto 0' }, h('div', { class: 'kicker' }, 'PROJECT 030 · CONTROL'), h('h1', {}, '管理者登入'),
-    h('div', { class: 'card' }, h('label', { class: 'field' }, h('span', {}, 'Email'), email), h('label', { class: 'field' }, h('span', {}, '密碼'), pw),
-      h('button', { class: 'btn primary block', onclick: async () => { try { await passwordLogin(email.value, pw.value); location.reload(); } catch (e) { msg.className = 'msg bad'; msg.textContent = errText(e); } } }, '以密碼登入'),
-      h('div', { class: 'dim', style: 'text-align:center;margin:10px 0;font-size:12px' }, '或'),
-      h('button', { class: 'btn block', onclick: async () => { try { await sendCode(email.value); msg.className = 'msg good'; msg.textContent = '驗證碼已寄出'; } catch (e) { msg.className = 'msg bad'; msg.textContent = errText(e); } } }, '寄送 Email 驗證碼'),
-      h('label', { class: 'field' }, h('span', {}, '驗證碼'), code),
-      h('button', { class: 'btn block', onclick: async () => { try { await verifyCode(email.value, code.value); location.reload(); } catch (e) { msg.className = 'msg bad'; msg.textContent = errText(e); } } }, '以驗證碼登入'), msg)));
+    h('form', { class: 'card', onsubmit: go },
+      h('label', { class: 'field' }, h('span', {}, '帳號'), acc), h('label', { class: 'field' }, h('span', {}, '密碼'), pw), btn, msg)));
 }
 
 const TABS = [['overview', '總覽'], ['settings', '設定與名單'], ['levels', '關卡內容'], ['review', '佐證審核'], ['events', '特殊事件'], ['finale', '終章尋寶'], ['test', '測試模式'], ['print', 'AR 卡片'], ['backup', '備份']];
@@ -115,14 +116,14 @@ async function settings(body) {
     playersCard(players || [])));
 }
 function playersCard(players) {
-  const em = h('input', { type: 'email', placeholder: '壽星的 email' });
+  const em = h('input', { type: 'email', placeholder: '壽星的帳號（名稱或 email）' });
   const note = h('input', { type: 'text', placeholder: '備註' });
   const list = h('div');
   players.forEach((p) => list.append(h('div', { class: 'row', style: 'border-bottom:1px solid var(--line);padding:6px 0' }, h('span', {}, p.email), h('span', { class: 'dim' }, p.note || ''), h('span', { class: 'spacer' }),
     h('button', { class: 'btn sm warn', onclick: async () => { if (!confirm('移除後此信箱將無法再登入（已建立的進度保留）。')) return; await sb.from('allowed_players').delete().eq('email', p.email); render(); } }, '移除'))));
   return h('div', { class: 'card' }, h('h2', {}, '受邀玩家（只有名單內的信箱能登入）'), list, h('div', { style: 'height:8px' }), em, h('div', { style: 'height:6px' }), note,
     h('div', { style: 'height:6px' }), h('button', { class: 'btn', onclick: async () => {
-      const { error } = await sb.from('allowed_players').insert({ email: em.value.trim().toLowerCase(), note: note.value });
+      const { error } = await sb.from('allowed_players').insert({ email: accountToEmail(em.value), note: note.value });
       if (error) toast(errText(error)); else render();
     } }, '加入名單'));
 }
