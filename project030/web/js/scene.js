@@ -78,6 +78,17 @@ export function renderScene(scene = {}, found = {}, onSpot) {
     <rect width="360" height="220" fill="rgba(${tintColor},${tint})" ${light === 'emergency' ? 'class="pulse"' : ''}/>
     ${light === 'off' ? '<circle cx="180" cy="110" r="70" fill="rgba(255,255,230,.05)"/>' : ''}
   </svg>`;
+  const hud = document.createElement('div');
+  hud.className = 'scene-hud';
+  const code = { intake: 'ZONE-01', radio: 'ZONE-02', vault: 'ZONE-03', mirror: 'ZONE-04', greenhouse: 'ZONE-05', fault: 'ZONE-06', gate: 'ZONE-07', fork: 'ZONE-08', playback: 'ZONE-09', core: 'ZONE-10', archive: 'FILE-030' }[scene.theme] || 'ZONE';
+  hud.innerHTML = `<span class="tl rec">LIVE · ${code}</span><span class="tr">CAM 0${(code.charCodeAt(code.length - 1) % 8) + 1}</span>
+    <span class="bl">LUX ${light.toUpperCase()}</span><span class="br" data-clock></span>
+    <i class="corner c1"></i><i class="corner c2"></i><i class="corner c3"></i><i class="corner c4"></i>`;
+  wrap.appendChild(hud);
+  const clk = hud.querySelector('[data-clock]');
+  let seen = false;
+  const tick = () => { if (clk.isConnected) seen = true; else if (seen) return clearInterval(iv); clk.textContent = new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Taipei' }); };
+  const iv = setInterval(tick, 1000); tick();
   if (scene.pulse === 'irregular') wrap.querySelectorAll('.corepulse').forEach((e) => e.classList.add('irregular'));
   for (const h of scene.hotspots || []) {
     const b = document.createElement('button');

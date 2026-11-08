@@ -5,6 +5,7 @@ import { mountSample, ACTION_LABEL, ACTION_DESC, PARAM_LABEL } from './sample.js
 import { renderWidget, renderClue, renderRevealed, h } from './steps.js';
 import { glyphSVG, NAMES } from './glyphs.js';
 import { startAR } from './ar.js';
+import { playPrologue } from './prologue.js';
 
 const app = document.getElementById('app');
 const S = { boot: null, pid: null, state: null, skew: 0, cleanup: [] };
@@ -60,7 +61,12 @@ async function boot() {
   S.pid = prof.id;
   localStorage.setItem('p030.profile', S.pid);
   window.addEventListener('hashchange', route);
-  route();
+  route().then(() => {
+    const k = 'p030.prologue.' + S.pid;
+    if (!localStorage.getItem(k) && S.state) {
+      playPrologue({ startDate: S.state.start_date, onDone: () => { localStorage.setItem(k, '1'); if (!location.hash || location.hash === '#/') route(); } });
+    }
+  });
 }
 
 function renderLogin() {
@@ -160,6 +166,49 @@ async function route() {
   } catch (e) { renderError(e); }
 }
 
+// ── 任務指引：依伺服器狀態算出「下一步」 ──
+function nextObjective(st) {
+  const d = st.game_day;
+  const lv = (n) => st.levels.find((l) => l.day === n);
+  const alts = st.levels.filter((l) => l.day <= 10 && l.status === 'ALTERNATE');
+  const zoneLabel = (l) => `第 ${String(l.day).padStart(2, '0')} 區「${l.title}」`;
+  if (d < 1) return { goal: '等待第一個訊號', desc: `第一個區域將於 ${st.start_date} 00:00 開啟。先打開通知，才不會錯過。`, href: '#/settings', cta: '設定通知', list: [] };
+  if (d >= 11) {
+    const f = st.finale || {};
+    if (f.hunt_done) return { goal: '檔案狀態：持續更新中', desc: '所有紀錄都已歸檔。你可以隨時回來重讀。', href: '#/finale', cta: '回到檔案室', list: [] };
+    return { goal: f.defined ? '前往現實座標' : '進入第030號檔案室', desc: '所有區域的紀錄都移到了同一個房間。', href: '#/finale', cta: '進入檔案室', list: [] };
+  }
+  const t = lv(d);
+  const zoneDone = t.status === 'COMPLETED';
+  const list = [
+    { ok: zoneDone, text: `完成今天的區域：${zoneLabel(t)}` },
+    { ok: st.observed_today, text: '在「培養艙」觀測樣本一次' },
+  ];
+  if (alts.length) list.push({ ok: false, text: `（可選）替代路線：${alts.map((a) => '第 ' + a.day + ' 區').join('、')}` });
+  if (st.portrait && !st.portrait.saved) list.push({ ok: false, text: '（可選）打開「影像校正邀請函」' });
+  if (t.status === 'AVAILABLE') return { goal: `進入${zoneLabel(t)}`, desc: '今天 23:59:59 前完成。區域關閉後，不會以原本的樣子回來。', href: `#/zone/${d}`, cta: '進入區域', list };
+  if (t.status === 'IN_PROGRESS') return { goal: `繼續${zoneLabel(t)}`, desc: '你上次停在這裡。進度已保存在伺服器上。', href: `#/zone/${d}`, cta: '繼續', list };
+  if (!st.observed_today) return { goal: '觀測樣本 030', desc: '今天還沒有觀測。選擇一種方式，它會記住。', href: '#/lab', cta: '前往培養艙', list };
+  if (alts.length) return { goal: `走替代路線：${zoneLabel(alts[0])}`, desc: '原本的區域已經關閉，但還有另一條路。', href: `#/zone/${alts[0].day}`, cta: '前往', list };
+  if (st.portrait && !st.portrait.saved) return { goal: '打開影像校正邀請函', desc: '鏡面系統在等你的回覆。', href: '#/gift', cta: '查看邀請函', list };
+  return { goal: '今天的任務已完成', desc: d < 10 ? '下一個區域將在午夜 00:00 開啟。' : '明天，第030號檔案室將會開啟。', href: '#/lab', cta: '看看樣本', list };
+}
+
+function showManual() {
+  modal(h('div', { class: 'manual' },
+    h('div', { class: 'kicker' }, 'OBSERVER MANUAL'), h('h2', { style: 'color:var(--text);margin-top:4px' }, '觀測手冊'),
+    h('ol', {},
+      h('li', {}, '每天 00:00 會開啟一個新的「區域」，當天 23:59:59 關閉。首頁上方的「下一步」會告訴你現在該做什麼。'),
+      h('li', {}, '進入區域後，閱讀畫面上的訊息與線索，操作機關（開關、密碼鎖、旋鈕……）。卡住時可以按「請求提示」。'),
+      h('li', {}, '場景畫面裡偶爾閃一下的光點可以點，可能藏著東西。'),
+      h('li', {}, '有些區域會要你拍照、錄音、寫一句話，或用相機掃描藏在你現實世界裡的卡片。'),
+      h('li', {}, '每天到「培養艙」觀測樣本 030 一次。觀測方式由你決定，它會依你的選擇長成不同的樣子。'),
+      h('li', {}, '取得的符號放在「物品」，每個符號都有一個頻率數字，之後會再用到。'),
+      h('li', {}, '錯過的區域會永久改變，但會開啟另一條替代路線。故事不會因此結束。'),
+      h('li', {}, '到右上角「設定」開啟通知，系統會在新區域開啟、即將關閉時提醒你。')),
+    h('button', { class: 'btn block', onclick: () => { document.querySelector('.modal')?.remove(); playPrologue({ startDate: S.state.start_date }); } }, '▶ 重播前導影片')));
+}
+
 // ── 終端（首頁） ──
 function home() {
   const st = S.state;
@@ -168,22 +217,13 @@ function home() {
   const before = d < 1;
   wrap.append(h('div', { class: 'kicker' }, before ? 'STANDBY' : d <= 10 ? `DAY ${String(d).padStart(2, '0')} / 10` : 'FILE 030'),
     h('h1', {}, before ? '等待訊號' : d <= 10 ? '觀測進行中' : '第030號檔案室'));
-  if (before) wrap.append(h('p', { class: 'dim' }, `第一個區域將於 ${st.start_date} 00:00 開啟。`));
+  const ob = nextObjective(st);
+  wrap.append(h('div', { class: 'objective fade-in' },
+    h('div', { class: 'row' }, h('span', { class: 'kicker' }, '下一步'), h('span', { class: 'spacer' }), h('button', { class: 'btn ghost sm', onclick: showManual }, '觀測手冊')),
+    h('div', { class: 'goal' }, ob.goal), h('div', { class: 'dim', style: 'font-size:14px' }, ob.desc),
+    ob.list.length ? h('ul', { class: 'checklist' }, ...ob.list.map((x) => h('li', { class: x.ok ? 'ok' : '' }, x.text))) : null,
+    h('a', { class: 'btn primary block', style: 'margin-top:10px', href: ob.href }, ob.cta)));
 
-  const today = st.levels.find((l) => l.day === Math.min(d, 11));
-  if (today && today.status !== 'LOCKED') {
-    const playable = ['AVAILABLE', 'IN_PROGRESS', 'ALTERNATE'].includes(today.status);
-    wrap.append(h('div', { class: 'card glow' },
-      h('div', { class: 'kicker' }, today.day === 11 ? 'FILE 030' : today.code),
-      h('h2', { style: 'margin:4px 0;color:var(--text);font-size:20px' }, today.title),
-      today.close_at ? h('div', { class: 'dim mono', style: 'font-size:12px' }, `封閉時間 ${fmtTime(new Date(new Date(today.close_at) - 1000).toISOString())}:59`) : null,
-      h('div', { style: 'height:10px' }),
-      h('a', { class: 'btn primary block', href: today.day === 11 ? '#/finale' : `#/zone/${today.day}` }, today.day === 11 ? '進入檔案室' : playable ? '進入區域' : '查看紀錄')));
-  }
-  if (!st.observed_today && d >= 1 && d <= 11) {
-    wrap.append(h('a', { class: 'card', href: '#/lab', style: 'display:block;text-decoration:none;color:var(--text)' },
-      h('div', { class: 'kicker' }, 'SAMPLE 030'), h('div', {}, '今天尚未觀測樣本。'), h('div', { class: 'dim', style: 'font-size:13px' }, `目前形態：${st.sample.form}`)));
-  }
   if (st.portrait) wrap.append(h('a', { class: 'card', href: '#/gift', style: 'display:block;text-decoration:none;color:var(--text)' },
     h('div', { class: 'kicker', style: 'color:var(--accent2)' }, 'INVITATION'), h('div', {}, '影像校正邀請函'), h('div', { class: 'dim', style: 'font-size:13px' }, st.portrait.saved ? '已設定・可再次修改' : '尚未設定')));
 
@@ -586,6 +626,7 @@ async function settings() {
     S.boot.profiles.forEach((p) => sel.append(h('option', { value: p.id, selected: p.id === S.pid ? 'selected' : null }, (p.is_test ? '［測試］' : '') + (p.label || p.id))));
     wrap.append(h('div', { class: 'card' }, h('b', {}, '切換檔案'), sel));
   }
+  wrap.append(h('button', { class: 'btn block', onclick: () => playPrologue({ startDate: S.state.start_date }) }, '▶ 重播前導影片'), h('div', { style: 'height:8px' }));
   if (S.boot.is_admin) wrap.append(h('a', { class: 'btn block', href: 'admin.html' }, '管理後台'));
   wrap.append(h('div', { style: 'height:10px' }), h('button', { class: 'btn ghost block', onclick: async () => { await signOut(); location.reload(); } }, '登出'));
   wrap.append(h('p', { class: 'faint mono', style: 'font-size:11px;text-align:center' }, S.boot.email));
