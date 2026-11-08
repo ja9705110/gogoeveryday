@@ -160,7 +160,7 @@ const SCENES = {
   base: ['music', 'waves', 'deep', 'sonar'],
   intake: ['music', 'buzz', 'waves'], radio: ['music', 'static', 'waves'], vault: ['music', 'deep', 'buzz'], mirror: ['music', 'shimmer'],
   greenhouse: ['music', 'drips', 'waves'], fault: ['music', 'rumble', 'deep'], gate: ['music', 'waves', 'sonar'], fork: ['music', 'deep', 'sonar'],
-  playback: ['music', 'tick'], core: ['music', 'pulse', 'shimmer'], archive: ['music', 'choir', 'waves'], prologue: ['music', 'waves', 'deep'],
+  playback: ['music', 'tick'], core: ['music', 'pulse', 'shimmer'], archive: ['music', 'choir', 'waves'], prologue: ['music', 'waves', 'deep'], ceremony: ['music', 'choir', 'waves', 'shimmer'],
 };
 
 export function ambience(name, force) {
