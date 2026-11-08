@@ -555,3 +555,7 @@ body { background: transparent !important; }
 .ms-name { font-family: 'Noto Sans TC'; font-size: 14px; font-weight: 500; color: var(--accent2); }
 .admin-tabs button { flex: none; white-space: nowrap; }
 .admin .topbar .btn { white-space: nowrap; }
+.keypad-display.long { font-size: 20px; letter-spacing: .18em; word-break: break-all; }
+.scene .hs.clue::after { background: rgba(63,244,255,.85); box-shadow: 0 0 12px var(--accent); animation: glim 2.2s infinite; }
+.scene .hs.clue::before { content: ''; position: absolute; inset: 6px; border: 1.5px solid rgba(63,244,255,.7); border-radius: 50%; animation: pulse 1.8s infinite; }
+.scene .hs.clue.seen::before { border-color: rgba(255,181,71,.6); }

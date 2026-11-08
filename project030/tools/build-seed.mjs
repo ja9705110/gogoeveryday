@@ -9,7 +9,7 @@ import { stages } from '../supabase/content/stages.mjs';
 export const levels = baseLevels.map((l) => {
   const st = stages[l.day];
   if (!st) return l;
-  const config = { ...l.config, steps: st.steps };
+  const config = { ...l.config, steps: st.steps, ...(st.scene ? { scene: { ...l.config.scene, ...st.scene } } : {}) };
   if (st.variant_steps && config.variants) config.variants = config.variants.map((v) => (st.variant_steps[v.id] ? { ...v, steps: st.variant_steps[v.id] } : v));
   return { ...l, config, secrets: { ...(l.secrets || {}), ...(st.secrets || {}) } };
 });

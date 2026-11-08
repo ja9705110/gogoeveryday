@@ -8,10 +8,15 @@ const story = (id, text, extra = {}) => ({ id, type: 'story', text, ...extra });
 export const stages = {
   // ───────── DAY 1 · 接入／身分建檔（暗中選出形象照風格） ─────────
   1: {
+    scene: { hotspots: [
+      { id: 'under_desk', x: 24, y: 82, label: '桌子底下' },
+      { id: 'c_panel', x: 17, y: 41, label: '配電箱', clue: [{ type: 'note', text: '配電箱內側貼著一張發黃的紙條：\n「只讓無法再被拆開的位置通電。」' }] },
+      { id: 'c_clock', x: 49, y: 21, label: '牆上的時鐘', clue: [{ type: 'clock', h: 10, m: 30, caption: '時鐘停住了。秒針一動也不動。' }] },
+    ] },
     steps: [
       story('s_wake', ['本區電力異常。', '系統：「請先恢復電源。」'], { speaker: 'SYSTEM', ...S(1, '恢復電源') }),
       { id: 's_power', type: 'switches', title: '配電箱', count: 6, labels: ['1', '2', '3', '4', '5', '6'], ...S(1, '恢復電源'),
-        clue: [{ type: 'note', text: '配電箱內側貼著一張發黃的紙條：\n「只讓無法再被拆開的位置通電。」' }], prompt: '撥動開關，然後拉下主閘。' },
+        prompt: '先調查上方畫面裡的配電箱，再撥動開關、拉下主閘。' },
       story('s_sample', ['燈亮了。培養艙的玻璃起霧，又慢慢變清。', '裡面有一個很小的東西。它沒有名字，只有編號：030。',
         '系統：「樣本需要觀察。每天一次，什麼時候都可以。觀察的方式，由你決定。」'], { speaker: 'SYSTEM', ...S(1, '恢復電源') }),
       { id: 's_observe', type: 'observe', title: '第一次觀察', prompt: '前往「培養艙」選一種方式觀察它，再回到這裡。', ...S(1, '恢復電源') },
@@ -41,8 +46,7 @@ export const stages = {
       story('s_drift', ['終端機突然閃爍：「警告。偵測到時間差。」', '「此區的時間，停在某一刻。你的世界卻仍在前進。」',
         '「培養艙無法在不同步的時間裡封存。」'], { speaker: 'SYSTEM', ...S(3, '時間同步') }),
       { id: 's_sync', type: 'evidence', title: '時間同步', kinds: ['photo'], gate: true, ...S(3, '時間同步'),
-        clue: [{ type: 'clock', h: 10, m: 30, caption: '這個房間的時間。' }],
-        prompt: '同步程序需要一份來自你世界的證據。',
+        prompt: '同步程序需要一份來自你世界的證據。（這個房間裡，有東西停住了。）',
         pending_text: '同步證據已送出。觀察站正在比對兩個世界的時間……比對通過後，本區將自動歸檔。' },
     ],
     secrets: {
@@ -53,18 +57,22 @@ export const stages = {
 
   // ───────── DAY 2 · 頻率 ─────────
   2: {
+    scene: { hotspots: [
+      { id: 'drawer', x: 76, y: 80, label: '抽屜' },
+      { id: 'c_log', x: 51, y: 57, label: '收音機', clue: [{ type: 'log', lines: ['廣播紀錄 23:10 —— 收到片段訊號', '附註：訊號是倒著傳來的。', '內容：「7.301」'] }] },
+      { id: 'c_serial', x: 20, y: 34, label: '窗邊的抄錄紙', clue: [{ type: 'note', text: '有人在紙上潦草地抄著：\n「訊號源序號：13 位數字。」\n「它印在一樣你每天都會用、用完就會消失的白色東西上。」' }] },
+    ] },
     steps: [
       story('s_intro', ['收音機自己開著，只有雜訊。', '系統：「請找出訊號源的頻率。」'], { speaker: 'SYSTEM', ...S(1, '調頻') }),
-      { id: 's_tune', type: 'dial', title: '調頻', dials: 4, format: '###.#', ...S(1, '調頻'),
-        clue: [{ type: 'log', lines: ['廣播紀錄 23:10 —— 收到片段訊號', '附註：訊號是倒著傳來的。', '內容：「7.301」'] }], prompt: '轉動旋鈕，對準頻率。' },
-      story('s_frag', ['雜訊退去，訊號斷成了四段。', '系統：「請依正確順序重組訊號。」'], { ...S(2, '訊號重組') }),
-      { id: 's_order', type: 'sequence', title: '訊號重組', pick: 4, render: 'box', ...S(2, '訊號重組'),
+      { id: 's_tune', type: 'dial', title: '調頻', dials: 4, format: '###.#', ...S(1, '調頻'), prompt: '調查畫面裡的收音機，轉動旋鈕對準頻率。' },
+      { id: 's_order', type: 'sequence', title: '訊號重組', pick: 4, render: 'box', ...S(1, '調頻'),
         items: [{ id: 'c', label: '每天' }, { id: 'a', label: '訊號源' }, { id: 'd', label: '自己響起' }, { id: 'b', label: '在你的世界' }],
-        clue: [{ type: 'note', text: '訊號開頭是「訊號源」，結尾是一個動作。' }], prompt: '依序點選四段訊號。' },
-      story('s_decoded', ['重組後的訊號：', '「訊號源・在你的世界・每天・自己響起。」'], { speaker: 'SIGNAL', ...S(3, '訊號源') }),
+        clue: [{ type: 'note', text: '訊號斷成了四段。開頭是「訊號源」，結尾是一個動作。' }], prompt: '依序點選四段訊號。' },
+      story('s_need_serial', ['訊號重組完成：「訊號源・在你的世界・每天・自己響起。」', '系統：「訊號源已定位。但頻道被鎖住了——需要訊號源的序號。」'], { speaker: 'SYSTEM', ...S(2, '訊號源序號') }),
+      { id: 's_serial', type: 'keypad', title: '訊號源序號', length: 13, ...S(2, '訊號源序號'), prompt: '輸入 13 位序號。（畫面裡有人留下了線索）' },
+      story('s_decoded', ['頻道解鎖。', '系統：「最後一步：需要一段來自訊號源本身的聲音。」'], { speaker: 'SYSTEM', ...S(3, '訊號源') }),
       { id: 's_record', type: 'evidence', title: '訊號源', kinds: ['audio'], gate: true, ...S(3, '訊號源'),
-        prompt: '收音機需要一段來自訊號源的聲音。',
-        pending_text: '聲音已送出。觀察站正在比對頻率……' },
+        prompt: '收音機需要一段「每天會自己響起」的聲音。', pending_text: '聲音已送出。觀察站正在比對頻率……' },
       story('s_watcher', ['門口站著一個人，穿著舊式的值班外套。', '「你也收到訊號了？」', '「我是這裡的守夜人。我們明天見。」'],
         { speaker: '守夜人', when: { not: { flag: 'lab_dark' } }, ...S(3, '訊號源') }),
       story('s_watcher_dark', ['走廊的另一端有手電筒的光晃了一下。', '「……這裡太暗了，」有人說。「明天吧。」'],
@@ -72,6 +80,7 @@ export const stages = {
     ],
     secrets: {
       s_order: { answer: 'a,b,c,d', hints: ['第一段是「訊號源」。', '訊號源 → 在你的世界 → 每天 → 自己響起'], success: '訊號變得清晰。', wrong: '訊號又亂了。' },
+      s_serial: { answer: '4710901898847', hints: ['每天都會用、用完就會消失、白色的……', '它通常放在廁所或浴室。', '找到倍潔雅衛生紙的包裝，輸入條碼下方的 13 個數字。'], success: '序號吻合。頻道解鎖。', wrong: '序號不符。' },
       s_record: { hints: ['你的世界裡，有什麼東西每天會自己發出聲音？', '鬧鐘、微波爐的「叮」、熱水壺、洗衣機……', '錄下任何一個會自己響起的聲音上傳。'] },
     },
   },
@@ -113,39 +122,47 @@ export const stages = {
 
   // ───────── DAY 5 · 溫室 ─────────
   5: {
+    scene: { hotspots: [
+      { id: 'roots', x: 82, y: 84, label: '根部' },
+      { id: 'vines', x: 10, y: 40, label: '藤蔓後面', when: { stat: 'exploration', gte: 2 } },
+      { id: 'c_pot', x: 50, y: 82, label: '花盆上的標籤', clue: [{ type: 'note', text: '標籤上的字很小：\n「調配方法：見《居家保健小百科》——消化不良。」\n「對照速查表：用法 × 肌膚敏感度，數一數每一欄。」' }] },
+    ] },
     steps: [
       { id: 's_order', type: 'sequence', title: '澆水順序', pick: 5, render: 'plant', ...S(1, '澆水順序'),
         items: [{ id: 'c', stage: 3 }, { id: 'a', stage: 1 }, { id: 'e', stage: 5 }, { id: 'b', stage: 2 }, { id: 'd', stage: 4 }],
         clue: [{ type: 'note', text: '澆水紀錄：「從最晚種下的開始。」' }], prompt: '依序點選植物。' },
-      { id: 's_drops', type: 'keypad', title: '灌溉計時器', length: 2, ...S(2, '灌溉計時器'),
-        clue: [{ type: 'note', text: '灌溉紀錄：\nⅠ號：3 滴\nⅡ號：Ⅰ號的兩倍\nⅢ號：比Ⅱ號少 1 滴\nⅣ號：和Ⅰ號一樣\n\n「總共要給幾滴？」' }], prompt: '輸入總滴數。' },
+      story('s_ill', ['溫室的終端亮起紅燈：「樣本消化系統異常。」', '「需要一份調配。調配的方法，記載在你世界的一本書裡。」'], { speaker: 'SYSTEM', ...S(2, '消化系統調配') }),
+      { id: 's_recipe', type: 'keypad', title: '消化系統調配', length: 6, ...S(2, '消化系統調配'), prompt: '輸入 6 位調配碼。（先調查畫面裡的花盆）' },
       { id: 's_night', type: 'story', optional: true, title: '夜間花苞', text: ['花苞在夜裡打開了。', '裡面是一顆很小的、發著光的種子。'],
         window: { from: '21:00', to: '23:59:59', closed_text: '花苞緊閉著。也許要等到夜裡（21:00 後）。' }, ...S(2, '灌溉計時器') },
       { id: 's_photo', type: 'evidence', title: '生長樣本', kinds: ['photo'], gate: true, ...S(3, '生長樣本'),
         prompt: '溫室需要一份「正在長大」的樣本。', pending_text: '樣本已送出。溫室正在比對生長紀錄……' },
     ],
     secrets: {
-      s_drops: { answer: '17', hints: ['先算出每一號各是幾滴。', '3、6、5、3。'], success: '水流過每一株植物。', wrong: '有一株植物垂下了葉子。' },
+      s_recipe: { answer: '777250', hints: ['花盆標籤提到一本書。它在你家的廚房。', '找到《居家保健小百科》裡「消化不良」的複方調配，把用到的精油對照前面的精油速查表。', '速查表有 3 種用法、3 種肌膚敏感度，共 6 欄。數一數每一欄有幾支調配裡的精油打勾，依序輸入 6 個數字。'], success: '調配完成。樣本的光變得穩定。', wrong: '調配比例不對。樣本微微顫抖。' },
       s_photo: { hints: ['你的世界裡，有什麼東西每天都在悄悄長大？', '植物、寵物、指甲、頭髮……任何正在生長的都可以。', '拍一株植物最新長出的葉子上傳。'] },
     },
   },
 
   // ───────── DAY 6 · 斷層 ─────────
   6: {
+    scene: { hotspots: [
+      { id: 'c_crack', x: 50, y: 52, label: '裂縫裡的紙', clue: [{ type: 'note', text: '一張被撕下的紙，邊緣燒焦了：\n「……社會工作……」\n「……答錯的那幾題，改回正確答案……」\n「共 10 題。」' }] },
+    ] },
     steps: [
       { id: 's_glitch', type: 'story', title: '損壞的紀錄', inject_evidence_day: 1, text: ['第 01 區的紀錄出現在這裡，但已經損壞：'], ...S(1, '重建斷層') },
       { id: 's_lock', type: 'symbols', title: '重建斷層', slots: 4, ...S(1, '重建斷層'),
         clue: [{ type: 'log', lines: ['損壞的時間戳：', 'D01 ▒▒ D02 ▒▒ D02 ▒▒ D01', '「把最早的兩個訊號，依時間戳放回去。」'] }], prompt: '從你持有的符號中依序放入。' },
-      { id: 's_depth', type: 'keypad', title: '斷層深度', length: 2, ...S(2, '斷層深度'),
-        clue: [{ type: 'log', lines: ['斷層深度 ＝ 最早兩個符號的頻率，', '依取得的順序排列。'] }], prompt: '輸入斷層深度。' },
-      { id: 's_choice', type: 'choice', title: '修復', flag: 'fault', ...S(2, '斷層深度'),
+      story('s_exam_intro', ['裂縫深處卡著一張被撕下來的紙。', '系統：「斷層的另一側，是一段曾經答錯的紀錄。把它改回來，裂縫才會停止。」'], { speaker: 'SYSTEM', ...S(2, '錯過的答案') }),
+      { id: 's_exam', type: 'letters', title: '錯過的答案', length: 10, letters: ['A', 'B', 'C', 'D'], ...S(2, '錯過的答案'), prompt: '依序輸入 10 個正確答案（A–D）。（先調查畫面裡的裂縫）' },
+      { id: 's_choice', type: 'choice', title: '修復', flag: 'fault', ...S(2, '錯過的答案'),
         text: ['斷層中有一段紀錄可以修復。', '但修復它，會覆寫較近的一段。'],
         options: [{ id: 'repair', label: '修復最早的紀錄', desc: '裂縫會闔上，另一段會被覆寫。' }, { id: 'keep', label: '保留裂縫', desc: '兩段紀錄都留下，裂縫不會消失。' }] },
       { id: 's_mended', type: 'evidence', title: '修補過的東西', kinds: ['photo'], gate: true, ...S(3, '修補過的東西'),
         prompt: '斷層需要一個「修補過」的東西作為參照。', pending_text: '參照物已送出。斷層正在比對……' },
     ],
     secrets: {
-      s_depth: { answer: '30', hints: ['在「物品」裡，每個符號都有頻率數字。', '「起」的頻率是 3，「聲」的頻率是 0。'], success: '斷層停止下沉。', wrong: '深度不符。' },
+      s_exam: { answer: 'BDBBCBABAB', hints: ['那是一張考卷。你曾經考過的。', '它藏在衣櫥中間的櫃子裡。', '找到四分社工師考卷的「社會工作」科，把答錯的題目的正確答案依序輸入。'], success: '答案吻合。裂縫停止擴大。', wrong: '斷層發出刺耳的聲音。' },
       s_mended: { hints: ['你身邊有沒有什麼東西，壞過，又被修好？', '黏過的杯子、補過的衣服、貼著膠帶的東西……', '拍一個曾經壞掉、又被修好的東西上傳。'] },
     },
   },
