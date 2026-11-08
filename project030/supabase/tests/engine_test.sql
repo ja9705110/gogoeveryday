@@ -55,15 +55,23 @@ select pg_temp.ok((public.submit_step(:'pid', 1, 's_wake', '{}') ->> 'correct'):
 select pg_temp.ok(not (public.submit_step(:'pid', 1, 's_power', '{"value":"111111"}') ->> 'correct')::boolean, 'wrong switch pattern rejected');
 select pg_temp.ok((public.submit_step(:'pid', 1, 's_power', '{"value":"011010"}') ->> 'correct')::boolean, 'switch pattern accepted');
 select pg_temp.ok((public.request_hint(:'pid', 1, 's_power') ->> 'hint') is not null, 'hint delivered by server');
-select pg_temp.ok((public.submit_step(:'pid', 1, 's_boot_intro', '{}') ->> 'correct')::boolean, 'stage 2 intro');
-select pg_temp.ok(not (public.submit_step(:'pid', 1, 's_boot', '{"value":"10"}') ->> 'correct')::boolean, 'wrong boot code');
-select pg_temp.ok((public.submit_step(:'pid', 1, 's_boot', '{"value":"030"}') ->> 'correct')::boolean, 'boot code 030');
 select pg_temp.ok((public.submit_step(:'pid', 1, 's_sample', '{}') ->> 'correct')::boolean, 'sample story');
 select pg_temp.ok(not (public.submit_step(:'pid', 1, 's_observe', '{}') ->> 'correct')::boolean, 'observe step needs real observation');
 select pg_temp.ok((public.observe(:'pid', 'explore') ->> 'total')::int = 1, 'observation recorded');
 select pg_temp.fails($$select public.observe('$$ || :'pid' || $$', 'rest')$$, 'P030_ALREADY_OBSERVED', 'one observation per day');
 select pg_temp.ok((public.submit_step(:'pid', 1, 's_observe', '{}') ->> 'correct')::boolean, 'observe step ok');
 select pg_temp.ok((public.explore(:'pid', 1, 'under_desk') -> 'gained' -> 0 ->> 'key') = 'label_unregistered', 'hidden item found');
+select public.submit_step(:'pid', 1, 's_id_intro', '{}') \g /dev/null
+select to_char((select birthday from public.settings), 'MMDD') as bmmdd \gset
+select pg_temp.ok(not (public.submit_step(:'pid', 1, 's_id', '{"value":"0000"}') ->> 'correct')::boolean, 'wrong observer number');
+select pg_temp.ok((public.submit_step(:'pid', 1, 's_id', jsonb_build_object('value', :'bmmdd')) ->> 'correct')::boolean, 'observer number = birthday MMDD');
+select public.submit_step(:'pid', 1, 's_calib', '{}') \g /dev/null
+select public.submit_step(:'pid', 1, 's_tone', '{"option":"film"}') \g /dev/null
+select public.submit_step(:'pid', 1, 's_outfit', '{"option":"self"}') \g /dev/null
+select public.submit_step(:'pid', 1, 's_mood', '{"option":"gentle"}') \g /dev/null
+select pg_temp.ok((public.submit_step(:'pid', 1, 's_scene', '{"option":"retro"}') ->> 'correct')::boolean, 'portrait calibration choices');
+select pg_temp.ok((public.get_state(:'pid') -> 'stats' -> 'choices' ->> 'choice:p_tone') = 'film', 'style choice stored');
+select pg_temp.ok((public.submit_step(:'pid', 1, 's_saved', '{}') ->> 'correct')::boolean, 'optional reference photo can be skipped');
 select pg_temp.ok((public.submit_step(:'pid', 1, 's_drift', '{}') ->> 'correct')::boolean, 'drift story');
 select pg_temp.ok((public.request_hint(:'pid', 1, 's_sync') ->> 'hint') like '%停住%', 'gate task has progressive hints');
 select pg_temp.ok((public.submit_evidence(:'pid', 1, 's_sync', 'photo', :'pid' || '/1/clock.jpg', null) ->> 'pending')::boolean, 'gate photo pending review');
@@ -229,11 +237,17 @@ select public.admin_create_test_profile('門檻測試', :'late1'::timestamptz) a
 select public.open_level(:'gp', 1) \g /dev/null
 select public.submit_step(:'gp', 1, 's_wake', '{}') \g /dev/null
 select public.submit_step(:'gp', 1, 's_power', '{"value":"011010"}') \g /dev/null
-select public.submit_step(:'gp', 1, 's_boot_intro', '{}') \g /dev/null
-select public.submit_step(:'gp', 1, 's_boot', '{"value":"030"}') \g /dev/null
 select public.submit_step(:'gp', 1, 's_sample', '{}') \g /dev/null
 select public.observe(:'gp', 'rest') \g /dev/null
 select public.submit_step(:'gp', 1, 's_observe', '{}') \g /dev/null
+select public.submit_step(:'gp', 1, 's_id_intro', '{}') \g /dev/null
+select public.submit_step(:'gp', 1, 's_id', jsonb_build_object('value', to_char((select birthday from public.settings), 'MMDD'))) \g /dev/null
+select public.submit_step(:'gp', 1, 's_calib', '{}') \g /dev/null
+select public.submit_step(:'gp', 1, 's_tone', '{"option":"mono"}') \g /dev/null
+select public.submit_step(:'gp', 1, 's_outfit', '{"option":"formal"}') \g /dev/null
+select public.submit_step(:'gp', 1, 's_mood', '{"option":"calm"}') \g /dev/null
+select public.submit_step(:'gp', 1, 's_scene', '{"option":"studio"}') \g /dev/null
+select public.submit_step(:'gp', 1, 's_saved', '{}') \g /dev/null
 select public.submit_step(:'gp', 1, 's_drift', '{}') \g /dev/null
 select public.submit_evidence(:'gp', 1, 's_sync', 'photo', :'gp' || '/1/c.jpg', null) \g /dev/null
 select public.admin_set_test_time(:'gp', :'late1'::timestamptz + interval '10 hours') \g /dev/null
