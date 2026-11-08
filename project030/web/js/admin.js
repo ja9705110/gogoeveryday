@@ -186,6 +186,7 @@ async function review(body) {
     if (e.kind === 'audio') { const a = h('audio', { controls: true, style: 'width:100%' }); signedUrl(e.storage_path).then((u) => u && (a.src = u)); media.append(a); }
     body.append(h('div', { class: 'card' },
       h('div', { class: 'row wrap' }, h('b', {}, `${e.is_test ? '［測試］' : ''}${e.profile_label}・第 ${e.day} 區 ${e.level_title}・${e.step_id}`), h('span', { class: 'spacer' }),
+        e.payload && e.payload.gate ? h('span', { class: 'status-pill', style: 'color:var(--accent2)' }, '關卡門檻：通過才算破關') : null,
         h('span', { class: `status-pill s-${e.status}` }, e.status), h('span', { class: 'mono dim', style: 'font-size:11px' }, fmt(e.submitted_at) + (e.on_time ? '' : '（替代路線）'))),
       media, h('div', { style: 'height:6px' }), note,
       h('div', { class: 'row wrap', style: 'margin-top:8px' },

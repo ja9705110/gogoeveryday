@@ -393,7 +393,7 @@ function drawSteps(L, box) {
       const msg = h('div', { class: 'msg' });
       const ctx = makeCtx(L, s, el, msg, box);
       el.append(renderWidget(s, ctx));
-      if (s.type !== 'story' && s.type !== 'evidence') el.append(hintBox(L, s));
+      if (s.type !== 'story') el.append(hintBox(L, s));
       el.append(msg);
       if (!s.optional) activeShown = true;
     } else {
@@ -517,6 +517,16 @@ function ctxEvidenceList(s, L) {
 
 function evidenceWidget(L, s, msg) {
   const box = h('div');
+  if (s.gate) {
+    const last = (s.submissions || []).filter((x) => x.status !== 'REPLACED').slice(-1)[0];
+    if (last && last.status === 'PENDING_REVIEW') {
+      const card = h('div', { class: 'gate-wait' }, h('div', { class: 'kicker' }, 'SYNC · 比對中'), h('p', {}, T(s.pending_text || '證據已送出，觀察站正在比對。')));
+      if (last.kind === 'photo') { const img = h('img', { style: 'max-width:100%;max-height:240px;margin-top:6px' }); signedUrl(last.path).then((u) => u && (img.src = u)); card.append(img); }
+      card.append(h('button', { class: 'btn ghost sm', style: 'margin-top:8px', onclick: () => route() }, '重新檢查'));
+      return card;
+    }
+    if (last && last.status === 'NEEDS_MORE') box.append(h('div', { class: 'clue', style: 'border-color:var(--warn)' }, '比對失敗：' + (last.note || '這份證據無法通過比對。再試一次。')));
+  }
   const submit = async (kind, blob, ext, text, btn) => {
     btn && (btn.disabled = true);
     msg.className = 'msg'; msg.textContent = '上傳中…';
@@ -528,7 +538,7 @@ function evidenceWidget(L, s, msg) {
       }
       const r = await rpc('submit_evidence', { p: S.pid, d: L.day, step_id: s.id, kind, path, content: text || null });
       sfx(r.completed ? 'complete' : 'ok');
-      msg.className = 'msg good'; msg.textContent = '已提交，等待比對。';
+      msg.className = 'msg good'; msg.textContent = r.pending ? '證據已送出，觀察站比對中。' : '已提交，等待比對。';
       await afterSuccess(L, r);
     } catch (e) { msg.className = 'msg bad'; msg.textContent = errText(e); btn && (btn.disabled = false); }
   };
