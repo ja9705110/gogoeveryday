@@ -62,7 +62,7 @@ async function boot() {
   localStorage.setItem('p030.profile', S.pid);
   window.addEventListener('hashchange', route);
   route().then(() => {
-    const k = 'p030.prologue.' + S.pid;
+    const k = 'p030.prologue.v2.' + S.pid;
     if (!localStorage.getItem(k) && S.state) {
       playPrologue({ startDate: S.state.start_date, onDone: () => { localStorage.setItem(k, '1'); if (!location.hash || location.hash === '#/') route(); } });
     }
@@ -196,6 +196,37 @@ function nextObjective(st) {
   return { goal: '今天的任務已完成', desc: d < 10 ? '下一個區域將在午夜 00:00 開啟。' : '明天，第030號檔案室將會開啟。', href: '#/lab', cta: '看看樣本', list };
 }
 
+function missionStatus(st) {
+  const frags = st.levels.filter((l) => l.day <= 10 && l.status === 'COMPLETED').length;
+  const syms = new Set(st.inventory.filter((i) => i.kind === 'symbol').map((i) => i.data.symbol)).size;
+  const lost = st.levels.filter((l) => l.day <= 10 && l.missed_at).length;
+  const bday = new Date(st.birthday + 'T00:00:00+08:00');
+  const left = Math.max(0, Math.ceil((bday - serverNow()) / 86400000));
+  const cell = (k, v, sub, warn) => h('div', { class: 'ms-cell' }, h('div', { class: 'ms-k' }, k), h('div', { class: 'ms-v' }, v), sub ? h('div', { class: 'ms-s', style: warn ? '' : 'color:var(--dim)' }, sub) : null);
+  return h('div', { class: 'mission fade-in' },
+    h('div', { class: 'row' }, h('span', { class: 'kicker' }, 'MISSION · 檔案 030 修復'), h('span', { class: 'spacer' }),
+      h('button', { class: 'btn ghost sm', onclick: showBrief }, '任務簡報')),
+    h('div', { class: 'ms-id' }, '第 030 號觀測員', h('span', { class: 'ms-tag' }, st.is_test ? 'SIM' : 'ACTIVE')),
+    h('div', { class: 'ms-grid' },
+      cell('片段回收', `${frags}/10`, lost ? `已沉沒 ${lost}` : null, true),
+      cell('符號', `${syms}/10`),
+      cell('樣本', st.sample.form.replace('樣本', '')),
+      cell('重新定義', left > 0 ? `T-${left}` : 'NOW', left > 0 ? '天' : null)));
+}
+
+function showBrief() {
+  modal(h('div', { class: 'manual' },
+    h('div', { class: 'kicker' }, 'MISSION BRIEF'), h('h2', { style: 'color:var(--text);margin-top:4px' }, '任務簡報'),
+    h('dl', { class: 'brief' },
+      h('dt', {}, '你是誰'), h('dd', {}, '時序檔案館的第 030 號觀測員。系統比對所有觀測員後，只有你的訊號頻率與檔案 030 完全一致——原因不明。'),
+      h('dt', {}, '發生了什麼'), h('dd', {}, '檔案館保存著每一個人的檔案。編號 030 的檔案正在崩解，碎成十個片段，散落在十天裡。每個片段只會浮現 24 小時。'),
+      h('dt', {}, '你的任務'), h('dd', {}, '每天進入當天浮現的片段區域，解開機關、回收符號；有些線索藏在你的現實世界裡。每天觀測一次檔案的核心——樣本 030。'),
+      h('dt', {}, '如果錯過'), h('dd', {}, '片段會沉回深處，不再以原本的樣子出現。系統會開啟替代路線，檔案會長成另一種樣子——但不會消失。'),
+      h('dt', {}, '最終目標'), h('dd', {}, '第 11 天，所有片段匯集到第 030 號檔案室，檔案 030 將被重新定義。'),
+      h('dt', {}, '協助者'), h('dd', {}, '守夜人——一位比你更早來到這裡的人。他知道的比他說的多。')),
+    h('button', { class: 'btn block', onclick: () => { document.querySelector('.modal')?.remove(); playPrologue({ startDate: S.state.start_date }); } }, '▶ 重播前導影片')));
+}
+
 function showManual() {
   modal(h('div', { class: 'manual' },
     h('div', { class: 'kicker' }, 'OBSERVER MANUAL'), h('h2', { style: 'color:var(--text);margin-top:4px' }, '觀測手冊'),
@@ -219,6 +250,7 @@ function home() {
   const before = d < 1;
   wrap.append(h('div', { class: 'kicker' }, before ? 'STANDBY' : d <= 10 ? `DAY ${String(d).padStart(2, '0')} / 10` : 'FILE 030'),
     h('h1', {}, before ? '等待訊號' : d <= 10 ? '觀測進行中' : '第030號檔案室'));
+  if (d >= 1) wrap.append(missionStatus(st));
   const ob = nextObjective(st);
   wrap.append(h('div', { class: 'objective fade-in' },
     h('div', { class: 'row' }, h('span', { class: 'kicker' }, '下一步'), h('span', { class: 'spacer' }), h('button', { class: 'btn ghost sm', onclick: showManual }, '觀測手冊')),
@@ -250,7 +282,7 @@ async function zone(day) {
   try { L = await rpc('open_level', { p: S.pid, d: day }); } catch (e) { toast(errText(e)); location.hash = '#/'; return; }
   const wrap = h('div', { class: 'fade-in' });
   const isMissed = L.status === 'MISSED';
-  wrap.append(h('div', { class: 'kicker' }, `${L.code} · ${L.subtitle || ''}`),
+  wrap.append(h('div', { class: 'kicker' }, day <= 10 ? `檔案 030 · 片段 ${String(day).padStart(2, '0')}/10 · ${L.subtitle || ''}` : `${L.code} · ${L.subtitle || ''}`),
     h('h1', {}, L.title + (L.route_title ? `｜${L.route_title}` : '')));
   if (L.route === 'alternate') wrap.append(h('div', { class: 'banner', style: 'border-color:var(--violet);color:var(--violet)' },
     `原路線已於 ${fmtTime(L.missed_at)} 封閉。這是另一條路。`));
@@ -320,6 +352,7 @@ function drawSteps(L, box) {
   }
   if (L.status === 'COMPLETED') {
     box.append(h('div', { class: 'card glow fade-in' }, h('div', { class: 'kicker' }, L.outcome === 'ALTERNATE' ? 'ARCHIVED · ALTERNATE' : 'ARCHIVED'),
+      h('p', {}, L.day <= 10 ? `片段 ${String(L.day).padStart(2, '0')} 已回收。` : ''),
       h('p', { class: 'dim' }, `歸檔時間 ${fmtTime(L.completed_at)}`), h('a', { class: 'btn block', href: '#/' }, '返回終端')));
   }
 }
