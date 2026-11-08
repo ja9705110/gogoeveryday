@@ -552,3 +552,6 @@ body { background: transparent !important; }
 .recap { display: flex; gap: 10px; align-items: center; padding: 12px; border: 1px solid rgba(255,181,71,.4); background: rgba(10,20,30,.7); color: var(--text); cursor: pointer; clip-path: var(--cut); text-align: left; }
 .recap.alt { border-color: rgba(180,140,255,.5); }
 .recap .mono { color: var(--accent2); font-size: 12px; }
+.ms-name { font-family: 'Noto Sans TC'; font-size: 14px; font-weight: 500; color: var(--accent2); }
+.admin-tabs button { flex: none; white-space: nowrap; }
+.admin .topbar .btn { white-space: nowrap; }

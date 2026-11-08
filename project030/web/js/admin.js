@@ -43,7 +43,7 @@ function login() {
       h('label', { class: 'field' }, h('span', {}, '帳號'), acc), h('label', { class: 'field' }, h('span', {}, '密碼'), pw), btn, msg)));
 }
 
-const TABS = [['overview', '總覽'], ['settings', '設定與名單'], ['levels', '關卡內容'], ['review', '佐證審核'], ['events', '特殊事件'], ['finale', '終章尋寶'], ['test', '測試模式'], ['print', 'AR 卡片'], ['backup', '備份']];
+const TABS = [['overview', '總覽'], ['settings', '壽星設定'], ['levels', '關卡內容'], ['review', '佐證審核'], ['events', '特殊事件'], ['finale', '終章尋寶'], ['test', '測試模式'], ['print', 'AR 卡片'], ['backup', '備份']];
 async function render() {
   app.innerHTML = '';
   app.append(h('div', { class: 'topbar' }, h('span', { class: 'brand' }, 'PROJECT 030 · CONTROL'),
@@ -96,38 +96,42 @@ async function detail(p) {
 
 // ── 設定 ──
 async function settings(body) {
-  const { data: s, error } = await sb.from('settings').select('*').eq('id', 1).single();
+  const { data: st, error } = await sb.from('settings').select('*').eq('id', 1).single();
   if (error) throw error;
-  const { data: players } = await sb.from('allowed_players').select('*').order('created_at');
   body.innerHTML = '';
-  const bd = h('input', { type: 'date', value: s.birthday });
-  const pr = h('input', { type: 'time', value: s.pending_reminder.slice(0, 5) });
-  const ex = h('input', { type: 'time', value: s.expiring_reminder.slice(0, 5) });
-  const cap = h('input', { type: 'text', value: String(s.daily_reminder_cap) });
-  body.append(h('div', { class: 'two' },
-    h('div', { class: 'card' }, h('h2', {}, '時間設定（Asia/Taipei）'),
-      h('label', { class: 'field' }, h('span', {}, '生日日期（遊戲於前 10 天的 00:00 開始）'), bd),
-      h('label', { class: 'field' }, h('span', {}, '未完成提醒時間'), pr),
-      h('label', { class: 'field' }, h('span', {}, '即將截止提醒時間'), ex),
-      h('label', { class: 'field' }, h('span', {}, '每日一般提醒上限'), cap),
-      h('p', { class: 'dim', style: 'font-size:12px' }, '注意：遊戲開始後修改生日，會讓已開放的區域重新計算期限；已經錯過的紀錄不會被恢復。'),
-      h('button', { class: 'btn primary', onclick: async () => {
-        const { error: e } = await sb.from('settings').update({ birthday: bd.value, pending_reminder: pr.value, expiring_reminder: ex.value, daily_reminder_cap: Number(cap.value) || 2, updated_at: new Date().toISOString() }).eq('id', 1);
-        toast(e ? errText(e) : '已儲存');
-      } }, '儲存')),
-    playersCard(players || [])));
-}
-function playersCard(players) {
-  const em = h('input', { type: 'email', placeholder: '壽星的帳號（名稱或 email）' });
-  const note = h('input', { type: 'text', placeholder: '備註' });
-  const list = h('div');
-  players.forEach((p) => list.append(h('div', { class: 'row', style: 'border-bottom:1px solid var(--line);padding:6px 0' }, h('span', {}, p.email), h('span', { class: 'dim' }, p.note || ''), h('span', { class: 'spacer' }),
-    h('button', { class: 'btn sm warn', onclick: async () => { if (!confirm('移除後此信箱將無法再登入（已建立的進度保留）。')) return; await sb.from('allowed_players').delete().eq('email', p.email); render(); } }, '移除'))));
-  return h('div', { class: 'card' }, h('h2', {}, '受邀玩家（只有名單內的信箱能登入）'), list, h('div', { style: 'height:8px' }), em, h('div', { style: 'height:6px' }), note,
-    h('div', { style: 'height:6px' }), h('button', { class: 'btn', onclick: async () => {
-      const { error } = await sb.from('allowed_players').insert({ email: accountToEmail(em.value), note: note.value });
-      if (error) toast(errText(error)); else render();
-    } }, '加入名單'));
+  const name = h('input', { type: 'text', value: st.player_name || '', placeholder: '壽星的名字' });
+  const bd = h('input', { type: 'date', value: st.birthday });
+  const info = h('div', { class: 'dim', style: 'font-size:13px;margin-top:8px' });
+  const paint = () => {
+    if (!bd.value) { info.textContent = ''; return; }
+    const [y, m, dd] = bd.value.split('-').map(Number);
+    const d = new Date(Date.UTC(y, m - 1, dd));
+    const start = new Date(d.getTime() - 10 * 86400000);
+    const mmdd = bd.value.slice(5, 7) + bd.value.slice(8, 10);
+    info.innerHTML = `遊戲開始：<b>${start.getUTCMonth() + 1}/${start.getUTCDate()}</b>　·　生日終章：<b>${d.getUTCMonth() + 1}/${d.getUTCDate()}</b><br>壽星登入：在遊戲首頁輸入 <b style="color:var(--accent2);font-size:18px">${mmdd}</b>（也是他的觀察員編號）`;
+  };
+  bd.oninput = paint; paint();
+  const msg = h('div', { class: 'msg' });
+  body.append(h('div', { class: 'card', style: 'max-width:520px' }, h('h2', {}, '壽星'),
+    h('label', { class: 'field' }, h('span', {}, '名字'), name),
+    h('label', { class: 'field' }, h('span', {}, '生日'), bd),
+    info,
+    h('div', { style: 'height:12px' }),
+    h('button', { class: 'btn primary block', onclick: async (e) => {
+      e.target.disabled = true; msg.className = 'msg'; msg.textContent = '儲存中…';
+      try { const r = await rpc('admin_set_player', { p_name: name.value, p_birthday: bd.value }); msg.className = 'msg good'; msg.textContent = `已儲存。壽星輸入 ${r.login_code} 即可登入。`; }
+      catch (err) { msg.className = 'msg bad'; msg.textContent = errText(err); }
+      e.target.disabled = false;
+    } }, '儲存'), msg,
+    h('p', { class: 'faint', style: 'font-size:12px' }, '遊戲開始後再修改生日，已經開放或錯過的區域會依新日期重新計算；已錯過的紀錄不會恢復。')));
+  const rmsg = h('div', { class: 'msg' });
+  body.append(h('div', { class: 'card', style: 'max-width:520px;border-color:rgba(255,79,109,.4)' }, h('h2', {}, '重置壽星進度'),
+    h('p', { class: 'dim', style: 'font-size:13px' }, '清除壽星的所有遊戲進度（關卡、符號、樣本、照片紀錄、星球），下次登入會從前導影片重新開始。名字、生日和登入方式不變。'),
+    h('button', { class: 'btn warn block', onclick: async () => {
+      if (!confirm('確定要清除壽星的所有遊戲進度？這個動作無法復原。')) return;
+      try { const n = await rpc('admin_reset_player'); rmsg.className = 'msg good'; rmsg.textContent = n ? '已重置。壽星下次打開就會重新開始。' : '目前沒有可重置的進度。'; }
+      catch (err) { rmsg.className = 'msg bad'; rmsg.textContent = errText(err); }
+    } }, '重置壽星進度'), rmsg));
 }
 
 // ── 關卡內容 ──
