@@ -48,20 +48,33 @@ select pg_temp.fails('select public.admin_overview()', 'P030_ADMIN_ONLY', 'playe
 
 select pg_temp.ok((public.open_level(:'pid', 1) ->> 'status') = 'IN_PROGRESS', 'open day 1 -> IN_PROGRESS');
 select pg_temp.ok(position('011010' in public.open_level(:'pid', 1)::text) = 0, 'answers not leaked in level payload');
-select pg_temp.fails($$select public.submit_step('$$ || :'pid' || $$', 1, 's_terminal', '{"value":"1030"}')$$, 'P030_STEP_ORDER', 'steps must be in order');
+select pg_temp.fails($$select public.submit_step('$$ || :'pid' || $$', 1, 's_sample', '{}')$$, 'P030_STEP_ORDER', 'steps must be in order');
 select pg_temp.ok((public.submit_step(:'pid', 1, 's_wake', '{}') ->> 'correct')::boolean, 'story step');
 select pg_temp.ok(not (public.submit_step(:'pid', 1, 's_power', '{"value":"111111"}') ->> 'correct')::boolean, 'wrong switch pattern rejected');
 select pg_temp.ok((public.submit_step(:'pid', 1, 's_power', '{"value":"011010"}') ->> 'correct')::boolean, 'switch pattern accepted');
-select pg_temp.ok((public.request_hint(:'pid', 1, 's_terminal') ->> 'hint') is not null, 'hint delivered by server');
-select pg_temp.ok((public.submit_step(:'pid', 1, 's_terminal', '{"value":"10:30"}') ->> 'correct')::boolean, 'keypad accepted (normalized)');
+select pg_temp.ok((public.request_hint(:'pid', 1, 's_power') ->> 'hint') is not null, 'hint delivered by server');
 select pg_temp.ok((public.submit_step(:'pid', 1, 's_sample', '{}') ->> 'correct')::boolean, 'sample story');
 select pg_temp.ok(not (public.submit_step(:'pid', 1, 's_observe', '{}') ->> 'correct')::boolean, 'observe step needs real observation');
 select pg_temp.ok((public.observe(:'pid', 'explore') ->> 'total')::int = 1, 'observation recorded');
 select pg_temp.fails($$select public.observe('$$ || :'pid' || $$', 'rest')$$, 'P030_ALREADY_OBSERVED', 'one observation per day');
 select pg_temp.ok((public.submit_step(:'pid', 1, 's_observe', '{}') ->> 'correct')::boolean, 'observe step ok');
 select pg_temp.ok((public.explore(:'pid', 1, 'under_desk') -> 'gained' -> 0 ->> 'key') = 'label_unregistered', 'hidden item found');
-select pg_temp.ok((public.submit_evidence(:'pid', 1, 's_log', 'text', null, '窗外的樹葉掉了一片') ->> 'completed')::boolean, 'evidence completes level');
-select pg_temp.ok((public.get_state(:'pid') -> 'levels' -> 0 ->> 'outcome') = 'ON_TIME', 'day 1 COMPLETED ON_TIME');
+select pg_temp.ok(not (public.submit_evidence(:'pid', 1, 's_log', 'text', null, '窗外的樹葉掉了一片') ->> 'completed')::boolean, 'log evidence accepted (level continues)');
+select pg_temp.ok((public.submit_step(:'pid', 1, 's_drift', '{}') ->> 'correct')::boolean, 'drift story');
+select pg_temp.ok((public.request_hint(:'pid', 1, 's_sync') ->> 'hint') like '%停住%', 'gate task has progressive hints');
+select pg_temp.ok((public.submit_evidence(:'pid', 1, 's_sync', 'photo', :'pid' || '/1/clock.jpg', null) ->> 'pending')::boolean, 'gate photo pending review');
+select pg_temp.fails($$select public.submit_evidence('$$ || :'pid' || $$', 1, 's_sync', 'photo', '$$ || :'pid' || $$/1/b.jpg', null)$$, 'P030_PENDING_REVIEW', 'cannot resubmit while pending');
+select pg_temp.ok((public.get_state(:'pid') -> 'levels' -> 0 ->> 'status') = 'IN_PROGRESS', 'level waits for approval');
+reset role;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000a', false), set_config('request.jwt.claims', '{"email":"admin@test.dev"}', false) \g /dev/null
+insert into public.admins (user_id) values ('00000000-0000-0000-0000-00000000000a') on conflict do nothing;
+set role authenticated;
+select e ->> 'id' as gid from jsonb_array_elements(public.admin_list_evidence('PENDING_REVIEW')) e where e ->> 'step_id' = 's_sync' limit 1 \gset
+select public.admin_review_evidence(:'gid', 'APPROVED', '時間同步完成') \g /dev/null
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000b', 'player@test.dev');
+set role authenticated;
+select pg_temp.ok((public.get_state(:'pid') -> 'levels' -> 0 ->> 'outcome') = 'ON_TIME', 'admin approval completes day 1 ON_TIME');
 select pg_temp.ok(public.get_state(:'pid') -> 'inventory' @> '[{"key":"sym:1"}]', 'symbol 1 granted');
 select pg_temp.fails($$select public.submit_evidence('$$ || :'pid' || $$', 1, 's_log', 'photo', 'someoneelse/x.jpg', null)$$, 'P030_', 'evidence path must belong to player');
 
@@ -196,5 +209,27 @@ select pg_temp.ok(not exists (select 1 from public.profiles where id = :'tp'), '
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000b', 'player@test.dev');
 set role authenticated;
 select pg_temp.ok((public.list_notifications(:'pid') -> 0 ->> 'title') = '紀錄需要補充', 'player notified of NEEDS_MORE');
+
+-- ════════════ C. 關卡門檻：截止前送出、隔天才審核，仍算準時 ════════════
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a', 'admin@test.dev');
+set role authenticated;
+select ((now() at time zone 'Asia/Taipei')::date)::text || ' 23:50:00+08' as late1 \gset
+select public.admin_create_test_profile('門檻測試', :'late1'::timestamptz) as gp \gset
+select public.open_level(:'gp', 1) \g /dev/null
+select public.submit_step(:'gp', 1, 's_wake', '{}') \g /dev/null
+select public.submit_step(:'gp', 1, 's_power', '{"value":"011010"}') \g /dev/null
+select public.submit_step(:'gp', 1, 's_sample', '{}') \g /dev/null
+select public.observe(:'gp', 'rest') \g /dev/null
+select public.submit_step(:'gp', 1, 's_observe', '{}') \g /dev/null
+select public.submit_evidence(:'gp', 1, 's_log', 'text', null, 'x') \g /dev/null
+select public.submit_step(:'gp', 1, 's_drift', '{}') \g /dev/null
+select public.submit_evidence(:'gp', 1, 's_sync', 'photo', :'gp' || '/1/c.jpg', null) \g /dev/null
+select public.admin_set_test_time(:'gp', :'late1'::timestamptz + interval '10 hours') \g /dev/null
+select pg_temp.ok((public.get_state(:'gp') -> 'levels' -> 0 ->> 'missed_at') is null, 'pending gate before deadline is not marked missed');
+select e ->> 'id' as gid2 from jsonb_array_elements(public.admin_list_evidence('PENDING_REVIEW')) e where e ->> 'profile_id' = :'gp' and e ->> 'step_id' = 's_sync' limit 1 \gset
+select public.admin_review_evidence(:'gid2', 'APPROVED', 'ok') \g /dev/null
+select pg_temp.ok((public.get_state(:'gp') -> 'levels' -> 0 ->> 'outcome') = 'ON_TIME', 'late approval still ON_TIME');
+select public.admin_delete_test_profile(:'gp') \g /dev/null
 reset role;
 \echo ALL TESTS PASSED

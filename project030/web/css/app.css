@@ -490,3 +490,5 @@ body { background: transparent !important; }
 .ln-n { font-size: 18px; color: #fff; }
 .planet-stage { position: relative; width: 100%; aspect-ratio: 3 / 4; margin: 16px 0; clip-path: var(--cut); border: 1px solid rgba(63,244,255,.4); background: #01030c; box-shadow: var(--glow); }
 .ps-cap { position: absolute; left: 0; right: 0; bottom: 12px; text-align: center; font-family: var(--hud), 'Noto Sans TC'; color: var(--accent); letter-spacing: .12em; text-shadow: var(--glow); }
+.gate-wait { padding: 12px; clip-path: var(--cut); border: 1px solid rgba(255,181,71,.5); background: linear-gradient(135deg, rgba(255,181,71,.10), rgba(5,14,24,.7)); }
+.gate-wait .kicker { color: var(--accent2); }
