@@ -62,8 +62,14 @@ export async function verifyCode(email, token) {
   if (error) throw error;
   return data.session;
 }
-export async function passwordLogin(email, password) {
-  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+// 帳號可以是 email，或不含 @ 的簡單名稱（對應 <名稱>@p030.game）
+export const accountToEmail = (acc) => {
+  const a = String(acc || '').trim().toLowerCase();
+  return a.includes('@') ? a : `${a}@p030.game`;
+};
+export async function passwordLogin(account, password) {
+  if (!String(account || '').trim() || !password) throw new Error('請輸入帳號與密碼。');
+  const { data, error } = await sb.auth.signInWithPassword({ email: accountToEmail(account), password });
   if (error) throw error;
   return data.session;
 }
