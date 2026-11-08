@@ -10,21 +10,29 @@ function drawShape(g, W, H, cfg, color = '#fff') {
   const cw = W / glyphs.length;
   g.save();
   g.strokeStyle = color; g.fillStyle = color; g.lineCap = 'round'; g.lineJoin = 'round';
-  const lw = Math.min(cw, H) * 0.16;
+  // 細線：約一隻手的寬度（相對於每格約 1/6）
+  g.lineWidth = Math.max(10, Math.min(cw, H) * (cfg.thin || 0.075));
   glyphs.forEach((ch, i) => {
-    const cx = cw * i + cw / 2, cy = H / 2, s = Math.min(cw, H) * 0.42;
-    g.lineWidth = lw;
+    // 字撐滿整個高度：每個字都會被切到上中下好幾格
+    const cx = cw * i + cw / 2, cy = H / 2, s = H * 0.46;
+    g.beginPath();
     if (ch === '♥') {
-      g.beginPath();
-      g.moveTo(cx, cy + s * 0.95);
-      g.bezierCurveTo(cx - s * 1.25, cy + s * 0.1, cx - s * 0.75, cy - s * 0.95, cx, cy - s * 0.35);
-      g.bezierCurveTo(cx + s * 0.75, cy - s * 0.95, cx + s * 1.25, cy + s * 0.1, cx, cy + s * 0.95);
-      g.stroke();
+      const rx = cw * 0.42, ry = H * 0.38;
+      g.moveTo(cx, cy + ry * 0.95);
+      g.bezierCurveTo(cx - rx * 1.25, cy + ry * 0.1, cx - rx * 0.75, cy - ry * 0.95, cx, cy - ry * 0.35);
+      g.bezierCurveTo(cx + rx * 0.75, cy - ry * 0.95, cx + rx * 1.25, cy + ry * 0.1, cx, cy + ry * 0.95);
+    } else if (ch === '1') {
+      g.moveTo(cx - cw * 0.22, cy - s * 0.62); g.lineTo(cx + cw * 0.03, cy - s * 0.95); g.lineTo(cx + cw * 0.03, cy + s * 0.95);
+    } else if (ch === '8') {
+      const w8 = Math.min(cw * 0.38, s * 0.46);
+      g.ellipse(cx, cy - s * 0.47, w8 * 0.8, s * 0.46, 0, 0, Math.PI * 2);
+      g.moveTo(cx + w8, cy + s * 0.46);
+      g.ellipse(cx, cy + s * 0.46, w8, s * 0.5, 0, 0, Math.PI * 2);
     } else {
-      g.font = `900 ${Math.min(H * 0.82, cw * 1.1)}px "Arial Black", "Helvetica Neue", sans-serif`;
-      g.textAlign = 'center'; g.textBaseline = 'middle';
-      g.fillText(ch, cx, cy + H * 0.03);
+      g.font = `700 ${s * 2}px "Helvetica Neue", sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.strokeText(ch, cx, cy);
     }
+    g.stroke();
   });
   g.restore();
 }
@@ -49,9 +57,9 @@ function tileGuide(shape, cfg, idx, size, color = 'rgba(63,244,255,.85)') {
 const loadImg = (src) => new Promise((res, rej) => { const i = new Image(); i.crossOrigin = 'anonymous'; i.onload = () => res(i); i.onerror = rej; i.src = src; });
 
 export function mosaicWidget({ step, pid, day, onSubmit, toast }) {
-  const cfg = { cols: 9, rows: 2, text: '1118', hearts: true, ...(step.mosaic || {}) };
+  const cfg = { cols: 10, rows: 3, text: '1118', hearts: true, ...(step.mosaic || {}) };
   const n = cfg.cols * cfg.rows;
-  const folder = `${pid}/${day}/mosaic`;
+  const folder = `${pid}/${day}/mosaic-${cfg.cols}x${cfg.rows}`;
   const shape = shapeCanvas(cfg);
   const shots = new Array(n).fill(null); // { path, url }
   const box = document.createElement('div');

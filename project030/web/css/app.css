@@ -602,3 +602,5 @@ body { background: transparent !important; }
 .avatar-note { font-size: 12px; color: var(--dim); }
 .ms-avatar { margin-left: auto; line-height: 0; }
 .ms-avatar svg { border-radius: 8px; border: 1px solid rgba(63,244,255,.5); box-shadow: 0 0 10px rgba(63,244,255,.3); }
+.mz-cell .mz-guide { opacity: .45; filter: none; }
+.mz-cell.shot .mz-guide { opacity: .2; }
