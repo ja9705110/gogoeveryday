@@ -50,21 +50,8 @@ select pg_temp.fails('select public.admin_overview()', 'P030_ADMIN_ONLY', 'playe
 select pg_temp.ok((public.open_level(:'pid', 1) ->> 'status') = 'IN_PROGRESS', 'open day 1 -> IN_PROGRESS');
 select pg_temp.ok(position('011010' in public.open_level(:'pid', 1)::text) = 0, 'answers not leaked in level payload');
 select pg_temp.ok((public.open_level(:'pid', 1) -> 'steps' -> 0 ->> 'stage') = '1', 'steps carry stage numbers');
-select pg_temp.fails($$select public.submit_step('$$ || :'pid' || $$', 1, 's_sample', '{}')$$, 'P030_STEP_ORDER', 'steps must be in order');
-select pg_temp.ok((public.submit_step(:'pid', 1, 's_wake', '{}') ->> 'correct')::boolean, 'story step');
-select pg_temp.ok(not (public.submit_step(:'pid', 1, 's_power', '{"value":"111111"}') ->> 'correct')::boolean, 'wrong switch pattern rejected');
-select pg_temp.ok((public.submit_step(:'pid', 1, 's_power', '{"value":"011010"}') ->> 'correct')::boolean, 'switch pattern accepted');
-select pg_temp.ok((public.request_hint(:'pid', 1, 's_power') ->> 'hint') is not null, 'hint delivered by server');
-select pg_temp.ok((public.submit_step(:'pid', 1, 's_sample', '{}') ->> 'correct')::boolean, 'sample story');
-select pg_temp.ok(not (public.submit_step(:'pid', 1, 's_lock', '{"value":"A168888418311"}') ->> 'correct')::boolean, 'lock rejects tax id with 1s');
-select pg_temp.ok((public.submit_step(:'pid', 1, 's_lock', '{"value":"a1688 88483"}') ->> 'correct')::boolean, 'lock opens: phone model + tax id minus 1s');
-select public.submit_step(:'pid', 1, 's_unlocked', '{}') \g /dev/null
-select pg_temp.ok(not (public.submit_step(:'pid', 1, 's_observe', '{}') ->> 'correct')::boolean, 'observe step needs real observation');
-select pg_temp.ok((public.observe(:'pid', 'explore') ->> 'total')::int = 1, 'observation recorded');
-select pg_temp.fails($$select public.observe('$$ || :'pid' || $$', 'rest')$$, 'P030_ALREADY_OBSERVED', 'one observation per day');
-select pg_temp.ok((public.submit_step(:'pid', 1, 's_observe', '{}') ->> 'correct')::boolean, 'observe step ok');
-select pg_temp.ok((public.explore(:'pid', 1, 'under_desk') -> 'gained' -> 0 ->> 'key') = 'label_unregistered', 'hidden item found');
-select public.submit_step(:'pid', 1, 's_id_intro', '{}') \g /dev/null
+select pg_temp.fails($$select public.submit_step('$$ || :'pid' || $$', 1, 's_power', '{"value":"011010"}')$$, 'P030_STEP_ORDER', 'steps must be in order');
+select pg_temp.ok((public.submit_step(:'pid', 1, 's_id_intro', '{}') ->> 'correct')::boolean, 'identity intro first');
 select to_char((select birthday from public.settings), 'MMDD') as bmmdd \gset
 select pg_temp.ok(not (public.submit_step(:'pid', 1, 's_id', '{"value":"0000"}') ->> 'correct')::boolean, 'wrong observer number');
 select pg_temp.ok((public.submit_step(:'pid', 1, 's_id', jsonb_build_object('value', :'bmmdd')) ->> 'correct')::boolean, 'observer number = birthday MMDD');
@@ -75,6 +62,20 @@ select public.submit_step(:'pid', 1, 's_mood', '{"option":"gentle"}') \g /dev/nu
 select pg_temp.ok((public.submit_step(:'pid', 1, 's_scene', '{"option":"retro"}') ->> 'correct')::boolean, 'portrait calibration choices');
 select pg_temp.ok((public.get_state(:'pid') -> 'stats' -> 'choices' ->> 'choice:p_tone') = 'film', 'style choice stored');
 select pg_temp.ok((public.submit_step(:'pid', 1, 's_saved', '{}') ->> 'correct')::boolean, 'optional reference photo can be skipped');
+select pg_temp.ok((public.submit_step(:'pid', 1, 's_blackout', '{}') ->> 'correct')::boolean, 'blackout event');
+select pg_temp.ok((public.open_level(:'pid', 1) -> 'steps' -> 9 -> 'scene' ->> 'light') = 'emergency', 'blackout step carries emergency scene');
+select pg_temp.ok(not (public.submit_step(:'pid', 1, 's_power', '{"value":"111111"}') ->> 'correct')::boolean, 'wrong switch pattern rejected');
+select pg_temp.ok((public.submit_step(:'pid', 1, 's_power', '{"value":"011010"}') ->> 'correct')::boolean, 'switch pattern accepted');
+select pg_temp.ok((public.request_hint(:'pid', 1, 's_lock') ->> 'hint') is not null, 'hint delivered by server');
+select pg_temp.ok((public.submit_step(:'pid', 1, 's_sample', '{}') ->> 'correct')::boolean, 'sample story');
+select pg_temp.ok(not (public.submit_step(:'pid', 1, 's_lock', '{"value":"A168888418311"}') ->> 'correct')::boolean, 'lock rejects tax id with 1s');
+select pg_temp.ok((public.submit_step(:'pid', 1, 's_lock', '{"value":"a1688 88483"}') ->> 'correct')::boolean, 'lock opens: phone model + tax id minus 1s');
+select public.submit_step(:'pid', 1, 's_unlocked', '{}') \g /dev/null
+select pg_temp.ok(not (public.submit_step(:'pid', 1, 's_observe', '{}') ->> 'correct')::boolean, 'observe step needs real observation');
+select pg_temp.ok((public.observe(:'pid', 'explore') ->> 'total')::int = 1, 'observation recorded');
+select pg_temp.fails($$select public.observe('$$ || :'pid' || $$', 'rest')$$, 'P030_ALREADY_OBSERVED', 'one observation per day');
+select pg_temp.ok((public.submit_step(:'pid', 1, 's_observe', '{}') ->> 'correct')::boolean, 'observe step ok');
+select pg_temp.ok((public.explore(:'pid', 1, 'under_desk') -> 'gained' -> 0 ->> 'key') = 'label_unregistered', 'hidden item found');
 select pg_temp.ok((public.submit_step(:'pid', 1, 's_drift', '{}') ->> 'correct')::boolean, 'drift story');
 select pg_temp.ok((public.request_hint(:'pid', 1, 's_sync') ->> 'hint') like '%停住%', 'gate task has progressive hints');
 select pg_temp.ok((public.submit_evidence(:'pid', 1, 's_sync', 'photo', :'pid' || '/1/clock.jpg', null) ->> 'pending')::boolean, 'gate photo pending review');
@@ -238,13 +239,6 @@ set role authenticated;
 select ((now() at time zone 'Asia/Taipei')::date)::text || ' 23:50:00+08' as late1 \gset
 select public.admin_create_test_profile('門檻測試', :'late1'::timestamptz) as gp \gset
 select public.open_level(:'gp', 1) \g /dev/null
-select public.submit_step(:'gp', 1, 's_wake', '{}') \g /dev/null
-select public.submit_step(:'gp', 1, 's_power', '{"value":"011010"}') \g /dev/null
-select public.submit_step(:'gp', 1, 's_sample', '{}') \g /dev/null
-select public.submit_step(:'gp', 1, 's_lock', '{"value":"A168888483"}') \g /dev/null
-select public.submit_step(:'gp', 1, 's_unlocked', '{}') \g /dev/null
-select public.observe(:'gp', 'rest') \g /dev/null
-select public.submit_step(:'gp', 1, 's_observe', '{}') \g /dev/null
 select public.submit_step(:'gp', 1, 's_id_intro', '{}') \g /dev/null
 select public.submit_step(:'gp', 1, 's_id', jsonb_build_object('value', to_char((select birthday from public.settings), 'MMDD'))) \g /dev/null
 select public.submit_step(:'gp', 1, 's_calib', '{}') \g /dev/null
@@ -253,6 +247,13 @@ select public.submit_step(:'gp', 1, 's_outfit', '{"option":"formal"}') \g /dev/n
 select public.submit_step(:'gp', 1, 's_mood', '{"option":"calm"}') \g /dev/null
 select public.submit_step(:'gp', 1, 's_scene', '{"option":"studio"}') \g /dev/null
 select public.submit_step(:'gp', 1, 's_saved', '{}') \g /dev/null
+select public.submit_step(:'gp', 1, 's_blackout', '{}') \g /dev/null
+select public.submit_step(:'gp', 1, 's_power', '{"value":"011010"}') \g /dev/null
+select public.submit_step(:'gp', 1, 's_sample', '{}') \g /dev/null
+select public.submit_step(:'gp', 1, 's_lock', '{"value":"A168888483"}') \g /dev/null
+select public.submit_step(:'gp', 1, 's_unlocked', '{}') \g /dev/null
+select public.observe(:'gp', 'rest') \g /dev/null
+select public.submit_step(:'gp', 1, 's_observe', '{}') \g /dev/null
 select public.submit_step(:'gp', 1, 's_drift', '{}') \g /dev/null
 select public.submit_evidence(:'gp', 1, 's_sync', 'photo', :'gp' || '/1/c.jpg', null) \g /dev/null
 select public.admin_set_test_time(:'gp', :'late1'::timestamptz + interval '10 hours') \g /dev/null
@@ -288,4 +289,29 @@ select pg_temp.ok((select private.norm(secrets #>> '{s_recipe,answer}') = privat
 select pg_temp.ok((select private.norm(secrets #>> '{s_exam,answer}') = private.norm('bdbbcbabab') from public.levels where day = 6), 'day 6 exam answer (case-insensitive)');
 select pg_temp.ok((select count(*) from public.levels l, jsonb_array_elements(l.config #> '{scene,hotspots}') h where h ? 'clue') >= 5, 'scene clue hotspots present');
 select pg_temp.ok(position('4710901898847' in (select config::text from public.levels where day = 2)) = 0, 'barcode not leaked in public config');
+-- ════════════ F. 每關過關照片 ════════════
+insert into public.reward_photos (day, stage, photo, caption) values (1, 1, 'data:image/jpeg;base64,AAA', '第一關'), (1, 2, 'data:image/jpeg;base64,BBB', '第二關'), (1, 3, 'data:image/jpeg;base64,CCC', '第三關');
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000b', 'player@test.dev');
+set role authenticated;
+select pg_temp.ok(jsonb_array_length(public.stage_photos(:'pid', 1)) = 3, 'completed day shows all stage photos');
+select pg_temp.ok(jsonb_array_length(public.stage_photos(:'pid', 2)) = 0, 'locked day shows no photos');
+reset role; set search_path = public, extensions;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a', 'admin@test.dev');
+set role authenticated;
+select (select (birthday - 10)::text || ' 10:00:00+08' from public.settings) as phat \gset
+select public.admin_create_test_profile('照片測試', :'phat'::timestamptz) as ph \gset
+select public.open_level(:'ph', 1) \g /dev/null
+select pg_temp.ok(jsonb_array_length(public.stage_photos(:'ph', 1)) = 0, 'no photo before clearing a stage');
+select public.submit_step(:'ph', 1, 's_id_intro', '{}') \g /dev/null
+select public.submit_step(:'ph', 1, 's_id', jsonb_build_object('value', to_char((select birthday from public.settings), 'MMDD'))) \g /dev/null
+select public.submit_step(:'ph', 1, 's_calib', '{}') \g /dev/null
+select public.submit_step(:'ph', 1, 's_tone', '{"option":"mono"}') \g /dev/null
+select public.submit_step(:'ph', 1, 's_outfit', '{"option":"formal"}') \g /dev/null
+select public.submit_step(:'ph', 1, 's_mood', '{"option":"calm"}') \g /dev/null
+select public.submit_step(:'ph', 1, 's_scene', '{"option":"studio"}') \g /dev/null
+select public.submit_step(:'ph', 1, 's_saved', '{}') \g /dev/null
+select pg_temp.ok(public.stage_photos(:'ph', 1) = '[{"stage":1,"photo":"data:image/jpeg;base64,AAA","caption":"第一關"}]'::jsonb, 'stage 1 photo only after stage 1 cleared');
+select public.admin_delete_test_profile(:'ph') \g /dev/null
+reset role; set search_path = public, extensions;
+select pg_temp.ok((select count(*) from public.reward_photos) = 3, 'admin can store photos');
 \echo ALL TESTS PASSED
