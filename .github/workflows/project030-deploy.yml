@@ -1,9 +1,8 @@
 name: PROJECT 030 deploy
 
+# 手動執行：網站本身已由 GitHub Pages（main 分支）直接提供；
+# 這個流程只在需要以 Repository secrets 重新部署 Supabase 後端時使用。
 on:
-  push:
-    branches: [main]
-    paths: ['project030/**', '.github/workflows/project030-deploy.yml']
   workflow_dispatch:
 
 permissions:
