@@ -351,7 +351,13 @@ async function zone(day) {
     const iv = setInterval(tick, 1000); tick(); S.cleanup.push(() => clearInterval(iv));
     wrap.append(cd);
   }
-  wrap.append(renderScene(L.scene, L.found, async (spot, btn) => {
+  // 場景隨劇情變化：套用「已完成或目前進行中」步驟的場景設定（例如突然停電）
+  let sceneNow = { ...L.scene };
+  for (const st of L.steps) {
+    if (st.scene) sceneNow = { ...sceneNow, ...st.scene };
+    if (!st.done && !st.optional) { if (st.fx) sfx(st.fx); break; }
+  }
+  wrap.append(renderScene(sceneNow, L.found, async (spot, btn) => {
     if (spot.clue) { // 場景線索：點了才看得到
       sfx('find'); btn.classList.add('seen');
       try { localStorage.setItem(`p030.clue.${S.pid}.${day}.${spot.id}`, '1'); } catch (_) {}
@@ -514,7 +520,9 @@ async function openCeremony(day, { replay = false } = {}) {
     const L2 = await rpc('open_level', { p: S.pid, d: day });
     if (L2.status !== 'COMPLETED') return route();
     localStorage.setItem(ceremonyKey(S.pid, day), '1');
-    playCeremony({ L: L2, state: S.state, onClose: () => { if (!replay) location.hash = '#/'; route(); } });
+    let photos = [];
+    try { photos = await rpc('stage_photos', { p: S.pid, d: day }); } catch (_) {}
+    playCeremony({ L: L2, state: S.state, photos, onClose: () => { if (!replay) location.hash = '#/'; route(); } });
   } catch (e) { toast(errText(e)); route(); }
 }
 
@@ -531,7 +539,9 @@ async function maybeStageClear(L, s) {
   const same = L.steps.filter((x) => x.stage === s.stage && !x.optional);
   if (!same.every((x) => x.done)) return;
   const total = new Set(L.steps.filter((x) => x.stage).map((x) => x.stage)).size;
-  await stageClear(s.stage, total, s.stage_title);
+  let photo = null;
+  try { photo = (await rpc('stage_photos', { p: S.pid, d: L.day })).find((x) => x.stage === s.stage) || null; } catch (_) {}
+  await stageClear(s.stage, total, s.stage_title, photo);
 }
 
 // ── 佐證 ──

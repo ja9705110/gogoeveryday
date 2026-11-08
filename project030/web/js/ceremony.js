@@ -22,7 +22,7 @@ const fmtT = (iso) => (iso ? new Date(iso).toLocaleString('zh-TW', { timeZone: '
 
 export function ceremonyKey(pid, day) { return `p030.ceremony.${pid}.${day}`; }
 
-export function playCeremony({ L, state, onClose }) {
+export function playCeremony({ L, state, photos = [], onClose }) {
   const day = L.day;
   const alt = L.outcome === 'ALTERNATE';
   const layer = LAYERS.find((x) => x.day === day);
@@ -85,6 +85,15 @@ export function playCeremony({ L, state, onClose }) {
     return c;
   }
 
+  function photoCard(ph, i) {
+    const c = div('cer-mem photo');
+    c.style.setProperty('--tilt', `${(i % 2 ? -1 : 1) * (1 + (i % 3))}deg`);
+    c.append(div('cer-mem-t', `STAGE ${ph.stage}`));
+    const img = document.createElement('img'); img.src = ph.photo; c.append(img);
+    if (ph.caption) c.append(div('cer-quote', ph.caption));
+    return c;
+  }
+
   let all = false;
   async function sequence() {
     sfx('ping');
@@ -98,6 +107,11 @@ export function playCeremony({ L, state, onClose }) {
       add(div('cer-h', '今日的紀錄'));
       const wrap = add(div('cer-mems'));
       for (const [i, m] of memories.entries()) { if (!alive || all) return; wrap.append(memoryCard(m, i)); sfx('type'); await wait(1100); }
+    }
+    if (photos.length) {
+      add(div('cer-h', '解鎖的影像'));
+      const pw = add(div('cer-mems'));
+      for (const [i, ph] of photos.entries()) { if (!alive || all) return; pw.append(photoCard(ph, i)); sfx('find'); await wait(1400); }
     }
     if (obs) { add(div('cer-line', `樣本今日的觀察：${ACTION[obs.action] || obs.action}`)); await wait(900); }
     if (!alive || all) return;
@@ -126,6 +140,7 @@ export function playCeremony({ L, state, onClose }) {
     all = true; body.innerHTML = '';
     body.append(div('cer-k', `FRAGMENT ${String(day).padStart(2, '0')} · RECOVERED`), div('cer-title', L.title), div('cer-meta', [alt ? '以替代路線歸檔' : '準時歸檔', fmtT(L.completed_at)].join('　·　')));
     if (memories.length) { body.append(div('cer-h', '今日的紀錄')); const w = div('cer-mems'); memories.forEach((m, i) => w.append(memoryCard(m, i))); body.append(w); }
+    if (photos.length) { body.append(div('cer-h', '解鎖的影像')); const w = div('cer-mems'); photos.forEach((ph, i) => w.append(photoCard(ph, i))); body.append(w); }
     symbols.forEach((s) => body.append(div('cer-sym', `<div class="g" style="color:${s.data.echo ? '#b48cff' : '#ffb547'}">${glyphSVG(s.data.symbol)}</div><div><div class="n">取得符號：${s.name}</div><div class="d">頻率 ${s.digit}</div></div>`)));
     if (layer) { const pc = div('cer-planet'); const pcv = document.createElement('canvas'); pcv.style.cssText = 'width:200px;height:200px;display:block;margin:0 auto'; pc.append(pcv, div('cer-pl-t', `星球第 ${layer.day} 層：${layer.name}`)); body.append(pc); stopPlanet && stopPlanet(); stopPlanet = mountPlanet(pcv, layerStates(state.levels), { size: 200 }); }
     ((EPILOGUE[day] || {})[alt ? 'alt' : 'main'] || []).forEach((l) => body.append(div('cer-epi', l)));
@@ -134,12 +149,20 @@ export function playCeremony({ L, state, onClose }) {
   sequence();
 }
 
-// 每一關（stage）完成的小儀式
-export function stageClear(n, total, title) {
+// 每一關（stage）完成的小儀式；若管理者有上傳照片，接著展示照片
+export function stageClear(n, total, title, photo) {
   const el = document.createElement('div');
-  el.className = 'stage-clear';
+  el.className = 'stage-clear' + (photo ? ' with-photo' : '');
   el.innerHTML = `<div class="sc-k">STAGE ${n}/${total}</div><div class="sc-t">CLEAR</div><div class="sc-n">${title || ''}</div>`;
   document.body.append(el);
   sfx('unlock');
-  return new Promise((r) => setTimeout(() => { el.classList.add('out'); setTimeout(() => { el.remove(); r(); }, 400); }, 1700));
+  if (!photo) return new Promise((r) => setTimeout(() => { el.classList.add('out'); setTimeout(() => { el.remove(); r(); }, 400); }, 1700));
+  return new Promise((r) => setTimeout(() => {
+    const card = document.createElement('div'); card.className = 'sc-photo';
+    const img = document.createElement('img'); img.src = photo.photo; card.append(img);
+    if (photo.caption) { const c = document.createElement('div'); c.className = 'sc-cap'; c.textContent = photo.caption; card.append(c); }
+    const b = document.createElement('button'); b.className = 'btn primary'; b.textContent = '繼續';
+    b.onclick = () => { el.classList.add('out'); setTimeout(() => { el.remove(); r(); }, 400); };
+    el.append(card, b); sfx('find');
+  }, 1300));
 }

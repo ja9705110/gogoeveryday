@@ -559,3 +559,14 @@ body { background: transparent !important; }
 .scene .hs.clue::after { background: rgba(63,244,255,.85); box-shadow: 0 0 12px var(--accent); animation: glim 2.2s infinite; }
 .scene .hs.clue::before { content: ''; position: absolute; inset: 6px; border: 1.5px solid rgba(63,244,255,.7); border-radius: 50%; animation: pulse 1.8s infinite; }
 .scene .hs.clue.seen::before { border-color: rgba(255,181,71,.6); }
+
+/* ── 每關照片 ── */
+.stage-clear.with-photo { pointer-events: auto; background: radial-gradient(circle, rgba(63,244,255,.14), rgba(1,3,10,.92) 65%); gap: 10px; padding: 20px; overflow-y: auto; }
+.sc-photo { max-width: 420px; width: 100%; background: #f3efe6; padding: 12px 12px 14px; transform: rotate(-1.5deg); box-shadow: 0 10px 40px rgba(0,0,0,.7), 0 0 30px rgba(255,181,71,.25); animation: hudin .6s both; }
+.sc-photo img { width: 100%; max-height: 56vh; object-fit: contain; display: block; background: #ddd; }
+.sc-cap { color: #2b2418; font-family: serif; font-size: 17px; margin-top: 8px; text-align: center; }
+.stage-clear.with-photo .btn { min-width: 200px; margin-top: 6px; }
+.photo-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.ph-cell { display: grid; gap: 6px; padding: 10px; border: 1px solid var(--line); background: rgba(2,10,18,.6); }
+.ph-prev { height: 140px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.4); overflow: hidden; }
+.ph-prev img { max-width: 100%; max-height: 140px; object-fit: contain; }
