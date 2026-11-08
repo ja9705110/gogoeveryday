@@ -103,9 +103,14 @@ select pg_temp.fails($$select public.get_state('$$ || :'pid' || $$')$$, 'P030_FO
 
 -- ════════════ B. 管理者測試模式：模擬日期與錯過情境 ════════════
 reset role; set search_path = public, extensions;
+insert into public.allowed_players values ('admin@test.dev', '誤加入名單') on conflict do nothing;
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000a', 'admin@test.dev');
 set role authenticated;
 select pg_temp.ok((public.bootstrap() ->> 'is_admin')::boolean, 'admin recognised');
+select pg_temp.ok((select count(*) from public.profiles where user_id = auth.uid() and not is_test) = 0, 'admin never gets a real player profile');
+select pg_temp.ok((select count(*) from public.profiles where user_id = auth.uid() and is_test) = 1, 'admin gets one automatic test profile');
+select pg_temp.ok((select bool_and((p ->> 'is_test')::boolean) from jsonb_array_elements(public.bootstrap() -> 'profiles') p), 'admin bootstrap lists only test profiles');
+select pg_temp.ok((public.get_state((public.bootstrap() -> 'profiles' -> 0 ->> 'id')::uuid) ->> 'game_day')::int = 1, 'automatic test profile starts on simulated day 1');
 select ((now() at time zone 'Asia/Taipei')::date + 2)::text || ' 10:00:00+08' as d3 \gset
 select public.admin_create_test_profile('測試：錯過前兩天', :'d3'::timestamptz) as tp \gset
 select pg_temp.ok((public.get_state(:'tp') ->> 'game_day')::int = 3, 'test profile simulated day 3');
@@ -220,7 +225,7 @@ reset role; set search_path = public, extensions;
 select pg_temp.ok((select count(*) from public.player_levels where profile_id = :'pid' and missed_at is not null) = 0, 'real player untouched by test mode');
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000a', 'admin@test.dev');
 set role authenticated;
-select pg_temp.ok(jsonb_array_length(public.admin_overview() -> 'profiles') = 2, 'admin overview lists real + test');
+select pg_temp.ok(jsonb_array_length(public.admin_overview() -> 'profiles') = 3, 'admin overview lists real + 2 test (auto + manual)');
 select pg_temp.ok((select count(*) from public.levels) = 11, 'admin can read content via RLS');
 select e ->> 'id' as eid from jsonb_array_elements(public.admin_list_evidence(null)) e where not (e ->> 'is_test')::boolean limit 1 \gset
 select pg_temp.ok((public.admin_review_evidence(:'eid', 'NEEDS_MORE', '請再多寫一點') ->> 'status') = 'NEEDS_MORE', 'admin review');

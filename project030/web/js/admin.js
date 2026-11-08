@@ -356,7 +356,7 @@ async function test(body) {
   const ov = await rpc('admin_overview');
   const tests = ov.profiles.filter((p) => p.is_test);
   body.innerHTML = '';
-  body.append(h('p', { class: 'dim' }, '測試檔案屬於你的管理者帳號，使用獨立的模擬時間，只產生站內訊息、不推播，也不會讀寫正式玩家的任何資料（伺服器端強制）。'));
+  body.append(h('p', { class: 'dim' }, '管理者帳號沒有正式玩家檔案，只負責管理與測試；用管理者帳號登入遊戲頁時，一律進入測試檔案。測試檔案屬於你的管理者帳號，使用獨立的模擬時間，只產生站內訊息、不推播，也不會讀寫正式玩家的任何資料（伺服器端強制）。'));
   const label = h('input', { type: 'text', placeholder: '名稱，例如：全部準時' });
   const at = h('input', { type: 'datetime-local', value: toLocalInput(new Date(ov.settings.birthday + 'T10:00:00+08:00').getTime() - 10 * 86400000) });
   body.append(h('div', { class: 'card' }, h('h2', {}, '建立測試檔案'), h('div', { class: 'grid2' }, label, at),
