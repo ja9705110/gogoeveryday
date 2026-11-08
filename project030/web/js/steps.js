@@ -200,7 +200,7 @@ W.choice = (s, ctx) => {
   const confirm = h('button', { class: 'btn primary block', disabled: true, onclick: (e) => sel && ctx.send({ option: sel }, e.target) }, '確定（無法反悔）');
   for (const o of s.options) {
     const b = h('button', {}, o.label, o.desc ? h('small', {}, o.desc) : null);
-    b.onclick = () => { sel = o.id; box.querySelectorAll('button').forEach((x) => x.classList.remove('sel')); b.classList.add('sel'); confirm.disabled = false; };
+    b.onclick = () => { sel = o.id; box.querySelectorAll('button').forEach((x) => x.classList.remove('sel')); b.classList.add('sel'); confirm.disabled = false; ctx.preview && ctx.preview(s.flag, o.id); };
     box.append(b);
   }
   return h('div', {}, box, confirm);

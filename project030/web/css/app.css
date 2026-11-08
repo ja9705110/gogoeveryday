@@ -591,3 +591,14 @@ body { background: transparent !important; }
 .mz-cap { font-family: var(--hud), 'Noto Sans TC'; color: var(--accent); letter-spacing: .1em; text-shadow: var(--glow); }
 .cer-sealed .cer-mem { animation: sealed 1.6s both; }
 @keyframes sealed { 0% { opacity: 0; transform: translateY(40px) scale(.6) rotate(0deg); filter: blur(12px) brightness(2.2); } 60% { filter: blur(0) brightness(1.4); } 100% { opacity: 1; transform: rotate(var(--tilt)); filter: none; } }
+
+/* ── 觀察員識別影像 ── */
+.avatar-card { margin: 18px 0 6px; padding: 12px; text-align: center; clip-path: var(--cut); border: 1px solid rgba(63,244,255,.5);
+  background: linear-gradient(160deg, rgba(14,40,60,.85), rgba(3,10,18,.85)); box-shadow: var(--glow); }
+.avatar-art { display: flex; justify-content: center; margin: 8px 0 4px; }
+.avatar-art svg { border-radius: 10px; box-shadow: 0 0 24px rgba(63,244,255,.35); }
+.avatar-art.pop svg { animation: avpop .5s both; }
+@keyframes avpop { 0% { filter: brightness(2.2) blur(3px); transform: scale(.96); } 100% { filter: none; transform: none; } }
+.avatar-note { font-size: 12px; color: var(--dim); }
+.ms-avatar { margin-left: auto; line-height: 0; }
+.ms-avatar svg { border-radius: 8px; border: 1px solid rgba(63,244,255,.5); box-shadow: 0 0 10px rgba(63,244,255,.3); }

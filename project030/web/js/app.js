@@ -12,6 +12,7 @@ import { mountPlanet, morphToPhoto, layerStates, LAYERS } from './planet.js';
 import { playCeremony, ceremonyKey, stageClear } from './ceremony.js';
 import { PORTRAIT_MAP, portraitFromChoices } from './portrait-map.js';
 import { mosaicWidget } from './mosaic.js';
+import { avatarSVG, choicesFromStats, AVATAR_STEPS } from './avatar.js';
 
 // 資料庫中舊稱呼的統一
 const T = (str) => String(str ?? '').replace(/觀測者|觀測員|觀察者/g, '觀察員').replace(/觀測/g, '觀察');
@@ -227,10 +228,12 @@ function missionStatus(st) {
   const bday = new Date(st.birthday + 'T00:00:00+08:00');
   const left = Math.max(0, Math.ceil((bday - serverNow()) / 86400000));
   const cell = (k, v, sub, warn) => h('div', { class: 'ms-cell' }, h('div', { class: 'ms-k' }, k), h('div', { class: 'ms-v' }, v), sub ? h('div', { class: 'ms-s', style: warn ? '' : 'color:var(--dim)' }, sub) : null);
+  const av = choicesFromStats(st.stats.choices);
   return h('div', { class: 'mission fade-in' },
     h('div', { class: 'row' }, h('span', { class: 'kicker' }, 'MISSION · 檔案 030 修復'), h('span', { class: 'spacer' }),
       h('button', { class: 'btn ghost sm', onclick: showBrief }, '任務簡報')),
-    h('div', { class: 'ms-id' }, `第 ${st.observer_no || '1118'} 號觀察員`, st.player_name && st.player_name !== '觀察員' ? h('span', { class: 'ms-name' }, st.player_name) : null, h('span', { class: 'ms-tag' }, st.is_test ? 'SIM' : 'ACTIVE')),
+    h('div', { class: 'ms-id' }, `第 ${st.observer_no || '1118'} 號觀察員`, st.player_name && st.player_name !== '觀察員' ? h('span', { class: 'ms-name' }, st.player_name) : null, h('span', { class: 'ms-tag' }, st.is_test ? 'SIM' : 'ACTIVE'),
+      Object.keys(av).length ? h('span', { class: 'ms-avatar', html: avatarSVG(av, { size: 48, label: false }) }) : null),
     h('div', { class: 'ms-grid' },
       cell('片段打撈', `${frags}/10`, lost ? `已沉沒 ${lost}` : null, true),
       cell('符號', `${syms}/10`),
@@ -409,7 +412,8 @@ function drawSteps(L, box) {
     box.append(h('div', { class: 'stagebar' }, ...stages.map((x) => h('div', { class: 'sb ' + (x.done ? 'done' : x === cur ? 'cur' : '') },
       h('div', { class: 'sb-n' }, `關卡 ${x.n}/${stages.length}`), h('div', { class: 'sb-t' }, x.title || '')))));
   }
-  let activeShown = false, lastStage = null;
+  let activeShown = false, lastStage = null, avatarShown = false;
+  S.avatarPreview = null;
   for (const s of L.steps) {
     const done = s.done;
     if (!done && activeShown) { if (s.optional) continue; break; }
@@ -417,6 +421,14 @@ function drawSteps(L, box) {
       lastStage = s.stage;
       const info = stages.find((x) => x.n === s.stage);
       box.append(h('div', { class: 'stage-head' + (info && info.done ? ' done' : '') }, h('span', {}, `STAGE ${s.stage}/${stages.length}`), h('b', {}, s.stage_title || ''), info && info.done ? h('span', { class: 'sh-ok' }, 'CLEAR') : null));
+    }
+    if (!avatarShown && s.type === 'choice' && AVATAR_STEPS.includes(s.flag)) {
+      avatarShown = true;
+      const base = choicesFromStats(S.state.stats.choices);
+      const holder = h('div', { class: 'avatar-art', html: avatarSVG(base, { size: 200 }) });
+      const note = h('div', { class: 'avatar-note' }, Object.keys(base).length >= 4 ? '識別影像已寫入檔案 030。' : '每完成一項校準，影像就會更新。');
+      box.append(h('div', { class: 'avatar-card fade-in' }, h('div', { class: 'kicker' }, 'OBSERVER ID IMAGE'), holder, note));
+      S.avatarPreview = (flag, opt) => { holder.innerHTML = avatarSVG({ ...base, [flag]: opt }, { size: 200 }); holder.classList.remove('pop'); void holder.offsetWidth; holder.classList.add('pop'); };
     }
     const el = h('div', { class: 'step ' + (done ? 'done' : 'active') });
     el.append(h('div', { class: 'st-title' }, s.title || (s.type === 'story' ? '' : s.type)));
@@ -472,6 +484,7 @@ function makeCtx(L, s, el, msg, box) {
   return {
     inventory: S.state.inventory,
     toast,
+    preview: (flag, opt) => S.avatarPreview && S.avatarPreview(flag, opt),
     async send(answer, btn, opts = {}) {
       if (btn) btn.disabled = true;
       msg.className = 'msg'; msg.textContent = '…';
@@ -844,6 +857,7 @@ async function gift() {
   const choice = { ...(g.choice || {}) };
   for (const k of Object.keys(PORTRAIT_MAP)) if (!choice[k] && day1[k]) choice[k] = day1[k].id;
   if (Object.keys(day1).length) wrap.append(h('div', { class: 'card glow' }, h('div', { class: 'kicker' }, 'IDENTITY · 第 1 天的設定'),
+    h('div', { style: 'display:flex;justify-content:center;margin:8px 0', html: avatarSVG(choicesFromStats(S.state.stats.choices), { size: 160 }) }),
     h('p', {}, '還記得第一天的「識別影像校準」嗎？那些設定，就是這次影像的方向。'),
     h('div', { class: 'dim', style: 'font-size:14px' }, Object.values(day1).map((x) => `${x.label}：${x.real}`).join('　/　'))));
   for (const [k, def] of Object.entries(PORTRAIT_MAP)) {
