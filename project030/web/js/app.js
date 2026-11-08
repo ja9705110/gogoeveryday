@@ -11,6 +11,7 @@ import { mountBackground } from './bg.js';
 import { mountPlanet, morphToPhoto, layerStates, LAYERS } from './planet.js';
 import { playCeremony, ceremonyKey, stageClear } from './ceremony.js';
 import { PORTRAIT_MAP, portraitFromChoices } from './portrait-map.js';
+import { mosaicWidget } from './mosaic.js';
 
 // 資料庫中舊稱呼的統一
 const T = (str) => String(str ?? '').replace(/觀測者|觀測員|觀察者/g, '觀察員').replace(/觀測/g, '觀察');
@@ -567,6 +568,18 @@ function ctxEvidenceList(s, L) {
 
 function evidenceWidget(L, s, msg) {
   const box = h('div');
+  if (s.mosaic) {
+    const last = (s.submissions || []).filter((x) => x.status !== 'REPLACED').slice(-1)[0];
+    if (!(last && last.status === 'PENDING_REVIEW')) {
+      return mosaicWidget({ step: s, pid: S.pid, day: L.day, toast, onSubmit: async (blob) => {
+        const path = `${S.pid}/${L.day}/mosaic-final-${Date.now()}.jpg`;
+        await upload('evidence', path, blob, 'image/jpeg');
+        const r = await rpc('submit_evidence', { p: S.pid, d: L.day, step_id: s.id, kind: 'photo', path, content: null });
+        sfx(r.completed ? 'complete' : 'ok');
+        await afterSuccess(L, r);
+      } });
+    }
+  }
   if (s.gate) {
     const last = (s.submissions || []).filter((x) => x.status !== 'REPLACED').slice(-1)[0];
     if (last && last.status === 'PENDING_REVIEW') {
