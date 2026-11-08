@@ -56,6 +56,9 @@ select pg_temp.ok(not (public.submit_step(:'pid', 1, 's_power', '{"value":"11111
 select pg_temp.ok((public.submit_step(:'pid', 1, 's_power', '{"value":"011010"}') ->> 'correct')::boolean, 'switch pattern accepted');
 select pg_temp.ok((public.request_hint(:'pid', 1, 's_power') ->> 'hint') is not null, 'hint delivered by server');
 select pg_temp.ok((public.submit_step(:'pid', 1, 's_sample', '{}') ->> 'correct')::boolean, 'sample story');
+select pg_temp.ok(not (public.submit_step(:'pid', 1, 's_lock', '{"value":"A168888418311"}') ->> 'correct')::boolean, 'lock rejects tax id with 1s');
+select pg_temp.ok((public.submit_step(:'pid', 1, 's_lock', '{"value":"a1688 88483"}') ->> 'correct')::boolean, 'lock opens: phone model + tax id minus 1s');
+select public.submit_step(:'pid', 1, 's_unlocked', '{}') \g /dev/null
 select pg_temp.ok(not (public.submit_step(:'pid', 1, 's_observe', '{}') ->> 'correct')::boolean, 'observe step needs real observation');
 select pg_temp.ok((public.observe(:'pid', 'explore') ->> 'total')::int = 1, 'observation recorded');
 select pg_temp.fails($$select public.observe('$$ || :'pid' || $$', 'rest')$$, 'P030_ALREADY_OBSERVED', 'one observation per day');
@@ -119,9 +122,8 @@ select pg_temp.ok((public.submit_step(:'tp', 3, 's_note', '{}') ->> 'correct')::
 select pg_temp.ok(not (public.submit_step(:'tp', 3, 's_scan', '{"target":1}') ->> 'correct')::boolean, 'wrong AR target rejected');
 select pg_temp.fails($$select public.submit_step('$$ || :'tp' || $$', 3, 's_scan', '{"code":"VAULT-A"}')$$, 'P030_FALLBACK_DISABLED', 'fallback disabled by default');
 select public.admin_set_ar_fallback(3, 's_scan', true) \g /dev/null
-select pg_temp.ok((public.submit_step(:'tp', 3, 's_scan', '{"code":"vault-a"}') -> 'reveal' ->> 'digits') = '床邊', 'admin-enabled fallback + reveal points to bedside');
-select pg_temp.ok(not (public.submit_step(:'tp', 3, 's_open', '{"value":"A168888418311"}') ->> 'correct')::boolean, 'safe rejects tax id with 1s');
-select pg_temp.ok((public.submit_step(:'tp', 3, 's_open', '{"value":"a1688 88483"}') ->> 'correct')::boolean, 'safe opened with phone model + tax id minus 1s');
+select pg_temp.ok((public.submit_step(:'tp', 3, 's_scan', '{"code":"vault-a"}') -> 'reveal' ->> 'digits') = '418', 'admin-enabled fallback + reveal');
+select pg_temp.ok((public.submit_step(:'tp', 3, 's_open', '{"value":"418"}') ->> 'correct')::boolean, 'safe opened');
 select pg_temp.ok(not (public.submit_step(:'tp', 3, 's_inside', '{}') ->> 'completed')::boolean, 'day 3 needs stage 3');
 select (public.submit_evidence(:'tp', 3, 's_coord', 'photo', :'tp' || '/3/c.jpg', null) ->> 'id') as c3 \gset
 select public.admin_review_evidence(:'c3', 'APPROVED', 'ok') \g /dev/null
@@ -239,6 +241,8 @@ select public.open_level(:'gp', 1) \g /dev/null
 select public.submit_step(:'gp', 1, 's_wake', '{}') \g /dev/null
 select public.submit_step(:'gp', 1, 's_power', '{"value":"011010"}') \g /dev/null
 select public.submit_step(:'gp', 1, 's_sample', '{}') \g /dev/null
+select public.submit_step(:'gp', 1, 's_lock', '{"value":"A168888483"}') \g /dev/null
+select public.submit_step(:'gp', 1, 's_unlocked', '{}') \g /dev/null
 select public.observe(:'gp', 'rest') \g /dev/null
 select public.submit_step(:'gp', 1, 's_observe', '{}') \g /dev/null
 select public.submit_step(:'gp', 1, 's_id_intro', '{}') \g /dev/null

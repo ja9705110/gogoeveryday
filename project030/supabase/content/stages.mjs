@@ -12,13 +12,17 @@ export const stages = {
       { id: 'under_desk', x: 24, y: 82, label: '桌子底下' },
       { id: 'c_panel', x: 17, y: 41, label: '配電箱', clue: [{ type: 'note', text: '配電箱內側貼著一張發黃的紙條：\n「只讓無法再被拆開的位置通電。」' }] },
       { id: 'c_clock', x: 49, y: 21, label: '牆上的時鐘', clue: [{ type: 'clock', h: 10, m: 30, caption: '時鐘停住了。秒針一動也不動。' }] },
+      { id: 'c_lock', x: 77, y: 54, label: '培養艙的鎖', clue: [{ type: 'note', text: '培養艙的鎖上刻著：\n「解鎖所需的兩樣東西，遺落在你世界的床邊。」\n「型號照抄。」\n「數字，依配電箱的規則。」' }] },
     ] },
     steps: [
       story('s_wake', ['本區電力異常。', '系統：「請先恢復電源。」'], { speaker: 'SYSTEM', ...S(1, '恢復電源') }),
       { id: 's_power', type: 'switches', title: '配電箱', count: 6, labels: ['1', '2', '3', '4', '5', '6'], ...S(1, '恢復電源'),
         prompt: '先調查上方畫面裡的配電箱，再撥動開關、拉下主閘。' },
       story('s_sample', ['燈亮了。培養艙的玻璃起霧，又慢慢變清。', '裡面有一個很小的東西。它沒有名字，只有編號：030。',
-        '系統：「樣本需要觀察。每天一次，什麼時候都可以。觀察的方式，由你決定。」'], { speaker: 'SYSTEM', ...S(1, '恢復電源') }),
+        '但培養艙被鎖住了。鎖上需要一組密碼。'], { speaker: 'SYSTEM', ...S(1, '恢復電源') }),
+      { id: 's_lock', type: 'text', title: '培養艙的鎖', placeholder: '輸入密碼（英文＋數字）', ...S(1, '恢復電源'),
+        prompt: '先調查畫面裡的培養艙，再輸入密碼。' },
+      story('s_unlocked', ['鎖開了。培養艙的門緩緩滑開。', '系統：「樣本需要觀察。每天一次，什麼時候都可以。觀察的方式，由你決定。」'], { speaker: 'SYSTEM', ...S(1, '恢復電源') }),
       { id: 's_observe', type: 'observe', title: '第一次觀察', prompt: '前往「培養艙」選一種方式觀察它，再回到這裡。', ...S(1, '恢復電源') },
       story('s_id_intro', ['終端機：「新觀察員接入。開始建立身分檔案。」', '「請先確認你的觀察員編號。」'], { speaker: 'SYSTEM', ...S(2, '身分建檔') }),
       { id: 's_id', type: 'keypad', title: '觀察員編號', length: 4, prompt: '輸入你的觀察員編號。', ...S(2, '身分建檔') },
@@ -50,6 +54,7 @@ export const stages = {
         pending_text: '同步證據已送出。觀察站正在比對兩個世界的時間……比對通過後，本區將自動歸檔。' },
     ],
     secrets: {
+      s_lock: { answer: ['A168888483'], hints: ['培養艙的鎖提到兩樣遺失的東西，它們在你世界的床邊。', '床邊有一支手機和一張收據。密碼 ＝ 手機型號 ＋ 收據上的統編。', '依配電箱的規則：1 不算。型號照抄，統編裡的 1 全部拿掉。'], success: '咔。培養艙的鎖彈開了。', wrong: '鎖沒有反應。' },
       s_id: { answer: '$birth_mmdd', hints: ['你登入時輸入的那四個數字。'], success: '身分確認。', wrong: '編號不符。' },
       s_sync: { hints: ['看看這個房間裡，有什麼東西停住了。', '你的世界裡，也有同樣的東西。讓它停在同一刻。', '找一個真的時鐘，把指針調到 10:30，拍下來上傳。（螢幕上的時鐘不算）'] },
     },
@@ -87,22 +92,17 @@ export const stages = {
 
   // ───────── DAY 3 · 保險箱 ─────────
   3: {
-    scene: { hotspots: [
-      { id: 'c_safe', x: 50, y: 55, label: '保險箱的轉盤', clue: [{ type: 'note', text: '轉盤旁刻著兩行很小的字：\n「型號照抄。」\n「數字，依第一天的規則。」' }] },
-    ] },
     steps: [
       story('s_watch', ['守夜人：「卡片是我放的。提示我只說一次——」', '「找一個你每天都會打開，卻很少注意它的地方。」'],
         { speaker: '守夜人', when: { flag: 'watcher_met' }, ...S(1, '投影卡 A') }),
       story('s_note', ['桌上壓著一張紙條：', '「卡片在你每天都會打開，卻很少注意的地方。——守夜人」'], { when: { not: { flag: 'watcher_met' } }, ...S(1, '投影卡 A') }),
       { id: 's_scan', type: 'ar', title: '掃描投影卡 A', target: 0, card: 'A', overlay: 'safe', prompt: '找到實體卡片 A，用相機對準它。', ...S(1, '投影卡 A') },
-      { id: 's_open', type: 'text', title: '保險箱密碼', placeholder: '輸入密碼（英文＋數字）', prompt: '投影指向的地方，有東西被遺落了。找到它們，打開保險箱。（先調查畫面裡的轉盤）', ...S(2, '保險箱') },
+      { id: 's_open', type: 'keypad', title: '保險箱轉盤', length: 3, prompt: '輸入保險箱的密碼。', ...S(2, '保險箱') },
       story('s_inside', ['保險箱裡只有一張舊照片。', '照片背面寫著：「第 7 天，再用一次。」', '照片的角落，有一行很小的字：「座標未確認」。'], { ...S(2, '保險箱') }),
       { id: 's_coord', type: 'evidence', title: '座標確認', kinds: ['photo'], gate: true, ...S(3, '座標確認'),
         prompt: '系統需要確認投影卡的原始座標。', pending_text: '座標資料已送出。觀察站正在比對……' },
     ],
     secrets: {
-      s_scan: { fallback: 'VAULT-A', reveal: { overlay: 'safe', digits: '床邊' }, success: '卡片上方浮現一個保險箱，轉盤上亮著兩個字。' },
-      s_open: { answer: ['A168888483'], hints: ['投影卡上的保險箱指向一個地方。遺失物就在那裡。', '床邊有一支手機和一張收據。密碼 ＝ 手機型號 ＋ 收據上的統編。', '記得第一天的規則：1 不算。型號照抄，統編裡的 1 全部拿掉。'], success: '咔。保險箱開了。', wrong: '轉盤卡住了。' },
       s_coord: { hints: ['投影卡是在哪裡找到的？', '回到那個地方。', '拍一張「找到卡片的那個位置」上傳。'] },
     },
   },
