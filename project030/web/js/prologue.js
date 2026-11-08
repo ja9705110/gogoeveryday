@@ -7,15 +7,16 @@ const SCENES = [
   { t: 4500, v: 'logo', lines: [], fx: 'static' },
   { t: 8500, v: 'file', lines: ['在星空與深海的交界，漂浮著每一個人的檔案。', '其中一份——編號 030——正在下沉。'], fx: 'type' },
   { t: 9000, v: 'zones', lines: ['它碎成十個片段，沉入不同的深度。', '每個片段，只會浮上海面 24 小時。'], fx: 'type' },
-  { t: 10000, v: 'id', lines: ['系統比對了所有觀察員。', '只有一個人的頻率，與檔案 030 完全一致。', '第 1118 號觀察員——是你。'], fx: 'scan' },
+  { t: 10000, v: 'id', lines: ['系統比對了所有觀察員。', '只有一個人的頻率，與檔案 030 完全一致。', '第 {no} 號觀察員——是你。'], fx: 'scan' },
   { t: 9000, v: 'rise', lines: ['你的任務：在片段沉沒之前找到它，', '解開機關，回收藏在裡面的符號。', '有些線索，藏在你的現實世界裡。'], fx: 'type' },
   { t: 8500, v: 'sample', lines: ['檔案的核心，會以「樣本」的形態交到你手上。', '每天觀察它一次——它會依照你的方式成長。'], fx: 'ping' },
   { t: 8000, v: 'missed', lines: ['錯過的片段，會沉入更深的海。', '它不會消失，只會長成另一種樣子。'], fx: 'sink' },
   { t: 7500, v: 'final', lines: ['第十一天，所有片段將浮上同一片海面——', '第 030 號檔案室。屆時，檔案將被重新定義。'], fx: 'type' },
-  { t: 0, v: 'ready', lines: ['第 1118 號觀察員，連線已建立。', '你的第一個片段，正在浮上海面。'], fx: 'match' },
+  { t: 0, v: 'ready', lines: ['第 {no} 號觀察員，連線已建立。', '你的第一個片段，正在浮上海面。'], fx: 'match' },
 ];
 
-export function playPrologue({ startDate, onDone }) {
+export function playPrologue({ startDate, observerNo, onDone }) {
+  const NO = observerNo || '1118';
   const root = document.createElement('div');
   root.className = 'prologue';
   root.innerHTML = `<canvas></canvas><div class="pl-text"></div>
@@ -52,7 +53,7 @@ export function playPrologue({ startDate, onDone }) {
     text.innerHTML = '';
     for (const raw of lines) {
       const p = document.createElement('p'); text.append(p);
-      for (const ch of raw.replace('{date}', date)) {
+      for (const ch of raw.replace('{date}', date).replace('{no}', NO)) {
         if (!alive) return;
         p.textContent += ch;
         if (fx === 'type' && ch.trim()) sfx('type');
@@ -74,7 +75,7 @@ export function playPrologue({ startDate, onDone }) {
     if (s.v === 'ready') {
       const brief = document.createElement('div'); brief.className = 'pl-brief';
       brief.innerHTML = `<div class="kicker">MISSION BRIEF</div>
-        <dl><dt>身分</dt><dd>第 1118 號觀察員</dd><dt>任務</dt><dd>在十天內，回收檔案 030 沉入深海的 10 個片段與符號</dd>
+        <dl><dt>身分</dt><dd>第 ${NO} 號觀察員</dd><dt>任務</dt><dd>在十天內，回收檔案 030 沉入深海的 10 個片段與符號</dd>
         <dt>期限</dt><dd>每個片段只在當天 00:00–23:59 浮上海面</dd><dt>每日</dt><dd>進入片段區域・觀察樣本一次</dd>
         <dt>終點</dt><dd>第 11 天，第 030 號檔案室</dd></dl>`;
       const btn = document.createElement('button'); btn.className = 'btn primary pl-go'; btn.textContent = '接受任務';
@@ -163,7 +164,7 @@ export function playPrologue({ startDate, onDone }) {
       g.fillStyle = 'rgba(63,244,255,.25)'; g.fillRect(cx - 90, cy - 80 + ((k * 60) % 160), 180, 2);
       const pct = Math.min(100, Math.floor(k * 18));
       g.font = '600 14px "Share Tech Mono", monospace'; g.textAlign = 'center';
-      g.fillStyle = pct >= 100 ? '#ffb547' : '#3ff4ff'; g.fillText(pct >= 100 ? 'MATCH 100% · OBSERVER 1118' : `MATCHING ${pct}%`, cx, cy + 108);
+      g.fillStyle = pct >= 100 ? '#ffb547' : '#3ff4ff'; g.fillText(pct >= 100 ? `MATCH 100% · OBSERVER ${NO}` : `MATCHING ${pct}%`, cx, cy + 108);
       if (pct >= 100 && !s._done) { s._done = true; sfx('match'); }
     }
     if (s.v === 'sample') {

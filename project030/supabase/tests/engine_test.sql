@@ -3,6 +3,7 @@
 \set QUIET on
 \pset tuples_only on
 \pset format unaligned
+set search_path = public, extensions;
 
 create or replace function pg_temp.ok(cond boolean, label text) returns void language plpgsql as $$
 begin
@@ -25,7 +26,7 @@ begin
 end $$;
 
 -- ── 準備：今天 = 第 1 天 ──
-reset role;
+reset role; set search_path = public, extensions;
 insert into auth.users values ('00000000-0000-0000-0000-00000000000a', 'admin@test.dev'),
                               ('00000000-0000-0000-0000-00000000000b', 'player@test.dev'),
                               ('00000000-0000-0000-0000-00000000000c', 'stranger@test.dev');
@@ -68,13 +69,13 @@ select pg_temp.ok((public.request_hint(:'pid', 1, 's_sync') ->> 'hint') like '%�
 select pg_temp.ok((public.submit_evidence(:'pid', 1, 's_sync', 'photo', :'pid' || '/1/clock.jpg', null) ->> 'pending')::boolean, 'gate photo pending review');
 select pg_temp.fails($$select public.submit_evidence('$$ || :'pid' || $$', 1, 's_sync', 'photo', '$$ || :'pid' || $$/1/b.jpg', null)$$, 'P030_PENDING_REVIEW', 'cannot resubmit while pending');
 select pg_temp.ok((public.get_state(:'pid') -> 'levels' -> 0 ->> 'status') = 'IN_PROGRESS', 'level waits for approval');
-reset role;
+reset role; set search_path = public, extensions;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000a', false), set_config('request.jwt.claims', '{"email":"admin@test.dev"}', false) \g /dev/null
 insert into public.admins (user_id) values ('00000000-0000-0000-0000-00000000000a') on conflict do nothing;
 set role authenticated;
 select e ->> 'id' as gid from jsonb_array_elements(public.admin_list_evidence('PENDING_REVIEW')) e where e ->> 'step_id' = 's_sync' limit 1 \gset
 select public.admin_review_evidence(:'gid', 'APPROVED', '時間同步完成') \g /dev/null
-reset role;
+reset role; set search_path = public, extensions;
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000b', 'player@test.dev');
 set role authenticated;
 select pg_temp.ok((public.get_state(:'pid') -> 'levels' -> 0 ->> 'outcome') = 'ON_TIME', 'admin approval completes day 1 ON_TIME');
@@ -82,14 +83,14 @@ select pg_temp.ok(public.get_state(:'pid') -> 'inventory' @> '[{"key":"sym:1"}]'
 select pg_temp.fails($$select public.submit_evidence('$$ || :'pid' || $$', 1, 's_sync', 'photo', 'someoneelse/x.jpg', null)$$, 'P030_', 'evidence path must belong to player');
 
 -- 陌生帳號
-reset role;
+reset role; set search_path = public, extensions;
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000c', 'stranger@test.dev');
 set role authenticated;
 select pg_temp.ok(not (public.bootstrap() ->> 'allowed')::boolean, 'stranger not allowed');
 select pg_temp.fails($$select public.get_state('$$ || :'pid' || $$')$$, 'P030_FORBIDDEN', 'stranger cannot read player profile');
 
 -- ════════════ B. 管理者測試模式：模擬日期與錯過情境 ════════════
-reset role;
+reset role; set search_path = public, extensions;
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000a', 'admin@test.dev');
 set role authenticated;
 select pg_temp.ok((public.bootstrap() ->> 'is_admin')::boolean, 'admin recognised');
@@ -147,7 +148,7 @@ select pg_temp.ok((public.submit_step(:'tp', 8, 's_stay', '{}') ->> 'correct')::
 -- 時間倒轉不會恢復錯過
 select public.admin_set_test_time(:'tp', :'d3'::timestamptz - interval '3 days') \g /dev/null
 select pg_temp.ok((public.get_state(:'tp') -> 'levels' -> 4 ->> 'status') = 'ALTERNATE', 'rewinding clock cannot undo a miss');
-reset role;
+reset role; set search_path = public, extensions;
 select pg_temp.fails($$update public.player_levels set missed_at = null where profile_id = '$$ || :'tp' || $$' and day = 5$$, 'P030_TIME_IS_IRREVERSIBLE', 'trigger blocks un-missing even for postgres');
 select pg_temp.fails($$delete from public.event_log where profile_id = '$$ || :'pid' || $$'$$, 'P030_EVENT_LOG_IMMUTABLE', 'event log immutable');
 set role authenticated;
@@ -156,7 +157,7 @@ set role authenticated;
 select ((now() at time zone 'Asia/Taipei')::date + 8)::text || ' 21:05:00+08' as d9 \gset
 select public.admin_set_test_time(:'tp', :'d9'::timestamptz) \g /dev/null
 select pg_temp.ok(jsonb_array_length(public.open_level(:'tp', 9) -> 'steps' -> 0 -> 'cards') = 8, 'timeline has 8 cards');
-reset role;
+reset role; set search_path = public, extensions;
 select string_agg(c ->> 'id', ',' order by o) as order9 from jsonb_array_elements(private.timeline_cards(:'tp', 8)) with ordinality x(c, o) \gset
 select pg_temp.ok((select count(*) from jsonb_array_elements(private.timeline_cards(:'tp', 8)) c where c ->> 'kind' = 'void') >= 4, 'missed days are void cards');
 set role authenticated;
@@ -203,7 +204,7 @@ select pg_temp.ok((public.get_state(:'tp') -> 'sample' ->> 'breaks')::int = 1, '
 select pg_temp.ok((public.get_state(:'tp') -> 'sample' ->> 'total')::int = 3, 'total observations');
 
 -- 正式玩家資料未受測試影響
-reset role;
+reset role; set search_path = public, extensions;
 select pg_temp.ok((select count(*) from public.player_levels where profile_id = :'pid' and missed_at is not null) = 0, 'real player untouched by test mode');
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000a', 'admin@test.dev');
 set role authenticated;
@@ -213,14 +214,14 @@ select e ->> 'id' as eid from jsonb_array_elements(public.admin_list_evidence(nu
 select pg_temp.ok((public.admin_review_evidence(:'eid', 'NEEDS_MORE', '請再多寫一點') ->> 'status') = 'NEEDS_MORE', 'admin review');
 select public.admin_test_reset(:'tp') \g /dev/null
 select public.admin_delete_test_profile(:'tp') \g /dev/null
-reset role;
+reset role; set search_path = public, extensions;
 select pg_temp.ok(not exists (select 1 from public.profiles where id = :'tp'), 'test profile purged');
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000b', 'player@test.dev');
 set role authenticated;
 select pg_temp.ok((public.list_notifications(:'pid') -> 0 ->> 'title') = '紀錄需要補充', 'player notified of NEEDS_MORE');
 
 -- ════════════ C. 關卡門檻：截止前送出、隔天才審核，仍算準時 ════════════
-reset role;
+reset role; set search_path = public, extensions;
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000a', 'admin@test.dev');
 set role authenticated;
 select ((now() at time zone 'Asia/Taipei')::date)::text || ' 23:50:00+08' as late1 \gset
@@ -241,5 +242,25 @@ select e ->> 'id' as gid2 from jsonb_array_elements(public.admin_list_evidence('
 select public.admin_review_evidence(:'gid2', 'APPROVED', 'ok') \g /dev/null
 select pg_temp.ok((public.get_state(:'gp') -> 'levels' -> 0 ->> 'outcome') = 'ON_TIME', 'late approval still ON_TIME');
 select public.admin_delete_test_profile(:'gp') \g /dev/null
-reset role;
+
+-- ════════════ D. 後台設定壽星（名字＋生日）與重置進度 ════════════
+reset role; set search_path = public, extensions;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a', 'admin@test.dev');
+set role authenticated;
+select pg_temp.ok((public.admin_set_player('小明', '2026-11-18') ->> 'login_code') = '1118', 'admin sets name + birthday');
+reset role; set search_path = public, extensions;
+select pg_temp.ok((select encrypted_password = crypt('p030-1118', encrypted_password) from auth.users where email = 'observer@p030.game'), 'observer password = birthday MMDD');
+select pg_temp.ok((select player_name from public.settings) = '小明', 'player name stored');
+insert into public.profiles (user_id, label) select id, email from auth.users where email = 'observer@p030.game';
+insert into public.event_log (profile_id, at, type) select p.id, now(), 'X' from public.profiles p join auth.users u on u.id = p.user_id where u.email = 'observer@p030.game';
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a', 'admin@test.dev');
+set role authenticated;
+select pg_temp.ok(public.admin_reset_player() = 1, 'admin can reset player progress');
+select public.admin_set_player('小明', '2026-12-05') \g /dev/null
+reset role; set search_path = public, extensions;
+select pg_temp.ok((select encrypted_password = crypt('p030-1205', encrypted_password) from auth.users where email = 'observer@p030.game'), 'changing birthday updates login code');
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000b', 'player@test.dev');
+set role authenticated;
+select pg_temp.fails('select public.admin_reset_player()', 'P030_ADMIN_ONLY', 'player cannot reset');
+reset role; set search_path = public, extensions;
 \echo ALL TESTS PASSED

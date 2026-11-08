@@ -75,7 +75,7 @@ async function boot() {
     const k = 'p030.prologue.v3.' + S.pid;
     if (localStorage.getItem(k) && needsUnlock()) toast('輕觸畫面任一處，開始播放情境音效', 3500);
     if (!localStorage.getItem(k) && S.state) {
-      playPrologue({ startDate: S.state.start_date, onDone: () => { localStorage.setItem(k, '1'); if (!location.hash || location.hash === '#/') route(); } });
+      playPrologue({ startDate: S.state.start_date, observerNo: S.state.observer_no, onDone: () => { localStorage.setItem(k, '1'); if (!location.hash || location.hash === '#/') route(); } });
     }
   });
 }
@@ -228,7 +228,7 @@ function missionStatus(st) {
   return h('div', { class: 'mission fade-in' },
     h('div', { class: 'row' }, h('span', { class: 'kicker' }, 'MISSION · 檔案 030 修復'), h('span', { class: 'spacer' }),
       h('button', { class: 'btn ghost sm', onclick: showBrief }, '任務簡報')),
-    h('div', { class: 'ms-id' }, '第 1118 號觀察員', h('span', { class: 'ms-tag' }, st.is_test ? 'SIM' : 'ACTIVE')),
+    h('div', { class: 'ms-id' }, `第 ${st.observer_no || '1118'} 號觀察員`, st.player_name && st.player_name !== '觀察員' ? h('span', { class: 'ms-name' }, st.player_name) : null, h('span', { class: 'ms-tag' }, st.is_test ? 'SIM' : 'ACTIVE')),
     h('div', { class: 'ms-grid' },
       cell('片段打撈', `${frags}/10`, lost ? `已沉沒 ${lost}` : null, true),
       cell('符號', `${syms}/10`),
@@ -268,13 +268,13 @@ function showBrief() {
   modal(h('div', { class: 'manual' },
     h('div', { class: 'kicker' }, 'MISSION BRIEF'), h('h2', { style: 'color:var(--text);margin-top:4px' }, '任務簡報'),
     h('dl', { class: 'brief' },
-      h('dt', {}, '你是誰'), h('dd', {}, '星海檔案館的第 1118 號觀察員。系統比對所有觀察員後，只有你的頻率與檔案 030 完全一致——原因不明。'),
+      h('dt', {}, '你是誰'), h('dd', {}, `星海檔案館的第 ${S.state.observer_no || '1118'} 號觀察員。系統比對所有觀察員後，只有你的頻率與檔案 030 完全一致——原因不明。`),
       h('dt', {}, '發生了什麼'), h('dd', {}, '在星空與深海的交界，漂浮著每一個人的檔案。編號 030 的檔案正在下沉，碎成十個片段，沉入不同的深度。每個片段只會浮上海面 24 小時。'),
       h('dt', {}, '你的任務'), h('dd', {}, '每天進入當天浮上海面的片段，解開機關、回收符號；有些線索藏在你的現實世界裡。每天觀察一次檔案的核心——樣本 030。'),
       h('dt', {}, '如果錯過'), h('dd', {}, '片段會沉入更深的海，不再以原本的樣子出現。系統會開啟替代路線，檔案會長成另一種樣子——但不會消失。'),
       h('dt', {}, '最終目標'), h('dd', {}, '第 11 天，所有片段將浮上同一片海面——第 030 號檔案室，檔案 030 將被重新定義。'),
       h('dt', {}, '協助者'), h('dd', {}, '守夜人——一位比你更早來到這片海的人。他知道的比他說的多。')),
-    h('button', { class: 'btn block', onclick: () => { document.querySelector('.modal')?.remove(); playPrologue({ startDate: S.state.start_date }); } }, '▶ 重播前導影片')));
+    h('button', { class: 'btn block', onclick: () => { document.querySelector('.modal')?.remove(); playPrologue({ startDate: S.state.start_date, observerNo: S.state.observer_no }); } }, '▶ 重播前導影片')));
 }
 
 function showManual() {
@@ -289,7 +289,7 @@ function showManual() {
       h('li', {}, '取得的符號放在「物品」，每個符號都有一個頻率數字，之後會再用到。'),
       h('li', {}, '錯過的區域會永久改變，但會開啟另一條替代路線。故事不會因此結束。'),
       h('li', {}, '到右上角「設定」開啟通知，系統會在新區域開啟、即將關閉時提醒你。')),
-    h('button', { class: 'btn block', onclick: () => { document.querySelector('.modal')?.remove(); playPrologue({ startDate: S.state.start_date }); } }, '▶ 重播前導影片')));
+    h('button', { class: 'btn block', onclick: () => { document.querySelector('.modal')?.remove(); playPrologue({ startDate: S.state.start_date, observerNo: S.state.observer_no }); } }, '▶ 重播前導影片')));
 }
 
 // ── 終端（首頁） ──
@@ -782,7 +782,7 @@ async function settings() {
     S.boot.profiles.forEach((p) => sel.append(h('option', { value: p.id, selected: p.id === S.pid ? 'selected' : null }, (p.is_test ? '［測試］' : '') + (p.label || p.id))));
     wrap.append(h('div', { class: 'card' }, h('b', {}, '切換檔案'), sel));
   }
-  wrap.append(h('button', { class: 'btn block', onclick: () => playPrologue({ startDate: S.state.start_date }) }, '▶ 重播前導影片'), h('div', { style: 'height:8px' }));
+  wrap.append(h('button', { class: 'btn block', onclick: () => playPrologue({ startDate: S.state.start_date, observerNo: S.state.observer_no }) }, '▶ 重播前導影片'), h('div', { style: 'height:8px' }));
   if (S.boot.is_admin) wrap.append(h('a', { class: 'btn block', href: 'admin.html' }, '管理後台'));
   wrap.append(h('div', { style: 'height:10px' }), h('button', { class: 'btn ghost block', onclick: async () => { await signOut(); location.reload(); } }, '登出'));
   wrap.append(h('p', { class: 'faint mono', style: 'font-size:11px;text-align:center' }, S.boot.email));
