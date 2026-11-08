@@ -143,6 +143,8 @@ function soundToggle() {
 
 function shell(active, content) {
   cleanup();
+  if (S.inPlace) { content.classList.remove('fade-in'); content.querySelectorAll('.fade-in').forEach((x) => x.classList.remove('fade-in')); }
+  const keepY = S.inPlace ? scrollY : 0;
   app.innerHTML = '';
   const st = S.state;
   const clock = h('div', { class: 'clock' });
@@ -164,6 +166,7 @@ function shell(active, content) {
     tabs.append(a);
   });
   app.append(tabs);
+  if (S.inPlace) scrollTo(0, keepY);
 }
 
 async function loadState() {
@@ -175,7 +178,10 @@ async function loadState() {
 
 async function route() {
   const hash = location.hash.replace(/^#/, '') || '/';
-  app.innerHTML = '<div class="loading">連線中…</div>';
+  // 同一頁原地更新：不清空畫面、不顯示「連線中」，避免閃爍與跳回頂端
+  S.inPlace = S.renderedHash === hash && !!app.querySelector('.topbar');
+  if (!S.inPlace) app.innerHTML = '<div class="loading">連線中…</div>';
+  S.renderedHash = hash;
   try {
     await loadState();
     const [, page, arg] = hash.split('/');
@@ -391,6 +397,11 @@ async function zone(day) {
   if (!localStorage.getItem(seenKey)) { await typeLines(intro, introLines); localStorage.setItem(seenKey, '1'); }
   else introLines.forEach((t) => intro.append(h('p', {}, t)));
   drawSteps(L, stepsBox);
+  // 捲到目前要做的那一題（影像校準時，從識別影像開始，讓影像與選項同時在畫面內）
+  const act = stepsBox.querySelector('.step.active');
+  const av = stepsBox.querySelector('.avatar-card');
+  const target = act && act.querySelector('.choice') && av && (av.compareDocumentPosition(act) & Node.DOCUMENT_POSITION_FOLLOWING) ? av : (S.inPlace ? act : null);
+  if (target) requestAnimationFrame(() => scrollTo({ top: Math.max(0, target.getBoundingClientRect().top + scrollY - 76), behavior: S.inPlace ? 'smooth' : 'auto' }));
 }
 
 function stageInfo(L) {
@@ -422,15 +433,21 @@ function drawSteps(L, box) {
       const info = stages.find((x) => x.n === s.stage);
       box.append(h('div', { class: 'stage-head' + (info && info.done ? ' done' : '') }, h('span', {}, `STAGE ${s.stage}/${stages.length}`), h('b', {}, s.stage_title || ''), info && info.done ? h('span', { class: 'sh-ok' }, 'CLEAR') : null));
     }
-    if (!avatarShown && s.type === 'choice' && AVATAR_STEPS.includes(s.flag)) {
+    const isAv = s.type === 'choice' && AVATAR_STEPS.includes(s.flag);
+    if (!avatarShown && isAv) {
       avatarShown = true;
       const base = choicesFromStats(S.state.stats.choices);
-      const holder = h('div', { class: 'avatar-art', html: avatarSVG(base, { size: 200 }) });
+      const avSteps = L.steps.filter((x) => x.type === 'choice' && AVATAR_STEPS.includes(x.flag));
+      const holder = h('div', { class: 'avatar-art', html: avatarSVG(base, { size: 112 }) });
+      const list = h('div', { class: 'av-list' }, ...avSteps.map((x) => h('div', { class: 'av-li' + (x.done ? ' ok' : x.id === s.id || (!x.done && avSteps.find((y) => !y.done) === x) ? ' cur' : '') },
+        h('i', {}, x.done ? '✓' : '·'), String(x.title || '').split('・').pop())));
       const note = h('div', { class: 'avatar-note' }, Object.keys(base).length >= 4 ? '識別影像已寫入檔案 030。' : '每完成一項校準，影像就會更新。');
-      box.append(h('div', { class: 'avatar-card fade-in' }, h('div', { class: 'kicker' }, 'OBSERVER ID IMAGE'), holder, note));
-      S.avatarPreview = (flag, opt) => { holder.innerHTML = avatarSVG({ ...base, [flag]: opt }, { size: 200 }); holder.classList.remove('pop'); void holder.offsetWidth; holder.classList.add('pop'); };
+      box.append(h('div', { class: 'avatar-card' }, holder, h('div', { class: 'av-side' }, h('div', { class: 'kicker' }, 'ID IMAGE'), list, note)));
+      S.avatarPreview = (flag, opt) => { holder.innerHTML = avatarSVG({ ...base, [flag]: opt }, { size: 112 }); holder.classList.remove('pop'); void holder.offsetWidth; holder.classList.add('pop'); };
     }
-    const el = h('div', { class: 'step ' + (done ? 'done' : 'active') });
+    // 已完成的校準題收進上方清單，避免把目前的選項擠出畫面
+    if (isAv && done) continue;
+    const el = h('div', { class: 'step ' + (done ? 'done' : 'active') + (isAv ? ' av-step' : '') });
     el.append(h('div', { class: 'st-title' }, s.title || (s.type === 'story' ? '' : s.type)));
     if (s.speaker) el.append(h('div', { class: 'speaker' }, s.speaker));
     if (s.text) el.append(h('div', { class: 'lines' }, ...[].concat(s.text).map((t) => h('p', {}, T(t)))));

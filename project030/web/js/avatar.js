@@ -70,7 +70,7 @@ export function avatarSVG(choices = {}, { size = 240, label = true } = {}) {
     : tone === 'cover' ? `<text x="14" y="40" font-family="Georgia,serif" font-size="38" font-weight="700" fill="#ff2d55" letter-spacing="2">030</text>
       <text x="16" y="56" font-family="Arial" font-size="8" fill="#fff" letter-spacing="3">THE OBSERVER ISSUE</text>
       <text x="226" y="270" text-anchor="end" font-family="Arial" font-size="9" font-weight="700" fill="#ffe600">NO.1118</text>` : '';
-  return `<svg viewBox="0 0 240 300" width="${size}" height="${size * 1.25}" class="avatar-svg" role="img" aria-label="觀察員識別影像">
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 300" width="${size}" height="${size * 1.25}">
     <defs>${TONE[tone](id)}<clipPath id="cp${id}"><rect width="240" height="300" rx="10"/></clipPath></defs>
     <g clip-path="url(#cp${id})"><g filter="url(#tn${id})">
       ${bg}
@@ -83,6 +83,8 @@ export function avatarSVG(choices = {}, { size = 240, label = true } = {}) {
     </g>${extra}</g>
     ${label ? `<rect x="0" y="272" width="240" height="28" fill="rgba(2,8,16,.72)"/><text x="12" y="290" font-family="monospace" font-size="10" fill="#3ff4ff" letter-spacing="1">ID IMAGE · ${done < 4 ? `CALIBRATING ${done}/4` : 'WRITTEN TO FILE 030'}</text>` : ''}
   </svg>`;
+  // 以圖片輸出：只點陣化一次，iOS Safari 捲動或背景動畫時不會反覆重畫濾鏡而閃爍
+  return `<img class="avatar-svg" width="${size}" height="${size * 1.25}" alt="觀察員識別影像" decoding="sync" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}">`;
 }
 
 export function choicesFromStats(choices = {}) {

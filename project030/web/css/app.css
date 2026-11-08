@@ -596,12 +596,12 @@ body { background: transparent !important; }
 .avatar-card { margin: 18px 0 6px; padding: 12px; text-align: center; clip-path: var(--cut); border: 1px solid rgba(63,244,255,.5);
   background: linear-gradient(160deg, rgba(14,40,60,.85), rgba(3,10,18,.85)); box-shadow: var(--glow); }
 .avatar-art { display: flex; justify-content: center; margin: 8px 0 4px; }
-.avatar-art svg { border-radius: 10px; box-shadow: 0 0 24px rgba(63,244,255,.35); }
-.avatar-art.pop svg { animation: avpop .5s both; }
+.avatar-art .avatar-svg { border-radius: 10px; box-shadow: 0 0 24px rgba(63,244,255,.35); }
+.avatar-art.pop .avatar-svg { animation: avpop .5s both; }
 @keyframes avpop { 0% { filter: brightness(2.2) blur(3px); transform: scale(.96); } 100% { filter: none; transform: none; } }
 .avatar-note { font-size: 12px; color: var(--dim); }
 .ms-avatar { margin-left: auto; line-height: 0; }
-.ms-avatar svg { border-radius: 8px; border: 1px solid rgba(63,244,255,.5); box-shadow: 0 0 10px rgba(63,244,255,.3); }
+.ms-avatar .avatar-svg { border-radius: 8px; border: 1px solid rgba(63,244,255,.5); box-shadow: 0 0 10px rgba(63,244,255,.3); }
 .mz-cell .mz-guide { opacity: .45; filter: none; }
 .mz-cell.shot .mz-guide { opacity: .2; }
 .cer-gate { position: fixed; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; padding: 20px;
@@ -613,3 +613,30 @@ body { background: transparent !important; }
 .cer-epi { line-height: 1.8; }
 .cer-next { margin-top: 30px; padding: 14px; border: 1px dashed rgba(255,181,71,.6); color: #ffe2b0; font-size: 15px; clip-path: var(--cut); background: rgba(255,181,71,.06); }
 .cer-next span { display: block; font-family: var(--hud); font-size: 11px; letter-spacing: .3em; color: var(--accent2); margin-bottom: 6px; text-shadow: 0 0 8px rgba(255,181,71,.6); }
+/* 減少閃爍：場景掃描線不再閃動；底部多留空間給分頁列 */
+.scene::before { animation: none; opacity: .6; }
+/* iOS Safari 防閃爍：背景畫布每秒重繪，任何「模糊背後」或「整頁混色」的圖層都會跟著每一幀重算而閃爍 */
+.card, .tabbar, .modal { -webkit-backdrop-filter: none; backdrop-filter: none; }
+.card { background: linear-gradient(160deg, rgba(12, 34, 52, .94), rgba(4, 12, 21, .95)); }
+.tabbar { background: rgba(3, 10, 18, .97); }
+.modal { background: rgba(0, 4, 10, .9); }
+body::after { mix-blend-mode: normal; background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, .55)); }
+body::before { animation: none; }
+#p030-bg { transform: translateZ(0); }
+.kicker::before, .step.active::before { animation: none; }
+.fade-in, .cer-body > * { animation-name: hudin2; }
+@keyframes hudin2 { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01s !important; animation-iteration-count: 1 !important; } }
+#app { padding-bottom: calc(150px + env(safe-area-inset-bottom)); }
+.avatar-card { margin: 12px 0 2px; padding: 10px 12px; display: flex; gap: 14px; align-items: center; text-align: left; }
+.avatar-card .avatar-art { margin: 0; flex: none; }
+.av-side { flex: 1; min-width: 0; }
+.av-list { margin: 6px 0; display: grid; gap: 3px; font-size: 13px; }
+.av-li { color: var(--faint, #4b6070); display: flex; gap: 8px; align-items: center; }
+.av-li i { font-style: normal; width: 14px; text-align: center; }
+.av-li.ok { color: var(--ok); } .av-li.cur { color: var(--accent); font-weight: 700; }
+.choice button { padding: 12px 14px; }
+.av-step .choice { grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+.av-step .choice button { padding: 10px 12px; line-height: 1.35; }
+.av-step .choice button small { font-size: 12px; }
+.av-step .lines p { margin: 4px 0; }
