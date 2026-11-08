@@ -1,5 +1,5 @@
 // PROJECT 030 · 玩家端
-import { sb, rpc, errText, session, passwordLogin, signOut, upload, signedUrl, isConfigured, vapidKey } from './api.js';
+import { sb, rpc, errText, session, passwordLogin, birthdayLogin, signOut, upload, signedUrl, isConfigured, vapidKey } from './api.js';
 import { renderScene } from './scene.js';
 import { mountSample, ACTION_LABEL, ACTION_DESC, PARAM_LABEL } from './sample.js';
 import { renderWidget, renderClue, renderRevealed, h } from './steps.js';
@@ -71,21 +71,31 @@ async function boot() {
 
 function renderLogin() {
   app.innerHTML = '';
-  const acc = h('input', { type: 'text', placeholder: '帳號', autocomplete: 'username', autocapitalize: 'none', value: localStorage.getItem('p030.account') || '' });
-  const pw = h('input', { type: 'password', placeholder: '密碼', autocomplete: 'current-password' });
+  const bd = h('input', { type: 'text', inputmode: 'numeric', placeholder: 'MMDD', maxlength: 10, autocomplete: 'off',
+    style: 'font-size:30px;text-align:center;letter-spacing:.4em;font-family:var(--hud)' });
   const msg = h('div', { class: 'msg' });
   const btn = h('button', { class: 'btn primary block', type: 'submit' }, '接入');
   const go = async (e) => {
-    e.preventDefault(); btn.disabled = true; msg.className = 'msg'; msg.textContent = '驗證中…';
-    try { await passwordLogin(acc.value, pw.value); localStorage.setItem('p030.account', acc.value.trim()); location.reload(); }
-    catch (err) { msg.className = 'msg bad'; msg.textContent = /Invalid login/i.test(err.message || '') ? '帳號或密碼錯誤。' : errText(err); btn.disabled = false; }
+    e.preventDefault(); btn.disabled = true; msg.className = 'msg'; msg.textContent = '比對中…';
+    try { await birthdayLogin(bd.value); location.reload(); }
+    catch (err) { msg.className = 'msg bad'; msg.textContent = /Invalid login/i.test(err.message || '') ? '身分不符。這份檔案不屬於這個日期。' : errText(err); btn.disabled = false; }
   };
+  // 管理者／其他帳號
+  const acc = h('input', { type: 'text', placeholder: '帳號', autocapitalize: 'none', autocomplete: 'username' });
+  const pw = h('input', { type: 'password', placeholder: '密碼', autocomplete: 'current-password' });
+  const msg2 = h('div', { class: 'msg' });
+  const other = h('form', { class: 'card hidden', onsubmit: async (e) => {
+    e.preventDefault(); msg2.textContent = '驗證中…';
+    try { await passwordLogin(acc.value, pw.value); location.reload(); }
+    catch (err) { msg2.className = 'msg bad'; msg2.textContent = /Invalid login/i.test(err.message || '') ? '帳號或密碼錯誤。' : errText(err); }
+  } }, acc, h('div', { style: 'height:8px' }), pw, h('div', { style: 'height:8px' }), h('button', { class: 'btn block', type: 'submit' }, '登入'), msg2);
   app.append(h('div', { style: 'margin-top:12vh' },
     h('div', { class: 'kicker' }, 'PROJECT 030'),
     h('h1', {}, '觀測者驗證'),
-    h('p', { class: 'dim' }, '你收到了一份邀請。請輸入交給你的帳號與密碼。'),
-    h('form', { class: 'card', onsubmit: go },
-      h('label', { class: 'field' }, h('span', {}, '帳號'), acc), h('label', { class: 'field' }, h('span', {}, '密碼'), pw), btn, msg)));
+    h('p', { class: 'dim' }, '這份檔案只屬於一個人。請輸入你的生日（月日）。'),
+    h('form', { class: 'card glow', onsubmit: go }, bd, h('div', { style: 'height:10px' }), btn, msg),
+    h('div', { style: 'text-align:center;margin-top:24px' }, h('button', { class: 'btn ghost sm', onclick: () => other.classList.toggle('hidden') }, '管理者登入')),
+    other));
 }
 function renderNotInvited() {
   app.innerHTML = '';
