@@ -92,7 +92,7 @@ export function renderScene(scene = {}, found = {}, onSpot) {
   if (scene.pulse === 'irregular') wrap.querySelectorAll('.corepulse').forEach((e) => e.classList.add('irregular'));
   for (const h of scene.hotspots || []) {
     const b = document.createElement('button');
-    b.className = 'hs' + (found[h.id] ? ' found' : '');
+    b.className = 'hs' + (h.clue ? ' clue' : '') + (found[h.id] ? ' found' : '');
     b.style.left = h.x + '%'; b.style.top = h.y + '%';
     b.setAttribute('aria-label', h.label || '調查');
     b.onclick = () => onSpot && onSpot(h, b);

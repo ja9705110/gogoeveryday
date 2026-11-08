@@ -277,4 +277,10 @@ select pg_temp.as_user('00000000-0000-0000-0000-00000000000b', 'player@test.dev'
 set role authenticated;
 select pg_temp.fails('select public.admin_reset_player()', 'P030_ADMIN_ONLY', 'player cannot reset');
 reset role; set search_path = public, extensions;
+-- ════════════ E. 現實世界密碼 ════════════
+select pg_temp.ok((select private.norm(secrets #>> '{s_serial,answer}') = '4710901898847' from public.levels where day = 2), 'day 2 barcode answer');
+select pg_temp.ok((select private.norm(secrets #>> '{s_recipe,answer}') = private.norm('777250') from public.levels where day = 5), 'day 5 essential-oil answer');
+select pg_temp.ok((select private.norm(secrets #>> '{s_exam,answer}') = private.norm('bdbbcbabab') from public.levels where day = 6), 'day 6 exam answer (case-insensitive)');
+select pg_temp.ok((select count(*) from public.levels l, jsonb_array_elements(l.config #> '{scene,hotspots}') h where h ? 'clue') >= 5, 'scene clue hotspots present');
+select pg_temp.ok(position('4710901898847' in (select config::text from public.levels where day = 2)) = 0, 'barcode not leaked in public config');
 \echo ALL TESTS PASSED

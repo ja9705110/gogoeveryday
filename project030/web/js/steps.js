@@ -85,7 +85,7 @@ W.switches = (s, ctx) => {
 
 W.keypad = (s, ctx) => {
   let v = '';
-  const disp = h('div', { class: 'keypad-display' }, '');
+  const disp = h('div', { class: 'keypad-display' + (s.length > 6 ? ' long' : '') }, '');
   const upd = () => { disp.textContent = v.padEnd(s.length, '·'); };
   const pad = h('div', { class: 'keypad' });
   [1, 2, 3, 4, 5, 6, 7, 8, 9, '⌫', 0, '⏎'].forEach((k) => pad.append(h('button', {
@@ -96,6 +96,19 @@ W.keypad = (s, ctx) => {
       upd();
     },
   }, String(k))));
+  upd();
+  return h('div', {}, disp, pad);
+};
+
+W.letters = (s, ctx) => { // A–D 選項密碼
+  let v = '';
+  const letters = s.letters || ['A', 'B', 'C', 'D'];
+  const disp = h('div', { class: 'keypad-display long' }, '');
+  const upd = () => { disp.textContent = v.padEnd(s.length, '·'); };
+  const pad = h('div', { class: 'keypad', style: 'grid-template-columns:repeat(4,1fr)' });
+  letters.forEach((k) => pad.append(h('button', { onclick: () => { if (v.length < s.length) v += k; upd(); } }, k)));
+  pad.append(h('button', { style: 'grid-column:span 2', onclick: () => { v = v.slice(0, -1); upd(); } }, '⌫'),
+    h('button', { style: 'grid-column:span 2', onclick: (e) => { if (v.length === s.length) ctx.send({ value: v }, e.target).then((r) => { if (!r?.correct) { v = ''; upd(); } }); } }, '⏎'));
   upd();
   return h('div', {}, disp, pad);
 };

@@ -352,6 +352,12 @@ async function zone(day) {
     wrap.append(cd);
   }
   wrap.append(renderScene(L.scene, L.found, async (spot, btn) => {
+    if (spot.clue) { // 場景線索：點了才看得到
+      sfx('find'); btn.classList.add('seen');
+      try { localStorage.setItem(`p030.clue.${S.pid}.${day}.${spot.id}`, '1'); } catch (_) {}
+      modal(h('div', {}, h('div', { class: 'kicker' }, spot.label || '調查'), ...[].concat(spot.clue).map((c) => renderClue(c))));
+      return;
+    }
     try {
       const r = await rpc('explore', { p: S.pid, d: day, spot: spot.id });
       sfx('find');
