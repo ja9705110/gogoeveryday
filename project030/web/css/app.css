@@ -640,3 +640,6 @@ body::before { animation: none; }
 .av-step .choice button { padding: 10px 12px; line-height: 1.35; }
 .av-step .choice button small { font-size: 12px; }
 .av-step .lines p { margin: 4px 0; }
+.tj { border-color: rgba(255,181,71,.5); }
+.tj-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.tj-grid .btn { margin: 0; padding: 10px 0; min-width: 0; font-family: var(--hud); }
