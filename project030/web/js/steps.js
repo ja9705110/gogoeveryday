@@ -1,6 +1,8 @@
 // 謎題元件：只負責操作介面；正確與否一律由伺服器判定
 import { glyphSVG, NAMES } from './glyphs.js';
 import { signedUrl } from './api.js';
+import { signalUrl } from './signal.js';
+import { duck } from './audio.js';
 
 export const h = (tag, attrs = {}, ...kids) => {
   const el = document.createElement(tag);
@@ -187,6 +189,17 @@ W.symbols = (s, ctx) => {
   return h('div', {}, slots, grid, h('div', { class: 'row' },
     h('button', { class: 'btn ghost', onclick: () => { seq.length = 0; draw(); } }, '清除'),
     h('button', { class: 'btn primary spacer', onclick: (e) => { if (seq.length === s.slots) ctx.send({ value: seq.map((x) => 'sym' + x).join(',') }, e.target).then((r) => { if (!r?.correct) { seq.length = 0; draw(); } }); } }, '放入')));
+};
+
+W.listen = (s, ctx) => { // 聽音訊：播放器＋數字鍵
+  const player = h('audio', { controls: '', preload: 'auto', style: 'width:100%;margin:6px 0 4px' });
+  player.onplay = () => duck(true); player.onpause = player.onended = () => duck(false);
+  const load = h('button', { class: 'btn block', onclick: async () => {
+    load.disabled = true; load.textContent = '接收訊號中…';
+    try { player.src = await signalUrl(); load.replaceWith(player); player.play().catch(() => {}); }
+    catch (e) { load.disabled = false; load.textContent = '▶ 重新接收訊號'; ctx.toast('這個瀏覽器無法播放訊號：' + (e.message || e)); }
+  } }, '▶ 播放訊號');
+  return h('div', {}, h('div', { class: 'clue mono', style: 'font-size:12px' }, '［深海錄音・約 30 秒・建議戴耳機］'), load, W.keypad(s, ctx));
 };
 
 W.text = (s, ctx) => {

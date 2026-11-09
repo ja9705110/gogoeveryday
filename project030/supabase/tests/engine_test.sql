@@ -289,11 +289,11 @@ set role authenticated;
 select pg_temp.fails('select public.admin_reset_player()', 'P030_ADMIN_ONLY', 'player cannot reset');
 reset role; set search_path = public, extensions;
 -- ════════════ E. 現實世界密碼 ════════════
-select pg_temp.ok((select private.norm(secrets #>> '{s_serial,answer}') = '4710901898847' from public.levels where day = 2), 'day 2 barcode answer');
+select pg_temp.ok((select secrets #>> '{s_count,answer}' = '6' from public.levels where day = 2), 'day 2 listening answer stored server-side');
 select pg_temp.ok((select private.norm(secrets #>> '{s_recipe,answer}') = private.norm('777250') from public.levels where day = 5), 'day 5 essential-oil answer');
 select pg_temp.ok((select private.norm(secrets #>> '{s_exam,answer}') = private.norm('bdbbcbabab') from public.levels where day = 6), 'day 6 exam answer (case-insensitive)');
 select pg_temp.ok((select count(*) from public.levels l, jsonb_array_elements(l.config #> '{scene,hotspots}') h where h ? 'clue') >= 5, 'scene clue hotspots present');
-select pg_temp.ok(position('4710901898847' in (select config::text from public.levels where day = 2)) = 0, 'barcode not leaked in public config');
+select pg_temp.ok(position('找五隻' in (select config::text from public.levels where day = 2)) = 0, 'day 2 decoded cipher not leaked in public config');
 -- ════════════ F. 每關過關照片 ════════════
 insert into public.reward_photos (day, stage, photo, caption) values (1, 1, 'data:image/jpeg;base64,AAA', '第一關'), (1, 2, 'data:image/jpeg;base64,BBB', '第二關'), (1, 3, 'data:image/jpeg;base64,CCC', '第三關');
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000b', 'player@test.dev');
@@ -336,5 +336,31 @@ select pg_temp.ok((select count(*) from public.player_levels where profile_id = 
 select pg_temp.fails($$select public.admin_test_jump('$$ || :'pid' || $$', 3)$$, 'P030_NOT_A_TEST_PROFILE', 'jump refuses real player profile');
 select pg_temp.fails($$select public.admin_test_jump('$$ || :'tj' || $$', 12)$$, 'P030_BAD_DAY', 'jump rejects bad day');
 select public.admin_delete_test_profile(:'tj') \g /dev/null
+reset role; set search_path = public, extensions;
+-- ════════════ 第 2 區改版：聽音訊 → 注音亂碼＋五隻貓 → 笑話錄音 ════════════
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a', 'admin@test.dev');
+set role authenticated;
+select public.admin_create_test_profile('第二區', null) as t2 \gset
+select public.admin_test_jump(:'t2', 2) \g /dev/null
+select pg_temp.ok((public.open_level(:'t2', 2) -> 'steps' -> 0 ->> 'id') = 's_intro', 'day 2 starts with intro');
+select public.submit_step(:'t2', 2, 's_intro', '{}') \g /dev/null
+select pg_temp.ok((public.submit_step(:'t2', 2, 's_tune', '{"value":"1037"}') ->> 'correct')::boolean, 'day 2 tune');
+select public.submit_step(:'t2', 2, 's_signal', '{}') \g /dev/null
+select pg_temp.ok(not (public.submit_step(:'t2', 2, 's_count', '{"value":"5"}') ->> 'correct')::boolean, 'listen: 5 kinds rejected');
+select pg_temp.ok((public.submit_step(:'t2', 2, 's_count', '{"value":"6"}') ->> 'correct')::boolean, 'listen: 6 kinds accepted');
+select public.submit_step(:'t2', 2, 's_print', '{}') \g /dev/null
+select pg_temp.ok(not (public.submit_step(:'t2', 2, 's_decode', '{"value":"5l3j35 al au q9 5l4"}') ->> 'correct')::boolean, 'cipher: raw text rejected');
+select pg_temp.ok((public.submit_step(:'t2', 2, 's_decode', '{"value":"找 5 隻貓咪，拍照"}') ->> 'correct')::boolean, 'cipher: decoded sentence accepted (spacing/punctuation/digit tolerant)');
+select public.submit_evidence(:'t2', 2, 's_cats', 'photo', :'t2' || '/2/cats.jpg', null) as r_cats \gset
+select pg_temp.ok((:'r_cats'::jsonb ->> 'pending')::boolean, 'cats photo waits for approval');
+select :'r_cats'::jsonb ->> 'id' as e_cats \gset
+select pg_temp.fails($$select public.submit_step('$$ || :'t2' || $$', 2, 's_laugh', '{}')$$, 'P030_', 'joke stage locked until cats photo approved');
+select public.admin_review_evidence(:'e_cats', 'APPROVED', '五隻都在') \g /dev/null
+select public.submit_step(:'t2', 2, 's_laugh', '{}') \g /dev/null
+select (public.submit_evidence(:'t2', 2, 's_joke', 'audio', :'t2' || '/2/joke.webm', null) ->> 'id') as e_joke \gset
+select public.admin_review_evidence(:'e_joke', 'APPROVED', '有笑') \g /dev/null
+select public.submit_step(:'t2', 2, 's_watcher', '{}') \g /dev/null
+select pg_temp.ok((public.get_state(:'t2') -> 'levels' -> 1 ->> 'status') = 'COMPLETED', 'day 2 completes after cats photo + joke recording approved');
+select public.admin_delete_test_profile(:'t2') \g /dev/null
 reset role; set search_path = public, extensions;
 \echo ALL TESTS PASSED

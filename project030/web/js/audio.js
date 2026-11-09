@@ -261,3 +261,5 @@ export function outputLevel() {
   return Math.sqrt(a.reduce((s, v) => s + v * v, 0) / a.length);
 }
 export const needsUnlock = () => sound.on && !unlocked;
+// 播放謎題音訊時，暫時把背景音壓低（避免干擾聆聽）
+export function duck(on) { if (ctx && ambBus) ambBus.gain.setTargetAtTime(on ? 0.04 : 0.55, ctx.currentTime, 0.25); }
