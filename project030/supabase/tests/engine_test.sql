@@ -294,6 +294,8 @@ select pg_temp.ok((select private.norm(secrets #>> '{s_recipe,answer}') = privat
 select pg_temp.ok((select private.norm(secrets #>> '{s_exam,answer}') = private.norm('bdbbcbabab') from public.levels where day = 6), 'day 6 exam answer (case-insensitive)');
 select pg_temp.ok((select count(*) from public.levels l, jsonb_array_elements(l.config #> '{scene,hotspots}') h where h ? 'clue') >= 5, 'scene clue hotspots present');
 select pg_temp.ok(position('找五隻' in (select config::text from public.levels where day = 2)) = 0, 'day 2 decoded cipher not leaked in public config');
+select pg_temp.ok((select private.norm(secrets #>> '{s_serial,answer}') = '4710901898847' from public.levels where day = 2), 'day 2 barcode answer');
+select pg_temp.ok(position('4710901898847' in (select config::text from public.levels where day = 2)) = 0, 'barcode not leaked in public config');
 -- ════════════ F. 每關過關照片 ════════════
 insert into public.reward_photos (day, stage, photo, caption) values (1, 1, 'data:image/jpeg;base64,AAA', '第一關'), (1, 2, 'data:image/jpeg;base64,BBB', '第二關'), (1, 3, 'data:image/jpeg;base64,CCC', '第三關');
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000b', 'player@test.dev');
@@ -349,6 +351,9 @@ select public.submit_step(:'t2', 2, 's_signal', '{}') \g /dev/null
 select pg_temp.ok(not (public.submit_step(:'t2', 2, 's_count', '{"value":"5"}') ->> 'correct')::boolean, 'listen: 5 kinds rejected');
 select pg_temp.ok((public.submit_step(:'t2', 2, 's_count', '{"value":"6"}') ->> 'correct')::boolean, 'listen: 6 kinds accepted');
 select public.submit_step(:'t2', 2, 's_print', '{}') \g /dev/null
+select pg_temp.ok(not (public.submit_step(:'t2', 2, 's_serial', '{"value":"4710901898840"}') ->> 'correct')::boolean, 'barcode: wrong serial rejected');
+select pg_temp.ok((public.submit_step(:'t2', 2, 's_serial', '{"value":"4710901898847"}') ->> 'correct')::boolean, 'barcode: tissue barcode accepted');
+select public.submit_step(:'t2', 2, 's_printed', '{}') \g /dev/null
 select pg_temp.ok(not (public.submit_step(:'t2', 2, 's_decode', '{"value":"5l3j35 al au q9 5l4"}') ->> 'correct')::boolean, 'cipher: raw text rejected');
 select pg_temp.ok((public.submit_step(:'t2', 2, 's_decode', '{"value":"找 5 隻貓咪，拍照"}') ->> 'correct')::boolean, 'cipher: decoded sentence accepted (spacing/punctuation/digit tolerant)');
 select public.submit_evidence(:'t2', 2, 's_cats', 'photo', :'t2' || '/2/cats.jpg', null) as r_cats \gset

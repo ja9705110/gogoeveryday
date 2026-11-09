@@ -191,15 +191,53 @@ W.symbols = (s, ctx) => {
     h('button', { class: 'btn primary spacer', onclick: (e) => { if (seq.length === s.slots) ctx.send({ value: seq.map((x) => 'sym' + x).join(',') }, e.target).then((r) => { if (!r?.correct) { seq.length = 0; draw(); } }); } }, '放入')));
 };
 
-W.listen = (s, ctx) => { // 聽音訊：播放器＋數字鍵
-  const player = h('audio', { controls: '', preload: 'auto', style: 'width:100%;margin:6px 0 4px' });
-  player.onplay = () => duck(true); player.onpause = player.onended = () => duck(false);
-  const load = h('button', { class: 'btn block', onclick: async () => {
-    load.disabled = true; load.textContent = '接收訊號中…';
-    try { player.src = await signalUrl(); load.replaceWith(player); player.play().catch(() => {}); }
-    catch (e) { load.disabled = false; load.textContent = '▶ 重新接收訊號'; ctx.toast('這個瀏覽器無法播放訊號：' + (e.message || e)); }
-  } }, '▶ 播放訊號');
-  return h('div', {}, h('div', { class: 'clue mono', style: 'font-size:12px' }, '［深海錄音・約 30 秒・建議戴耳機］'), load, W.keypad(s, ctx));
+// 聽音訊：自訂播放器（大按鈕、可點進度條、波形）＋邊聽邊「標記」新聲音，最後送出標記數
+let listenAudio = null;
+addEventListener('hashchange', () => { if (listenAudio) { listenAudio.pause(); duck(false); } });
+W.listen = (s, ctx) => {
+  if (listenAudio) listenAudio.pause();
+  const audio = listenAudio = new Audio(); audio.preload = 'auto'; audio.setAttribute('playsinline', '');
+  const fmt = (t) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
+  const box = h('div', { class: 'ls' });
+  const play = h('button', { class: 'ls-play', disabled: '', 'aria-label': '播放' }, '…');
+  const fill = h('i');
+  const bar = h('div', { class: 'ls-bar', role: 'slider', 'aria-label': '播放進度' }, fill);
+  const time = h('div', { class: 'ls-time' }, '接收訊號中…');
+  const wave = h('div', { class: 'ls-wave' }, ...Array.from({ length: 28 }, (_, i) => h('i', { style: `animation-delay:${(i * 0.07) % 0.9}s` })));
+  const marks = [];
+  const chips = h('div', { class: 'ls-marks' });
+  const mark = h('button', { class: 'btn ls-mark', disabled: '' }, '＋ 聽到一種新的聲音');
+  const clear = h('button', { class: 'btn ghost sm' }, '清除標記');
+  const send = h('button', { class: 'btn primary block', disabled: '' }, '送出');
+  const draw = () => {
+    chips.innerHTML = '';
+    marks.forEach((t, i) => chips.append(h('button', { class: 'ls-chip', title: '移除這個標記', onclick: () => { marks.splice(i, 1); draw(); } }, `${i + 1}・${fmt(t)} ×`)));
+    if (!marks.length) chips.append(h('span', { class: 'dim', style: 'font-size:12px' }, '還沒有標記。每種聲音只要標記一次。'));
+    send.textContent = marks.length ? `送出：一共 ${marks.length} 種` : '送出';
+    send.disabled = !marks.length;
+  };
+  const sync = () => {
+    const d = audio.duration || 31;
+    fill.style.width = (100 * audio.currentTime / d) + '%';
+    time.textContent = `${fmt(audio.currentTime)} / ${fmt(d)}`;
+  };
+  audio.ontimeupdate = sync; audio.onloadedmetadata = sync;
+  audio.onplay = () => { duck(true); box.classList.add('playing'); play.textContent = '❚❚'; play.setAttribute('aria-label', '暫停'); };
+  audio.onpause = () => { duck(false); box.classList.remove('playing'); play.textContent = '▶'; play.setAttribute('aria-label', '播放'); };
+  audio.onended = () => { duck(false); box.classList.remove('playing'); play.textContent = '↺'; play.setAttribute('aria-label', '重播'); };
+  // 進入這一步就先合成好，按下播放時才能在同一個手勢裡直接播放（iPhone 需要）
+  signalUrl().then((u) => { audio.src = u; audio.load(); play.disabled = false; mark.disabled = false; play.textContent = '▶'; time.textContent = '0:00 / 0:31'; })
+    .catch((e) => { time.textContent = '這個瀏覽器無法產生訊號：' + (e.message || e); });
+  play.onclick = () => { if (audio.paused) { if (audio.ended) audio.currentTime = 0; audio.play().catch((e) => ctx.toast('無法播放：' + (e.message || e))); } else audio.pause(); };
+  bar.onclick = (e) => { if (!audio.duration) return; const r = bar.getBoundingClientRect(); audio.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * audio.duration; sync(); };
+  mark.onclick = () => { marks.push(audio.currentTime); draw(); mark.classList.remove('hit'); void mark.offsetWidth; mark.classList.add('hit'); };
+  clear.onclick = () => { marks.length = 0; draw(); };
+  send.onclick = (e) => { audio.pause(); ctx.send({ value: String(marks.length) }, e.target); };
+  draw();
+  box.append(h('div', { class: 'ls-head' }, h('span', {}, '深海錄音・建議戴耳機'), h('span', { class: 'spacer' }), time),
+    h('div', { class: 'ls-row' }, play, h('div', { class: 'ls-main' }, wave, bar)), mark, chips,
+    h('div', { class: 'row', style: 'margin-top:8px;gap:8px' }, clear, h('span', { class: 'spacer' })), send);
+  return box;
 };
 
 W.text = (s, ctx) => {
