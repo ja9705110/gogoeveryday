@@ -319,4 +319,22 @@ select pg_temp.ok(jsonb_array_length(public.stage_photos(:'ph', 1)) = 0, 'no pho
 select public.admin_delete_test_profile(:'ph') \g /dev/null
 reset role; set search_path = public, extensions;
 select pg_temp.ok((select count(*) from public.reward_photos) = 3, 'admin can store photos');
+-- ════════════ 測試：直接選區 ════════════
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a', 'admin@test.dev');
+set role authenticated;
+select public.admin_create_test_profile('選區', null) as tj \gset
+select public.admin_test_jump(:'tj', 5) \g /dev/null
+select pg_temp.ok((public.get_state(:'tj') ->> 'game_day')::int = 5, 'jump: simulated day 5');
+select pg_temp.ok((select count(*) from public.player_levels where profile_id = :'tj' and day < 5 and status = 'COMPLETED' and missed_at is null) = 4, 'jump: zones 1-4 completed on time');
+select pg_temp.ok((public.get_state(:'tj') -> 'levels' -> 4 ->> 'status') in ('AVAILABLE', 'IN_PROGRESS'), 'jump: zone 5 open');
+select pg_temp.ok((public.open_level(:'tj', 5) -> 'steps' -> 0 ->> 'id') is not null, 'jump: zone 5 playable');
+select public.admin_test_jump(:'tj', 2) \g /dev/null
+select pg_temp.ok((select count(*) from public.player_levels where profile_id = :'tj' and status = 'COMPLETED') = 1, 'jump back: progress cleared, only zone 1 completed');
+select public.admin_test_jump(:'tj', 11) \g /dev/null
+select pg_temp.ok((public.get_state(:'tj') ->> 'game_day')::int = 11, 'jump: finale day');
+select pg_temp.ok((select count(*) from public.player_levels where profile_id = :'tj' and day <= 10 and status = 'COMPLETED') = 10, 'jump: zones 1-10 completed before finale');
+select pg_temp.fails($$select public.admin_test_jump('$$ || :'pid' || $$', 3)$$, 'P030_NOT_A_TEST_PROFILE', 'jump refuses real player profile');
+select pg_temp.fails($$select public.admin_test_jump('$$ || :'tj' || $$', 12)$$, 'P030_BAD_DAY', 'jump rejects bad day');
+select public.admin_delete_test_profile(:'tj') \g /dev/null
+reset role; set search_path = public, extensions;
 \echo ALL TESTS PASSED

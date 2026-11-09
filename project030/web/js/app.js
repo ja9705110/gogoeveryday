@@ -73,6 +73,11 @@ async function boot() {
   }
   S.pid = prof.id;
   localStorage.setItem('p030.profile', S.pid);
+  const jump = Number(new URLSearchParams(location.search).get('jump'));
+  if (jump && prof.is_test) { // 從管理後台「選區測試」開啟
+    try { await testJump(jump); } catch (e) { toast(errText(e)); }
+    history.replaceState(null, '', location.pathname + (jump === 11 ? '#/finale' : '#/zone/' + jump));
+  }
   window.addEventListener('hashchange', route);
   route().then(() => {
     const k = 'p030.prologue.v3.' + S.pid;
@@ -157,7 +162,7 @@ function shell(active, content) {
   tick(); const iv = setInterval(tick, 1000); S.cleanup.push(() => clearInterval(iv));
   app.append(h('div', { class: 'topbar' }, h('a', { class: 'brand', href: '#/', style: 'text-decoration:none' }, 'PROJECT 030'),
     h('div', { class: 'row' }, clock, soundToggle(), h('a', { href: '#/settings', 'aria-label': '設定', style: 'color:var(--dim);margin-left:10px', html: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>' }))));
-  if (st?.is_test) app.append(h('div', { class: 'banner' }, `測試模式・模擬時間 ${fmtTime(st.server_now, { year: 'numeric' })}・不影響正式玩家`));
+  if (st?.is_test) app.append(h('a', { class: 'banner', href: '#/', style: 'display:block;text-decoration:none' }, `測試模式・模擬時間 ${fmtTime(st.server_now, { year: 'numeric' })}・不影響正式玩家・回終端選區 ›`));
   app.append(content);
   const tabs = h('nav', { class: 'tabbar' });
   [['home', '#/', '終端'], ['lab', '#/lab', '培養艙'], ['items', '#/items', '物品'], ['log', '#/log', '紀錄'], ['inbox', '#/inbox', '訊息']].forEach(([k, href, label]) => {
@@ -311,6 +316,7 @@ function home() {
   const before = d < 1;
   wrap.append(h('div', { class: 'kicker' }, before ? 'STANDBY' : d <= 10 ? `DAY ${String(d).padStart(2, '0')} / 10` : 'FILE 030'),
     h('h1', {}, before ? '等待訊號' : d <= 10 ? '星海觀察中' : '第030號檔案室'));
+  if (st.is_test) wrap.append(testPanel(st));
   if (d >= 1) wrap.append(missionStatus(st));
   if (d >= 1) wrap.append(planetCard(st));
   const ob = nextObjective(st);
@@ -558,6 +564,31 @@ async function openCeremony(day, { replay = false } = {}) {
 }
 
 // 破關後由管理者審核通過（玩家不在畫面上）→ 下次打開時補播回顧
+// ── 測試：直接選區（只有測試檔案看得到；伺服器端也只允許測試檔案） ──
+async function testJump(d) {
+  await rpc('admin_test_jump', { p: S.pid, d });
+  for (let k = 1; k <= 11; k++) { if (k < d) localStorage.setItem(ceremonyKey(S.pid, k), '1'); else localStorage.removeItem(ceremonyKey(S.pid, k)); }
+  Object.keys(localStorage).filter((x) => x.startsWith(`p030.intro.${S.pid}.`) && Number(x.split('.')[3]) >= d).forEach((x) => localStorage.removeItem(x));
+  localStorage.setItem('p030.prologue.v3.' + S.pid, '1');
+}
+
+function testPanel(st) {
+  const grid = h('div', { class: 'tj-grid' }, ...st.levels.map((l) => h('button', {
+    class: 'btn sm' + (l.day === st.game_day ? ' primary' : ''),
+    onclick: async (e) => {
+      const name = l.day === 11 ? '生日終章' : `第 ${l.day} 區`;
+      if (!confirm(`從「${name}」開始測試？\n\n這份測試檔案的進度會清空，前面各區自動視為已完成，模擬時間跳到那一天 10:00。\n（不會影響壽星的正式進度）`)) return;
+      e.target.disabled = true;
+      try { await testJump(l.day); toast(`已跳到${name}`); location.hash = l.day === 11 ? '#/finale' : `#/zone/${l.day}`; }
+      catch (err) { toast(errText(err)); e.target.disabled = false; }
+    },
+  }, l.day === 11 ? '終章' : String(l.day))));
+  return h('div', { class: 'card tj' },
+    h('div', { class: 'kicker', style: 'color:var(--accent2)' }, 'TEST · 選區測試'),
+    h('p', { class: 'dim', style: 'font-size:13px;margin:4px 0 10px' }, '點一個區域，就從那一區的開頭開始玩。前面各區會自動完成，模擬時間跳到當天 10:00。'),
+    grid);
+}
+
 function pendingCeremony(st) {
   if (document.querySelector('.prologue, .ceremony')) return;
   const due = st.levels.filter((l) => l.day <= 10 && l.status === 'COMPLETED' && !localStorage.getItem(ceremonyKey(S.pid, l.day))).sort((x, y) => x.day - y.day)[0];
