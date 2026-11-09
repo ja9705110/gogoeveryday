@@ -3,6 +3,7 @@ import { sb, rpc, errText, session, passwordLogin, accountToEmail, signOut, sign
 import { h } from './steps.js';
 import { mountBackground } from './bg.js';
 import { portraitFromChoices } from './portrait-map.js';
+import { makeZip } from './zip.js';
 
 const app = document.getElementById('app');
 const A = { tab: 'overview', ov: null };
@@ -44,7 +45,7 @@ function login() {
       h('label', { class: 'field' }, h('span', {}, '帳號'), acc), h('label', { class: 'field' }, h('span', {}, '密碼'), pw), btn, msg)));
 }
 
-const TABS = [['overview', '總覽'], ['settings', '壽星設定'], ['levels', '關卡內容'], ['review', '佐證審核'], ['events', '特殊事件'], ['photos', '每日照片'], ['finale', '終章尋寶'], ['test', '測試模式'], ['print', 'AR 卡片'], ['backup', '備份']];
+const TABS = [['overview', '總覽'], ['settings', '壽星設定'], ['levels', '關卡內容'], ['review', '佐證審核'], ['files', '照片下載'], ['events', '特殊事件'], ['photos', '每日照片'], ['finale', '終章尋寶'], ['test', '測試模式'], ['print', 'AR 卡片'], ['backup', '備份']];
 async function render() {
   app.innerHTML = '';
   app.append(h('div', { class: 'topbar' }, h('span', { class: 'brand' }, 'PROJECT 030 · CONTROL'),
@@ -54,8 +55,91 @@ async function render() {
   app.append(tabs);
   const body = h('div', {}, h('div', { class: 'loading' }, '載入中…'));
   app.append(body);
-  try { await ({ overview, settings, levels, review, events, photos, finale, test, print, backup })[A.tab](body); }
+  try { await ({ overview, settings, levels, review, files, events, photos, finale, test, print, backup })[A.tab](body); }
   catch (e) { body.innerHTML = ''; body.append(h('div', { class: 'card msg bad' }, errText(e))); }
+}
+
+// ── 照片下載：列出玩家上傳的所有檔案（照片、分格原圖、錄音），可單張下載或整包 ZIP ──
+async function downloadOne(path, name) {
+  const { data, error } = await sb.storage.from('evidence').createSignedUrl(path, 600, { download: name || true });
+  if (error) { toast(errText(error)); return; }
+  const a = document.createElement('a'); a.href = data.signedUrl; a.rel = 'noopener'; document.body.append(a); a.click(); setTimeout(() => a.remove(), 5000);
+}
+async function walkFiles(prefix, depth = 0) {
+  const { data, error } = await sb.storage.from('evidence').list(prefix, { limit: 1000, sortBy: { column: 'name', order: 'asc' } });
+  if (error) throw error;
+  const out = [];
+  for (const f of data || []) {
+    if (f.name.startsWith('.')) continue;
+    if (f.id === null) { if (depth < 4) out.push(...await walkFiles(`${prefix}/${f.name}`, depth + 1)); }
+    else out.push({ path: `${prefix}/${f.name}`, size: f.metadata?.size || 0, mime: f.metadata?.mimetype || '', at: f.created_at });
+  }
+  return out;
+}
+const SUB_LABEL = (sub) => !sub ? '提交的檔案' : sub.startsWith('set-') ? `${sub.slice(4)}・分格原圖` : sub.startsWith('mosaic') ? '集結之手・分格原圖' : sub;
+async function files(body) {
+  const ov = await rpc('admin_overview');
+  const profs = [...ov.profiles].sort((a, b) => a.is_test - b.is_test);
+  body.innerHTML = '';
+  if (!profs.length) { body.append(h('p', { class: 'dim' }, '還沒有任何檔案。')); return; }
+  const pid = A.filesPid && profs.some((p) => p.id === A.filesPid) ? A.filesPid : profs[0].id;
+  const kind = A.filesKind || 'all';
+  const sel = h('select', { onchange: (e) => { A.filesPid = e.target.value; render(); } },
+    ...profs.map((p) => h('option', { value: p.id, selected: p.id === pid ? 'selected' : null }, p.is_test ? '［測試］' + (p.label || p.id) : `${ov.settings.player_name || '壽星'}（正式檔案）`)));
+  const ksel = h('select', { onchange: (e) => { A.filesKind = e.target.value; render(); } },
+    ...[['all', '照片＋錄音'], ['image', '只有照片'], ['audio', '只有錄音']].map(([v, l]) => h('option', { value: v, selected: v === kind ? 'selected' : null }, l)));
+  const zipBtn = h('button', { class: 'btn primary', disabled: '' }, '⬇ 全部打包下載（.zip）');
+  const prog = h('div', { class: 'dim mono', style: 'font-size:12px;margin-top:6px' });
+  body.append(h('div', { class: 'card' }, h('h2', {}, '照片下載'),
+    h('p', { class: 'dim', style: 'font-size:13px' }, '壽星在遊戲中上傳的所有檔案：每一區提交的照片與錄音、分格拍攝的原圖（例如五隻貓、集結之手）。可以單張下載，或整包下載成 ZIP。'),
+    h('div', { class: 'grid2' }, sel, ksel), h('div', { style: 'height:8px' }), zipBtn, prog));
+  const listBox = h('div', {}, h('div', { class: 'loading' }, '讀取檔案中…'));
+  body.append(listBox);
+  const prof = profs.find((p) => p.id === pid);
+  let all = await walkFiles(pid);
+  const isImg = (f) => f.mime.startsWith('image/') || /\.(jpe?g|png|webp|heic)$/i.test(f.path);
+  const isAud = (f) => f.mime.startsWith('audio/') || /\.(webm|m4a|mp3|wav|ogg|aac)$/i.test(f.path);
+  all = all.filter((f) => kind === 'all' ? isImg(f) || isAud(f) : kind === 'image' ? isImg(f) : isAud(f));
+  listBox.innerHTML = '';
+  if (!all.length) { listBox.append(h('p', { class: 'dim' }, '這個檔案還沒有上傳任何照片或錄音。')); return; }
+  const totalMB = all.reduce((a, f) => a + f.size, 0) / 1048576;
+  prog.textContent = `共 ${all.length} 個檔案・約 ${totalMB.toFixed(1)} MB`;
+  zipBtn.disabled = false;
+  const nice = (f) => { const [, day, ...rest] = f.path.split('/'); const sub = rest.length > 1 ? rest[0] : ''; return { day: Number(day), sub, base: rest[rest.length - 1] }; };
+  const { data: urls } = await sb.storage.from('evidence').createSignedUrls(all.filter(isImg).map((f) => f.path), 3600);
+  const urlOf = new Map((urls || []).map((u) => [u.path, u.signedUrl]));
+  const groups = new Map();
+  for (const f of all) { const n = nice(f); const k = `${String(n.day).padStart(2, '0')}|${n.sub}`; if (!groups.has(k)) groups.set(k, []); groups.get(k).push({ ...f, ...n }); }
+  for (const [k, items] of [...groups.entries()].sort()) {
+    const [day, sub] = k.split('|');
+    const grid = h('div', { class: 'dl-grid' });
+    for (const f of items) {
+      const name = `zone${day}_${sub ? sub + '_' : ''}${f.base}`;
+      const media = isImg(f) ? h('img', { src: urlOf.get(f.path) || '', alt: '', loading: 'lazy' }) : h('div', { class: 'dl-aud' }, '🎧', h('small', {}, f.base.split('.').pop().toUpperCase()));
+      grid.append(h('button', { class: 'dl-item', title: '下載 ' + name, onclick: () => downloadOne(f.path, name) }, media,
+        h('span', { class: 'dl-cap' }, fmt(f.at).replace(/:\d\d$/, '')), h('span', { class: 'dl-btn' }, '⬇')));
+    }
+    listBox.append(h('div', { class: 'card' }, h('div', { class: 'row' }, h('b', {}, `第 ${day} 區・${SUB_LABEL(sub)}`), h('span', { class: 'spacer' }), h('span', { class: 'dim mono', style: 'font-size:12px' }, `${items.length} 個`)), grid));
+  }
+  zipBtn.onclick = async () => {
+    zipBtn.disabled = true;
+    try {
+      const out = [];
+      for (const [i, f] of all.entries()) {
+        prog.textContent = `打包中 ${i + 1} / ${all.length}…`;
+        const { data, error } = await sb.storage.from('evidence').download(f.path);
+        if (error) throw error;
+        const n = nice(f);
+        out.push({ name: `第${String(n.day).padStart(2, '0')}區/${n.sub ? SUB_LABEL(n.sub) + '/' : ''}${n.base}`, data: new Uint8Array(await data.arrayBuffer()), date: f.at ? new Date(f.at) : new Date() });
+      }
+      const zip = makeZip(out);
+      const a = document.createElement('a'); a.href = URL.createObjectURL(zip);
+      a.download = `PROJECT030_${prof.is_test ? 'test' : 'player'}_${new Date().toISOString().slice(0, 10)}.zip`; // 外層檔名用英數，所有瀏覽器都能正確存檔
+      document.body.append(a); a.click(); setTimeout(() => { a.remove(); URL.revokeObjectURL(a.href); }, 60000);
+      prog.textContent = `完成：${out.length} 個檔案已打包下載。`;
+    } catch (e) { prog.textContent = '打包失敗：' + errText(e); }
+    zipBtn.disabled = false;
+  };
 }
 
 // ── 總覽 ──
@@ -223,7 +307,8 @@ async function review(body) {
       h('div', { class: 'row wrap' }, h('b', {}, `${e.is_test ? '［測試］' : ''}${e.profile_label}・第 ${e.day} 區 ${e.level_title}・${e.step_id}`), h('span', { class: 'spacer' }),
         e.payload && e.payload.gate ? h('span', { class: 'status-pill', style: 'color:var(--accent2)' }, '關卡門檻：通過才算破關') : null,
         h('span', { class: `status-pill s-${e.status}` }, e.status), h('span', { class: 'mono dim', style: 'font-size:11px' }, fmt(e.submitted_at) + (e.on_time ? '' : '（替代路線）'))),
-      media, h('div', { style: 'height:6px' }), note,
+      media, e.storage_path ? h('div', { style: 'margin-top:6px' }, h('button', { class: 'btn sm ghost', onclick: () => downloadOne(e.storage_path, `zone${String(e.day).padStart(2, '0')}_${e.step_id}_${e.storage_path.split('/').pop()}`) }, '⬇ 下載檔案')) : null,
+      h('div', { style: 'height:6px' }), note,
       h('div', { class: 'row wrap', style: 'margin-top:8px' },
         h('button', { class: 'btn primary sm', onclick: async () => { await rpc('admin_review_evidence', { eid: e.id, new_status: 'APPROVED', note: note.value }); toast('已通過'); render(); } }, '驗證通過'),
         h('button', { class: 'btn sm warn', onclick: async () => { await rpc('admin_review_evidence', { eid: e.id, new_status: 'NEEDS_MORE', note: note.value }); toast('已要求補充'); render(); } }, '需要補充'),
