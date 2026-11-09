@@ -12,6 +12,7 @@ import { mountPlanet, morphToPhoto, layerStates, LAYERS } from './planet.js';
 import { playCeremony, ceremonyKey, stageClear } from './ceremony.js';
 import { PORTRAIT_MAP, portraitFromChoices } from './portrait-map.js';
 import { mosaicWidget } from './mosaic.js';
+import { photosetWidget } from './photoset.js';
 import { avatarSVG, choicesFromStats, AVATAR_STEPS } from './avatar.js';
 
 // 資料庫中舊稱呼的統一
@@ -627,16 +628,19 @@ function ctxEvidenceList(s, L) {
 
 function evidenceWidget(L, s, msg) {
   const box = h('div');
-  if (s.mosaic) {
+  if (s.mosaic || s.photoset) {
     const last = (s.submissions || []).filter((x) => x.status !== 'REPLACED').slice(-1)[0];
     if (!(last && last.status === 'PENDING_REVIEW')) {
-      return mosaicWidget({ step: s, pid: S.pid, day: L.day, toast, onSubmit: async (blob) => {
-        const path = `${S.pid}/${L.day}/mosaic-final-${Date.now()}.jpg`;
+      const onSubmit = async (blob) => {
+        const path = `${S.pid}/${L.day}/${s.mosaic ? 'mosaic' : 'set'}-final-${Date.now()}.jpg`;
         await upload('evidence', path, blob, 'image/jpeg');
         const r = await rpc('submit_evidence', { p: S.pid, d: L.day, step_id: s.id, kind: 'photo', path, content: null });
         sfx(r.completed ? 'complete' : 'ok');
         await afterSuccess(L, r);
-      } });
+      };
+      const w = s.mosaic ? mosaicWidget({ step: s, pid: S.pid, day: L.day, toast, onSubmit }) : photosetWidget({ step: s, pid: S.pid, day: L.day, toast, onSubmit });
+      if (last && last.status === 'NEEDS_MORE') return h('div', {}, h('div', { class: 'clue', style: 'border-color:var(--warn)' }, '比對失敗：' + (last.note || '這份證據無法通過比對。可以重拍其中幾張，再送出一次。')), w);
+      return w;
     }
   }
   if (s.gate) {

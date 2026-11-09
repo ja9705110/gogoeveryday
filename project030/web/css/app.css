@@ -664,3 +664,24 @@ body::before { animation: none; }
 @keyframes lshit { 0% { background: rgba(255, 181, 71, .45); } 100% { background: transparent; } }
 .ls-marks { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; min-height: 20px; }
 .ls-chip { font-family: var(--mono); font-size: 12px; padding: 5px 9px; border: 1px solid rgba(255, 181, 71, .6); background: rgba(255, 181, 71, .1); color: var(--accent2); cursor: pointer; }
+/* ── 多張照片一起送審 ── */
+.pset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 6px; }
+.pset-cell { position: relative; aspect-ratio: 1; padding: 0; border: 1px dashed rgba(63, 244, 255, .5); background: rgba(4, 14, 24, .8); color: var(--accent); cursor: pointer; overflow: hidden; }
+.pset-cell.shot { border-style: solid; border-color: var(--ok); }
+.pset-cell.busy { opacity: .6; }
+.pset-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
+.pset-cell.shot .pset-img { display: block; }
+.pset-add { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 28px; }
+.pset-add small { font-size: 11px; color: var(--dim); margin-top: 2px; }
+.pset-cell.shot .pset-add { display: none; }
+.pset-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 3px 0; font-size: 12px; font-family: var(--mono); background: rgba(2, 8, 16, .75); color: var(--accent); }
+.pset-cell.shot .pset-cap { color: var(--ok); }
+.pset-cell.shot .pset-cap::after { content: ' ✓'; }
+/* ── 後台：照片下載 ── */
+.dl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; margin-top: 8px; }
+.dl-item { position: relative; aspect-ratio: 1; padding: 0; border: 1px solid var(--line); background: rgba(4, 14, 24, .8); overflow: hidden; cursor: pointer; color: var(--accent); }
+.dl-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.dl-aud { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 30px; }
+.dl-aud small { font-size: 11px; color: var(--dim); font-family: var(--mono); }
+.dl-cap { position: absolute; left: 0; right: 0; bottom: 0; font-size: 10px; font-family: var(--mono); padding: 2px 4px; background: rgba(2, 8, 16, .75); color: var(--dim); text-align: left; }
+.dl-btn { position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; line-height: 24px; border-radius: 50%; background: rgba(2, 8, 16, .8); font-size: 13px; }
