@@ -127,6 +127,10 @@ select pg_temp.ok((public.submit_step(:'tp', 3, 's_order', '{"value":"a,b,c,d,e"
 select public.submit_step(:'tp', 3, 's_ill', '{}') \g /dev/null
 select pg_temp.ok(not (public.submit_step(:'tp', 3, 's_recipe', '{"value":"777251"}') ->> 'correct')::boolean, 'wrong essential-oil code rejected');
 select pg_temp.ok((public.submit_step(:'tp', 3, 's_recipe', '{"value":"777250"}') ->> 'correct')::boolean, 'essential-oil code accepted');
+select pg_temp.ok(not (public.submit_step(:'tp', 3, 's_night', '{}') ->> 'correct')::boolean, 'night bud closed at 10:00 (game clock)');
+select public.admin_set_test_time(:'tp', (((now() at time zone 'Asia/Taipei')::date + 2)::text || ' 21:05:00+08')::timestamptz) \g /dev/null
+select pg_temp.ok((public.submit_step(:'tp', 3, 's_night', '{}') ->> 'correct')::boolean, 'night bud opens after 21:00');
+select pg_temp.ok(public.get_state(:'tp') -> 'inventory' @> '[{"key":"night_seed"}]', 'night seed granted');
 select public.submit_step(:'tp', 3, 's_warm', '{}') \g /dev/null
 select pg_temp.ok((public.open_level(:'tp', 3) -> 'steps' @> '[{"id":"s_people","photoset":{"count":3,"live":true}}]'), 'three-person photos are camera-only (live)');
 select (public.submit_evidence(:'tp', 3, 's_people', 'photo', :'tp' || '/3/set-final.jpg', null) ->> 'id') as c3 \gset
