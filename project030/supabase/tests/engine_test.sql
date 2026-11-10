@@ -121,19 +121,40 @@ select pg_temp.ok((select push_status from public.notifications where profile_id
 select pg_temp.fails($$select public.get_state('$$ || :'pid' || $$')$$, 'P030_FORBIDDEN', 'test tools cannot touch real player via player RPC');
 select pg_temp.fails($$select public.admin_set_test_time('$$ || :'pid' || $$', now())$$, 'P030_NOT_A_TEST_PROFILE', 'cannot time-shift a real profile');
 
--- 第 3 天：守夜人已離開 → 紙條變體
-select pg_temp.ok((public.open_level(:'tp', 3) ->> 'variant') = 'note', 'day 3 variant = note (watcher left)');
-select pg_temp.ok((public.open_level(:'tp', 3) -> 'steps' -> 0 ->> 'id') = 's_note', 'note step shown instead of watcher');
-select pg_temp.ok((public.submit_step(:'tp', 3, 's_note', '{}') ->> 'correct')::boolean, 'note story');
-select pg_temp.ok(not (public.submit_step(:'tp', 3, 's_scan', '{"target":1}') ->> 'correct')::boolean, 'wrong AR target rejected');
-select pg_temp.fails($$select public.submit_step('$$ || :'tp' || $$', 3, 's_scan', '{"code":"VAULT-A"}')$$, 'P030_FALLBACK_DISABLED', 'fallback disabled by default');
-select public.admin_set_ar_fallback(3, 's_scan', true) \g /dev/null
-select pg_temp.ok((public.submit_step(:'tp', 3, 's_scan', '{"code":"vault-a"}') -> 'reveal' ->> 'digits') = '418', 'admin-enabled fallback + reveal');
-select pg_temp.ok((public.submit_step(:'tp', 3, 's_open', '{"value":"418"}') ->> 'correct')::boolean, 'safe opened');
-select pg_temp.ok(not (public.submit_step(:'tp', 3, 's_inside', '{}') ->> 'completed')::boolean, 'day 3 needs stage 3');
-select (public.submit_evidence(:'tp', 3, 's_coord', 'photo', :'tp' || '/3/c.jpg', null) ->> 'id') as c3 \gset
+-- 第 3 天（溫室・香氛調配）：守夜人已離開 → 基本版；第 3 關三段體溫需審核
+select pg_temp.ok((public.open_level(:'tp', 3) ->> 'title') = '溫室', 'day 3 is now the greenhouse');
+select pg_temp.ok((public.submit_step(:'tp', 3, 's_order', '{"value":"a,b,c,d,e"}') ->> 'correct')::boolean, 'greenhouse watering order');
+select public.submit_step(:'tp', 3, 's_ill', '{}') \g /dev/null
+select pg_temp.ok(not (public.submit_step(:'tp', 3, 's_recipe', '{"value":"777251"}') ->> 'correct')::boolean, 'wrong essential-oil code rejected');
+select pg_temp.ok((public.submit_step(:'tp', 3, 's_recipe', '{"value":"777250"}') ->> 'correct')::boolean, 'essential-oil code accepted');
+select public.submit_step(:'tp', 3, 's_warm', '{}') \g /dev/null
+select pg_temp.ok((public.open_level(:'tp', 3) -> 'steps' @> '[{"id":"s_people","photoset":{"count":3,"live":true}}]'), 'three-person photos are camera-only (live)');
+select (public.submit_evidence(:'tp', 3, 's_people', 'photo', :'tp' || '/3/set-final.jpg', null) ->> 'id') as c3 \gset
 select public.admin_review_evidence(:'c3', 'APPROVED', 'ok') \g /dev/null
 select pg_temp.ok((public.get_state(:'tp') -> 'levels' -> 2 ->> 'status') = 'COMPLETED', 'day 3 completed after stage 3 approval');
+select pg_temp.ok(public.get_state(:'tp') -> 'inventory' @> '[{"key":"sym:5"}]' or exists (select 1 from public.inventory where profile_id = :'tp' and source_day = 3 and kind = 'symbol' and (data ->> 'symbol')::int = 5), 'day 3 grants the sprout symbol');
+
+-- 第 5 天（保險箱・投影卡 A）：前 4 天都錯過 → 守夜人已離開 → 紙條變體
+select ((now() at time zone 'Asia/Taipei')::date + 4)::text || ' 10:00:00+08' as d5 \gset
+select public.admin_create_test_profile('測試：保險箱', :'d5'::timestamptz) as sp \gset
+select pg_temp.ok((public.open_level(:'sp', 5) ->> 'variant') = 'note', 'day 5 safe: variant = note (watcher left)');
+select pg_temp.ok((public.open_level(:'sp', 5) -> 'steps' -> 0 ->> 'id') = 's_note', 'note step shown instead of watcher');
+select pg_temp.ok((public.submit_step(:'sp', 5, 's_note', '{}') ->> 'correct')::boolean, 'note story');
+select pg_temp.ok(not (public.submit_step(:'sp', 5, 's_scan', '{"target":1}') ->> 'correct')::boolean, 'wrong AR target rejected');
+select pg_temp.fails($$select public.submit_step('$$ || :'sp' || $$', 5, 's_scan', '{"code":"VAULT-A"}')$$, 'P030_FALLBACK_DISABLED', 'fallback disabled by default');
+select public.admin_set_ar_fallback(5, 's_scan', true) \g /dev/null
+select pg_temp.ok((public.submit_step(:'sp', 5, 's_scan', '{"code":"vault-a"}') -> 'reveal' ->> 'digits') = '418', 'admin-enabled fallback + reveal');
+select pg_temp.ok((public.submit_step(:'sp', 5, 's_open', '{"value":"418"}') ->> 'correct')::boolean, 'safe opened');
+select pg_temp.ok(not (public.submit_step(:'sp', 5, 's_inside', '{}') ->> 'completed')::boolean, 'day 5 needs stage 3');
+select (public.submit_evidence(:'sp', 5, 's_coord', 'photo', :'sp' || '/5/c.jpg', null) ->> 'id') as c5 \gset
+select public.admin_review_evidence(:'c5', 'APPROVED', 'ok') \g /dev/null
+select pg_temp.ok((public.get_state(:'sp') -> 'levels' -> 4 ->> 'status') = 'COMPLETED', 'day 5 safe completed after stage 3 approval');
+select pg_temp.ok(public.get_state(:'sp') -> 'inventory' @> '[{"key":"photo_old"}]', 'old photo granted on day 5');
+select ((now() at time zone 'Asia/Taipei')::date + 7)::text || ' 12:00:00+08' as d8s \gset
+select public.admin_set_test_time(:'sp', :'d8s'::timestamptz) \g /dev/null
+select pg_temp.ok(not (public.get_state(:'sp') -> 'inventory' @> '[{"key":"photo_old"}]'), 'photo lost when day 7 missed');
+select pg_temp.ok(exists (select 1 from public.event_log where profile_id = :'sp' and type = 'ITEM_LOST'), 'ITEM_LOST logged');
+select public.admin_delete_test_profile(:'sp') \g /dev/null
 
 -- 第 1 天替代路線：不同場景與機關
 select pg_temp.ok((public.open_level(:'tp', 1) -> 'scene' ->> 'light') = 'off', 'alternate scene is dark');
@@ -150,8 +171,7 @@ select pg_temp.ok((public.get_state(:'tp') -> 'levels' -> 0 ->> 'missed_at') is 
 -- 跳到第 8 天：4–7 天錯過；照片因第 7 天錯過而遺失
 select ((now() at time zone 'Asia/Taipei')::date + 7)::text || ' 12:00:00+08' as d8 \gset
 select public.admin_set_test_time(:'tp', :'d8'::timestamptz) \g /dev/null
-select pg_temp.ok(not (public.get_state(:'tp') -> 'inventory' @> '[{"key":"photo_old"}]'), 'photo lost when day 7 missed');
-select pg_temp.ok(exists (select 1 from public.event_log where profile_id = :'tp' and type = 'ITEM_LOST'), 'ITEM_LOST logged');
+select pg_temp.ok(not (public.get_state(:'tp') -> 'inventory' @> '[{"key":"photo_old"}]'), 'no old photo without the safe');
 select pg_temp.ok((public.open_level(:'tp', 8) ->> 'variant') = 'third', 'day 8 third door appears after >=2 misses');
 select pg_temp.ok((public.submit_step(:'tp', 8, 's_intro', '{}') ->> 'correct')::boolean, 'fork intro');
 select pg_temp.ok((public.submit_step(:'tp', 8, 's_door', '{"option":"stay"}') ->> 'correct')::boolean, 'choose unnamed door');
@@ -290,7 +310,7 @@ select pg_temp.fails('select public.admin_reset_player()', 'P030_ADMIN_ONLY', 'p
 reset role; set search_path = public, extensions;
 -- ════════════ E. 現實世界密碼 ════════════
 select pg_temp.ok((select secrets #>> '{s_count,answer}' = '6' from public.levels where day = 2), 'day 2 listening answer stored server-side');
-select pg_temp.ok((select private.norm(secrets #>> '{s_recipe,answer}') = private.norm('777250') from public.levels where day = 5), 'day 5 essential-oil answer');
+select pg_temp.ok((select private.norm(secrets #>> '{s_recipe,answer}') = private.norm('777250') from public.levels where day = 3), 'day 3 essential-oil answer');
 select pg_temp.ok((select private.norm(secrets #>> '{s_exam,answer}') = private.norm('bdbbcbabab') from public.levels where day = 6), 'day 6 exam answer (case-insensitive)');
 select pg_temp.ok((select count(*) from public.levels l, jsonb_array_elements(l.config #> '{scene,hotspots}') h where h ? 'clue') >= 5, 'scene clue hotspots present');
 select pg_temp.ok(position('找五隻' in (select config::text from public.levels where day = 2)) = 0, 'day 2 decoded cipher not leaked in public config');

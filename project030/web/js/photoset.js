@@ -16,6 +16,46 @@ async function shrink(file, max = 1600) {
   } catch (_) { return file; }
 }
 
+// 現場拍攝（不能從相簿選）：預設前鏡頭方便合照，可切換；照片右下角印上拍攝時間
+function liveCamera(i, label, onShot) {
+  const ov = h('div', { class: 'mz-cam pset-cam' });
+  const video = h('video', { playsinline: '', muted: '', autoplay: '' });
+  const tip = h('div', { class: 'mz-tip' }, `${label}：請把你和對方都放進畫面裡，按「拍下」。`);
+  const shoot = h('button', { class: 'btn primary mz-shoot' }, '拍下');
+  const flip = h('button', { class: 'btn' }, '切換鏡頭');
+  const cancel = h('button', { class: 'btn ghost' }, '取消');
+  ov.append(h('div', { class: 'mz-stage pset-stage' }, video), tip, h('div', { class: 'mz-bar' }, cancel, flip, shoot));
+  document.body.append(ov);
+  let stream = null, facing = 'user';
+  const stop = () => stream && stream.getTracks().forEach((t) => t.stop());
+  const start = async () => {
+    stop(); shoot.disabled = true;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: facing, width: { ideal: 1600 }, height: { ideal: 1600 } } });
+      video.srcObject = stream; video.style.transform = facing === 'user' ? 'scaleX(-1)' : 'none'; await video.play().catch(() => {}); shoot.disabled = false;
+    } catch (e) {
+      tip.innerHTML = '無法開啟相機。這一關只能現場拍攝：請到手機設定允許這個網頁使用相機，再回來重試。';
+    }
+  };
+  const close = () => { stop(); ov.remove(); };
+  cancel.onclick = close;
+  flip.onclick = () => { facing = facing === 'user' ? 'environment' : 'user'; start(); };
+  shoot.onclick = async () => {
+    if (!video.videoWidth) return;
+    const k = Math.min(1, 1600 / Math.max(video.videoWidth, video.videoHeight));
+    const c = document.createElement('canvas'); c.width = Math.round(video.videoWidth * k); c.height = Math.round(video.videoHeight * k);
+    const g = c.getContext('2d'); g.drawImage(video, 0, 0, c.width, c.height);
+    const stamp = 'LIVE ' + new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', hour12: false }).replace(/:\d\d$/, '');
+    const fs = Math.max(14, Math.round(c.width / 40)); g.font = `600 ${fs}px monospace`; g.textAlign = 'right'; g.textBaseline = 'bottom';
+    const tw = g.measureText(stamp).width; g.fillStyle = 'rgba(0,0,0,.55)'; g.fillRect(c.width - tw - fs * 1.2, c.height - fs * 1.9, tw + fs, fs * 1.5);
+    g.fillStyle = '#3ff4ff'; g.fillText(stamp, c.width - fs * 0.7, c.height - fs * 0.6);
+    const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.86));
+    close(); onShot(blob);
+  };
+  if (!navigator.mediaDevices?.getUserMedia) tip.textContent = '這個瀏覽器無法開啟相機。請用手機的 Safari 或 Chrome 開啟遊戲。';
+  else start();
+}
+
 export function photosetWidget({ step, pid, day, toast, onSubmit }) {
   const cfg = { count: 5, label: '第 {n} 張', ...(step.photoset || {}) };
   const n = cfg.count;
@@ -31,24 +71,25 @@ export function photosetWidget({ step, pid, day, toast, onSubmit }) {
     const img = h('img', { class: 'pset-img', alt: '' });
     const cap = h('div', { class: 'pset-cap' }, cfg.label.replace('{n}', i + 1));
     const add = h('div', { class: 'pset-add' }, '＋', h('small', {}, '拍照或選照片'));
-    const cell = h('button', { class: 'pset-cell', onclick: () => inp.click() }, img, add, cap, inp);
-    inp.onchange = async () => {
-      const f = inp.files[0]; if (!f) return; inp.value = '';
+    if (cfg.live) add.lastChild.textContent = '開相機拍攝';
+    const cell = h('button', { class: 'pset-cell', onclick: () => (cfg.live ? liveCamera(i, cfg.label.replace('{n}', i + 1), (b) => save(b)) : inp.click()) }, img, add, cap, cfg.live ? null : inp);
+    const save = async (raw) => {
       cell.classList.add('busy'); add.lastChild.textContent = '上傳中…';
       try {
-        const blob = await shrink(f);
+        const blob = cfg.live ? raw : await shrink(raw);
         const path = `${folder}/${i}-${Date.now()}.jpg`;
         await upload('evidence', path, blob, 'image/jpeg');
         shots[i] = { path, url: URL.createObjectURL(blob) }; sfx('ok'); paint();
       } catch (e) { toast('上傳失敗：' + (e.message || e)); }
-      cell.classList.remove('busy'); add.lastChild.textContent = '拍照或選照片';
+      cell.classList.remove('busy'); add.lastChild.textContent = cfg.live ? '開相機拍攝' : '拍照或選照片';
     };
+    inp.onchange = () => { const f = inp.files[0]; inp.value = ''; if (f) save(f); };
     grid.append(cell); cells.push({ cell, img });
   }
   const paint = () => {
     let k = 0;
     shots.forEach((s, i) => { if (s) { k++; cells[i].img.src = s.url; cells[i].cell.classList.add('shot'); } });
-    status.textContent = k < n ? `已完成 ${k} / ${n} 張。點格子拍照；點已拍的格子可以重拍。照片會自動保存，可以分次完成。` : `${n} 張都完成了。確認無誤後，一起送出審核。`;
+    status.textContent = k < n ? `已完成 ${k} / ${n} 張。點格子${cfg.live ? '開相機現場拍攝' : '拍照'}；點已拍的格子可以重拍。照片會自動保存，可以分次完成。` : `${n} 張都完成了。確認無誤後，一起送出審核。`;
     send.disabled = k < n;
   };
   // 讀回之前已上傳的照片（每一格取最新的一張）
