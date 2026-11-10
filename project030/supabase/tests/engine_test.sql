@@ -312,7 +312,7 @@ reset role; set search_path = public, extensions;
 select pg_temp.ok((select secrets #>> '{s_count,answer}' = '6' from public.levels where day = 2), 'day 2 listening answer stored server-side');
 select pg_temp.ok((select private.norm(secrets #>> '{s_recipe,answer}') = private.norm('777250') from public.levels where day = 3), 'day 3 essential-oil answer');
 select pg_temp.ok((select position('好像消化不良' in config::text) > 0 and position('對照速查表' in config::text) = 0 from public.levels where day = 3), 'pot label: indigestion + book in kitchen cupboard, no lookup-table line');
-select pg_temp.ok((select secrets #>> '{s_recipe,hints,1}' = '對照速查表：用法 × 肌膚敏感度，數一數每一欄。' from public.levels where day = 3), 'lookup-table line is the second hint');
+select pg_temp.ok((select secrets #>> '{s_recipe,hints,0}' = '對照速查表：用法 × 肌膚敏感度，數一數每一欄。' and secrets #>> '{s_recipe,hints,1}' like '翻開《居家保健小百科》%' and secrets #>> '{s_recipe,hints,2}' like '速查表有 3 種用法%' from public.levels where day = 3), 'recipe hints: lookup table -> open the book -> count');
 select pg_temp.ok((select position('扮鬼臉' in config::text) > 0 and position('三段體溫' in config::text) = 0 from public.levels where day = 3), 'day 3 stage 3 is the funny-face joy nutrient task');
 select pg_temp.ok((select private.norm(secrets #>> '{s_exam,answer}') = private.norm('bdbbcbabab') from public.levels where day = 6), 'day 6 exam answer (case-insensitive)');
 select pg_temp.ok((select count(*) from public.levels l, jsonb_array_elements(l.config #> '{scene,hotspots}') h where h ? 'clue') >= 5, 'scene clue hotspots present');
