@@ -742,3 +742,5 @@ body::before { animation: none; }
 .evo-picks { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin: 8px 0; }
 .evo-pick { border: 1px solid rgba(255, 181, 71, .45); padding: 8px; display: flex; flex-direction: column; gap: 4px; background: rgba(255, 181, 71, .05); }
 .evo-pick img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; }
+.pset-stage { width: min(92vw, 520px); aspect-ratio: 3 / 4; background: #000; overflow: hidden; }
+.pset-stage video { width: 100%; height: 100%; object-fit: cover; }

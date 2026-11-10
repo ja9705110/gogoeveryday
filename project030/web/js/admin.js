@@ -611,7 +611,7 @@ async function test(body) {
 async function print(body) {
   body.innerHTML = '';
   body.append(h('div', { class: 'card' }, h('p', {}, 'AR 卡片圖檔位於 repo 的 project030/print/（不會部署到公開網站）。請以 A6 或更大尺寸、霧面紙列印，避免反光。'),
-    h('ul', {}, h('li', {}, '卡片 A：第 3 區「保險箱」（目標索引 0）'), h('li', {}, '卡片 B：第 7 區「門」（目標索引 1）')),
+    h('ul', {}, h('li', {}, '卡片 A：第 5 區「保險箱」（目標索引 0）'), h('li', {}, '卡片 B：第 7 區「門」（目標索引 1）')),
     h('p', { class: 'dim' }, '若玩家相機無法使用，請到「關卡內容」啟用該步驟的備用驗證，並把備用碼告訴玩家（或寫在卡片背面）。')));
 }
 

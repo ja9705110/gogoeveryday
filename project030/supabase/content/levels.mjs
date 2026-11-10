@@ -14,13 +14,13 @@ export const symbols = [
     { from_day: 2, text: '它記得聲音，但不記得是誰說的。' },
     { from_day: 9, text: '回放的時候，你聽見的是當時的自己。' } ] },
   { id: 3, key: 'key', name: '鑰', digit: 7, lore: [
-    { from_day: 3, text: '能打開東西，也能只留下形狀。' },
+    { from_day: 5, text: '能打開東西，也能只留下形狀。' },
     { from_day: 7, text: '第 7 天，再用一次。' } ] },
   { id: 4, key: 'mirror', name: '鏡', digit: 1, lore: [
     { from_day: 4, text: '鏡子裡的房間，比外面多一盞燈。' },
     { from_day: 10, text: '鏡像不是相反，只是另一個方向。' } ] },
   { id: 5, key: 'sprout', name: '芽', digit: 9, lore: [
-    { from_day: 5, text: '不是每一株都同時長出來。' } ] },
+    { from_day: 3, text: '不是每一株都同時長出來。' } ] },
   { id: 6, key: 'fault', name: '裂', digit: 4, lore: [
     { from_day: 6, text: '裂縫也是一種紀錄。' } ] },
   { id: 7, key: 'gate', name: '門', digit: 6, lore: [
@@ -140,11 +140,11 @@ export const levels = [
     on_alternate_complete: { symbol: 2, echo: true, flags: { read_note: true } },
   },
 
-  // ───────────────────────── DAY 3 · 保險箱（AR 卡片 A） ─────────────────────────
+  // ───────────────────────── DAY 5 · 保險箱（AR 卡片 A；原第 3 天，11/10 起與溫室對調） ─────────────────────────
   {
-    day: 3, code: 'ZONE 03', title: '保險箱', subtitle: 'THE SAFE',
+    day: 5, code: 'ZONE 05', title: '保險箱', subtitle: 'THE SAFE',
     config: {
-      notify: { new: '第 03 區偵測到一個實體投影。它在你的世界裡。', pending: '投影卡尚未被掃描。', expiring: '投影將於午夜失效。' },
+      notify: { new: '第 05 區偵測到一個實體投影。它在你的世界裡。', pending: '投影卡尚未被掃描。', expiring: '投影將於午夜失效。' },
       scene: { theme: 'vault', light: 'on', props: ['safe', 'shelf', 'desk'], hotspots: [] },
       variants: [
         { id: 'watcher', when: { flag: 'watcher_met' }, scene: { npc: 'watcher' } },
@@ -161,7 +161,7 @@ export const levels = [
         { id: 's_open', type: 'keypad', title: '保險箱轉盤', length: 3, prompt: '輸入保險箱的密碼。' },
         story('s_inside', ['保險箱裡只有一張舊照片。', '照片背面寫著：「第 7 天，再用一次。」']),
       ],
-      epilogue: ['保險箱已歸檔。', '你取得了第三個符號，以及一張照片。'],
+      epilogue: ['保險箱已歸檔。', '你取得了「鑰」符號，以及一張照片。'],
     },
     secrets: {
       s_scan: { fallback: 'VAULT-A', reveal: { overlay: 'safe', digits: '418' }, success: '卡片上方浮現一個保險箱。' },
@@ -219,11 +219,11 @@ export const levels = [
     on_alternate_complete: { symbol: 4, echo: true, gift: 'portrait' },
   },
 
-  // ───────────────────────── DAY 5 · 溫室 ─────────────────────────
+  // ───────────────────────── DAY 3 · 溫室（原第 5 天） ─────────────────────────
   {
-    day: 5, code: 'ZONE 05', title: '溫室', subtitle: 'GREENHOUSE',
+    day: 3, code: 'ZONE 03', title: '溫室', subtitle: 'GREENHOUSE',
     config: {
-      notify: { new: '第 05 區的濕度上升。有東西在生長。', pending: '溫室裡的植物還沒有被照顧。', expiring: '溫室的燈將於午夜關閉。' },
+      notify: { new: '第 03 區的濕度上升。有東西在生長。', pending: '溫室裡的植物還沒有被照顧。', expiring: '溫室的燈將於午夜關閉。' },
       scene: { theme: 'greenhouse', light: 'on', props: ['plants', 'incubator', 'window'],
         hotspots: [{ id: 'roots', x: 82, y: 84, label: '根部' },
                    { id: 'vines', x: 10, y: 40, label: '藤蔓後面', when: { stat: 'exploration', gte: 2 } }] },
@@ -239,7 +239,7 @@ export const levels = [
           window: { from: '21:00', to: '23:59:59', closed_text: '花苞緊閉著。也許要等到夜裡（21:00 後）。' } },
         { id: 's_photo', type: 'evidence', title: '生長紀錄', kinds: ['photo'], prompt: '拍下一個正在生長、或正在改變中的東西。' },
       ],
-      epilogue: ['溫室已歸檔。', '你取得了第五個符號。'],
+      epilogue: ['溫室已歸檔。', '你取得了「芽」符號。'],
     },
     secrets: {
       s_order: { answer: 'a,b,c,d,e', hints: ['最晚種下的，現在長得最小。'], success: '水流過每一株植物。', wrong: '有一株植物垂下了葉子。' },
@@ -329,7 +329,7 @@ export const levels = [
       s_scan: { fallback: 'GATE-B', reveal: { overlay: 'totem', glyphs: [4, 5, 6] }, success: '卡片上方浮現一座圖騰。' },
       s_rings: { answer: '4,5,6', hints: ['答案只出現在 AR 圖騰上。'], success: '門環依序歸位。', wrong: '門環彈回原位。' },
       hotspots: {
-        photo_slot: { text: '照片嵌進凹槽剛剛好。門內傳來機械聲。', grant: { flags: { photo_used: true }, items: [{ key: 'gate_mark', name: '門的刻痕', desc: '你在第 3 天拿到的東西，在第 7 天被用上了。', data: { hidden: true } }] } },
+        photo_slot: { text: '照片嵌進凹槽剛剛好。門內傳來機械聲。', grant: { flags: { photo_used: true }, items: [{ key: 'gate_mark', name: '門的刻痕', desc: '你在第 5 天拿到的東西，在第 7 天被用上了。', data: { hidden: true } }] } },
         side_room: { text: '柱子後方有一間沒有標示的小房間。牆上有一張地圖的一角。', grant: { items: [{ key: 'map_fragment', name: '地圖殘片', desc: '標示著一個不在這十個區域裡的位置。', data: { hidden: true } }] } },
       },
     },
