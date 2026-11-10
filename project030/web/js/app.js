@@ -14,6 +14,7 @@ import { PORTRAIT_MAP, portraitFromChoices } from './portrait-map.js';
 import { mosaicWidget } from './mosaic.js';
 import { photosetWidget } from './photoset.js';
 import { avatarSVG, choicesFromStats, AVATAR_STEPS } from './avatar.js';
+import { playOmen, playEvolution, EVO_GLYPH } from './evo.js';
 
 // 資料庫中舊稱呼的統一
 const T = (str) => String(str ?? '').replace(/觀測者|觀測員|觀察者/g, '觀察員').replace(/觀測/g, '觀察');
@@ -195,6 +196,7 @@ async function route() {
     if (!page) return home();
     if (page === 'zone') return zone(Number(arg));
     if (page === 'lab') return lab();
+    if (page === 'evo') return evoPage();
     if (page === 'items') return items();
     if (page === 'log') return log();
     if (page === 'inbox') return inbox();
@@ -319,6 +321,11 @@ function home() {
     h('h1', {}, before ? '等待訊號' : d <= 10 ? '星海觀察中' : '第030號檔案室'));
   if (st.is_test) wrap.append(testPanel(st));
   if (d >= 1) wrap.append(missionStatus(st));
+  const ev = st.evo || {};
+  if (ev.status === 'ready' || ev.status === 'active') wrap.append(h('a', { class: 'card evo-alert', href: '#/evo' },
+    h('div', { class: 'kicker', style: 'color:#ff6fae' }, 'ANOMALY · 培養皿'), h('div', {}, ev.status === 'active' ? '進化程序進行中。' : '培養皿出現未知反應。'),
+    h('div', { class: 'dim', style: 'font-size:13px' }, ev.status === 'active' ? '回到進化程序，完成形態分化。' : '偵測到新的形態分化可能。點這裡進入進化程序。')));
+  else if (ev.status === 'not_ready') wrap.append(h('div', { class: 'card' }, h('div', { class: 'kicker' }, 'ANOMALY'), h('div', { class: 'dim', style: 'font-size:13px' }, '培養皿出現微弱反應，但分化訊號尚未穩定。稍後再回來看看。')));
   if (d >= 1) wrap.append(planetCard(st));
   const ob = nextObjective(st);
   wrap.append(h('div', { class: 'objective fade-in' },
@@ -344,6 +351,7 @@ function home() {
   wrap.append(list);
   shell('home', wrap);
   pendingCeremony(st);
+  maybeOmen(st);
 }
 
 // ── 區域 ──
@@ -590,6 +598,95 @@ function testPanel(st) {
     grid);
 }
 
+// ── 第二階段進化事件 ──
+function maybeOmen(st) {
+  if (st.evo?.status !== 'ready') return;
+  const k = 'p030.evo.omen.' + S.pid;
+  if (localStorage.getItem(k)) return;
+  setTimeout(() => {
+    if (document.querySelector('.prologue, .ceremony, .evo-ov') || location.hash.replace(/^#/, '') !== '/' && location.hash !== '') return;
+    localStorage.setItem(k, '1');
+    playOmen({ onEnter: () => { location.hash = '#/evo'; } });
+  }, 2600);
+}
+
+async function evoPage() {
+  const wrap = h('div', { class: 'fade-in evo' });
+  const body = h('div');
+  const st = S.state;
+  wrap.append(h('div', { class: 'kicker', style: 'color:#ff6fae' }, 'EVOLUTION · PHASE II'), h('h1', {}, '第二階段進化'));
+  const choices = choicesFromStats(st.stats?.choices || {});
+  wrap.append(h('div', { class: 'card evo-id' }, h('span', { class: 'evo-id-av', html: avatarSVG(choices, { size: 64, label: false }) }),
+    h('div', {}, h('div', { class: 'kicker' }, 'CORE IDENTITY'), h('div', {}, `第 ${st.observer_no || '1118'} 號觀察員`),
+      h('div', { class: 'dim', style: 'font-size:12px' }, '初始身分資料：已保留（不可重置）。進化只會建立新的外在形態。'))));
+  const phases = h('div', { class: 'evo-phases' });
+  wrap.append(phases, body);
+  shell('home', wrap);
+  const setPhase = (n) => { phases.innerHTML = ''; ['進化環境', '形態分化', '進化啟動'].forEach((t, i) => phases.append(h('div', { class: 'evo-ph' + (i + 1 < n ? ' done' : i + 1 === n ? ' cur' : '') }, h('b', {}, `0${i + 1}`), t))); };
+  const busy = (on) => body.querySelectorAll('button').forEach((b) => (b.disabled = on));
+  const call = async (fn, args = {}) => { busy(true); try { const v = await rpc(fn, { p: S.pid, ...args }); draw(v); } catch (e) { toast(errText(e)); busy(false); } };
+  const zoom = (o) => { const ov = h('div', { class: 'evo-zoom', onclick: () => ov.remove() }, h('img', { src: o.image, alt: o.label }), h('div', { class: 'evo-zoom-cap' }, `SIM FILE ・ ${o.label}`), h('div', { class: 'dim', style: 'font-size:12px' }, '點任意處關閉')); document.body.append(ov); };
+  const card = (o, { pick = true, tag } = {}) => h('div', { class: 'evo-opt' },
+    h('button', { class: 'evo-img', onclick: () => zoom(o), 'aria-label': '放大 ' + o.label }, h('img', { src: o.image, alt: o.label, loading: 'lazy' }), h('span', { class: 'evo-tag' }, tag || 'SIM FILE')),
+    h('div', { class: 'evo-lbl' }, o.label),
+    pick ? h('button', { class: 'btn primary block sm', onclick: () => { sfx('match'); call('evo_pick', { w: o.id }); } }, '選擇這個') : null);
+  function draw(v) {
+    body.innerHTML = '';
+    if (v.status === 'locked') { setPhase(0); body.append(h('div', { class: 'card' }, h('p', { class: 'dim' }, '培養皿目前沒有反應。'), h('a', { class: 'btn', href: '#/lab' }, '回到培養艙'))); return; }
+    if (v.status === 'not_ready') { setPhase(0); body.append(h('div', { class: 'card' }, h('p', {}, '偵測到微弱的分化反應。'), h('p', { class: 'dim' }, '分化訊號尚未穩定，稍後再回來看看。'))); return; }
+    if (v.status === 'ready') {
+      setPhase(1);
+      body.append(h('div', { class: 'card' }, h('div', { class: 'evo-intro' }, ...['樣本出現了未知的進化反應。', '它的核心不會改變——你是誰，已經寫在檔案裡。', '這一次，它需要決定自己「看起來」的樣子。', '進化程序開始後，請依直覺選擇。'].map((t) => h('p', {}, t))),
+        h('button', { class: 'btn primary block', onclick: () => call('evo_begin') }, '啟動進化程序')));
+      return;
+    }
+    if (v.status === 'done') {
+      setPhase(4);
+      const cv = h('canvas', { class: 'evo-sample' });
+      body.append(h('div', { class: 'incubator' }, cv),
+        h('div', { class: 'card evo-done' }, h('div', { class: 'kicker' }, 'PHASE II COMPLETE'),
+          h('div', { class: 'evo-done-row' }, h('div', {}, h('div', { class: 'dim', style: 'font-size:12px' }, '新識別碼'), h('div', { class: 'mono', style: 'font-size:18px' }, v.code),
+            h('div', { class: 'dim', style: 'font-size:12px;margin-top:6px' }, '核心身分：已保留'), h('div', { class: 'dim', style: 'font-size:12px' }, `新形態：${v.first?.label || '已建立'}`)),
+            v.first ? card(v.first, { pick: false, tag: 'FORM' }) : null),
+          h('div', { class: 'row', style: 'gap:10px;margin-top:10px;align-items:center' }, h('i', { class: 'evo-glyph', html: EVO_GLYPH }), h('div', { class: 'dim', style: 'font-size:13px' }, '分化印記：已收進「物品」。')),
+          h('a', { class: 'btn block', href: '#/lab', style: 'margin-top:10px' }, '前往培養艙')));
+      requestAnimationFrame(() => S.cleanup.push(mountSample(cv, { ...st.sample, evo: { tint: v.tint, shape: v.shape } })));
+      return;
+    }
+    const ph = v.phase;
+    if (ph === 'env') {
+      setPhase(1);
+      body.append(h('div', { class: 'evo-q' }, h('div', { class: 'kicker' }, `ENVIRONMENT ・ 比對 ${v.step} / ${v.steps}`), h('p', {}, '兩種進化環境。選出樣本更想留下來的那一個。'), h('p', { class: 'dim', style: 'font-size:12px' }, '看光線、背景、顏色與氣氛。點圖片可以放大。')),
+        h('div', { class: 'evo-grid two' }, ...v.options.map((o) => card(o, { tag: 'ENV' }))));
+    } else if (ph === 'form') {
+      setPhase(2);
+      body.append(h('div', { class: 'evo-q' }, h('div', { class: 'kicker' }, `FORM ・ 第 ${v.step} / ${v.steps} 輪`), h('p', {}, '形態模擬檔案。選出最接近它想成為的樣子。'), h('p', { class: 'dim', style: 'font-size:12px' }, '只看畫面，不用想太多。點圖片可以放大。')),
+        h('div', { class: 'evo-grid' + (v.options.length === 2 ? ' two' : '') }, ...v.options.map((o) => card(o))));
+    } else if (ph === 'final1') {
+      setPhase(2);
+      body.append(h('div', { class: 'evo-q' }, h('div', { class: 'kicker' }, 'FINAL ・ 首選形態'), h('p', {}, '最後的分化候選。選出你的首選形態。')),
+        h('div', { class: 'evo-grid' + (v.options.length === 2 ? ' two' : '') }, ...v.options.map((o) => card(o, { tag: 'FINAL' }))));
+    } else if (ph === 'final2') {
+      setPhase(2);
+      body.append(h('div', { class: 'evo-q' }, h('div', { class: 'kicker' }, 'FINAL ・ 備選形態'), h('p', {}, `首選：${v.first.label}。再選出一個備選形態。`)),
+        h('div', { class: 'evo-grid two' }, ...v.options.map((o) => card(o, { tag: 'BACKUP' }))));
+    } else if (ph === 'confirm') {
+      setPhase(3);
+      body.append(h('div', { class: 'evo-q' }, h('div', { class: 'kicker' }, 'CONFIRM ・ 分化確認'), h('p', {}, '確認後將啟動進化，無法再更改。')),
+        h('div', { class: 'evo-grid two' }, card(v.first, { pick: false, tag: '首選' }), card(v.second, { pick: false, tag: '備選' })),
+        h('div', { class: 'row', style: 'gap:8px;margin-top:12px' },
+          h('button', { class: 'btn ghost', onclick: () => call('evo_redo_final') }, '重新選擇'),
+          h('button', { class: 'btn primary spacer', onclick: async (e) => {
+            e.target.disabled = true;
+            try { const r = await rpc('evo_confirm', { p: S.pid }); await playEvolution({ evo: r }); await loadState(); draw(r); }
+            catch (err) { toast(errText(err)); e.target.disabled = false; }
+          } }, '確認並啟動進化')));
+    }
+    scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  try { draw(await rpc('evo_state', { p: S.pid })); } catch (e) { body.append(h('div', { class: 'card msg bad' }, errText(e))); }
+}
+
 function pendingCeremony(st) {
   if (document.querySelector('.prologue, .ceremony')) return;
   const due = st.levels.filter((l) => l.day <= 10 && l.status === 'COMPLETED' && !localStorage.getItem(ceremonyKey(S.pid, l.day))).sort((x, y) => x.day - y.day)[0];
@@ -773,8 +870,14 @@ function lab() {
     }
   }
   if (sm.dormant > 0) wrap.append(h('p', { class: 'dim', style: 'font-size:13px' }, `樣本已有 ${sm.dormant} 天沒有被觀察。它沒有停止生長，只是長往別的方向。`));
+  const ev = st.evo || {};
+  if (ev.status === 'done') wrap.append(h('div', { class: 'card evo-card' }, h('div', { class: 'kicker' }, 'PHASE II · 第二階段形態'),
+    h('div', { class: 'row', style: 'gap:12px;align-items:center' }, h('i', { class: 'evo-glyph', html: EVO_GLYPH }),
+      h('div', {}, h('div', { class: 'mono' }, ev.code), h('div', { class: 'dim', style: 'font-size:13px' }, `核心身分：已保留・新形態：${ev.label || '已建立'}`))),
+    h('a', { class: 'btn sm', href: '#/evo', style: 'margin-top:8px' }, '回顧進化形態')));
+  else if (ev.status === 'ready' || ev.status === 'active') wrap.append(h('a', { class: 'card evo-alert', href: '#/evo' }, h('div', { class: 'kicker', style: 'color:#ff6fae' }, 'ANOMALY'), h('div', {}, '樣本出現未知反應。進入進化程序 ›')));
   shell('lab', wrap);
-  requestAnimationFrame(() => S.cleanup.push(mountSample(cv, sm)));
+  requestAnimationFrame(() => S.cleanup.push(mountSample(cv, { ...sm, evo: ev.status === 'done' ? ev : null })));
 }
 
 // ── 物品 ──
@@ -798,7 +901,7 @@ function items() {
   const others = st.inventory.filter((i) => i.kind !== 'symbol');
   wrap.append(h('h2', {}, '物品'));
   if (!others.length) wrap.append(h('p', { class: 'dim' }, '尚無。'));
-  others.forEach((i) => wrap.append(h('div', { class: 'card' }, h('div', {}, i.name), i.description ? h('div', { class: 'dim', style: 'font-size:13px' }, i.description) : null,
+  others.forEach((i) => wrap.append(h('div', { class: 'card' }, i.data?.glyph === 'evo' ? h('i', { class: 'evo-glyph sm', html: EVO_GLYPH }) : null, h('div', {}, i.name), i.description ? h('div', { class: 'dim', style: 'font-size:13px' }, i.description) : null,
     h('div', { class: 'faint mono', style: 'font-size:11px' }, `第 ${i.source_day || '?'} 區・${fmtTime(i.acquired_at)}`))));
   shell('items', wrap);
 }

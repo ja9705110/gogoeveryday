@@ -368,4 +368,63 @@ select public.submit_step(:'t2', 2, 's_watcher', '{}') \g /dev/null
 select pg_temp.ok((public.get_state(:'t2') -> 'levels' -> 1 ->> 'status') = 'COMPLETED', 'day 2 completes after cats photo + joke recording approved');
 select public.admin_delete_test_profile(:'t2') \g /dev/null
 reset role; set search_path = public, extensions;
+-- ════════════ 第二階段進化事件 ════════════
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a', 'admin@test.dev');
+set role authenticated;
+insert into public.evo_works (category, game_label, work_code, title, source_url, note, image, tint, sort)
+select 'env', '環境 E-0' || g, 'ENV-' || g, '環境作品 ' || g, 'https://example.test/env' || g, '備註', 'data:image/jpeg;base64,AA', '#88aacc', g from generate_series(1, 3) g;
+insert into public.evo_works (category, game_label, work_code, title, source_url, note, image, tint, sort)
+select 'form', '形態 ' || chr(64 + g), 'CS-' || g, '作品 ' || g, 'https://example.test/' || g, '管理者備註 ' || g, 'data:image/jpeg;base64,BB', '#cc8866', g from generate_series(1, 9) g;
+select pg_temp.ok((select count(*) from public.evo_works) = 12, 'admin can upload evolution works');
+select public.admin_create_test_profile('進化', null) as ev \gset
+select public.admin_test_jump(:'ev', 3) \g /dev/null
+select pg_temp.ok((public.evo_state(:'ev') ->> 'status') = 'locked', 'evolution locked before day 3 is completed');
+select pg_temp.fails($$select public.evo_begin('$$ || :'ev' || $$')$$, 'P030_EVO_LOCKED', 'cannot begin while locked');
+select public.admin_test_jump(:'ev', 4) \g /dev/null
+select pg_temp.ok((public.evo_state(:'ev') ->> 'status') = 'ready', 'evolution ready after day 3 completed');
+select pg_temp.ok((public.get_state(:'ev') #>> '{evo,status}') = 'ready', 'state carries evolution summary');
+select public.evo_begin(:'ev') as v \gset
+select pg_temp.ok((:'v'::jsonb ->> 'phase') = 'env' and jsonb_array_length(:'v'::jsonb -> 'options') = 2, 'phase 1: pairwise environment comparison');
+select pg_temp.ok(position('ENV-' in :'v') = 0 and position('example.test' in :'v') = 0 and position('備註' in :'v') = 0, 'player view hides work codes, links and notes');
+select pg_temp.ok((:'v'::jsonb #>> '{identity,observer_no}') is not null, 'initial identity snapshot kept');
+select pg_temp.fails($$select public.evo_pick('$$ || :'ev' || $$', gen_random_uuid())$$, 'P030_EVO_BAD_PICK', 'pick must be one of the shown options');
+-- 進化環境：3 張 → 2 次比較
+select public.evo_pick(:'ev', ((public.evo_state(:'ev') -> 'options' -> 0 ->> 'id'))::uuid) \g /dev/null
+select public.evo_pick(:'ev', ((public.evo_state(:'ev') -> 'options' -> 1 ->> 'id'))::uuid) as v \gset
+select pg_temp.ok((:'v'::jsonb ->> 'phase') = 'form' and (:'v'::jsonb ->> 'steps')::int = 3 and jsonb_array_length(:'v'::jsonb -> 'options') = 3, 'phase 2: three form rounds of 3');
+select public.evo_pick(:'ev', ((public.evo_state(:'ev') -> 'options' -> 0 ->> 'id'))::uuid) \g /dev/null
+select public.evo_pick(:'ev', ((public.evo_state(:'ev') -> 'options' -> 1 ->> 'id'))::uuid) \g /dev/null
+select public.evo_pick(:'ev', ((public.evo_state(:'ev') -> 'options' -> 2 ->> 'id'))::uuid) as v \gset
+select pg_temp.ok((:'v'::jsonb ->> 'phase') = 'final1' and jsonb_array_length(:'v'::jsonb -> 'options') = 3, 'final: choose first from 3 finalists');
+select public.evo_pick(:'ev', ((public.evo_state(:'ev') -> 'options' -> 1 ->> 'id'))::uuid) as v \gset
+select pg_temp.ok((:'v'::jsonb ->> 'phase') = 'final2' and jsonb_array_length(:'v'::jsonb -> 'options') = 2, 'final: choose second from remaining 2');
+select public.evo_pick(:'ev', ((public.evo_state(:'ev') -> 'options' -> 0 ->> 'id'))::uuid) as v \gset
+select pg_temp.ok((:'v'::jsonb ->> 'phase') = 'confirm' and (:'v'::jsonb #>> '{first,label}') is not null and (:'v'::jsonb #>> '{second,label}') is not null, 'confirm shows first and second');
+select public.evo_redo_final(:'ev') as v \gset
+select pg_temp.ok((:'v'::jsonb ->> 'phase') = 'final1', 'can redo final choice before confirming');
+select public.evo_pick(:'ev', ((public.evo_state(:'ev') -> 'options' -> 2 ->> 'id'))::uuid) \g /dev/null
+select public.evo_pick(:'ev', ((public.evo_state(:'ev') -> 'options' -> 0 ->> 'id'))::uuid) \g /dev/null
+select public.evo_confirm(:'ev') as v \gset
+select pg_temp.ok((:'v'::jsonb ->> 'status') = 'done' and (:'v'::jsonb ->> 'code') like 'OBS-%-II-%', 'evolution completes with new identity code');
+select pg_temp.ok(exists (select 1 from public.inventory where profile_id = :'ev' and item_key = 'evo_mark'), 'special symbol granted');
+select pg_temp.ok((public.get_state(:'ev') #>> '{evo,status}') = 'done' and (public.get_state(:'ev') #>> '{evo,tint}') = '#cc8866', 'sample receives evolved appearance');
+select pg_temp.fails($$select public.evo_pick('$$ || :'ev' || $$', gen_random_uuid())$$, 'P030_EVO_DONE', 'evolution happens only once');
+select (public.admin_evo_results() -> 0) is not null as x \gset
+select pg_temp.ok((select (e ->> 'status') = 'done' and (e #>> '{first,work_code}') like 'CS-%' and (e #>> '{second,work_code}') like 'CS-%'
+                     and jsonb_array_length(e -> 'log') = 10 and (e #>> '{first,image}') like 'data:%'
+                   from jsonb_array_elements(public.admin_evo_results()) e where e ->> 'profile_id' = :'ev'), 'admin sees first/second works, images and full comparison log');
+select pg_temp.ok((select count(*) from public.evo_runs where profile_id = :'ev' and completed_at is not null) = 1, 'result persisted');
+reset role; set search_path = public, extensions;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000b', 'player@test.dev');
+set role authenticated;
+select pg_temp.ok((select count(*) from public.evo_works) = 0, 'player cannot read works table (codes/notes hidden)');
+select pg_temp.fails('select public.admin_evo_results()', 'P030_ADMIN_ONLY', 'player cannot read evolution results');
+select pg_temp.ok((public.evo_state(:'pid') ->> 'status') in ('locked', 'ready'), 'real player has own evolution state');
+reset role; set search_path = public, extensions;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a', 'admin@test.dev');
+set role authenticated;
+select public.admin_test_reset(:'ev') \g /dev/null
+select pg_temp.ok((select count(*) from public.evo_runs where profile_id = :'ev') = 0, 'test reset clears evolution');
+select public.admin_delete_test_profile(:'ev') \g /dev/null
+reset role; set search_path = public, extensions;
 \echo ALL TESTS PASSED
