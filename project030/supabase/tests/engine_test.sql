@@ -313,6 +313,7 @@ select pg_temp.ok((select secrets #>> '{s_count,answer}' = '6' from public.level
 select pg_temp.ok((select private.norm(secrets #>> '{s_recipe,answer}') = private.norm('777250') from public.levels where day = 3), 'day 3 essential-oil answer');
 select pg_temp.ok((select position('好像消化不良' in config::text) > 0 and position('對照速查表' in config::text) = 0 from public.levels where day = 3), 'pot label: indigestion + book in kitchen cupboard, no lookup-table line');
 select pg_temp.ok((select secrets #>> '{s_recipe,hints,1}' = '對照速查表：用法 × 肌膚敏感度，數一數每一欄。' from public.levels where day = 3), 'lookup-table line is the second hint');
+select pg_temp.ok((select position('扮鬼臉' in config::text) > 0 and position('三段體溫' in config::text) = 0 from public.levels where day = 3), 'day 3 stage 3 is the funny-face joy nutrient task');
 select pg_temp.ok((select private.norm(secrets #>> '{s_exam,answer}') = private.norm('bdbbcbabab') from public.levels where day = 6), 'day 6 exam answer (case-insensitive)');
 select pg_temp.ok((select count(*) from public.levels l, jsonb_array_elements(l.config #> '{scene,hotspots}') h where h ? 'clue') >= 5, 'scene clue hotspots present');
 select pg_temp.ok(position('找五隻' in (select config::text from public.levels where day = 2)) = 0, 'day 2 decoded cipher not leaked in public config');
