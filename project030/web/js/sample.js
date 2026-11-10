@@ -1,4 +1,6 @@
 // 030 號樣本：完全由伺服器回傳的觀察資料（參數、歷程、中斷）繪製，不是固定圖片
+import { drawEvo } from './evo.js';
+
 const ACTION_HUE = { explore: 172, preserve: 38, adjust: 268, rest: 128 };
 export const ACTION_LABEL = { explore: '探索', preserve: '保存', adjust: '調整環境', rest: '靜置' };
 export const ACTION_DESC = {
@@ -47,6 +49,8 @@ export function mountSample(canvas, state) {
     g.addColorStop(0, `hsla(${hue},80%,70%,${0.18 + p.lum / 400})`);
     g.addColorStop(1, 'hsla(0,0%,0%,0)');
     ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+    // 第二階段進化後的外層結構（依玩家選擇的形態而不同）
+    if (state?.evo) drawEvo(ctx, cx, cy, base + 14, t, state.evo, 1);
 
     // 根：靜置
     ctx.strokeStyle = `hsla(${(hue + 40) % 360},40%,55%,.55)`; ctx.lineWidth = 1.4;

@@ -685,3 +685,60 @@ body::before { animation: none; }
 .dl-aud small { font-size: 11px; color: var(--dim); font-family: var(--mono); }
 .dl-cap { position: absolute; left: 0; right: 0; bottom: 0; font-size: 10px; font-family: var(--mono); padding: 2px 4px; background: rgba(2, 8, 16, .75); color: var(--dim); text-align: left; }
 .dl-btn { position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; line-height: 24px; border-radius: 50%; background: rgba(2, 8, 16, .8); font-size: 13px; }
+/* ── 第二階段進化 ── */
+.evo-alert { display: block; text-decoration: none; color: var(--text); border-color: rgba(255, 111, 174, .6); box-shadow: 0 0 22px rgba(255, 111, 174, .18); animation: evopulse 2.4s ease-in-out infinite; }
+@keyframes evopulse { 0%, 100% { box-shadow: 0 0 12px rgba(255, 111, 174, .12); } 50% { box-shadow: 0 0 26px rgba(255, 111, 174, .35); } }
+.evo-id { display: flex; gap: 12px; align-items: center; }
+.evo-id-av { flex: none; line-height: 0; }
+.evo-id-av .avatar-svg { border-radius: 8px; border: 1px solid rgba(63, 244, 255, .5); }
+.evo-phases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 12px 0; }
+.evo-ph { border: 1px solid var(--line); padding: 6px 8px; font-size: 12px; color: var(--dim); background: rgba(4, 14, 24, .7); }
+.evo-ph b { display: block; font-family: var(--hud); font-size: 11px; color: var(--faint); }
+.evo-ph.cur { border-color: #ff6fae; color: #fff; box-shadow: 0 0 12px rgba(255, 111, 174, .3); }
+.evo-ph.cur b { color: #ff6fae; }
+.evo-ph.done { border-color: rgba(70, 230, 160, .5); color: var(--ok); }
+.evo-q p { margin: 4px 0; }
+.evo-intro p { margin: 6px 0; }
+.evo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+.evo-grid:not(.two) { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+.evo-opt { border: 1px solid rgba(63, 244, 255, .35); background: rgba(4, 14, 24, .85); padding: 6px; display: flex; flex-direction: column; gap: 6px; }
+.evo-img { position: relative; padding: 0; border: 0; background: #000; aspect-ratio: 3 / 4; overflow: hidden; cursor: zoom-in; display: block; width: 100%; }
+.evo-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.evo-img::before, .evo-img::after { content: ''; position: absolute; width: 18px; height: 18px; border: 2px solid var(--accent); pointer-events: none; z-index: 1; }
+.evo-img::before { left: 5px; top: 5px; border-right: 0; border-bottom: 0; }
+.evo-img::after { right: 5px; bottom: 5px; border-left: 0; border-top: 0; }
+.evo-tag { position: absolute; left: 6px; bottom: 6px; z-index: 1; font-family: var(--mono); font-size: 10px; letter-spacing: .1em; padding: 2px 6px; background: rgba(2, 8, 16, .75); color: var(--accent); }
+.evo-lbl { font-family: var(--hud); font-size: 14px; letter-spacing: .12em; text-align: center; color: #fff; }
+.evo-zoom { position: fixed; inset: 0; z-index: 300; background: rgba(0, 3, 8, .94); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 16px; }
+.evo-zoom img { max-width: 100%; max-height: 80vh; object-fit: contain; border: 1px solid rgba(63, 244, 255, .4); }
+.evo-zoom-cap { font-family: var(--mono); color: var(--accent); letter-spacing: .12em; }
+.evo-done-row { display: grid; grid-template-columns: 1fr 120px; gap: 12px; align-items: center; }
+.evo-sample { width: 100%; height: 100%; }
+.evo-glyph { display: inline-block; width: 44px; height: 44px; color: #ff9cc8; filter: drop-shadow(0 0 8px rgba(255, 111, 174, .6)); flex: none; }
+.evo-glyph.sm { width: 32px; height: 32px; float: right; }
+.evo-ov { position: fixed; inset: 0; z-index: 250; background: radial-gradient(circle at 50% 42%, rgba(30, 10, 30, .92), rgba(0, 2, 8, .98)); display: flex; flex-direction: column; align-items: center; justify-content: safe center; padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); text-align: center; overflow-y: auto; }
+.evo-ov .evo-cv { max-width: 100%; }
+.evo-lines { min-height: 120px; margin-top: 4px; }
+.evo-ov.ritual .evo-lines p { margin: 3px 0; }
+.evo-code { margin-top: 6px !important; }
+.evo-lines p { font-family: var(--mono); color: #ffd1e6; margin: 6px 0; letter-spacing: .06em; animation: hudin2 .5s both; }
+.evo-ov.ritual .evo-lines p { color: #e6fbff; }
+.evo-bar { display: flex; flex-direction: column; gap: 8px; align-items: center; margin-top: 12px; min-height: 48px; }
+.evo-bar .btn.primary { min-width: 220px; }
+.evo-code { margin-top: 10px; animation: hudin2 .5s both; }
+.evo-code span { display: block; font-size: 11px; color: var(--dim); letter-spacing: .2em; }
+.evo-code b { font-family: var(--mono); font-size: 22px; color: var(--accent); letter-spacing: .08em; }
+.evo-sym { display: flex; gap: 12px; align-items: center; justify-content: center; margin-top: 12px; animation: hudin2 .6s both; color: var(--dim); font-size: 13px; text-align: left; }
+.evo-sym i { width: 48px; height: 48px; color: #ff9cc8; filter: drop-shadow(0 0 10px rgba(255, 111, 174, .7)); }
+.evo-sym b { color: #fff; font-size: 15px; }
+/* 後台：進化事件 */
+.evo-adm { display: grid; grid-template-columns: 110px 1fr; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+.evo-adm.off { opacity: .5; }
+.evo-adm img { width: 110px; aspect-ratio: 3 / 4; object-fit: cover; cursor: pointer; border: 1px solid var(--line); }
+.evo-adm-f .field { margin: 4px 0; }
+.evo-adm-f input[type=color] { width: 44px; height: 30px; padding: 0; border: 1px solid var(--line); background: none; }
+.evo-res { border-top: 1px solid var(--line); padding: 12px 0; }
+.evo-res.test { opacity: .85; }
+.evo-picks { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin: 8px 0; }
+.evo-pick { border: 1px solid rgba(255, 181, 71, .45); padding: 8px; display: flex; flex-direction: column; gap: 4px; background: rgba(255, 181, 71, .05); }
+.evo-pick img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; }

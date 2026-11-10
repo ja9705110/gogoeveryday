@@ -45,7 +45,7 @@ function login() {
       h('label', { class: 'field' }, h('span', {}, '帳號'), acc), h('label', { class: 'field' }, h('span', {}, '密碼'), pw), btn, msg)));
 }
 
-const TABS = [['overview', '總覽'], ['settings', '壽星設定'], ['levels', '關卡內容'], ['review', '佐證審核'], ['files', '照片下載'], ['events', '特殊事件'], ['photos', '每日照片'], ['finale', '終章尋寶'], ['test', '測試模式'], ['print', 'AR 卡片'], ['backup', '備份']];
+const TABS = [['overview', '總覽'], ['settings', '壽星設定'], ['levels', '關卡內容'], ['review', '佐證審核'], ['files', '照片下載'], ['evo', '進化事件'], ['events', '特殊事件'], ['photos', '每日照片'], ['finale', '終章尋寶'], ['test', '測試模式'], ['print', 'AR 卡片'], ['backup', '備份']];
 async function render() {
   app.innerHTML = '';
   app.append(h('div', { class: 'topbar' }, h('span', { class: 'brand' }, 'PROJECT 030 · CONTROL'),
@@ -55,7 +55,7 @@ async function render() {
   app.append(tabs);
   const body = h('div', {}, h('div', { class: 'loading' }, '載入中…'));
   app.append(body);
-  try { await ({ overview, settings, levels, review, files, events, photos, finale, test, print, backup })[A.tab](body); }
+  try { await ({ overview, settings, levels, review, files, evo, events, photos, finale, test, print, backup })[A.tab](body); }
   catch (e) { body.innerHTML = ''; body.append(h('div', { class: 'card msg bad' }, errText(e))); }
 }
 
@@ -140,6 +140,142 @@ async function files(body) {
     } catch (e) { prog.textContent = '打包失敗：' + errText(e); }
     zipBtn.disabled = false;
   };
+}
+
+// ── 第二階段進化事件：參考作品管理＋結果 ──
+const EVO_CAT = { env: '進化環境', form: '形態' };
+async function evoPrepare(file) { // 縮圖＋自動取主色
+  const bmp = await createImageBitmap(file);
+  const k = Math.min(1, 1400 / Math.max(bmp.width, bmp.height));
+  const c = document.createElement('canvas'); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+  const g = c.getContext('2d'); g.drawImage(bmp, 0, 0, c.width, c.height);
+  const s = document.createElement('canvas'); s.width = s.height = 24; const sg = s.getContext('2d'); sg.drawImage(c, 0, 0, 24, 24);
+  const px = sg.getImageData(0, 0, 24, 24).data; let r = 0, gg = 0, b = 0, w = 0;
+  for (let i = 0; i < px.length; i += 4) { const mx = Math.max(px[i], px[i + 1], px[i + 2]), mn = Math.min(px[i], px[i + 1], px[i + 2]); const wt = 1 + (mx - mn) / 32; r += px[i] * wt; gg += px[i + 1] * wt; b += px[i + 2] * wt; w += wt; }
+  const hex = '#' + [r, gg, b].map((v) => Math.round(v / w).toString(16).padStart(2, '0')).join('');
+  return { image: c.toDataURL('image/jpeg', 0.85), tint: hex };
+}
+const evoLabel = (cat, n) => cat === 'env' ? `環境 E-${String(n).padStart(2, '0')}` : `形態 ${n <= 26 ? String.fromCharCode(64 + n) : 'Z' + (n - 26)}`;
+const safeName = (s) => String(s || 'work').replace(/[^\w.-]+/g, '_').slice(0, 40);
+const saveDataUrl = (url, name) => { const a = document.createElement('a'); a.href = url; a.download = name; document.body.append(a); a.click(); setTimeout(() => a.remove(), 3000); };
+async function evo(body) {
+  const [{ data: works, error }, { data: cfgRows }, results] = await Promise.all([
+    sb.from('evo_works').select('*').order('category').order('sort').order('created_at'),
+    sb.from('evo_config').select('*').eq('id', 1),
+    rpc('admin_evo_results')]);
+  if (error) throw error;
+  const cfg = (cfgRows || [])[0] || { open_day: 3, force_open: false };
+  const ov = await rpc('admin_overview');
+  body.innerHTML = '';
+  const env = works.filter((w) => w.category === 'env' && w.active), form = works.filter((w) => w.category === 'form' && w.active);
+  const openDate = new Date(new Date(ov.settings.birthday + 'T00:00:00+08:00').getTime() + (cfg.open_day - 11) * 86400000);
+  const warn = [];
+  if (form.length < 3) warn.push(`形態至少需要 3 張（目前 ${form.length} 張），進化才會開放。`);
+  else if (form.length < 6) warn.push(`形態目前 ${form.length} 張：會直接進入最終首選／備選，沒有三輪比較。建議 9 張（三輪、每輪 3 選 1）。`);
+  if (env.length < 2) warn.push(`進化環境目前 ${env.length} 張：少於 2 張會跳過第一階段。建議 4 張。`);
+  // 狀態與開放設定
+  const force = h('input', { type: 'checkbox', checked: cfg.force_open ? 'checked' : null, onchange: async (e) => {
+    const { error: er } = await sb.from('evo_config').update({ force_open: e.target.checked, updated_at: new Date().toISOString() }).eq('id', 1);
+    toast(er ? errText(er) : e.target.checked ? '已立即開放給所有檔案' : '已改回依日期開放'); } });
+  body.append(h('div', { class: 'card' }, h('h2', {}, '第二階段進化事件'),
+    h('p', { class: 'dim', style: 'font-size:13px' }, `開放：第 ${cfg.open_day} 天（${openDate.toLocaleDateString('zh-TW', { timeZone: 'Asia/Taipei' })}）完成當天任務後；若當天沒完成，隔天也會自動開放。玩家只會看到「形態 A」「環境 E-01」等代碼與圖片，看不到作品代碼、名稱、連結與備註。`),
+    h('div', { class: 'grid2' }, h('div', {}, h('div', { class: 'dim', style: 'font-size:12px' }, '進化環境（啟用中）'), h('div', { class: 'mono', style: 'font-size:20px' }, `${env.length} 張`)),
+      h('div', {}, h('div', { class: 'dim', style: 'font-size:12px' }, '形態（啟用中）'), h('div', { class: 'mono', style: 'font-size:20px' }, `${form.length} 張`))),
+    ...warn.map((w) => h('div', { class: 'clue', style: 'border-color:var(--warn);font-size:13px' }, w)),
+    h('label', { class: 'row', style: 'gap:8px;margin-top:8px' }, force, h('span', {}, '立即開放（不等第 3 天完成；測試或補救用）'))));
+  // 上傳
+  const cat = h('select', {}, h('option', { value: 'form' }, '形態（第二階段主要選擇）'), h('option', { value: 'env' }, '進化環境（第一階段兩兩比較）'));
+  const files = h('input', { type: 'file', accept: 'image/*', multiple: true });
+  const upMsg = h('div', { class: 'dim', style: 'font-size:12px' });
+  body.append(h('div', { class: 'card' }, h('h2', {}, '上傳參考作品'),
+    h('p', { class: 'dim', style: 'font-size:13px' }, '可以一次選多張。上傳後會自動編成「形態 A、B、C…」或「環境 E-01…」，並以檔名當作作品代碼；之後可在下面逐張修改作品代碼、名稱、原始連結與備註。請上傳實際作品照片，並先裁掉照片上的商標或浮水印。'),
+    h('div', { class: 'grid2' }, cat, files),
+    h('button', { class: 'btn primary', style: 'margin-top:8px', onclick: async (e) => {
+      const list = [...files.files]; if (!list.length) { toast('請先選擇圖片'); return; }
+      e.target.disabled = true;
+      const c = cat.value; let n = works.filter((w) => w.category === c).length;
+      let sort = Math.max(0, ...works.filter((w) => w.category === c).map((w) => w.sort || 0));
+      try {
+        for (const [i, f] of list.entries()) {
+          upMsg.textContent = `處理中 ${i + 1} / ${list.length}…`;
+          const { image, tint } = await evoPrepare(f);
+          n++; sort++;
+          const { error: er } = await sb.from('evo_works').insert({ category: c, game_label: evoLabel(c, n), work_code: f.name.replace(/\.[^.]+$/, ''), image, tint, sort });
+          if (er) throw er;
+        }
+        toast(`已上傳 ${list.length} 張`); render();
+      } catch (er) { upMsg.textContent = '上傳失敗：' + errText(er); e.target.disabled = false; }
+    } }, '上傳'), upMsg));
+  // 作品列表
+  for (const c of ['form', 'env']) {
+    const rows = works.filter((w) => w.category === c);
+    const box = h('div', { class: 'card' }, h('h2', {}, `${EVO_CAT[c]}・${rows.length} 張`));
+    if (!rows.length) box.append(h('p', { class: 'dim' }, '尚未上傳。'));
+    for (const w of rows) {
+      const f = {};
+      const inp = (k, ph, type = 'text') => (f[k] = h('input', { type, placeholder: ph, value: w[k] ?? '' }));
+      const act = h('input', { type: 'checkbox', checked: w.active ? 'checked' : null });
+      box.append(h('div', { class: 'evo-adm' + (w.active ? '' : ' off') },
+        h('img', { src: w.image, alt: '', onclick: () => saveDataUrl(w.image, `${safeName(w.work_code || w.game_label)}.jpg`), title: '點擊下載原圖' }),
+        h('div', { class: 'evo-adm-f' },
+          h('div', { class: 'grid2' }, h('label', { class: 'field' }, h('span', {}, '玩家看到的代碼'), inp('game_label', '形態 A')), h('label', { class: 'field' }, h('span', {}, '作品代碼'), inp('work_code', '例如作品集編號'))),
+          h('label', { class: 'field' }, h('span', {}, '作品名稱／說明'), inp('title', '例如：自然光窗邊、雜誌感…')),
+          h('label', { class: 'field' }, h('span', {}, '原始作品連結'), inp('source_url', 'https://…')),
+          h('label', { class: 'field' }, h('span', {}, '備註（只有管理者看得到）'), inp('note', '')),
+          h('div', { class: 'row wrap', style: 'gap:8px;align-items:center' }, h('span', { class: 'dim', style: 'font-size:12px' }, '主色'), inp('tint', '', 'color'), h('span', { class: 'dim', style: 'font-size:12px' }, '排序'), (() => { const x = inp('sort', '', 'number'); x.style.width = '70px'; return x; })(),
+            h('label', { class: 'row', style: 'gap:4px' }, act, h('span', { style: 'font-size:12px' }, '啟用')), h('span', { class: 'spacer' }),
+            h('button', { class: 'btn sm primary', onclick: async () => {
+              const patch = { game_label: f.game_label.value.trim() || w.game_label, work_code: f.work_code.value.trim() || null, title: f.title.value.trim() || null,
+                source_url: f.source_url.value.trim() || null, note: f.note.value.trim() || null, tint: f.tint.value, sort: Number(f.sort.value) || 0, active: act.checked, updated_at: new Date().toISOString() };
+              const { error: er } = await sb.from('evo_works').update(patch).eq('id', w.id); toast(er ? errText(er) : '已儲存');
+            } }, '儲存'),
+            h('button', { class: 'btn sm ghost', onclick: async () => {
+              if (!confirm(`刪除 ${w.game_label}？`)) return;
+              const { error: er } = await sb.from('evo_works').delete().eq('id', w.id);
+              if (er) { await sb.from('evo_works').update({ active: false }).eq('id', w.id); toast('這張已經被選過，改為停用（保留結果）。'); }
+              render();
+            } }, '刪除')))));
+    }
+    body.append(box);
+  }
+  // 結果
+  const res = h('div', { class: 'card' }, h('h2', {}, '進化結果'));
+  const pname = ov.settings.player_name || '壽星';
+  if (!results.length) res.append(h('p', { class: 'dim' }, '尚無資料。'));
+  for (const r of results) {
+    const who = r.is_test ? `［測試］${r.label || ''}` : `${pname}（正式檔案）`;
+    const st = { done: '已完成', active: `進行中（${r.phase}）`, ready: '已開放、尚未開始', locked: '尚未開放' }[r.status] || r.status;
+    const sec = h('div', { class: 'evo-res' + (r.is_test ? ' test' : '') }, h('div', { class: 'row wrap' }, h('b', {}, who), h('span', { class: 'spacer' }), h('span', { class: `status-pill` }, st)));
+    if (r.status === 'done' || r.status === 'active') {
+      const idc = Object.fromEntries(Object.entries(r.identity || r.sample_choices || {}).map(([k, v]) => ['choice:' + k, v]));
+      const pr = portraitFromChoices(idc);
+      sec.append(h('div', { class: 'dim', style: 'font-size:12px' }, `開始 ${fmt(r.started_at)}${r.completed_at ? '・完成 ' + fmt(r.completed_at) : ''}${r.code ? '・識別碼 ' + r.code : ''}`),
+        h('div', { style: 'margin:6px 0' }, h('b', { style: 'font-size:13px' }, '初始身分（第 1 天，已保留）'),
+          Object.keys(pr).length ? h('table', { class: 't' }, ...Object.values(pr).map((x) => h('tr', {}, h('th', {}, x.label), h('td', {}, x.real), h('td', { class: 'faint' }, `遊戲中：${x.game}`)))) : h('div', { class: 'dim', style: 'font-size:12px' }, '（第 1 天身分建檔尚未完成）')));
+      const pickCard = (title, w, tag) => !w ? null : h('div', { class: 'evo-pick' },
+        h('div', { class: 'kicker' }, title), h('img', { src: w.image || '', alt: '' }),
+        h('div', {}, h('b', {}, w.work_code || '（未填作品代碼）'), ` ・ 玩家看到：${w.game_label}`), w.title ? h('div', { style: 'font-size:13px' }, w.title) : null,
+        w.source_url ? h('a', { href: w.source_url, target: '_blank', rel: 'noopener', style: 'font-size:12px;word-break:break-all' }, w.source_url) : null,
+        w.note ? h('div', { class: 'dim', style: 'font-size:12px' }, '備註：' + w.note) : null,
+        w.image ? h('button', { class: 'btn sm', onclick: () => saveDataUrl(w.image, `${tag}_${safeName(w.work_code || w.game_label)}.jpg`) }, '⬇ 下載照片') : null);
+      sec.append(h('div', { class: 'evo-picks' }, pickCard('第一偏好（首選）', r.first, 'first'), pickCard('第二偏好（備選）', r.second, 'second'), pickCard('進化環境偏好', r.env, 'env')));
+      if (r.status === 'done') {
+        const txt = [`PROJECT 030 偏好結果（${who}）`, r.first && `首選：${r.first.work_code || ''} ${r.first.title || ''} ${r.first.source_url || ''}`.trim(),
+          r.second && `備選：${r.second.work_code || ''} ${r.second.title || ''} ${r.second.source_url || ''}`.trim(),
+          r.env && `環境偏好：${r.env.work_code || ''} ${r.env.title || ''} ${r.env.source_url || ''}`.trim(),
+          ...Object.values(pr).map((x) => `${x.label}：${x.real}`)].filter(Boolean).join('\n');
+        sec.append(h('button', { class: 'btn sm', onclick: async () => { try { await navigator.clipboard.writeText(txt); toast('已複製，可以直接貼給廠商'); } catch (_) { prompt('複製這段文字：', txt); } } }, '複製結果文字'));
+      }
+      const t = h('table', { class: 't', style: 'font-size:12px' }, h('tr', {}, ...['#', '階段', '出現的作品', '選擇'].map((x) => h('th', {}, x))));
+      const PH = { env: '環境', form: '形態分化', final1: '首選', final2: '備選', redo_final: '重新選擇' };
+      (r.log || []).forEach((e, i) => t.append(h('tr', {}, h('td', {}, String(i + 1)), h('td', {}, `${PH[e.phase] || e.phase}${e.round && e.phase !== 'final1' && e.phase !== 'final2' ? ' ' + e.round : ''}`),
+        h('td', {}, (e.options_info || []).map((o) => `${o.game_label}（${o.work_code || '—'}）`).join('、')),
+        h('td', {}, e.pick_info ? `${e.pick_info.game_label}（${e.pick_info.work_code || '—'}）` : '—'))));
+      sec.append(h('details', {}, h('summary', { style: 'font-size:13px' }, `所有視覺比較紀錄（${(r.log || []).length} 筆）`), t));
+    }
+    res.append(sec);
+  }
+  body.append(res);
 }
 
 // ── 總覽 ──

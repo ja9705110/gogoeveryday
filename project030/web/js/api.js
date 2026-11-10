@@ -10,6 +10,12 @@ export const sb = configured
 export const isConfigured = () => configured;
 
 const ERRORS = {
+  P030_EVO_LOCKED: '培養皿目前沒有反應。',
+  P030_EVO_NOT_READY: '分化訊號尚未穩定，稍後再回來。',
+  P030_EVO_DONE: '第二階段進化已經完成。',
+  P030_EVO_BAD_PICK: '這個選項已經不在畫面上了，請重新整理。',
+  P030_EVO_BAD_PHASE: '進化程序狀態已更新，請重新整理。',
+  P030_EVO_NOT_STARTED: '進化程序尚未啟動。',
   P030_FORBIDDEN: '你沒有存取這份檔案的權限。',
   P030_ADMIN_ONLY: '需要管理者權限。',
   P030_LOCKED: '這個區域尚未開放。',
