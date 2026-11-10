@@ -107,42 +107,55 @@ export function mosaicWidget({ step, pid, day, onSubmit, toast }) {
     paint();
   })();
 
+  // 重拍：新照片上傳成功後，刪掉這一格舊的檔案（刪除失敗不影響遊戲，畫面只會用最新的一張）
   async function saveShot(i, blob) {
     const path = `${folder}/${i}-${Date.now()}.jpg`;
     await upload('evidence', path, blob, 'image/jpeg');
+    const old = shots[i];
     shots[i] = { path, url: URL.createObjectURL(blob) };
     sfx('ok'); paint();
+    if (old && old.path) sb.storage.from('evidence').remove([old.path]).catch(() => {});
   }
 
+  // 只能現場拍：預設前鏡頭（內鏡頭），可切換；前鏡頭的預覽和存檔都左右翻轉，手才會對在同一條線上
   function openCamera(i, label = i + 1) {
     const ov = document.createElement('div'); ov.className = 'mz-cam';
     ov.innerHTML = `<div class="mz-stage"><video playsinline muted autoplay></video><canvas class="mz-over"></canvas></div>
       <div class="mz-tip">第 ${label} 格：請一個人把<b>手</b>放在發光的線上，讓手蓋住線條。</div>
-      <div class="mz-bar"><button class="btn ghost" data-a="x">取消</button><button class="btn primary mz-shoot" data-a="s">拍下</button><label class="btn" style="margin:0">選照片<input type="file" accept="image/*" capture="environment" hidden></label></div>`;
+      <div class="mz-bar"><button class="btn ghost" data-a="x">取消</button><button class="btn" data-a="f">切換鏡頭</button><button class="btn primary mz-shoot" data-a="s">拍下</button></div>`;
     document.body.append(ov);
     const video = ov.querySelector('video'), over = ov.querySelector('.mz-over'), stage = ov.querySelector('.mz-stage');
-    let stream = null;
+    const shoot = ov.querySelector('[data-a=s]'), tip = ov.querySelector('.mz-tip');
+    let stream = null, facing = 'user';
     const size = Math.min(innerWidth - 32, innerHeight * 0.62, 520);
     stage.style.width = stage.style.height = size + 'px';
     over.width = over.height = size;
     over.getContext('2d').drawImage(tileGuide(shape, cfg, i, size, 'rgba(63,244,255,.6)'), 0, 0);
-    const close = () => { stream && stream.getTracks().forEach((t) => t.stop()); ov.remove(); };
+    const stop = () => stream && stream.getTracks().forEach((t) => t.stop());
+    const close = () => { stop(); ov.remove(); };
+    const start = async () => {
+      stop(); shoot.disabled = true;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 1280 } } });
+        video.srcObject = stream; video.style.transform = facing === 'user' ? 'scaleX(-1)' : 'none';
+        await video.play().catch(() => {}); shoot.disabled = false;
+      } catch (_) { tip.innerHTML = '無法開啟相機。這一關只能現場拍攝：請到手機設定允許這個網頁使用相機，再回來重試。'; }
+    };
     ov.querySelector('[data-a=x]').onclick = close;
-    const finish = async (source, sw, sh) => {
+    ov.querySelector('[data-a=f]').onclick = () => { facing = facing === 'user' ? 'environment' : 'user'; start(); };
+    shoot.onclick = async () => {
+      if (!video.videoWidth) return;
+      sfx('tap'); shoot.disabled = true;
+      const sw = video.videoWidth, sh = video.videoHeight, side = Math.min(sw, sh);
       const c = document.createElement('canvas'); c.width = c.height = TILE * 2;
-      const side = Math.min(sw, sh);
-      c.getContext('2d').drawImage(source, (sw - side) / 2, (sh - side) / 2, side, side, 0, 0, c.width, c.height);
+      const g = c.getContext('2d');
+      if (facing === 'user') { g.translate(c.width, 0); g.scale(-1, 1); }
+      g.drawImage(video, (sw - side) / 2, (sh - side) / 2, side, side, 0, 0, c.width, c.height);
       const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.85));
-      try { await saveShot(i, blob); close(); } catch (e) { toast('上傳失敗：' + (e.message || e)); }
+      try { await saveShot(i, blob); close(); } catch (e) { toast('上傳失敗：' + (e.message || e)); shoot.disabled = false; }
     };
-    ov.querySelector('[data-a=s]').onclick = () => { if (video.videoWidth) { sfx('tap'); finish(video, video.videoWidth, video.videoHeight); } };
-    ov.querySelector('input[type=file]').onchange = async (e) => {
-      const f = e.target.files[0]; if (!f) return;
-      const bmp = await createImageBitmap(f); finish(bmp, bmp.width, bmp.height);
-    };
-    navigator.mediaDevices?.getUserMedia({ audio: false, video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 1280 } } })
-      .then((s) => { stream = s; video.srcObject = s; video.play().catch(() => {}); })
-      .catch(() => { ov.querySelector('.mz-shoot').style.display = 'none'; ov.querySelector('.mz-tip').innerHTML += '<br>無法開啟相機，請改用「選照片」。'; });
+    if (!navigator.mediaDevices?.getUserMedia) tip.textContent = '這個瀏覽器無法開啟相機。請用手機的 Safari 或 Chrome 開啟遊戲。';
+    else start();
   }
 
   doneBtn.onclick = async () => {
