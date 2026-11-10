@@ -592,10 +592,23 @@ function testPanel(st) {
       catch (err) { toast(errText(err)); e.target.disabled = false; }
     },
   }, l.day === 11 ? '終章' : String(l.day))));
+  // 模擬時間：有時段限制的機關（例如 21:00 後才會打開的花苞）看的是遊戲時間，不是手機時間
+  const now = new Date(st.server_now);
+  const ymd = now.toLocaleDateString('sv-SE', { timeZone: 'Asia/Taipei' });
+  const setTime = async (iso, e) => {
+    e.target.disabled = true;
+    try { await rpc('admin_set_test_time', { p: S.pid, sim_at: iso }); toast('模擬時間已更新'); route(); }
+    catch (err) { toast(errText(err)); e.target.disabled = false; }
+  };
+  const clock = h('div', { class: 'row wrap', style: 'gap:8px;margin-top:12px;align-items:center' },
+    h('span', { class: 'mono dim', style: 'font-size:12px' }, `模擬時間 ${fmtTime(st.server_now)}`), h('span', { class: 'spacer' }),
+    h('button', { class: 'btn sm', onclick: (e) => setTime(`${ymd}T21:00:00+08:00`, e) }, '跳到今晚 21:00'),
+    h('button', { class: 'btn sm', onclick: (e) => setTime(new Date(now.getTime() + 3600000).toISOString(), e) }, '+1 小時'));
   return h('div', { class: 'card tj' },
     h('div', { class: 'kicker', style: 'color:var(--accent2)' }, 'TEST · 選區測試'),
     h('p', { class: 'dim', style: 'font-size:13px;margin:4px 0 10px' }, '點一個區域，就從那一區的開頭開始玩。前面各區會自動完成，模擬時間跳到當天 10:00。'),
-    grid);
+    grid, clock,
+    h('p', { class: 'dim', style: 'font-size:12px;margin:6px 0 0' }, '有時段限制的機關（例如夜間花苞）看的是模擬時間。要測試時，先按「跳到今晚 21:00」。'));
 }
 
 // ── 第二階段進化事件 ──
