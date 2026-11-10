@@ -79,7 +79,9 @@ export function photosetWidget({ step, pid, day, toast, onSubmit }) {
         const blob = cfg.live ? raw : await shrink(raw);
         const path = `${folder}/${i}-${Date.now()}.jpg`;
         await upload('evidence', path, blob, 'image/jpeg');
+        const old = shots[i];
         shots[i] = { path, url: URL.createObjectURL(blob) }; sfx('ok'); paint();
+        if (old && old.path) sb.storage.from('evidence').remove([old.path]).catch(() => {}); // 重拍：刪掉舊的那張
       } catch (e) { toast('上傳失敗：' + (e.message || e)); }
       cell.classList.remove('busy'); add.lastChild.textContent = cfg.live ? '開相機拍攝' : '拍照或選照片';
     };
