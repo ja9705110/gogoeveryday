@@ -1260,18 +1260,20 @@ async function finale() {
   let color = (A.choices || {})['choice:color'] || (() => { try { return localStorage.getItem(colorKey); } catch (_) { return null; } })() || null;
   const universe = () => ({ levels: M.chapters.map((c) => ({ day: c.day, title: c.title, thumb: M.thumbs[c.day], color: DAY_COLORS[(c.day - 1) % 10], missed: c.missed })), emotions: FINALE_EMOTIONS, states: layerStates(S.state.levels), name: 'Jasper', tint: color });
   const runFilm = () => playFilm({ chapters: M.chapters.map((c) => ({ ...c, fav: c.day === fav })), universe: universe(), ending: M.ending, onDone: (what) => {
-    if (what === 'replay') return runFilm();
+    if (what === 'replay') return fullShow();
     localStorage.setItem(thirtyKey, '1');
     celebrate({ song: M.song, hb: M.hb, onHunt: () => { renderAfter(); showHunt(); huntBox.scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
   } });
   function renderAfter() {
     body.innerHTML = '';
     body.append(h('div', { class: 'card glow' }, h('div', { class: 'kicker' }, 'FILE 030 · UNLOCKED'), h('p', {}, '你的宇宙，已經開始轉動。'),
-      h('button', { class: 'btn primary block', onclick: () => { primeAll(M); runFilm(); } }, '▶ 播放回顧影片：11/08–11/18'),
+      h('button', { class: 'btn primary block', onclick: () => { primeAll(M); fullShow(); } }, '▶ 播放回顧影片：11/08–11/18'),
       localStorage.getItem(thirtyKey) ? h('button', { class: 'btn block', style: 'margin-top:8px', onclick: () => { celebrate({ song: M.song, hb: M.hb, onHunt: () => huntBox.scrollIntoView({ behavior: 'smooth' }) }); } }, '我 30 歲了！') : null));
   }
   // 最後一關：選最喜歡的關卡 → 選一個代表自己的顏色 → 宇宙轉動 → 回顧影片
-  const afterColor = async (c) => { color = c; await spinUniverse(universe(), fav, M.chapters.find((x) => x.day === fav)); renderAfter(); runFilm(); };
+  // 每次回顧都從頭播：海底浮上 → 升空 → 情緒分裂 → 繞著 Jasper 轉 → 回顧影片
+  const fullShow = async () => { await spinUniverse(universe(), fav, M.chapters.find((x) => x.day === fav)); runFilm(); };
+  const afterColor = async (c) => { color = c; renderAfter(); await fullShow(); };
   if (prog.words_at) {
     if (!color) { colorPick(body, M, colorKey, afterColor); return; }
     renderAfter(); if (localStorage.getItem(thirtyKey)) showHunt(); return;
@@ -1355,10 +1357,14 @@ function spinUniverse(u, favDay, favCh) {
     const sea = mountSeaRise(ov, u.levels); // 先從海底開始：十個片段浮上海面，再升上天空
     ov.append(cap);
     ambience('ceremony', true);
-    const say = (html) => { cap.innerHTML = html; cap.classList.remove('on'); void cap.offsetWidth; cap.classList.add('on'); };
-    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+    let over = false;
+    const finish = () => { if (over) return; over = true; try { sea.stop(); } catch (_) {} cos.stop(); ov.remove(); done(); };
+    const skip = h('button', { class: 'btn ghost sm cosmos-skip', onclick: finish }, '略過');
+    ov.append(skip);
+    const say = (html) => { if (over) return; cap.innerHTML = html; cap.classList.remove('on'); void cap.offsetWidth; cap.classList.add('on'); };
+    const wait = (ms) => new Promise((r) => setTimeout(r, over ? 0 : ms));
     (async () => {
-      await sea.play(say, sfx);
+      await sea.play(say, sfx); if (over) return;
       cos.showLevels(); await sea.fadeOut(); cos.speed(0.15);
       cos.focus(favDay);
       say(`<div class="film-line">你選了</div><div class="film-word">${esc(favCh?.title || '')}</div>`); sfx('ping');
@@ -1376,8 +1382,9 @@ function spinUniverse(u, favDay, favCh) {
       say('<div class="film-line">每一分、每一秒，<br>你的宇宙都一直在運轉。</div>');
       await wait(3200); cos.speed(6);
       await wait(1600);
+      if (over) return;
       ov.classList.add('out'); await wait(700);
-      cos.stop(); ov.remove(); done();
+      finish();
     })();
   });
 }
