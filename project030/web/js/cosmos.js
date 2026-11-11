@@ -10,7 +10,7 @@ import { mountPlanet } from './planet.js';
 const TILT = -0.35; // 跟星球的星環同一個傾斜角度
 
 export function mountCosmos(host, opts) {
-  const { levels = [], emotions = {}, states = {}, name = 'Jasper' } = opts;
+  const { levels = [], emotions = {}, states = {}, name = 'Jasper', tint = null } = opts;
   const labels = opts.labels !== false;
   const wrap = document.createElement('div'); wrap.className = 'cosmos-wrap';
   const mk = (cls) => { const c = document.createElement('canvas'); c.className = 'cosmos-cv ' + cls; wrap.append(c); return c; };
@@ -31,7 +31,8 @@ export function mountCosmos(host, opts) {
   const PS = Math.round(Math.min(W, H) * 0.8);
   pc.style.width = PS + 'px'; pc.style.height = PS + 'px';
   pc.style.left = (W / 2 - PS / 2) + 'px'; pc.style.top = (cyOf() - PS / 2) + 'px';
-  const stopPlanet = mountPlanet(pc, states, { size: PS });
+  // 最後的成果：星球用他選的代表色；旁邊的衛星不出現
+  const stopPlanet = mountPlanet(pc, states, { size: PS, tint, noMoon: true });
   const PR = PS * 0.27; // 星球半徑（planet.js 的比例）
 
   const stars = Array.from({ length: 160 }, () => ({ x: Math.random(), y: Math.random(), s: Math.random() * 1.3 + 0.3, tw: Math.random() * 6.28 }));

@@ -483,6 +483,9 @@ select pg_temp.ok((select favorite_day = 3 and words_at is not null from public.
 select pg_temp.ok((public.finale_archive(:'fv') -> 'progress' ->> 'favorite_day')::int = 3, 'archive reports the favourite');
 select pg_temp.ok((public.finale_hunt(:'fv') ->> 'total') is not null, 'hunt opens after picking a favourite');
 select pg_temp.ok((public.get_state(:'fv') -> 'stats' -> 'choices' ->> 'choice:favorite')::int = 3, 'favourite visible to admin via choices');
+select pg_temp.fails($$select public.finale_color('$$ || :'fv' || $$', 'red; drop')$$, 'P030_BAD_ANSWER', 'colour must be #rrggbb');
+select pg_temp.ok((public.finale_color(:'fv', '#3FA9F5') ->> 'color') = '#3fa9f5', 'colour saved');
+select pg_temp.ok((public.finale_archive(:'fv') -> 'choices' ->> 'choice:color') = '#3fa9f5', 'archive returns his colour');
 select public.admin_delete_test_profile(:'fv') \g /dev/null
 reset role; set search_path = public, extensions;
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000b', 'player@test.dev');
