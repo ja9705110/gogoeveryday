@@ -789,3 +789,20 @@ body::before { animation: none; }
 .party-mute { position: absolute; right: 12px; top: calc(12px + env(safe-area-inset-top)); z-index: 2; }
 .party-next { position: relative; margin-top: 34px; display: flex; flex-direction: column; gap: 12px; align-items: center; min-height: 90px; }
 .party-q { font-size: 18px; color: #fff; animation: hudin2 .8s both; }
+/* ── 第 4 區：鏡前的自己 ── */
+.tr-chips { display: flex; flex-wrap: wrap; gap: 7px; margin: 10px 0 4px; }
+.tr-chip { padding: 8px 12px; font-size: 15px; border: 1px solid rgba(180, 220, 255, .35); background: rgba(10, 30, 46, .7); color: #dbeaf5; cursor: pointer; border-radius: 18px; transition: all .15s; }
+.tr-chip.on { border-color: #cfe9ff; background: linear-gradient(160deg, rgba(200, 235, 255, .9), rgba(150, 200, 235, .85)); color: #06233a; box-shadow: 0 0 14px rgba(190, 230, 255, .55); }
+.tr-mirror { margin: 10px 0; padding: 16px; border: 1px solid rgba(200, 235, 255, .55); background: linear-gradient(160deg, rgba(190, 225, 245, .14), rgba(20, 40, 60, .55)); box-shadow: inset 0 0 40px rgba(200, 235, 255, .12), 0 0 24px rgba(190, 230, 255, .2); animation: hudin2 .8s both; }
+.tr-k { font-size: 16px; letter-spacing: .08em; color: #eaf6ff; margin-bottom: 8px; }
+.tr-sub { font-size: 13px; color: var(--dim); margin: 12px 0 6px; }
+.tr-good { display: flex; flex-wrap: wrap; gap: 6px; }
+.tr-good span { padding: 5px 11px; border-radius: 16px; border: 1px solid rgba(255, 215, 154, .7); color: #ffd79a; background: rgba(255, 181, 71, .1); box-shadow: 0 0 10px rgba(255, 181, 71, .25); }
+.tr-flips { display: grid; gap: 8px; }
+.tr-flip { display: grid; grid-template-columns: auto 22px 1fr; gap: 8px; align-items: center; padding: 8px 10px; background: rgba(2, 10, 18, .55); border-left: 2px solid rgba(200, 235, 255, .6); opacity: 0; animation: trflip .9s both; }
+.tr-from { color: #9fb3c2; text-decoration: line-through; text-decoration-color: rgba(200, 235, 255, .5); font-size: 14px; }
+.tr-arrow { color: #cfe9ff; text-align: center; }
+.tr-to b { display: block; color: #fff; font-size: 16px; letter-spacing: .06em; text-shadow: 0 0 10px rgba(200, 235, 255, .7); }
+.tr-to small { color: #b9cbd8; font-size: 12px; }
+.tr-end { margin-top: 14px; font-size: 13px; color: #cfe9ff; text-align: center; letter-spacing: .06em; }
+@keyframes trflip { 0% { opacity: 0; transform: perspective(500px) rotateY(-90deg); } 100% { opacity: 1; transform: none; } }

@@ -518,6 +518,8 @@ function makeCtx(L, s, el, msg, box) {
     inventory: S.state.inventory,
     toast,
     preview: (flag, opt) => S.avatarPreview && S.avatarPreview(flag, opt),
+    savedTraits: S.state.stats?.choices?.['choice:traits'],
+    saveTraits: async (ids) => { await rpc('save_traits', { p: S.pid, d: L.day, step_id: s.id, traits: ids }); S.state.stats.choices = { ...(S.state.stats.choices || {}), 'choice:traits': ids }; },
     async send(answer, btn, opts = {}) {
       if (btn) btn.disabled = true;
       msg.className = 'msg'; msg.textContent = '…';

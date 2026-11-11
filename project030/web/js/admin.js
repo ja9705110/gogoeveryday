@@ -4,6 +4,7 @@ import { h } from './steps.js';
 import { mountBackground } from './bg.js';
 import { portraitFromChoices } from './portrait-map.js';
 import { makeZip } from './zip.js';
+import { TRAIT_BY_ID } from './traits.js';
 
 const app = document.getElementById('app');
 const A = { tab: 'overview', ov: null };
@@ -297,6 +298,13 @@ async function overview(body) {
       h('td', {}, p.sample.form), h('td', {}, h('button', { class: 'btn sm', onclick: () => detail(p) }, '詳細'))));
   }
   for (const p of ov.profiles.filter((x) => !x.is_test)) {
+    const tr = (p.stats.choices || {})['choice:traits'];
+    if (Array.isArray(tr) && tr.length) {
+      const picked = tr.map((id) => TRAIT_BY_ID[id]).filter(Boolean);
+      body.append(h('div', { class: 'card' }, h('h2', {}, `鏡前的自己・${ov.settings.player_name || '壽星'}選的特質`),
+        h('p', { class: 'dim', style: 'font-size:12px' }, '第 4 天鏡廳，他點選「像自己」的詞。缺點會在鏡子裡翻成另一面。'),
+        h('div', { style: 'display:flex;flex-wrap:wrap;gap:6px' }, ...picked.map((t) => h('span', { class: 'status-pill', style: t.flip ? 'color:#cfe9ff' : 'color:#ffd79a' }, t.flip ? `${t.label} → ${t.flip[0]}` : t.label)))));
+    }
     const pr = portraitFromChoices(p.stats.choices || {});
     if (!Object.keys(pr).length) continue;
     body.append(h('div', { class: 'card', style: 'border-color:rgba(255,181,71,.5)' }, h('h2', {}, `形象照方向・${ov.settings.player_name || '壽星'}`),

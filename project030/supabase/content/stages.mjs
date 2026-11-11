@@ -127,8 +127,9 @@ export const stages = {
   // ───────── DAY 4 · 鏡廳 ─────────
   4: {
     steps: [
-      { id: 's_mirror', type: 'keypad', title: '鏡中數字', length: 4, ...S(1, '鏡中數字'),
-        clue: [{ type: 'mirror', text: '8031', caption: '這組數字只出現在鏡子裡。' }], prompt: '它在現實中應該是什麼？' },
+      { id: 's_traits', type: 'story', widget: 'traits', min: 3, title: '鏡前的自己', ...S(1, '鏡前的自己'),
+        text: ['鏡廳的入口，掛著一面還沒有影像的鏡子。', '鏡框上刻著一行字：「照鏡子之前，先說說你看見的自己。」'],
+        prompt: '點選所有你覺得「像你」的詞——好的、不好的都可以，想選幾個就選幾個（至少 3 個）。' },
       story('s_clock_intro', ['第二面鏡子裡，掛著一個時鐘。', '但這個房間裡，沒有任何時鐘。'], { ...S(2, '鏡中時鐘') }),
       { id: 's_mclock', type: 'keypad', title: '鏡中時鐘', length: 4, ...S(2, '鏡中時鐘'),
         clue: [{ type: 'clock', h: 2, m: 15, mirror: true, caption: '鏡子裡的時鐘。' }], prompt: '真正的時間是幾點幾分？（四位數）' },
