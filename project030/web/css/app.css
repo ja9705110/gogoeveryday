@@ -744,3 +744,48 @@ body::before { animation: none; }
 .evo-pick img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; }
 .pset-stage { width: min(92vw, 520px); aspect-ratio: 3 / 4; background: #000; overflow: hidden; }
 .pset-stage video { width: 100%; height: 100%; object-fit: cover; }
+/* ── 終章：最後一道鎖（十個詞） ── */
+.fw-pool { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; min-height: 40px; }
+.fw-chip { padding: 9px 14px; font-size: 16px; letter-spacing: .1em; border: 1px solid rgba(255, 181, 71, .7); background: rgba(255, 181, 71, .1); color: #ffd79a; cursor: pointer; }
+.fw-chip.on { background: #ffb547; color: #1a1006; box-shadow: 0 0 16px rgba(255, 181, 71, .6); }
+.fw-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 12px; }
+.fw-card { text-align: left; padding: 0 0 8px; border: 1px solid var(--line); background: rgba(4, 14, 24, .85); color: var(--text); cursor: pointer; overflow: hidden; }
+.fw-card.ready { border-color: rgba(255, 181, 71, .8); box-shadow: 0 0 12px rgba(255, 181, 71, .25); }
+.fw-card.void { opacity: .7; }
+.fw-img { position: relative; aspect-ratio: 4 / 3; background: radial-gradient(circle at 50% 40%, #12324a, #050c14) center / cover no-repeat; }
+.fw-sym { position: absolute; left: 6px; top: 6px; width: 30px; height: 30px; color: #f2b84b; filter: drop-shadow(0 0 6px rgba(0, 0, 0, .8)); }
+.fw-t { font-family: var(--mono); font-size: 12px; color: var(--accent); padding: 6px 8px 0; }
+.fw-h { font-size: 12px; color: var(--dim); padding: 2px 8px; min-height: 2.6em; }
+.fw-slot { margin: 4px 8px 0; padding: 6px; text-align: center; border: 1px dashed rgba(255, 181, 71, .5); color: var(--faint); font-size: 15px; letter-spacing: .15em; }
+.fw-slot.filled { border-style: solid; color: #ffd79a; background: rgba(255, 181, 71, .1); }
+/* ── 回顧影片 ── */
+.film { position: fixed; inset: 0; z-index: 260; background: #01040a; overflow: hidden; color: #fff; }
+.film-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 30%, rgba(30, 60, 110, .45), transparent 60%), radial-gradient(ellipse at 50% 110%, rgba(255, 140, 80, .12), transparent 60%); }
+.film-img { position: absolute; inset: 0; }
+.film-frame { position: absolute; inset: -4%; background: center / contain no-repeat; opacity: 0; transform: scale(1.02) translate(0, 0); transition: opacity 1.1s ease, transform 4.5s ease-out; filter: saturate(1.05); }
+.film-frame.on { opacity: 1; transform: scale(1.1) translate(var(--kx), var(--ky)); }
+.film-img::after { content: ''; position: absolute; inset: 0; background: linear-gradient(transparent 50%, rgba(0, 0, 0, .78)); }
+.film-cap { position: absolute; left: 0; right: 0; bottom: calc(90px + env(safe-area-inset-bottom)); padding: 0 24px; text-align: center; z-index: 2; opacity: 0; transform: translateY(10px); transition: opacity .9s, transform .9s; }
+.film-cap.on { opacity: 1; transform: none; }
+.film-line { font-size: 20px; line-height: 1.8; letter-spacing: .06em; text-shadow: 0 2px 12px #000; }
+.film-date { font-family: var(--mono); font-size: 13px; color: var(--accent); letter-spacing: .2em; margin-bottom: 8px; text-shadow: 0 2px 8px #000; }
+.film-word { font-size: 42px; font-weight: 700; letter-spacing: .3em; color: #ffd79a; text-shadow: 0 0 24px rgba(255, 181, 71, .55), 0 2px 12px #000; }
+.film-def { font-size: 17px; line-height: 1.8; text-shadow: 0 2px 12px #000; }
+.film-wave { display: flex; gap: 5px; justify-content: center; margin-top: 12px; height: 36px; align-items: center; }
+.film-wave i { width: 5px; height: 30%; background: #ffd79a; border-radius: 2px; animation: lswave 1s ease-in-out infinite; }
+.film-wave i:nth-child(2n) { animation-delay: .2s; } .film-wave i:nth-child(3n) { animation-delay: .4s; }
+.film-bar { position: absolute; left: 16px; right: 16px; top: calc(14px + env(safe-area-inset-top)); height: 3px; background: rgba(255, 255, 255, .15); z-index: 3; }
+.film-bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width 1s; }
+.film-skip { position: absolute; right: 12px; top: calc(26px + env(safe-area-inset-top)); z-index: 3; }
+.film-end { position: absolute; inset: 0; z-index: 4; display: flex; flex-direction: column; gap: 14px; align-items: center; justify-content: center; }
+.film-go { font-size: 22px; padding: 18px 34px; letter-spacing: .12em; animation: evopulse 1.6s ease-in-out infinite; }
+/* ── 我 30 歲了！ ── */
+.party { position: fixed; inset: 0; z-index: 270; background: radial-gradient(circle at 50% 42%, #2a1640, #070312 70%); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; overflow: hidden; transition: opacity .5s; }
+.party.out { opacity: 0; }
+.party-cv { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.party-30 { position: relative; font-family: var(--hud); font-size: 132px; font-weight: 900; line-height: 1; color: #fff; text-shadow: 0 0 30px #ff6fae, 0 0 70px #3ff4ff; animation: scpop .7s both; }
+.party-t { position: relative; font-size: 34px; font-weight: 700; letter-spacing: .3em; margin-top: 8px; color: #ffd79a; text-shadow: 0 0 18px rgba(255, 181, 71, .7); animation: hudin2 1s .4s both; }
+.party-s { position: relative; font-size: 15px; color: #e6dcff; margin-top: 12px; animation: hudin2 1s .9s both; }
+.party-mute { position: absolute; right: 12px; top: calc(12px + env(safe-area-inset-top)); z-index: 2; }
+.party-next { position: relative; margin-top: 34px; display: flex; flex-direction: column; gap: 12px; align-items: center; min-height: 90px; }
+.party-q { font-size: 18px; color: #fff; animation: hudin2 .8s both; }

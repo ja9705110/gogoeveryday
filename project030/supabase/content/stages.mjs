@@ -243,12 +243,12 @@ export const stages = {
       { id: 's_timeline', type: 'timeline', title: '排列片段', upto: 8, prompt: '依照發生的順序排列這些片段。空白的片段也有它的位置。', ...S(1, '排列片段') },
       story('s_stop', ['投影機在最後一格停住了。', '畫面角落印著一行字：「紀錄起始日」。'], { ...S(2, '起始日') }),
       { id: 's_date', type: 'keypad', title: '紀錄起始日', length: 4, prompt: '輸入第一個片段浮上海面的日期（月日，四位數）。', ...S(2, '起始日') },
-      { id: 's_voice', type: 'evidence', title: '最後一段', kinds: ['audio'], gate: true, ...S(3, '最後一段'),
-        prompt: '回放缺少最後一段：現在的你。', pending_text: '聲音已送出。投影機正在寫入……' },
+      { id: 's_voice', type: 'evidence', title: '給三十歲的你', kinds: ['audio'], gate: true, ...S(3, '給三十歲的你'),
+        prompt: '回放的最後一格是空的。它留給一段聲音：給 11/18、三十歲的你。', pending_text: '聲音已送出。投影機會在那一天替你播放……' },
     ],
     secrets: {
       s_date: { answer: '$start_mmdd', hints: ['你第一次接入的那一天。', '看「紀錄」頁最早的一筆事件。'], success: '投影機重新轉動。', wrong: '日期不符。' },
-      s_voice: { hints: ['投影機也可以錄音。', '對它說一句話——給十天前剛接入時的自己。', '錄一段聲音，對十天前的自己說一句話。'] },
+      s_voice: { hints: ['這段聲音，會在你三十歲那一天播放。', '想一想：11/18 的你，會想聽見什麼？', '錄一段聲音，對三十歲的自己（11/18 的你）說一句話。'] },
     },
   },
 

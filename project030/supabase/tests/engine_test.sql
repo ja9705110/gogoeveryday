@@ -454,4 +454,28 @@ select public.admin_test_reset(:'ev') \g /dev/null
 select pg_temp.ok((select count(*) from public.evo_runs where profile_id = :'ev') = 0, 'test reset clears evolution');
 select public.admin_delete_test_profile(:'ev') \g /dev/null
 reset role; set search_path = public, extensions;
+-- ════════════ 11/18 終章改版：十個詞 → 影片 → 我 30 歲了 → 尋寶 ════════════
+reset role; set search_path = public, extensions;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a', 'admin@test.dev');
+set role authenticated;
+select pg_temp.ok((select config::text like '%給三十歲的你%' from public.levels where day = 9), 'day 9 recording is addressed to the 30-year-old self');
+select public.admin_create_test_profile('終章', null) as fz \gset
+select public.admin_test_jump(:'fz', 11) \g /dev/null
+select public.finale_archive(:'fz') as fa \gset
+select pg_temp.ok(jsonb_array_length(:'fa'::jsonb -> 'words') = 10 and (:'fa'::jsonb -> 'words') <> '["開始","理解","陪伴","自信","守護","接納","連結","取捨","肯定","成為"]'::jsonb, 'archive gives the ten words shuffled');
+select pg_temp.ok(:'fa'::jsonb ? 'song' and (:'fa'::jsonb -> 'days' -> 0) ? 'day_photos', 'archive carries song path and daily photos');
+select pg_temp.fails($$select public.finale_hunt('$$ || :'fz' || $$')$$, 'P030_DEFINE_FIRST', 'hunt locked before the last lock');
+select pg_temp.ok((public.finale_words(:'fz', '["理解","開始","陪伴","自信","守護","接納","連結","取捨","肯定","成為"]') ->> 'right')::int = 8, 'wrong answer only reports how many are right');
+select pg_temp.ok(not (public.finale_words(:'fz', '["理解","開始","陪伴","自信","守護","接納","連結","取捨","肯定","成為"]') ->> 'correct')::boolean, 'wrong mapping does not unlock');
+select pg_temp.fails($$select public.finale_words('$$ || :'fz' || $$', '["開始"]')$$, 'P030_BAD_ANSWER', 'answer must have ten words');
+select pg_temp.ok((public.finale_words(:'fz', '["開始","理解","陪伴","自信","守護","接納","連結","取捨","肯定","成為"]') ->> 'correct')::boolean, 'correct mapping unlocks the archive');
+select pg_temp.ok((select words_at is not null and words_tries = 3 from public.finale_progress where profile_id = :'fz'), 'unlock time and tries recorded');
+select pg_temp.ok((public.finale_hunt(:'fz') ->> 'total') is not null, 'hunt opens after the last lock (no definition needed)');
+select pg_temp.ok(public.finale_song_allowed(), 'song readable once the finale is open');
+select public.admin_delete_test_profile(:'fz') \g /dev/null
+reset role; set search_path = public, extensions;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000b', 'player@test.dev');
+set role authenticated;
+select pg_temp.fails($$select public.finale_words('$$ || :'pid' || $$', '["開始","理解","陪伴","自信","守護","接納","連結","取捨","肯定","成為"]')$$, 'P030_FINALE_LOCKED', 'last lock unavailable before the birthday');
+reset role; set search_path = public, extensions;
 \echo ALL TESTS PASSED
