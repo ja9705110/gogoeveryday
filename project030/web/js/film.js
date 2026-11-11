@@ -225,14 +225,20 @@ export function celebrate({ song, hb: hbFile, onHunt }) {
   hb.done.then(() => {
     if (!alive) return;
     lyric('第 1118 號觀察員，歡迎來到三十歲。');
-    if (song && neonSrc) { try { if (song.src !== neonSrc) song.src = neonSrc; song.currentTime = 0; song.muted = muted; song.play().catch(() => {}); } catch (_) {} }
-    burst(200);
-    setTimeout(() => {
-      if (!alive) return;
-      const b = el('button', 'btn primary', '出發去找禮物 →');
-      b.onclick = () => { alive = false; hb.stop(); clearInterval(rain); removeEventListener('resize', resize); ov.classList.add('out'); setTimeout(() => ov.remove(), 500); onHunt && onHunt(); };
-      next.append(el('div', 'party-q', '先猜猜看，你的禮物是什麼？'), b);
-    }, 8000);
+    // 唱完生日快樂歌：按「領取我的生日禮物」才播 NEON（真的點一下，iPhone 一定放行）
+    const gift = el('button', 'btn primary party-gift', '🎁 領取我的生日禮物');
+    gift.onclick = () => {
+      gift.remove();
+      if (song && neonSrc) { try { song.onended = null; if (song.src !== neonSrc) song.src = neonSrc; song.currentTime = 0; song.muted = muted; song.play().catch(() => {}); } catch (_) {} }
+      burst(240); sfx('complete');
+      setTimeout(() => {
+        if (!alive) return;
+        const b = el('button', 'btn primary', '出發去找禮物 →');
+        b.onclick = () => { alive = false; hb.stop(); clearInterval(rain); removeEventListener('resize', resize); ov.classList.add('out'); setTimeout(() => ov.remove(), 500); onHunt && onHunt(); };
+        next.append(el('div', 'party-q', '先猜猜看，你的禮物是什麼？'), b);
+      }, 8000);
+    };
+    next.append(gift);
   });
   // 彩帶與星光
   const g = cv.getContext('2d'); const dpr = Math.min(devicePixelRatio || 1, 2);
