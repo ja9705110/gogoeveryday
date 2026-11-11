@@ -505,6 +505,40 @@ select pg_temp.ok((public.get_state(:'mr') #> '{stats,choices,choice:traits}') =
 select pg_temp.ok((public.submit_step(:'mr', 4, 's_traits', '{}') ->> 'correct')::boolean, 'continue after the mirror');
 select public.submit_step(:'mr', 4, 's_clock_intro', '{}') \g /dev/null
 select pg_temp.ok((public.submit_step(:'mr', 4, 's_mclock', '{"value":"0215"}') ->> 'correct')::boolean, 'mirror clock still follows');
+-- ════════════ 幸福券：逾期的第 4 區重新開啟 ════════════
+reset role; set search_path = public, extensions;
+select (private.level_window(5)).open_at as w5o, (private.level_window(5)).close_at as w5c, (private.level_window(6)).open_at as w6o \gset
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a', 'admin@test.dev');
+set role authenticated;
+select public.admin_set_test_time(:'mr', (:'w5o'::timestamptz + interval '30 minutes')) \g /dev/null
+select public.get_state(:'mr') \g /dev/null
+select pg_temp.ok((select missed_at is not null and status = 'ALTERNATE' from public.player_levels where profile_id = :'mr' and day = 4), 'day 4 goes to the alternate route after midnight');
+select pg_temp.fails($$select public.use_happy_ticket('$$ || :'mr' || $$', 4)$$, 'P030_NO_TICKET', 'no ticket yet');
+select pg_temp.ok((public.admin_grant_ticket(:'mr', 4) ->> 'until')::timestamptz = :'w5c'::timestamptz, 'ticket lasts until the end of today');
+select pg_temp.ok(exists (select 1 from public.notifications where profile_id = :'mr' and title = '你收到一張幸福券'), 'he is told about the ticket');
+select pg_temp.ok((public.use_happy_ticket(:'mr', 4) ->> 'ok')::boolean, 'ticket used');
+select pg_temp.ok((select missed_at is null and status = 'IN_PROGRESS' from public.player_levels where profile_id = :'mr' and day = 4), 'day 4 reopened');
+select pg_temp.ok((select (data -> 'done') ? 's_mclock' from public.player_levels where profile_id = :'mr' and day = 4), 'finished steps are kept');
+select pg_temp.ok((public.get_state(:'mr') -> 'levels' -> 3 ->> 'status') = 'IN_PROGRESS', 'stays open after refresh while the ticket lasts');
+select pg_temp.ok((public.get_state(:'mr') -> 'stats' ->> 'missed')::int = 0, 'not counted as missed');
+select pg_temp.ok((public.open_level(:'mr', 4) -> 'steps' -> 0 ->> 'id') = 's_traits', 'original route, not the alternate one');
+select pg_temp.ok((public.use_happy_ticket(:'mr', 4) ->> 'already')::boolean, 'using twice is harmless');
+select public.submit_evidence(:'mr', 4, 's_photo', 'photo', :'mr' || '/4/x.jpg', null) as tev \gset
+select public.admin_review_evidence((:'tev'::jsonb ->> 'id')::uuid, 'APPROVED', 'ok') \g /dev/null
+select pg_temp.ok((public.submit_step(:'mr', 4, 's_letter', '{}') ->> 'completed')::boolean, 'day 4 completed with the ticket');
+select pg_temp.ok((public.get_state(:'mr') -> 'levels' -> 4 ->> 'status') in ('AVAILABLE', 'IN_PROGRESS'), 'today (day 5) is still playable');
+select pg_temp.fails($$select public.admin_grant_ticket('$$ || :'mr' || $$', 4)$$, 'P030_ALREADY_DONE', 'no ticket for a finished zone');
+-- 期限過了還沒完成：一樣會逾期
+select public.admin_create_test_profile('幸福券過期', null) as mx \gset
+select public.admin_test_jump(:'mx', 4) \g /dev/null
+select public.admin_set_test_time(:'mx', (:'w5o'::timestamptz + interval '1 hour')) \g /dev/null
+select public.get_state(:'mx') \g /dev/null
+select public.admin_grant_ticket(:'mx', 4) \g /dev/null
+select public.use_happy_ticket(:'mx', 4) \g /dev/null
+select public.admin_set_test_time(:'mx', (:'w6o'::timestamptz + interval '1 hour')) \g /dev/null
+select public.get_state(:'mx') \g /dev/null
+select pg_temp.ok((select missed_at is not null from public.player_levels where profile_id = :'mx' and day = 4), 'after the ticket expires the zone closes again');
+select public.admin_delete_test_profile(:'mx') \g /dev/null
 select public.admin_delete_test_profile(:'mr') \g /dev/null
 reset role; set search_path = public, extensions;
 \echo ALL TESTS PASSED

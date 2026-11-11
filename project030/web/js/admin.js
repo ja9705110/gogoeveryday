@@ -297,6 +297,29 @@ async function overview(body) {
       h('td', { class: 'mono' }, `${p.stats.ontime} / ${p.stats.missed}`), h('td', { class: 'mono' }, String(p.stats.exploration)),
       h('td', {}, p.sample.form), h('td', {}, h('button', { class: 'btn sm', onclick: () => detail(p) }, '詳細'))));
   }
+  // 幸福券：讓逾期的那一區重新開啟（正式玩家；測試檔案也可以拿來試）
+  {
+    const { data: tks } = await sb.from('happy_tickets').select('*');
+    const card = h('div', { class: 'card', style: 'border-color:rgba(255,215,154,.6)' }, h('h2', {}, '🎟 幸福券'),
+      h('p', { class: 'dim', style: 'font-size:12px' }, '送給他一張幸福券：逾期（或今天之前沒完成）的那一區會重新開啟到他「今天」結束，之前完成的關卡都保留。走完會看到那一天的回顧，再回到今天繼續。'));
+    const fmtT = (t) => new Date(new Date(t).getTime() - 1000).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+    for (const p of [...ov.profiles].sort((a, b) => Number(a.is_test) - Number(b.is_test))) {
+      const gd = Math.max(0, ...(p.levels || []).filter((l) => l.status !== 'LOCKED' && l.day <= 10).map((l) => l.day));
+      const days = (p.levels || []).filter((l) => l.day <= 10 && l.status !== 'COMPLETED' && (l.status === 'ALTERNATE' || l.status === 'MISSED' || l.day < gd));
+      const mine = (tks || []).filter((k) => k.profile_id === p.id);
+      if (!days.length && !mine.length) continue;
+      const row = h('div', { style: 'margin:8px 0' }, h('div', { class: 'mono', style: 'font-size:12px' }, (p.is_test ? '［測試］' : '') + (p.label || '')));
+      for (const l of days) {
+        const k = mine.find((x) => x.day === l.day);
+        const msg = h('span', { class: 'dim', style: 'font-size:12px;margin-left:8px' }, k ? (k.used_at ? `已使用・開放到 ${fmtT(k.until)}` : `已送出，尚未使用・期限 ${fmtT(k.until)}`) : '');
+        const b = h('button', { class: 'btn sm' + (k ? ' ghost' : ' primary') }, k ? '重新送出' : `送出幸福券：第 ${l.day} 區`);
+        b.onclick = async () => { b.disabled = true; try { const r = await rpc('admin_grant_ticket', { p: p.id, d: l.day }); msg.textContent = `已送出・期限 ${fmtT(r.until)}`; } catch (e) { msg.textContent = errText(e); b.disabled = false; } };
+        row.append(h('div', { style: 'margin:4px 0' }, h('span', {}, `第 ${l.day} 區 ${l.title || ''}`, ' '), b, msg));
+      }
+      card.append(row);
+    }
+    if (card.children.length > 2) body.append(card);
+  }
   for (const p of ov.profiles.filter((x) => !x.is_test)) {
     const tr = (p.stats.choices || {})['choice:traits'];
     if (Array.isArray(tr) && tr.length) {

@@ -827,3 +827,14 @@ body::before { animation: none; }
 .party-s { transition: opacity .6s; }
 .party-s.on { animation: lyricin .8s ease; }
 @keyframes lyricin { from { opacity: 0; transform: translateY(8px); } }
+
+/* 幸福券 */
+.ticket-card { border-color: rgba(255, 215, 154, .6); box-shadow: 0 0 18px rgba(255, 181, 71, .18); }
+.ticket { position: relative; padding: 14px 18px; border-radius: 10px; background: linear-gradient(120deg, #ffd79a, #ff9fc6 60%, #b48cff); color: #2a1406; overflow: hidden; }
+.ticket::before, .ticket::after { content: ''; position: absolute; top: 50%; width: 18px; height: 18px; margin-top: -9px; border-radius: 50%; background: var(--bg, #050c14); }
+.ticket::before { left: -9px; } .ticket::after { right: -9px; }
+.ticket-k { font-family: var(--mono); font-size: 11px; letter-spacing: .3em; opacity: .7; }
+.ticket-t { font-size: 26px; font-weight: 800; letter-spacing: .3em; margin: 2px 0; }
+.ticket-s { font-size: 13px; opacity: .85; }
+.ticket.big { animation: ticketin .9s cubic-bezier(.2, 1.4, .4, 1); margin-bottom: 12px; }
+@keyframes ticketin { from { transform: scale(.6) rotate(-6deg); opacity: 0; } }
