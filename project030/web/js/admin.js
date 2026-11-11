@@ -562,28 +562,34 @@ async function finale(body) {
   {
     const player = h('audio', { controls: '', preload: 'none', style: 'width:100%;margin-top:6px;display:' + (data.song_path ? 'block' : 'none') });
     if (data.song_path) signedUrl(data.song_path, 'gifts').then((u) => u && (player.src = u));
-    const sin = h('input', { type: 'file', accept: 'audio/*', class: 'hidden' });
+    // 不限定檔案類型：iPhone 的「檔案」裡 mp3 在 accept=audio/* 時常常是灰色、選不到
+    const sin = h('input', { type: 'file', class: 'hidden' });
     const smsg = h('div', { class: 'msg' });
+    const cur = h('div', { class: 'mono', style: 'font-size:12px' }, data.song_path ? '目前：' + data.song_path.split('/').pop() : '尚未上傳');
     sin.onchange = async () => {
-      const f = sin.files[0]; if (!f) return;
+      const f = sin.files[0]; sin.value = ''; if (!f) return;
+      const ext0 = (f.name.split('.').pop() || '').toLowerCase();
+      if (!/^audio\//.test(f.type || '') && !['mp3', 'm4a', 'aac', 'wav', 'mp4'].includes(ext0)) { smsg.className = 'msg bad'; smsg.textContent = `這不是音樂檔（${f.name}）。請選 mp3 或 m4a。`; return; }
       if (f.size > 15 * 1024 * 1024) { smsg.className = 'msg bad'; smsg.textContent = '檔案超過 15 MB。'; return; }
       smsg.className = 'msg'; smsg.textContent = '上傳中…（約 9 MB，需要一點時間）';
       try {
         const ext = (f.name.split('.').pop() || 'mp3').toLowerCase().replace(/[^a-z0-9]/g, '') || 'mp3';
         const path = `finale/song-${Date.now()}.${ext}`;
-        const { error: e1 } = await sb.storage.from('gifts').upload(path, f, { contentType: f.type || 'audio/mpeg', upsert: false });
-        if (e1) throw e1;
+        const ctype = /^audio\//.test(f.type || '') ? f.type : ({ m4a: 'audio/mp4', mp4: 'audio/mp4', aac: 'audio/aac', wav: 'audio/wav' }[ext] || 'audio/mpeg');
+        const { error: e1 } = await sb.storage.from('gifts').upload(path, f, { contentType: ctype, upsert: false });
+        if (e1) { const m = String(e1.message || e1); throw new Error(/row-level|security|policy|unauthorized|403/i.test(m) ? '沒有上傳權限：請先在 Supabase 貼上 30 號 SQL（20261108000030_finale_film.sql）。（' + m + '）' : /size|large|413/i.test(m) ? '檔案太大（上限 15 MB）。（' + m + '）' : m); }
         const { error: e2 } = await sb.from('finale_config').update({ song_path: path, updated_at: new Date().toISOString() }).eq('id', 1);
-        if (e2) throw e2;
+        if (e2) { const m = String(e2.message || e2); throw new Error(/song_path|column/i.test(m) ? '資料庫還沒有「終章歌曲」欄位：請先在 Supabase 貼上 30 號 SQL（20261108000030_finale_film.sql）。（' + m + '）' : m); }
         if (data.song_path) sb.storage.from('gifts').remove([data.song_path]).catch(() => {});
         data.song_path = path;
         const u = await signedUrl(path, 'gifts'); if (u) { player.src = u; player.style.display = 'block'; }
-        smsg.className = 'msg good'; smsg.textContent = '已上傳：' + f.name;
+        smsg.className = 'msg good'; smsg.textContent = '已上傳：' + f.name; cur.textContent = '目前：' + path.split('/').pop();
       } catch (e) { smsg.className = 'msg bad'; smsg.textContent = '上傳失敗：' + errText(e); }
     };
     body.append(h('div', { class: 'card' }, h('h2', {}, '終章歌曲'),
       h('p', { class: 'dim', style: 'font-size:13px' }, '11/18 凌晨，他看完回顧影片、按下「我 30 歲了！」時播放。檔案存在私人資料夾，生日當天之前玩家讀不到。'),
-      h('div', { class: 'mono', style: 'font-size:12px' }, data.song_path ? '目前：' + data.song_path.split('/').pop() : '尚未上傳'),
+      cur,
+      !('song_path' in data) ? h('div', { class: 'msg bad' }, '資料庫還沒有「終章歌曲」欄位：請先在 Supabase 貼上 30 號 SQL（20261108000030_finale_film.sql），再回來上傳。') : null,
       player, sin, h('button', { class: 'btn primary', style: 'margin-top:8px', onclick: () => sin.click() }, data.song_path ? '更換歌曲' : '上傳歌曲'), smsg));
   }
   // 最終照片：星球在終章會化為這張照片（只存在資料庫，生日當天才會送到玩家端）
