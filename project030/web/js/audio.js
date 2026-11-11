@@ -141,9 +141,25 @@ const LAYERS = {
     const id = setInterval(() => { if (sound.on && Math.random() < 0.6) blip(out, 900 + Math.random() * 900, 0.06); }, 1400);
     return [{ stop: () => clearInterval(id) }];
   },
-  shimmer(out) { // 玻璃泛音
-    const g = ctx.createGain(); g.gain.value = 0.03; g.connect(out);
-    return [1320, 1760, 2217].map((fr) => { const o = osc('sine', fr); o.connect(g); o.start(); lfo(0.2 + Math.random() * 0.3, 6, o.frequency); return o; });
+  shimmer(out) { // 玻璃泛音：偶爾響起、慢慢淡出的柔和玻璃聲（不再有持續的高頻長音）
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2200; lp.Q.value = 0.4;
+    const g = ctx.createGain(); g.gain.value = 1; lp.connect(g); g.connect(out);
+    const NOTES = [523.3, 659.3, 784, 880, 1046.5];
+    let alive = true, id;
+    const chime = () => {
+      if (!alive) return;
+      if (sound.on) {
+        const t = ctx.currentTime, f = NOTES[Math.floor(Math.random() * NOTES.length)];
+        [[f, 0.018], [f * 2, 0.004]].forEach(([fr, v]) => {
+          const o = osc('sine', fr); const e = ctx.createGain();
+          e.gain.setValueAtTime(0.0001, t); e.gain.linearRampToValueAtTime(v, t + 0.25); e.gain.exponentialRampToValueAtTime(0.0001, t + 3.2);
+          o.connect(e); e.connect(lp); o.start(t); o.stop(t + 3.3);
+        });
+      }
+      id = setTimeout(chime, 3500 + Math.random() * 4000);
+    };
+    id = setTimeout(chime, 1500);
+    return [{ stop: () => { alive = false; clearTimeout(id); setTimeout(() => g.disconnect(), 4000); } }];
   },
   rumble(out) { // 斷層低頻
     const n = noise(); const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 90;
@@ -204,7 +220,7 @@ const LAYERS = {
 };
 const SCENES = {
   base: ['music', 'waves', 'deep', 'sonar'],
-  intake: ['music', 'buzz', 'waves'], radio: ['music', 'static', 'waves'], vault: ['music', 'deep', 'buzz'], mirror: ['music', 'shimmer'],
+  intake: ['music', 'buzz', 'waves'], radio: ['music', 'static', 'waves'], vault: ['music', 'deep', 'buzz'], mirror: ['music', 'shimmer', 'waves'],
   greenhouse: ['music', 'drips', 'waves'], fault: ['music', 'rumble', 'deep'], gate: ['music', 'waves', 'sonar'], fork: ['music', 'deep', 'sonar'],
   playback: ['music', 'tick'], core: ['music', 'pulse', 'shimmer'], archive: ['memory'], prologue: ['music', 'waves', 'deep'], ceremony: ['memory'],
 };
