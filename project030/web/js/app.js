@@ -15,7 +15,7 @@ import { mosaicWidget } from './mosaic.js';
 import { photosetWidget } from './photoset.js';
 import { avatarSVG, choicesFromStats, AVATAR_STEPS } from './avatar.js';
 import { playOmen, playEvolution, EVO_GLYPH } from './evo.js';
-import { playFilm, celebrate, primeAudio } from './film.js';
+import { playFilm, celebrate, primeAudio, renderBirthdaySong } from './film.js';
 import { mountCosmos } from './cosmos.js';
 
 // 資料庫中舊稱呼的統一
@@ -1141,13 +1141,32 @@ const mkAudio = (url) => { if (!url) return null; const a = new Audio(url); a.pr
 const mmdd = (ymd, add) => { const d = new Date(ymd + 'T12:00:00+08:00'); d.setDate(d.getDate() + add); return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`; };
 
 // 準備影片素材：他每天上傳的照片與錄音、你上傳的每日照片、第 9 天給三十歲的錄音、終章照片、歌曲
+// 管理者用測試檔案預覽終章時：影片改用壽星目前真實上傳的照片、錄音與文字（只讀取，不會動到他的進度）
+async function realPlayerEvidence() {
+  try {
+    const me = (await sb.auth.getUser()).data?.user?.id;
+    const { data: profs } = await sb.from('profiles').select('id,user_id,is_test,created_at').eq('is_test', false);
+    const real = (profs || []).filter((x) => x.user_id !== me).sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))[0];
+    if (!real) return null;
+    const { data: ev } = await sb.from('evidence').select('day,step_id,kind,storage_path,text_content,status,submitted_at').eq('profile_id', real.id);
+    const byDay = {};
+    for (const e of (ev || []).filter((x) => x.status !== 'REPLACED').sort((a, b) => String(a.submitted_at).localeCompare(String(b.submitted_at)))) {
+      (byDay[e.day] = byDay[e.day] || []).push({ kind: e.kind, path: e.storage_path, text: e.text_content, step_id: e.step_id });
+    }
+    return { pid: real.id, byDay };
+  } catch (_) { return null; }
+}
+
 async function finaleMedia(A) {
   const start = S.state.start_date;
   const chapters = []; const thumbs = {}; let voice = null;
+  const real = S.state.is_test ? await realPlayerEvidence() : null;
+  const owner = real ? real.pid : S.pid;
+  const evOf = (d) => (real ? real.byDay[d.day] || [] : d.evidence || []);
   // 一組照片（五隻貓、三個人…）：把每一張個別取回來，一張一張放
   const setShots = async (day, stepId) => {
     try {
-      const folder = `${S.pid}/${day}/set-${stepId}`;
+      const folder = `${owner}/${day}/set-${stepId}`;
       const { data } = await sb.storage.from('evidence').list(folder, { limit: 200, sortBy: { column: 'name', order: 'desc' } });
       const pick = {};
       for (const f of data || []) { const m = f.name.match(/^(\d+)-/); if (m && !pick[m[1]]) pick[m[1]] = `${folder}/${f.name}`; }
@@ -1158,7 +1177,7 @@ async function finaleMedia(A) {
   };
   for (const d of A.days) {
     const items = []; const audios = [];
-    for (const e of d.evidence || []) {
+    for (const e of evOf(d)) {
       if (e.kind === 'photo' && e.path) {
         const set = e.path.includes('/set-final-') ? await setShots(d.day, e.step_id) : [];
         if (set.length) set.forEach((u) => items.push({ type: 'photo', url: u }));
@@ -1176,11 +1195,12 @@ async function finaleMedia(A) {
   let photo = null; try { photo = await rpc('finale_photo', { p: S.pid }); } catch (_) {}
   // 宇宙中心的他：你上傳的終章照片；沒有的話用他在鏡廳拍的自己
   let me = photo;
-  if (!me) { const d4 = A.days.find((d) => d.day === 4); const r = (d4?.evidence || []).filter((e) => e.kind === 'photo' && e.path && e.step_id === 's_photo').pop(); if (r) me = await signedUrl(r.path); }
+  if (!me) { const d4 = A.days.find((d) => d.day === 4); const r = (d4 ? evOf(d4) : []).filter((e) => e.kind === 'photo' && e.path && e.step_id === 's_photo').pop(); if (r) me = await signedUrl(r.path); }
   const song = A.song ? mkAudio(await signedUrl(A.song, 'gifts')) : null;
-  return { chapters, thumbs, ending: { voice, photo }, song, me };
+  const hb = await renderBirthdaySong(); // 生日快樂歌：先做成一般音檔，iPhone 靜音模式也聽得到
+  return { chapters, thumbs, ending: { voice, photo }, song, hb, me, preview: !!real };
 }
-const primeAll = (M) => [M.song, M.ending.voice, ...M.chapters.flatMap((c) => c.audios)].forEach(primeAudio);
+const primeAll = (M) => [M.song, M.hb && M.hb.audio, M.ending.voice, ...M.chapters.flatMap((c) => c.audios)].forEach(primeAudio);
 
 async function finale() {
   let A;
@@ -1196,6 +1216,7 @@ async function finale() {
   body.append(loading);
   const M = await finaleMedia(A);
   loading.remove();
+  if (M.preview) wrap.insertBefore(h('div', { class: 'clue', style: 'font-size:12px' }, '測試預覽：回顧影片使用壽星目前真實上傳的照片、錄音與文字（只讀取，不會改到他的進度）。'), body);
   const thirtyKey = 'p030.thirty.' + S.pid;
   const showHunt = () => { huntBox.innerHTML = ''; hunt(huntBox); };
   let fav = prog.favorite_day || null;
@@ -1204,13 +1225,13 @@ async function finale() {
     if (what === 'replay') return runFilm();
     primeAudio(M.song); // 先生日快樂歌，唱完才播 NEON（在這一下點擊中先解鎖）
     localStorage.setItem(thirtyKey, '1');
-    celebrate({ song: M.song, onHunt: () => { renderAfter(); showHunt(); huntBox.scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
+    celebrate({ song: M.song, hb: M.hb, onHunt: () => { renderAfter(); showHunt(); huntBox.scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
   } });
   function renderAfter() {
     body.innerHTML = '';
     body.append(h('div', { class: 'card glow' }, h('div', { class: 'kicker' }, 'FILE 030 · UNLOCKED'), h('p', {}, '你的宇宙，已經開始轉動。'),
       h('button', { class: 'btn primary block', onclick: () => { primeAll(M); runFilm(); } }, '▶ 播放回顧影片：11/08–11/18'),
-      localStorage.getItem(thirtyKey) ? h('button', { class: 'btn block', style: 'margin-top:8px', onclick: () => { primeAudio(M.song); celebrate({ song: M.song, onHunt: () => huntBox.scrollIntoView({ behavior: 'smooth' }) }); } }, '我 30 歲了！') : null));
+      localStorage.getItem(thirtyKey) ? h('button', { class: 'btn block', style: 'margin-top:8px', onclick: () => { primeAudio(M.song); celebrate({ song: M.song, hb: M.hb, onHunt: () => huntBox.scrollIntoView({ behavior: 'smooth' }) }); } }, '我 30 歲了！') : null));
   }
   if (prog.words_at) { renderAfter(); if (localStorage.getItem(thirtyKey)) showHunt(); return; }
   favoriteGame(A, M, body, async (d) => { fav = d; await spinUniverse(universe(), d, M.chapters.find((c) => c.day === d)); renderAfter(); runFilm(); });

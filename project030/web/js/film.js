@@ -117,56 +117,90 @@ export function playFilm({ chapters, universe, ending, onDone }) {
   })();
 }
 
-// 生日快樂歌（音樂盒，瀏覽器即時合成；旋律為公有領域）
-// 回傳 { done: Promise, mute(bool), stop() }
-export function happyBirthday(onLine) {
-  const C = window.AudioContext || window.webkitAudioContext;
-  if (!C) return { done: Promise.resolve(), mute() {}, stop() {} };
-  const ac = new C(); try { ac.resume(); } catch (_) {}
-  const master = ac.createGain(); master.gain.value = 0.9; master.connect(ac.destination);
-  const verb = ac.createConvolver(); const len = ac.sampleRate * 1.6; const ir = ac.createBuffer(2, len, ac.sampleRate);
+// 生日快樂歌（音樂盒；旋律為公有領域）
+const HB_PHRASES = (() => {
+  const G = 67, A = 69, Cn = 72, Bn = 71, D = 74, E = 76, F = 77, G2 = 79;
+  return [
+    { line: 'Happy birthday to you', notes: [[G, 0.75], [G, 0.25], [A, 1], [G, 1], [Cn, 1], [Bn, 2]], chord: [48, 55, 43] },
+    { line: 'Happy birthday to you', notes: [[G, 0.75], [G, 0.25], [A, 1], [G, 1], [D, 1], [Cn, 2]], chord: [43, 50, 48] },
+    { line: 'Happy birthday, dear Jasper', notes: [[G, 0.75], [G, 0.25], [G2, 1], [E, 1], [Cn, 1], [Bn, 1], [A, 2]], chord: [48, 53, 53] },
+    { line: 'Happy birthday to you', notes: [[F, 0.75], [F, 0.25], [E, 1], [Cn, 1], [D, 1], [Cn, 2]], chord: [53, 43, 48] },
+  ];
+})();
+// 把整首歌排進任何一個 AudioContext（即時或離線），回傳每一句歌詞的時間與總長度
+function scheduleHB(ac, dest, start) {
+  const verb = ac.createConvolver(); const len = Math.floor(ac.sampleRate * 1.6); const ir = ac.createBuffer(2, len, ac.sampleRate);
   for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); }
-  verb.buffer = ir; const wet = ac.createGain(); wet.gain.value = 0.25; verb.connect(wet); wet.connect(master);
+  verb.buffer = ir; const wet = ac.createGain(); wet.gain.value = 0.25; verb.connect(wet); wet.connect(dest);
   const hz = (n) => 440 * Math.pow(2, (n - 69) / 12);
   const bell = (t, n, dur, vol) => {
     for (const [mul, v] of [[1, 1], [2, 0.32], [3, 0.12], [4.2, 0.05]]) {
       const o = ac.createOscillator(); const g = ac.createGain();
       o.type = 'sine'; o.frequency.value = hz(n) * mul;
       g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * v, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0008, t + dur * (mul === 1 ? 1 : 0.5));
-      o.connect(g); g.connect(master); g.connect(verb); o.start(t); o.stop(t + dur + 0.05);
+      o.connect(g); g.connect(dest); g.connect(verb); o.start(t); o.stop(t + dur + 0.05);
     }
   };
-  // 3/4 拍；每一拍 0.5 秒
-  const B = 0.52;
-  const G = 67, A = 69, Cn = 72, Bn = 71, D = 74, E = 76, F = 77, G2 = 79;
-  const phrases = [
-    { line: 'Happy birthday to you', notes: [[G, 0.75], [G, 0.25], [A, 1], [G, 1], [Cn, 1], [Bn, 2]], chord: [48, 55, 43] },
-    { line: 'Happy birthday to you', notes: [[G, 0.75], [G, 0.25], [A, 1], [G, 1], [D, 1], [Cn, 2]], chord: [43, 50, 48] },
-    { line: 'Happy birthday, dear Jasper', notes: [[G, 0.75], [G, 0.25], [G2, 1], [E, 1], [Cn, 1], [Bn, 1], [A, 2]], chord: [48, 53, 53] },
-    { line: 'Happy birthday to you', notes: [[F, 0.75], [F, 0.25], [E, 1], [Cn, 1], [D, 1], [Cn, 2]], chord: [53, 43, 48] },
-  ];
-  let t = ac.currentTime + 0.35; const timers = [];
-  phrases.forEach((ph, pi) => {
-    const t0 = t;
-    timers.push(setTimeout(() => onLine && onLine(ph.line, pi), Math.max(0, (t0 - ac.currentTime) * 1000)));
+  const B = 0.52; let t = start; const lines = [];
+  HB_PHRASES.forEach((ph) => {
+    const t0 = t; lines.push({ t: t0 - start, line: ph.line });
     const beats = ph.notes.reduce((x, n) => x + n[1], 0);
     ph.notes.forEach(([n, b]) => { bell(t, n, Math.max(0.6, b * B * 1.8), 0.22); t += b * B; });
-    // 伴奏：每小節一個低音
     for (let m = 0; m < Math.ceil(beats / 3); m++) bell(t0 + (0.25 + m * 3) * B, ph.chord[m % ph.chord.length], 1.6, 0.09);
     t += B * 0.5;
   });
-  const total = (t - ac.currentTime + 1.2) * 1000;
+  return { lines, duration: t - start + 1.4 };
+}
+// 先在背景把歌「錄」成一般音檔（WAV），用 <audio> 播放：iPhone 靜音模式下也聽得到
+export async function renderBirthdaySong() {
+  try {
+    const OC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    if (!OC) return null;
+    const sr = 22050, secs = 18;
+    const oc = new OC(1, sr * secs, sr);
+    const master = oc.createGain(); master.gain.value = 0.9; master.connect(oc.destination);
+    const { lines, duration } = scheduleHB(oc, master, 0.2);
+    const buf = await new Promise((res, rej) => { const r = oc.startRendering(); if (r && r.then) r.then(res, rej); else oc.oncomplete = (e) => res(e.renderedBuffer); });
+    const n = Math.min(buf.length, Math.ceil((duration + 0.2) * sr)); const data = buf.getChannelData(0);
+    const out = new DataView(new ArrayBuffer(44 + n * 2));
+    const str = (o, x) => { for (let i = 0; i < x.length; i++) out.setUint8(o + i, x.charCodeAt(i)); };
+    str(0, 'RIFF'); out.setUint32(4, 36 + n * 2, true); str(8, 'WAVE'); str(12, 'fmt '); out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, 1, true);
+    out.setUint32(24, sr, true); out.setUint32(28, sr * 2, true); out.setUint16(32, 2, true); out.setUint16(34, 16, true); str(36, 'data'); out.setUint32(40, n * 2, true);
+    let peak = 0; for (let i = 0; i < n; i++) peak = Math.max(peak, Math.abs(data[i]));
+    const gain = peak > 0 ? 0.85 / peak : 1; // 音量調到跟 NEON 差不多
+    for (let i = 0; i < n; i++) out.setInt16(44 + i * 2, Math.max(-1, Math.min(1, data[i] * gain)) * 0x7fff, true);
+    const audio = new Audio(URL.createObjectURL(new Blob([out], { type: 'audio/wav' })));
+    audio.preload = 'auto'; audio.setAttribute('playsinline', '');
+    return { audio, lines: lines.map((l) => ({ ...l, t: l.t + 0.2 })), duration: n / sr };
+  } catch (_) { return null; }
+}
+// 備用：沒辦法預先做成音檔時，直接即時合成
+function liveBirthday(onLine) {
+  const C = window.AudioContext || window.webkitAudioContext;
+  if (!C) return { done: Promise.resolve(), mute() {}, stop() {} };
+  const ac = new C(); try { ac.resume(); } catch (_) {}
+  const master = ac.createGain(); master.gain.value = 0.9; master.connect(ac.destination);
+  const { lines, duration } = scheduleHB(ac, master, ac.currentTime + 0.35);
+  const timers = lines.map((l) => setTimeout(() => onLine && onLine(l.line), (l.t + 0.35) * 1000));
   let finish; const done = new Promise((r) => (finish = r));
-  timers.push(setTimeout(() => { finish(); setTimeout(() => ac.close().catch(() => {}), 1500); }, total));
-  return {
-    done,
-    mute: (m) => master.gain.setTargetAtTime(m ? 0 : 0.9, ac.currentTime, 0.05),
-    stop: () => { timers.forEach(clearTimeout); try { ac.close(); } catch (_) {} finish(); },
-  };
+  timers.push(setTimeout(() => { finish(); setTimeout(() => ac.close().catch(() => {}), 1500); }, (duration + 0.35) * 1000));
+  return { done, mute: (m) => master.gain.setTargetAtTime(m ? 0 : 0.9, ac.currentTime, 0.05), stop: () => { timers.forEach(clearTimeout); try { ac.close(); } catch (_) {} finish(); } };
+}
+// 用預先做好的音檔播放，歌詞跟著 currentTime 換
+function fileBirthday(hb, onLine) {
+  const a = hb.audio; let finish; const done = new Promise((r) => (finish = r)); let shown = -1, alive = true;
+  try { a.pause(); a.currentTime = 0; a.muted = false; } catch (_) {}
+  const pr = a.play(); if (pr && pr.catch) pr.catch(() => { finish(); });
+  const tick = () => { if (!alive) return; const t = a.currentTime || 0; let i = -1; hb.lines.forEach((l, k) => { if (t >= l.t) i = k; }); if (i !== shown && i >= 0) { shown = i; onLine && onLine(hb.lines[i].line); } requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+  a.onended = () => { alive = false; finish(); };
+  const guard = setTimeout(() => { alive = false; finish(); }, (hb.duration + 3) * 1000);
+  done.then(() => clearTimeout(guard));
+  return { done, mute: (m) => { a.muted = m; }, stop: () => { alive = false; try { a.pause(); } catch (_) {} finish(); } };
 }
 
 // 「我 30 歲了！」：歌曲＋慶祝畫面；之後出現「出發去找禮物」
-export function celebrate({ song, onHunt }) {
+export function celebrate({ song, hb: hbFile, onHunt }) {
   const ov = el('div', 'party');
   const cv = el('canvas', 'party-cv');
   const big = el('div', 'party-30', '30');
@@ -181,7 +215,7 @@ export function celebrate({ song, onHunt }) {
   // 先唱生日快樂歌，唱完才播 NEON
   let muted = false;
   const lyric = (line) => { t2.textContent = line; t2.classList.remove('on'); void t2.offsetWidth; t2.classList.add('on'); };
-  const hb = happyBirthday(lyric);
+  const hb = hbFile && hbFile.audio ? fileBirthday(hbFile, lyric) : liveBirthday(lyric);
   mute.onclick = () => { muted = !muted; hb.mute(muted); if (song) song.muted = muted; mute.textContent = muted ? '🔇' : '🔊'; };
   let alive = true;
   hb.done.then(() => {
