@@ -26,7 +26,7 @@ const S = { boot: null, pid: null, state: null, skew: 0, cleanup: [] };
 const STATUS = { LOCKED: '未開放', AVAILABLE: '可進入', IN_PROGRESS: '進行中', COMPLETED: '已歸檔', MISSED: '已錯過', ALTERNATE: '替代路線' };
 const EVENT_TEXT = {
   STARTED: '進入區域', COMPLETED: '區域歸檔', MISSED: '區域關閉（錯過）', OBSERVE: '觀察樣本', EVIDENCE: '提交紀錄', CHOICE: '做出選擇',
-  SCAN: '掃描投影卡', EXPLORE: '調查', HINT: '請求提示', ITEM_LOST: '失去物品', SPECIAL_EVENT: '特殊事件', REVIEW: '紀錄比對',
+  SCAN: '掃描投影卡', TICKET: '使用幸福券', FAVORITE: '選了最喜歡的關卡', TRAITS: '鏡前的自己', EXPLORE: '調查', HINT: '請求提示', ITEM_LOST: '失去物品', SPECIAL_EVENT: '特殊事件', REVIEW: '紀錄比對',
   ROUTE: '路線判定', DEFINED: '填寫定義', HUNT: '現實座標', PORTRAIT_SAVED: '影像設定',
 };
 
@@ -323,6 +323,7 @@ function home() {
     h('h1', {}, before ? '等待訊號' : d <= 10 ? '星海觀察中' : '第030號檔案室'));
   if (st.is_test) wrap.append(testPanel(st));
   if (d >= 1) wrap.append(missionStatus(st));
+  const tbox = h('div'); wrap.append(tbox); ticketCard(st, tbox);
   const ev = st.evo || {};
   if (ev.status === 'ready' || ev.status === 'active') wrap.append(h('a', { class: 'card evo-alert', href: '#/evo' },
     h('div', { class: 'kicker', style: 'color:#ff6fae' }, 'ANOMALY · 培養皿'), h('div', {}, ev.status === 'active' ? '進化程序進行中。' : '培養皿出現未知反應。'),
@@ -356,6 +357,38 @@ function home() {
   maybeOmen(st);
 }
 
+// ── 幸福券：讓逾期的那一區重新開啟 ──
+async function myTickets() {
+  try { const { data } = await sb.from('happy_tickets').select('*').eq('profile_id', S.pid); return data || []; } catch (_) { return []; }
+}
+const fmtUntil = (t) => { const x = new Date(new Date(t).getTime() - 1000); return `${x.toLocaleDateString('zh-TW', { timeZone: S.state.tz || 'Asia/Taipei', month: 'numeric', day: 'numeric' })} ${x.toLocaleTimeString('zh-TW', { timeZone: S.state.tz || 'Asia/Taipei', hour: '2-digit', minute: '2-digit', hour12: false })}`; };
+async function ticketCard(st, box) {
+  const tks = (await myTickets()).filter((k) => new Date(k.until) > serverNow());
+  for (const k of tks) {
+    const l = st.levels.find((x) => x.day === k.day); if (!l || l.status === 'COMPLETED') continue;
+    if (!k.used_at) {
+      const btn = h('button', { class: 'btn primary block', style: 'margin-top:10px' }, '使用幸福券');
+      btn.onclick = async () => {
+        btn.disabled = true;
+        try {
+          await rpc('use_happy_ticket', { p: S.pid, d: k.day }); sfx('complete');
+          modal(h('div', { class: 'ticket-used' }, h('div', { class: 'ticket big' }, h('div', { class: 'ticket-k' }, 'HAPPY TICKET'), h('div', { class: 'ticket-t' }, '幸福券'), h('div', { class: 'ticket-s' }, `第 ${k.day} 區・${l.title}`)),
+            h('p', {}, `「${l.title}」重新開啟了。`), h('p', { class: 'dim' }, `開放到 ${fmtUntil(k.until)}。之前完成的關卡都還在，接著走就好。走完會看到那一天的回顧，然後回到今天繼續。`),
+            h('a', { class: 'btn primary block', href: `#/zone/${k.day}`, onclick: () => document.querySelector('.modal')?.remove() }, `回到「${l.title}」`)));
+          route();
+        } catch (e) { toast(errText(e)); btn.disabled = false; }
+      };
+      box.append(h('div', { class: 'card ticket-card fade-in' },
+        h('div', { class: 'ticket' }, h('div', { class: 'ticket-k' }, 'HAPPY TICKET'), h('div', { class: 'ticket-t' }, '幸福券'), h('div', { class: 'ticket-s' }, `第 ${k.day} 區・${l.title}`)),
+        h('p', { style: 'margin:10px 0 0' }, k.note || `累了也沒關係。用這張券，回去把「${l.title}」走完吧。`),
+        h('div', { class: 'dim', style: 'font-size:12px;margin-top:4px' }, `使用後，「${l.title}」會重新開啟到 ${fmtUntil(k.until)}；走完再回到今天就好。`), btn));
+    } else {
+      box.append(h('a', { class: 'card ticket-card', href: `#/zone/${k.day}`, style: 'display:block;text-decoration:none;color:var(--text)' },
+        h('div', { class: 'kicker', style: 'color:#ffd79a' }, '🎟 幸福券使用中'), h('div', {}, `「${l.title}」開放到 ${fmtUntil(k.until)}`), h('div', { class: 'dim', style: 'font-size:13px' }, '點這裡回去繼續。')));
+    }
+  }
+}
+
 // ── 區域 ──
 async function zone(day) {
   let L;
@@ -367,6 +400,8 @@ async function zone(day) {
     h('h1', {}, L.title + (L.route_title ? `｜${L.route_title}` : '')));
   if (L.route === 'alternate') wrap.append(h('div', { class: 'banner', style: 'border-color:var(--violet);color:var(--violet)' },
     `原路線已於 ${fmtTime(L.missed_at)} 封閉。這是另一條路。`));
+  const tk = day <= 10 && L.status !== 'COMPLETED' ? (await myTickets()).find((k) => k.day === day && k.used_at && new Date(k.until) > serverNow()) : null;
+  if (tk) { L.close_at = tk.until; wrap.append(h('div', { class: 'banner', style: 'border-color:#ffd79a;color:#ffd79a' }, `🎟 幸福券使用中・開放到 ${fmtUntil(tk.until)}・走完就回到今天繼續`)); }
   if (L.close_at && L.route === 'main' && L.status !== 'COMPLETED') {
     const cd = h('div', { class: 'mono dim', style: 'font-size:12px' });
     const tick = () => {
