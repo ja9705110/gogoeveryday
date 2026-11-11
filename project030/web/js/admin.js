@@ -523,6 +523,34 @@ async function finale(body) {
   const { data, error } = await sb.from('finale_config').select('*').eq('id', 1).single();
   if (error) throw error;
   body.innerHTML = '';
+  // 終章歌曲：按下「我 30 歲了！」時播放（存在私人資料夾 gifts/finale/，生日當天之前玩家讀不到）
+  {
+    const player = h('audio', { controls: '', preload: 'none', style: 'width:100%;margin-top:6px;display:' + (data.song_path ? 'block' : 'none') });
+    if (data.song_path) signedUrl(data.song_path, 'gifts').then((u) => u && (player.src = u));
+    const sin = h('input', { type: 'file', accept: 'audio/*', class: 'hidden' });
+    const smsg = h('div', { class: 'msg' });
+    sin.onchange = async () => {
+      const f = sin.files[0]; if (!f) return;
+      if (f.size > 15 * 1024 * 1024) { smsg.className = 'msg bad'; smsg.textContent = '檔案超過 15 MB。'; return; }
+      smsg.className = 'msg'; smsg.textContent = '上傳中…（約 9 MB，需要一點時間）';
+      try {
+        const ext = (f.name.split('.').pop() || 'mp3').toLowerCase().replace(/[^a-z0-9]/g, '') || 'mp3';
+        const path = `finale/song-${Date.now()}.${ext}`;
+        const { error: e1 } = await sb.storage.from('gifts').upload(path, f, { contentType: f.type || 'audio/mpeg', upsert: false });
+        if (e1) throw e1;
+        const { error: e2 } = await sb.from('finale_config').update({ song_path: path, updated_at: new Date().toISOString() }).eq('id', 1);
+        if (e2) throw e2;
+        if (data.song_path) sb.storage.from('gifts').remove([data.song_path]).catch(() => {});
+        data.song_path = path;
+        const u = await signedUrl(path, 'gifts'); if (u) { player.src = u; player.style.display = 'block'; }
+        smsg.className = 'msg good'; smsg.textContent = '已上傳：' + f.name;
+      } catch (e) { smsg.className = 'msg bad'; smsg.textContent = '上傳失敗：' + errText(e); }
+    };
+    body.append(h('div', { class: 'card' }, h('h2', {}, '終章歌曲'),
+      h('p', { class: 'dim', style: 'font-size:13px' }, '11/18 凌晨，他看完回顧影片、按下「我 30 歲了！」時播放。檔案存在私人資料夾，生日當天之前玩家讀不到。'),
+      h('div', { class: 'mono', style: 'font-size:12px' }, data.song_path ? '目前：' + data.song_path.split('/').pop() : '尚未上傳'),
+      player, sin, h('button', { class: 'btn primary', style: 'margin-top:8px', onclick: () => sin.click() }, data.song_path ? '更換歌曲' : '上傳歌曲'), smsg));
+  }
   // 最終照片：星球在終章會化為這張照片（只存在資料庫，生日當天才會送到玩家端）
   const prev = h('img', { style: 'max-width:220px;max-height:280px;display:' + (data.photo ? 'block' : 'none') + ';margin:8px 0;border:1px solid var(--line)' });
   if (data.photo) prev.src = data.photo;
