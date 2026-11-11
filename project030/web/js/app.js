@@ -1256,7 +1256,9 @@ async function finale() {
   const thirtyKey = 'p030.thirty.' + S.pid;
   const showHunt = () => { huntBox.innerHTML = ''; hunt(huntBox); };
   let fav = prog.favorite_day || null;
-  const universe = () => ({ levels: M.chapters.map((c) => ({ day: c.day, title: c.title, thumb: M.thumbs[c.day], color: DAY_COLORS[(c.day - 1) % 10], missed: c.missed })), emotions: FINALE_EMOTIONS, states: layerStates(S.state.levels), name: 'Jasper' });
+  const colorKey = 'p030.color.' + S.pid;
+  let color = (A.choices || {})['choice:color'] || (() => { try { return localStorage.getItem(colorKey); } catch (_) { return null; } })() || null;
+  const universe = () => ({ levels: M.chapters.map((c) => ({ day: c.day, title: c.title, thumb: M.thumbs[c.day], color: DAY_COLORS[(c.day - 1) % 10], missed: c.missed })), emotions: FINALE_EMOTIONS, states: layerStates(S.state.levels), name: 'Jasper', tint: color });
   const runFilm = () => playFilm({ chapters: M.chapters.map((c) => ({ ...c, fav: c.day === fav })), universe: universe(), ending: M.ending, onDone: (what) => {
     if (what === 'replay') return runFilm();
     localStorage.setItem(thirtyKey, '1');
@@ -1268,8 +1270,13 @@ async function finale() {
       h('button', { class: 'btn primary block', onclick: () => { primeAll(M); runFilm(); } }, '▶ 播放回顧影片：11/08–11/18'),
       localStorage.getItem(thirtyKey) ? h('button', { class: 'btn block', style: 'margin-top:8px', onclick: () => { celebrate({ song: M.song, hb: M.hb, onHunt: () => huntBox.scrollIntoView({ behavior: 'smooth' }) }); } }, '我 30 歲了！') : null));
   }
-  if (prog.words_at) { renderAfter(); if (localStorage.getItem(thirtyKey)) showHunt(); return; }
-  favoriteGame(A, M, body, async (d) => { fav = d; await spinUniverse(universe(), d, M.chapters.find((c) => c.day === d)); renderAfter(); runFilm(); });
+  // 最後一關：選最喜歡的關卡 → 選一個代表自己的顏色 → 宇宙轉動 → 回顧影片
+  const afterColor = async (c) => { color = c; await spinUniverse(universe(), fav, M.chapters.find((x) => x.day === fav)); renderAfter(); runFilm(); };
+  if (prog.words_at) {
+    if (!color) { colorPick(body, M, colorKey, afterColor); return; }
+    renderAfter(); if (localStorage.getItem(thirtyKey)) showHunt(); return;
+  }
+  favoriteGame(A, M, body, (d) => { fav = d; colorPick(body, M, colorKey, afterColor); });
 }
 
 // 最後一關：回顧這十天，選一個你最喜歡、或玩得最開心的關卡
@@ -1308,6 +1315,33 @@ function favoriteGame(A, M, box, onPicked) {
     h('p', { class: 'dim', style: 'font-size:12px' }, '沒有標準答案，點一下選擇，再點一次取消。')),
     grid, msg, send);
   paint();
+}
+
+// 選一個代表自己的顏色：最後的星球（Jasper）會用這個顏色長出來
+const SELF_COLORS = ['#ff6b6b', '#ff9f43', '#ffd166', '#a7e36b', '#2ec4b6', '#3fa9f5', '#4361ee', '#8e7dff', '#c77dff', '#ff70a6', '#f2e8cf', '#7d8597'];
+function colorPick(box, M, colorKey, onDone) {
+  box.innerHTML = '';
+  let picked = null, stop = null;
+  const cv = h('canvas', { class: 'cp-planet' });
+  const draw = () => { if (stop) stop(); stop = mountPlanet(cv, layerStates(S.state.levels), { size: 240, tint: picked, noMoon: true }); };
+  const send = h('button', { class: 'btn primary block', disabled: '' }, '就是這個顏色');
+  const sw = h('div', { class: 'cp-swatches' });
+  const custom = h('input', { type: 'color', value: '#3fa9f5', class: 'cp-custom' });
+  const mark = () => { [...sw.children].forEach((b) => b.classList.toggle('on', b.dataset.c === picked)); custom.classList.toggle('on', !SELF_COLORS.includes(picked) && !!picked); };
+  const choose = (c) => { picked = c.toLowerCase(); sfx('tap'); mark(); draw(); send.disabled = false; };
+  for (const c of SELF_COLORS) { const b = h('button', { class: 'cp-sw', style: `background:${c}`, 'aria-label': c, onclick: () => choose(c) }); b.dataset.c = c; sw.append(b); }
+  custom.oninput = () => choose(custom.value);
+  send.onclick = async () => {
+    primeAll(M); // iPhone：在這一下點擊中先解鎖影片裡的錄音
+    send.disabled = true;
+    try { await rpc('finale_color', { p: S.pid, color: picked }); } catch (_) {}
+    try { localStorage.setItem(colorKey, picked); } catch (_) {}
+    sfx('complete'); if (stop) stop(); box.innerHTML = ''; onDone(picked);
+  };
+  box.append(h('div', { class: 'card glow' }, h('div', { class: 'kicker' }, 'FILE 030 · LAST LOCK'), h('h2', { style: 'margin-top:4px' }, '最後，選一個代表你自己的顏色'),
+    h('p', {}, '沒有對錯。選一個，現在最像你的顏色。'), h('p', { class: 'dim', style: 'font-size:12px' }, '這顆星球是你這十天重建起來的。它會變成你選的顏色。')),
+    h('div', { class: 'cp-stage' }, cv), sw, h('label', { class: 'cp-more' }, h('span', {}, '或是自己調一個顏色'), custom), send);
+  draw();
 }
 
 // 選完之後：他選的那一關分裂成情緒 → 每一關都分裂成情緒 → 所有情緒圍繞著他轉動 → 回顧影片

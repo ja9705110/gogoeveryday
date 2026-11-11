@@ -842,3 +842,14 @@ body::before { animation: none; }
 .ticket.big { animation: ticketin .9s cubic-bezier(.2, 1.4, .4, 1); margin-bottom: 12px; }
 @keyframes ticketin { from { transform: scale(.6) rotate(-6deg); opacity: 0; } }
 .party-gift { font-size: 20px; padding: 16px 30px; letter-spacing: .1em; animation: evopulse 1.6s ease-in-out infinite; }
+
+/* 終章：代表自己的顏色 */
+.cp-stage { display: flex; justify-content: center; margin: 6px 0 4px; }
+.cp-planet { width: 240px; height: 240px; display: block; }
+.cp-swatches { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 8px 0 12px; }
+.cp-sw { aspect-ratio: 1; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .25); cursor: pointer; transition: transform .2s, box-shadow .2s; padding: 0; }
+.cp-sw.on { transform: scale(1.12); border-color: #fff; box-shadow: 0 0 16px rgba(255, 255, 255, .6); }
+.cp-more { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--dim); margin: 0 0 12px; }
+.cp-custom { width: 54px; height: 36px; border: 1px solid var(--line); background: transparent; padding: 0; border-radius: 8px; }
+.cp-custom.on { box-shadow: 0 0 12px rgba(255, 255, 255, .5); border-color: #fff; }
+.cp-planet, .cosmos-planet { -webkit-mask-image: radial-gradient(circle closest-side, #000 80%, transparent 100%); mask-image: radial-gradient(circle closest-side, #000 80%, transparent 100%); }

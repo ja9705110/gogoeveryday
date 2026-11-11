@@ -18,7 +18,22 @@ export function layerStates(levels) {
 
 const rnd = (seed) => () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
 
-export function mountPlanet(canvas, states, { highlight = null, size = null } = {}) {
+// 代表色：保留每一層原本的明暗，只把色相換成他選的顏色
+const parseCol = (c) => {
+  if (c[0] === '#') { const n = c.length === 4 ? c.slice(1).split('').map((x) => x + x).join('') : c.slice(1); return { r: parseInt(n.slice(0, 2), 16), g: parseInt(n.slice(2, 4), 16), b: parseInt(n.slice(4, 6), 16), a: 1 }; }
+  const m = c.match(/rgba?\(([^)]+)\)/); if (!m) return null; const v = m[1].split(',').map(Number); return { r: v[0], g: v[1], b: v[2], a: v.length > 3 ? v[3] : 1 };
+};
+const toHsl = ({ r, g, b }) => { r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b); let h = 0, s = 0; const l = (mx + mn) / 2; const d = mx - mn;
+  if (d) { s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn); h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; } return { h, s: s * 100, l: l * 100 }; };
+export function tintColor(tint, c) {
+  const o = parseCol(c), t = parseCol(tint); if (!o || !t) return c;
+  const oh = toHsl(o), th = toHsl(t);
+  const l = Math.max(8, Math.min(88, oh.l * 0.7 + th.l * 0.3));
+  const sat = Math.min(100, th.s * (0.55 + 0.45 * oh.s / 100));
+  return `hsla(${th.h.toFixed(0)},${sat.toFixed(0)}%,${l.toFixed(0)}%,${o.a})`;
+}
+
+export function mountPlanet(canvas, states, { highlight = null, size = null, tint = null, noMoon = false } = {}) {
   const g = canvas.getContext('2d');
   const dpr = Math.min(devicePixelRatio || 1, 2);
   const SW = canvas.clientWidth || size || 300, SH = canvas.clientHeight || SW;
@@ -30,7 +45,7 @@ export function mountPlanet(canvas, states, { highlight = null, size = null } = 
   const t0 = performance.now();
   let raf;
   const st = (d) => states[d] || 'none';
-  const col = (d, full, alt) => (st(d) === 'alt' ? alt : full);
+  const col = (d, full, alt) => (tint ? tintColor(tint, full) : st(d) === 'alt' ? alt : full);
   const appear = (d) => (highlight === d ? Math.max(0.001, Math.min(1, (performance.now() - t0 - 600) / 1800)) : 1);
 
   function wire(radius, alpha) {
@@ -112,7 +127,7 @@ export function mountPlanet(canvas, states, { highlight = null, size = null } = 
     }
     ring(true);
     // 7 衛星
-    if (st(7) !== 'none') {
+    if (st(7) !== 'none' && !noMoon) {
       const a = appear(7), ang = t * 0.6;
       const mx = cx + Math.cos(ang) * R * 1.9, my = cy + Math.sin(ang) * R * 0.55;
       g.fillStyle = col(7, '#d8d4c8', '#b9a8e8'); g.globalAlpha = a; g.beginPath(); g.arc(mx, my, R * 0.16, 0, 7); g.fill(); g.globalAlpha = 1;

@@ -328,6 +328,9 @@ async function overview(body) {
         h('p', { class: 'dim', style: 'font-size:12px' }, '第 4 天鏡廳，他點選「像自己」的詞。缺點會在鏡子裡翻成另一面。'),
         h('div', { style: 'display:flex;flex-wrap:wrap;gap:6px' }, ...picked.map((t) => h('span', { class: 'status-pill', style: t.flip ? 'color:#cfe9ff' : 'color:#ffd79a' }, t.flip ? `${t.label} → ${t.flip[0]}` : t.label)))));
     }
+    const fc = (p.stats.choices || {})['choice:color'];
+    if (fc) body.append(h('div', { class: 'card' }, h('h2', {}, `終章・${ov.settings.player_name || '壽星'}代表自己的顏色`),
+      h('div', { class: 'row' }, h('span', { style: `display:inline-block;width:42px;height:42px;border-radius:50%;background:${String(fc).replace(/[^#0-9a-f]/gi, '')};box-shadow:0 0 14px ${String(fc).replace(/[^#0-9a-f]/gi, '')}` }), h('span', { class: 'mono', style: 'margin-left:10px' }, String(fc)))));
     const fv = (p.stats.choices || {})['choice:favorite'];
     if (fv) body.append(h('div', { class: 'card' }, h('h2', {}, `終章・${ov.settings.player_name || '壽星'}最喜歡的關卡`),
       h('p', { class: 'dim', style: 'font-size:12px' }, '11/18 他回顧十個關卡後自己選的。'),
