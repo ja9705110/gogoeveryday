@@ -1123,6 +1123,19 @@ const FINALE_DAYS = {
   9: { hint: '給三十歲的自己' },
   10: { hint: '所有符號一起共鳴' },
 };
+// 每一關分裂出來的情緒（好的、不好的都有）——只是當下的感受，不是定義
+const FINALE_EMOTIONS = {
+  1: ['期待', '好奇', '緊張', '慌張'],
+  2: ['困惑', '好笑', '害羞', '得意'],
+  3: ['好笑', '尷尬', '溫暖', '在乎'],
+  4: ['不安', '猶豫', '逞強', '坦然'],
+  5: ['好奇', '著急', '驚喜', '安心'],
+  6: ['挫折', '不甘心', '懊悔', '釋懷'],
+  7: ['無助', '感動', '溫暖', '被支持'],
+  8: ['猶豫', '不捨', '遺憾', '勇敢'],
+  9: ['懷念', '感慨', '心疼', '驕傲'],
+  10: ['激動', '期待', '平靜', '完整'],
+};
 const DAY_COLORS = ['#3ff4ff', '#ffb547', '#7dffb2', '#b48cff', '#ffd36e', '#ff8f6b', '#6fb8ff', '#ff6fae', '#9df0ff', '#f6f1ff'];
 const mkAudio = (url) => { if (!url) return null; const a = new Audio(url); a.preload = 'auto'; a.setAttribute('playsinline', ''); return a; };
 const mmdd = (ymd, add) => { const d = new Date(ymd + 'T12:00:00+08:00'); d.setDate(d.getDate() + add); return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`; };
@@ -1144,8 +1157,11 @@ async function finaleMedia(A) {
     chapters.push({ day: d.day, date: mmdd(start, d.day - 1), zone: `第 ${d.day} 區`, title: d.title, hint: FINALE_DAYS[d.day]?.hint || '', photos, audio, missed: d.status !== 'COMPLETED' });
   }
   let photo = null; try { photo = await rpc('finale_photo', { p: S.pid }); } catch (_) {}
+  // 宇宙中心的「他」：你上傳的終章照片；沒有的話用他在鏡廳拍的自己
+  let me = photo;
+  if (!me) { const d4 = A.days.find((d) => d.day === 4); const r = (d4?.evidence || []).filter((e) => e.kind === 'photo' && e.path && e.step_id === 's_photo').pop(); if (r) me = await signedUrl(r.path); }
   const song = A.song ? mkAudio(await signedUrl(A.song, 'gifts')) : null;
-  return { chapters, thumbs, ending: { voice, photo }, song };
+  return { chapters, thumbs, ending: { voice, photo }, song, me };
 }
 const primeAll = (M) => [M.song, M.ending.voice, ...M.chapters.map((c) => c.audio)].forEach(primeAudio);
 
@@ -1166,8 +1182,8 @@ async function finale() {
   const thirtyKey = 'p030.thirty.' + S.pid;
   const showHunt = () => { huntBox.innerHTML = ''; hunt(huntBox); };
   let fav = prog.favorite_day || null;
-  const bodies = () => M.chapters.map((c) => ({ day: c.day, title: c.title, thumb: M.thumbs[c.day], color: DAY_COLORS[(c.day - 1) % 10], fav: c.day === fav, missed: c.missed }));
-  const runFilm = () => playFilm({ chapters: M.chapters.map((c) => ({ ...c, fav: c.day === fav })), bodies: bodies(), ending: M.ending, onDone: (what) => {
+  const universe = () => ({ levels: M.chapters.map((c) => ({ day: c.day, title: c.title, thumb: M.thumbs[c.day], color: DAY_COLORS[(c.day - 1) % 10], missed: c.missed })), emotions: FINALE_EMOTIONS, me: M.me });
+  const runFilm = () => playFilm({ chapters: M.chapters.map((c) => ({ ...c, fav: c.day === fav })), universe: universe(), ending: M.ending, onDone: (what) => {
     if (what === 'replay') return runFilm();
     if (M.song) { try { M.song.currentTime = 0; M.song.play().catch(() => {}); } catch (_) {} }
     localStorage.setItem(thirtyKey, '1');
@@ -1180,7 +1196,7 @@ async function finale() {
       localStorage.getItem(thirtyKey) ? h('button', { class: 'btn block', style: 'margin-top:8px', onclick: () => { if (M.song) { M.song.currentTime = 0; M.song.play().catch(() => {}); } celebrate({ song: M.song, onHunt: () => huntBox.scrollIntoView({ behavior: 'smooth' }) }); } }, '我 30 歲了！') : null));
   }
   if (prog.words_at) { renderAfter(); if (localStorage.getItem(thirtyKey)) showHunt(); return; }
-  favoriteGame(A, M, body, async (d) => { fav = d; await spinUniverse(bodies(), M.chapters.find((c) => c.day === d)); renderAfter(); runFilm(); });
+  favoriteGame(A, M, body, async (d) => { fav = d; await spinUniverse(universe(), d, M.chapters.find((c) => c.day === d)); renderAfter(); runFilm(); });
 }
 
 // 最後一關：回顧這十天，選一個你最喜歡、或玩得最開心的關卡
@@ -1221,27 +1237,36 @@ function favoriteGame(A, M, box, onPicked) {
   paint();
 }
 
-// 選完之後：十個關卡化成星球，開始轉動，越轉越快，然後進入回顧影片
+// 選完之後：他選的那一關分裂成情緒 → 每一關都分裂成情緒 → 所有情緒圍繞著他轉動 → 回顧影片
 const esc = (x) => String(x ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
-function spinUniverse(bodies, favCh) {
+function spinUniverse(u, favDay, favCh) {
   return new Promise((done) => {
     const ov = h('div', { class: 'cosmos' });
     const cap = h('div', { class: 'cosmos-cap' });
     document.body.append(ov);
-    const cos = mountCosmos(ov, bodies, { speed: 0.05 });
+    const cos = mountCosmos(ov, { ...u, mode: 'story', speed: 0.15 });
     ov.append(cap);
     ambience('ceremony', true);
     const say = (html) => { cap.innerHTML = html; cap.classList.remove('on'); void cap.offsetWidth; cap.classList.add('on'); };
     const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     (async () => {
+      cos.focus(favDay);
       say(`<div class="film-line">你選了</div><div class="film-word">${esc(favCh?.title || '')}</div>`); sfx('ping');
-      await wait(2800); cos.speed(0.35);
-      say('<div class="film-line">其他的每一關，也都還在。<br>開心的、卡住的、做不到的，都在。</div>');
-      await wait(3600); cos.speed(1.2);
-      say('<div class="film-line">它們開始轉動了。</div>'); sfx('sink');
-      await wait(3000); cos.speed(7);
-      say('<div class="film-line">你的宇宙，一直都在運轉。</div>');
-      await wait(2800);
+      await wait(3000);
+      cos.split(favDay); sfx('sink');
+      say(`<div class="film-line">這一關裡，其實有好多種情緒。</div><div class="film-def">${(u.emotions[favDay] || []).map(esc).join('・')}</div>`);
+      await wait(4200);
+      cos.showLevels();
+      say('<div class="film-line">其他的每一關，也都是。</div>');
+      await wait(2400);
+      say('<div class="film-line">開心的、卡住的、做不到的、<br>不想再來一次的，都在。</div>');
+      await cos.splitAll(300); await wait(1800);
+      cos.gather(); cos.speed(0.6);
+      say('<div class="film-line">它們全部，都圍繞著你轉動。</div>');
+      await wait(4200); cos.speed(2.2);
+      say('<div class="film-line">每一分、每一秒，<br>你的宇宙都一直在運轉。</div>');
+      await wait(3200); cos.speed(6);
+      await wait(1600);
       ov.classList.add('out'); await wait(700);
       cos.stop(); ov.remove(); done();
     })();

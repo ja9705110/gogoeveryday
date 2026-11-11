@@ -13,10 +13,10 @@ export function primeAudio(a) {
 }
 
 // chapters: [{ date, zone, title, hint, photos: [url], audio: HTMLAudioElement|null, missed, fav }]
-// bodies: 背景宇宙的十顆星球（mountCosmos）
+// universe: 背景宇宙（所有情緒圍繞著他轉動，mountCosmos）
 // ending: { voice: HTMLAudioElement|null, photo: url|null }
 // 不替任何一天下定義：只放他當天的照片、聲音、日期和關卡名稱
-export function playFilm({ chapters, bodies, ending, onDone }) {
+export function playFilm({ chapters, universe, ending, onDone }) {
   const ov = el('div', 'film');
   const bg = el('div', 'film-bg');
   const img = el('div', 'film-img');
@@ -25,7 +25,7 @@ export function playFilm({ chapters, bodies, ending, onDone }) {
   const skip = el('button', 'btn ghost sm film-skip', '略過');
   ov.append(bg, img, cap, bar, skip);
   document.body.append(ov);
-  const cos = bodies && bodies.length ? mountCosmos(bg, bodies, { speed: 0.25, labels: false, planetScale: 0.8 }) : null;
+  const cos = universe ? mountCosmos(bg, { ...universe, mode: 'orbit', speed: 0.25, cy: 0.42 }) : null;
   const tok = { stop: false, timers: [] };
   const total = 1 + chapters.length + 1; let done = 0;
   const progress = () => { bar.firstChild.style.width = `${Math.min(100, (100 * done) / total)}%`; };
