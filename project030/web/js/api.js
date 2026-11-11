@@ -42,6 +42,13 @@ export function errText(e) {
   const m = (e && (e.message || e.msg || String(e))) || '未知錯誤';
   const code = (m.match(/P030_[A-Z_]+/) || [])[0];
   if (code && ERRORS[code]) return ERRORS[code];
+  // 資料庫還沒安裝某個功能：直接說要貼哪一號 SQL
+  const fn = (m.match(/Could not find the (?:function|table) '?public\.([a-z_]+)/i) || [])[1];
+  if (fn) {
+    const NEED = { admin_test_jump: 20, admin_evo_results: 24, evo_begin: 24, evo_confirm: 24, evo_pick: 24, evo_redo_final: 24, evo_state: 24, finale_words: 30, finale_song_allowed: 30, save_traits: 31, finale_favorite: 32, use_happy_ticket: 33, admin_grant_ticket: 33, happy_tickets: 33, finale_color: 34 };
+    const n = NEED[fn];
+    return n ? `資料庫還沒有安裝這個功能（${fn}）。請到 Supabase 的 SQL Editor 貼上並執行 ${n} 號 SQL（檔名開頭 20261108000${String(n).padStart(3, '0')}），之後重新整理再試。` : `資料庫還沒有安裝這個功能（${fn}）。請確認 Supabase 已經貼上最新的 SQL。`;
+  }
   if (/Failed to fetch|NetworkError|Load failed/i.test(m)) return '連線中斷。請檢查網路後再試一次。';
   if (/JWT|session|refresh token/i.test(m)) return '登入已過期，請重新登入。';
   return m.replace(/^.*?P030_/, '');

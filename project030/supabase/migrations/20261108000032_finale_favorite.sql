@@ -29,3 +29,6 @@ do $$ begin
 end $$;
 
 select '終章已改為「選一個最喜歡的關卡」' as status;
+
+-- 讓 API 立刻認得新的函式
+notify pgrst, 'reload schema';
