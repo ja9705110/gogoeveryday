@@ -187,16 +187,19 @@ function liveBirthday(onLine) {
   return { done, mute: (m) => master.gain.setTargetAtTime(m ? 0 : 0.9, ac.currentTime, 0.05), stop: () => { timers.forEach(clearTimeout); try { ac.close(); } catch (_) {} finish(); } };
 }
 // 用預先做好的音檔播放，歌詞跟著 currentTime 換
-function fileBirthday(hb, onLine) {
-  const a = hb.audio; let finish; const done = new Promise((r) => (finish = r)); let shown = -1, alive = true;
-  try { a.pause(); a.currentTime = 0; a.muted = false; } catch (_) {}
-  const pr = a.play(); if (pr && pr.catch) pr.catch(() => { finish(); });
+// 用同一個播放器：點擊當下播生日快樂歌，播完「換歌」成 NEON
+// iPhone 只允許「被點擊啟動過的播放器」在之後自己繼續播；另開一個播放器 15 秒後再播會被擋下
+function fileBirthday(hb, player, onLine) {
+  const a = player || hb.audio; let finish; const done = new Promise((r) => (finish = r)); let shown = -1, alive = true;
+  const src = hb.audio.src;
+  try { a.onended = null; a.pause(); if (a.src !== src) a.src = src; a.currentTime = 0; a.muted = false; } catch (_) {}
+  const pr = a.play(); if (pr && pr.catch) pr.catch(() => { alive = false; finish(); });
   const tick = () => { if (!alive) return; const t = a.currentTime || 0; let i = -1; hb.lines.forEach((l, k) => { if (t >= l.t) i = k; }); if (i !== shown && i >= 0) { shown = i; onLine && onLine(hb.lines[i].line); } requestAnimationFrame(tick); };
   requestAnimationFrame(tick);
-  a.onended = () => { alive = false; finish(); };
+  a.onended = () => { alive = false; a.onended = null; finish(); };
   const guard = setTimeout(() => { alive = false; finish(); }, (hb.duration + 3) * 1000);
   done.then(() => clearTimeout(guard));
-  return { done, mute: (m) => { a.muted = m; }, stop: () => { alive = false; try { a.pause(); } catch (_) {} finish(); } };
+  return { done, mute: (m) => { a.muted = m; }, stop: () => { alive = false; finish(); } };
 }
 
 // 「我 30 歲了！」：歌曲＋慶祝畫面；之後出現「出發去找禮物」
@@ -211,17 +214,18 @@ export function celebrate({ song, hb: hbFile, onHunt }) {
   ov.append(cv, big, t1, t2, mute, next);
   document.body.append(ov);
   duck(true);
-  if (song) { try { song.pause(); song.currentTime = 0; } catch (_) {} }
-  // 先唱生日快樂歌，唱完才播 NEON
+  // 先唱生日快樂歌，唱完才播 NEON（同一個播放器換歌）
+  const neonSrc = song ? (song.dataset.neon || (song.dataset.neon = song.src)) : null;
   let muted = false;
   const lyric = (line) => { t2.textContent = line; t2.classList.remove('on'); void t2.offsetWidth; t2.classList.add('on'); };
-  const hb = hbFile && hbFile.audio ? fileBirthday(hbFile, lyric) : liveBirthday(lyric);
+  const hb = hbFile && hbFile.audio ? fileBirthday(hbFile, song, lyric) : liveBirthday(lyric);
+  if (!(hbFile && hbFile.audio) && song) { try { song.pause(); } catch (_) {} }
   mute.onclick = () => { muted = !muted; hb.mute(muted); if (song) song.muted = muted; mute.textContent = muted ? '🔇' : '🔊'; };
   let alive = true;
   hb.done.then(() => {
     if (!alive) return;
     lyric('第 1118 號觀察員，歡迎來到三十歲。');
-    if (song) { try { song.currentTime = 0; song.muted = muted; song.play().catch(() => {}); } catch (_) {} }
+    if (song && neonSrc) { try { if (song.src !== neonSrc) song.src = neonSrc; song.currentTime = 0; song.muted = muted; song.play().catch(() => {}); } catch (_) {} }
     burst(200);
     setTimeout(() => {
       if (!alive) return;

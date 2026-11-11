@@ -1258,7 +1258,6 @@ async function finale() {
   const universe = () => ({ levels: M.chapters.map((c) => ({ day: c.day, title: c.title, thumb: M.thumbs[c.day], color: DAY_COLORS[(c.day - 1) % 10], missed: c.missed })), emotions: FINALE_EMOTIONS, me: M.me, name: 'Jasper' });
   const runFilm = () => playFilm({ chapters: M.chapters.map((c) => ({ ...c, fav: c.day === fav })), universe: universe(), ending: M.ending, onDone: (what) => {
     if (what === 'replay') return runFilm();
-    primeAudio(M.song); // 先生日快樂歌，唱完才播 NEON（在這一下點擊中先解鎖）
     localStorage.setItem(thirtyKey, '1');
     celebrate({ song: M.song, hb: M.hb, onHunt: () => { renderAfter(); showHunt(); huntBox.scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
   } });
@@ -1266,7 +1265,7 @@ async function finale() {
     body.innerHTML = '';
     body.append(h('div', { class: 'card glow' }, h('div', { class: 'kicker' }, 'FILE 030 · UNLOCKED'), h('p', {}, '你的宇宙，已經開始轉動。'),
       h('button', { class: 'btn primary block', onclick: () => { primeAll(M); runFilm(); } }, '▶ 播放回顧影片：11/08–11/18'),
-      localStorage.getItem(thirtyKey) ? h('button', { class: 'btn block', style: 'margin-top:8px', onclick: () => { primeAudio(M.song); celebrate({ song: M.song, hb: M.hb, onHunt: () => huntBox.scrollIntoView({ behavior: 'smooth' }) }); } }, '我 30 歲了！') : null));
+      localStorage.getItem(thirtyKey) ? h('button', { class: 'btn block', style: 'margin-top:8px', onclick: () => { celebrate({ song: M.song, hb: M.hb, onHunt: () => huntBox.scrollIntoView({ behavior: 'smooth' }) }); } }, '我 30 歲了！') : null));
   }
   if (prog.words_at) { renderAfter(); if (localStorage.getItem(thirtyKey)) showHunt(); return; }
   favoriteGame(A, M, body, async (d) => { fav = d; await spinUniverse(universe(), d, M.chapters.find((c) => c.day === d)); renderAfter(); runFilm(); });
