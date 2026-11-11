@@ -3103,6 +3103,9 @@ end $$;
 
 select '終章已改為「選一個最喜歡的關卡」' as status;
 
+-- 讓 API 立刻認得新的函式
+notify pgrst, 'reload schema';
+
 -- ===== migrations/20261108000033_happy_ticket.sql =====
 -- 幸福券：讓逾期的那一區重新開啟，回去完成它、看見那一天的回顧，之後再回到今天
 -- 例：11/11 太累只破到一半 → 11/12 收到幸福券 → 回去把鏡廳完成
@@ -3235,6 +3238,9 @@ end $$;
 
 select '幸福券已安裝' as status;
 
+-- 讓 API 立刻認得新的函式
+notify pgrst, 'reload schema';
+
 -- ===== migrations/20261108000034_finale_color.sql =====
 -- 終章：他選一個代表自己的顏色，最後的星球（Jasper）用這個顏色呈現
 create or replace function public.finale_color(p uuid, color text) returns jsonb
@@ -3260,6 +3266,9 @@ do $$ begin
 end $$;
 
 select '終章代表色已安裝' as status;
+
+-- 讓 API 立刻認得新的函式
+notify pgrst, 'reload schema';
 
 -- ===== 管理者 =====
 insert into public.admin_emails (email) values ('ja9705110@gmail.com') on conflict do nothing;

@@ -128,3 +128,6 @@ begin
 end $$;
 
 select '幸福券已安裝' as status;
+
+-- 讓 API 立刻認得新的函式
+notify pgrst, 'reload schema';
