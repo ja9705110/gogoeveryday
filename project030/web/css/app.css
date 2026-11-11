@@ -853,3 +853,4 @@ body::before { animation: none; }
 .cp-custom { width: 54px; height: 36px; border: 1px solid var(--line); background: transparent; padding: 0; border-radius: 8px; }
 .cp-custom.on { box-shadow: 0 0 12px rgba(255, 255, 255, .5); border-color: #fff; }
 .cp-planet, .cosmos-planet { -webkit-mask-image: radial-gradient(circle closest-side, #000 80%, transparent 100%); mask-image: radial-gradient(circle closest-side, #000 80%, transparent 100%); }
+.sea-rise { z-index: 1; }

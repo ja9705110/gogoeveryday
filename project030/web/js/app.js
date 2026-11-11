@@ -16,7 +16,7 @@ import { photosetWidget } from './photoset.js';
 import { avatarSVG, choicesFromStats, AVATAR_STEPS } from './avatar.js';
 import { playOmen, playEvolution, EVO_GLYPH } from './evo.js';
 import { playFilm, celebrate, primeAudio, renderBirthdaySong } from './film.js';
-import { mountCosmos } from './cosmos.js';
+import { mountCosmos, mountSeaRise } from './cosmos.js';
 
 // 資料庫中舊稱呼的統一
 const T = (str) => String(str ?? '').replace(/觀測者|觀測員|觀察者/g, '觀察員').replace(/觀測/g, '觀察');
@@ -1351,21 +1351,23 @@ function spinUniverse(u, favDay, favCh) {
     const ov = h('div', { class: 'cosmos' });
     const cap = h('div', { class: 'cosmos-cap' });
     document.body.append(ov);
-    const cos = mountCosmos(ov, { ...u, mode: 'story', speed: 0.15 });
+    const cos = mountCosmos(ov, { ...u, mode: 'story', speed: 0 });
+    const sea = mountSeaRise(ov, u.levels); // 先從海底開始：十個片段浮上海面，再升上天空
     ov.append(cap);
     ambience('ceremony', true);
     const say = (html) => { cap.innerHTML = html; cap.classList.remove('on'); void cap.offsetWidth; cap.classList.add('on'); };
     const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     (async () => {
+      await sea.play(say, sfx);
+      cos.showLevels(); await sea.fadeOut(); cos.speed(0.15);
       cos.focus(favDay);
       say(`<div class="film-line">你選了</div><div class="film-word">${esc(favCh?.title || '')}</div>`); sfx('ping');
-      await wait(3000);
+      await wait(2800);
       cos.split(favDay); sfx('sink');
       say(`<div class="film-line">這一關裡，其實有好多種情緒。</div><div class="film-def">${(u.emotions[favDay] || []).map(esc).join('・')}</div>`);
-      await wait(4200);
-      cos.showLevels();
+      await wait(4000);
       say('<div class="film-line">其他的每一關，也都是。</div>');
-      await wait(2400);
+      await wait(2200);
       say('<div class="film-line">開心的、卡住的、做不到的、<br>不想再來一次的，都在。</div>');
       await cos.splitAll(300); await wait(1800);
       cos.gather(); cos.speed(0.6);

@@ -128,6 +128,8 @@ export function mountCosmos(host, opts) {
         circleImg(gf, l.img, x, y, r, l.color, l.alpha * (l.missed ? 0.5 : 1));
         if (labels && l.alpha > 0.4) { gf.globalAlpha = l.alpha; gf.fillStyle = '#eaf4ff'; gf.font = `${big ? 600 : 400} ${big ? 15 : 11}px "Noto Sans TC", system-ui, sans-serif`; gf.textAlign = 'center'; gf.fillText(l.title, x, y + r + (big ? 22 : 14)); gf.globalAlpha = 1; }
       }
+      // 他選的那一關：在圈上用金色光圈標出來
+      if (levelsOn && l.day === focusDay && !l.split && l.alpha > 0.3) { const pr = r * (1.45 + 0.12 * Math.sin(now / 260)); gf.globalAlpha = l.alpha; gf.strokeStyle = 'rgba(255,215,154,.95)'; gf.lineWidth = 2.5; gf.shadowColor = 'rgba(255,190,110,.9)'; gf.shadowBlur = 14; gf.beginPath(); gf.arc(x, y, pr, 0, 6.283); gf.stroke(); gf.shadowBlur = 0; gf.globalAlpha = 1; }
       if (l.flash > 0) { gf.globalAlpha = l.flash; const gr = gf.createRadialGradient(x, y, 0, x, y, r * 3); gr.addColorStop(0, '#ffffff'); gr.addColorStop(1, l.color + '00'); gf.fillStyle = gr; gf.beginPath(); gf.arc(x, y, r * 3, 0, 6.283); gf.fill(); gf.globalAlpha = 1; }
     }
     // 情緒：在星球後面的畫在後層，前面的畫在前層
@@ -165,5 +167,77 @@ export function mountCosmos(host, opts) {
     splitAll: (stagger = 260) => new Promise((done) => { const rest = L.filter((l) => !l.split); rest.forEach((l, i) => setTimeout(() => { splitLevel(l); if (i === rest.length - 1) done(); }, i * stagger)); if (!rest.length) done(); }),
     gather: () => { meOn = true; P.forEach((p) => { p.state = 'orbit'; }); },
     stop: () => { alive = false; stopPlanet(); removeEventListener('resize', resize); wrap.remove(); },
+  };
+}
+
+// ── 終章開場：十個片段從海底浮上海面，再一起升上天空 ──
+// levels: [{ day, title, missed }]；回傳 { play(say), fadeOut(), stop() }
+export function mountSeaRise(host, levels) {
+  const cv = document.createElement('canvas'); cv.className = 'cosmos-cv sea-rise';
+  host.append(cv);
+  const g = cv.getContext('2d'); const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let W = 0, H = 0;
+  const resize = () => { W = host.clientWidth || innerWidth; H = host.clientHeight || innerHeight; cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px'; g.setTransform(dpr, 0, 0, dpr, 0, 0); };
+  resize(); addEventListener('resize', resize);
+  const seed = (i) => { const x = Math.sin(i * 999) * 10000; return x - Math.floor(x); };
+  const stars = Array.from({ length: 150 }, () => ({ x: Math.random(), y: Math.random(), r: Math.random() * 1.4 + 0.2, p: Math.random() * 6 }));
+  const motes = Array.from({ length: 60 }, () => ({ x: Math.random(), y: Math.random(), s: 0.2 + Math.random() * 0.6 }));
+  const F = levels.map((l, i) => ({ ...l, i, depth: 0.25 + seed(i + 3) * 0.6, x: 0, y: 0, risen: 0, sky: 0, ripple: -1 }));
+  let phase = 'deep', t0 = performance.now(), pan = 0, alive = true, last = t0;
+  const ringPos = (i, cx, cy) => { const R = Math.min(W, H * 0.9) * 0.5; const a = (i / F.length) * 6.283 - 1.57; return [cx + Math.cos(a) * R * 0.66, cy + Math.sin(a) * R * 0.66 * 0.85]; };
+  const orb = (x, y, r, color, a = 1) => { const gr = g.createRadialGradient(x, y, 0, x, y, r * 3); gr.addColorStop(0, `rgba(${color},${a})`); gr.addColorStop(0.3, `rgba(${color},${a * 0.4})`); gr.addColorStop(1, `rgba(${color},0)`); g.fillStyle = gr; g.beginPath(); g.arc(x, y, r * 3, 0, 7); g.fill(); };
+  const frame = (now) => {
+    if (!alive) return;
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    if (phase === 'sky') pan = Math.min(1, pan + dt / 3.2);
+    const ease = pan * pan * (3 - 2 * pan);
+    const hz = H * (0.46 + ease * 0.75); // 升空時海平面往下退出畫面
+    // 天空：從深夜藍漸漸轉成宇宙的靛紫
+    const sky = g.createLinearGradient(0, 0, 0, Math.max(hz, 1));
+    sky.addColorStop(0, ease > 0 ? `rgb(${2 + 29 * ease},${3 + 30 * ease},${11 + 70 * ease})` : '#02030b'); sky.addColorStop(1, `rgb(${10 + 21 * ease},${30 + 3 * ease},${70 + 30 * ease})`);
+    g.fillStyle = sky; g.fillRect(0, 0, W, H);
+    for (const s of stars) { const tw = 0.4 + 0.6 * Math.abs(Math.sin(now * 0.0012 + s.p)); g.fillStyle = `rgba(220,235,255,${tw})`; g.beginPath(); g.arc(s.x * W, s.y * hz * 0.95, s.r, 0, 7); g.fill(); }
+    // 海
+    if (hz < H) {
+      const ocean = g.createLinearGradient(0, hz, 0, H + H * 0.4); ocean.addColorStop(0, 'rgba(8,40,80,1)'); ocean.addColorStop(1, '#010409');
+      g.fillStyle = ocean; g.fillRect(0, hz, W, H - hz);
+      for (let j = 0; j < 6; j++) { g.strokeStyle = `rgba(63,244,255,${0.2 - j * 0.028})`; g.lineWidth = 1; g.beginPath(); for (let x = 0; x <= W; x += 6) { const y = hz + j * j * 6 + Math.sin(x * 0.012 + now * 0.0012 + j) * (2 + j); x ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke(); }
+      g.fillStyle = 'rgba(160,230,255,.05)'; g.fillRect(W * 0.45, hz, W * 0.1, H - hz);
+      for (const m of motes) { m.y -= m.s * 0.0008; if (m.y < 0) m.y = 1; const my = hz + m.y * (H - hz); g.fillStyle = 'rgba(63,244,255,.3)'; g.fillRect(m.x * W + Math.sin(now * 0.001 + m.s * 10) * 4, my, 1.5, 1.5); }
+    }
+    // 片段
+    for (const f of F) {
+      const bx = W * (0.08 + (f.i / Math.max(1, F.length - 1)) * 0.84);
+      const deepY = hz + 40 + f.depth * (H * 0.34 - 40);
+      const surfY = hz - 14;
+      let x = bx, y = deepY + (surfY - deepY) * f.risen;
+      if (f.sky > 0) { const [tx, ty] = ringPos(f.i, W / 2, H * 0.44); const k = f.sky * f.sky * (3 - 2 * f.sky); x = bx + (tx - bx) * k; y = surfY + (ty - surfY) * k; f.sky = Math.min(1, f.sky + dt / 2.6); }
+      y += Math.sin(now * 0.002 + f.i) * 3 * (1 - f.sky);
+      const col = f.missed ? '180,140,255' : '255,181,71';
+      const lit = f.risen >= 1;
+      orb(x, y, lit ? 9 + f.sky * 6 : 6, lit ? col : '63,244,255', lit ? 1 : 0.7);
+      // 浮出水面時的漣漪
+      if (f.ripple >= 0 && f.ripple < 1) { f.ripple += dt / 1.4; g.strokeStyle = `rgba(${col},${0.6 * (1 - f.ripple)})`; g.lineWidth = 1.2; g.beginPath(); g.ellipse(bx, hz, f.ripple * 60, f.ripple * 12, 0, 0, 7); g.stroke(); }
+      g.font = '10px "Share Tech Mono", monospace'; g.textAlign = 'center'; g.fillStyle = 'rgba(225,245,255,.85)';
+      g.fillText(f.sky > 0.6 ? f.title : String(f.day).padStart(2, '0'), x, y + 24 + f.sky * 6);
+    }
+    requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+  const rise = (f) => new Promise((done) => { const s = performance.now(); const step = (now) => { if (!alive) return done(); f.risen = Math.min(1, (now - s) / 1500); if (f.risen < 1) requestAnimationFrame(step); else { f.ripple = 0; done(); } }; requestAnimationFrame(step); });
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  return {
+    async play(say, sfx) {
+      say('<div class="film-line">十天前，檔案 030 碎成十個片段，<br>沉入了深海。</div>');
+      await wait(3400);
+      say('<div class="film-line">每完成一天，<br>就有一個片段浮上海面。</div>');
+      for (const f of F) { if (!alive) return; rise(f).then(() => sfx && sfx('ping')); await wait(520); }
+      await wait(1900);
+      say('<div class="film-line">現在，它們一起升上了天空。</div>');
+      phase = 'sky'; F.forEach((f, i) => setTimeout(() => { f.sky = 0.001; }, i * 90));
+      await wait(3400);
+    },
+    fadeOut: () => new Promise((done) => { cv.style.transition = 'opacity 1.2s'; cv.style.opacity = '0'; setTimeout(() => { alive = false; removeEventListener('resize', resize); cv.remove(); done(); }, 1250); }),
+    stop: () => { alive = false; removeEventListener('resize', resize); cv.remove(); },
   };
 }
