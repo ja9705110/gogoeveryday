@@ -7,10 +7,15 @@ const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls)
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
 // iPhone：在使用者點擊的當下先「解鎖」之後要播放的音訊
+// 靜音試播一下就停；如果在這之間真的開始播放（realPlay），就不去動它
 export function primeAudio(a) {
-  if (!a) return;
-  try { a.muted = true; const pr = a.play(); if (pr) pr.then(() => { a.pause(); a.currentTime = 0; a.muted = false; }).catch(() => { a.muted = false; }); } catch (_) { a.muted = false; }
+  if (!a || !a.paused) return;
+  const tok = {}; a._prime = tok;
+  const stop = () => { if (a._prime !== tok) return; a._prime = null; try { a.pause(); a.currentTime = 0; } catch (_) {} a.muted = false; };
+  try { a.muted = true; const pr = a.play(); if (pr) pr.then(stop).catch(() => { if (a._prime === tok) { a._prime = null; a.muted = false; } }); else stop(); } catch (_) { a._prime = null; a.muted = false; }
+  setTimeout(stop, 1500); // 保險：無論如何 1.5 秒內停下來
 }
+const realPlay = (a) => { a._prime = null; a.muted = false; return a.play(); };
 
 // chapters: [{ date, zone, title, hint, items: [{ type: 'photo', url } | { type: 'text', text }], audios: [HTMLAudioElement], missed, fav }]
 // universe: 背景宇宙（所有情緒圍繞著他轉動，mountCosmos）
@@ -47,7 +52,7 @@ export function playFilm({ chapters, universe, ending, onDone }) {
   const playClip = async (a, maxMs) => {
     if (!a || tok.stop) return;
     duck(true);
-    try { a.currentTime = 0; await a.play(); } catch (_) { duck(false); return; }
+    try { a.currentTime = 0; await realPlay(a); } catch (_) { duck(false); return; }
     await Promise.race([new Promise((r) => (a.onended = r)), wait(maxMs, tok)]);
     try { a.pause(); } catch (_) {}
     duck(false);
@@ -192,7 +197,7 @@ function liveBirthday(onLine) {
 function fileBirthday(hb, player, onLine) {
   const a = player || hb.audio; let finish; const done = new Promise((r) => (finish = r)); let shown = -1, alive = true;
   const src = hb.audio.src;
-  try { a.onended = null; a.pause(); if (a.src !== src) a.src = src; a.currentTime = 0; a.muted = false; } catch (_) {}
+  try { a._prime = null; a.onended = null; a.pause(); if (a.src !== src) a.src = src; a.currentTime = 0; a.muted = false; } catch (_) {}
   const pr = a.play(); if (pr && pr.catch) pr.catch(() => { alive = false; finish(); });
   const tick = () => { if (!alive) return; const t = a.currentTime || 0; let i = -1; hb.lines.forEach((l, k) => { if (t >= l.t) i = k; }); if (i !== shown && i >= 0) { shown = i; onLine && onLine(hb.lines[i].line); } requestAnimationFrame(tick); };
   requestAnimationFrame(tick);
@@ -229,7 +234,7 @@ export function celebrate({ song, hb: hbFile, onHunt }) {
     const gift = el('button', 'btn primary party-gift', '🎁 領取我的生日禮物');
     gift.onclick = () => {
       gift.remove();
-      if (song && neonSrc) { try { song.onended = null; if (song.src !== neonSrc) song.src = neonSrc; song.currentTime = 0; song.muted = muted; song.play().catch(() => {}); } catch (_) {} }
+      if (song && neonSrc) { try { song._prime = null; song.onended = null; if (song.src !== neonSrc) song.src = neonSrc; song.currentTime = 0; song.muted = muted; song.play().catch(() => {}); } catch (_) {} }
       burst(240); sfx('complete');
       setTimeout(() => {
         if (!alive) return;

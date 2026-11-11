@@ -1235,7 +1235,8 @@ async function finaleMedia(A) {
   const hb = await renderBirthdaySong(); // 生日快樂歌：先做成一般音檔，iPhone 靜音模式也聽得到
   return { chapters, thumbs, ending: { voice, photo }, song, hb, me, preview: !!real };
 }
-const primeAll = (M) => [M.song, M.hb && M.hb.audio, M.ending.voice, ...M.chapters.flatMap((c) => c.audios)].forEach(primeAudio);
+// 只預先解鎖影片裡的錄音；生日快樂歌與 NEON 都是在按鈕按下的當下才播，不需要（也不能）先試播
+const primeAll = (M) => [M.ending.voice, ...M.chapters.flatMap((c) => c.audios)].forEach(primeAudio);
 
 async function finale() {
   let A;
