@@ -305,6 +305,10 @@ async function overview(body) {
         h('p', { class: 'dim', style: 'font-size:12px' }, '第 4 天鏡廳，他點選「像自己」的詞。缺點會在鏡子裡翻成另一面。'),
         h('div', { style: 'display:flex;flex-wrap:wrap;gap:6px' }, ...picked.map((t) => h('span', { class: 'status-pill', style: t.flip ? 'color:#cfe9ff' : 'color:#ffd79a' }, t.flip ? `${t.label} → ${t.flip[0]}` : t.label)))));
     }
+    const fv = (p.stats.choices || {})['choice:favorite'];
+    if (fv) body.append(h('div', { class: 'card' }, h('h2', {}, `終章・${ov.settings.player_name || '壽星'}最喜歡的關卡`),
+      h('p', { class: 'dim', style: 'font-size:12px' }, '11/18 他回顧十個關卡後自己選的。'),
+      h('div', { style: 'font-size:20px;color:#ffd79a' }, `★ 第 ${fv} 區`)));
     const pr = portraitFromChoices(p.stats.choices || {});
     if (!Object.keys(pr).length) continue;
     body.append(h('div', { class: 'card', style: 'border-color:rgba(255,181,71,.5)' }, h('h2', {}, `形象照方向・${ov.settings.player_name || '壽星'}`),

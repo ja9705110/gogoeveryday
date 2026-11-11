@@ -16,6 +16,7 @@ import { photosetWidget } from './photoset.js';
 import { avatarSVG, choicesFromStats, AVATAR_STEPS } from './avatar.js';
 import { playOmen, playEvolution, EVO_GLYPH } from './evo.js';
 import { playFilm, celebrate, primeAudio } from './film.js';
+import { mountCosmos } from './cosmos.js';
 
 // 資料庫中舊稱呼的統一
 const T = (str) => String(str ?? '').replace(/觀測者|觀測員|觀察者/g, '觀察員').replace(/觀測/g, '觀察');
@@ -1108,20 +1109,21 @@ function showInvitation(g, choice) {
 }
 
 // ── 終章：第030號檔案室 ──
-// ── 11/18 終章：最後一關「十個詞」→ 回顧影片 → 我 30 歲了！→ 現實尋寶 ──
-const FINALE_WORDS_ORDER = ['開始', '理解', '陪伴', '自信', '守護', '接納', '連結', '取捨', '肯定', '成為'];
+// ── 11/18 終章：回顧十個關卡、選一個最喜歡的 → 宇宙開始轉動 → 回顧影片 → 我 30 歲了！→ 現實尋寶 ──
+// 不替他命名任何一天：卡片上只有那天玩了什麼，讓他自己選
 const FINALE_DAYS = {
-  1: { hint: '停電，只開 2、3、5', def: '開始不是一切都準備好，而是燈熄了，你還願意伸手去找開關。' },
-  2: { hint: '倒著的訊號、一個笑話', def: '理解，是你願意換一個方向聽，也願意用對方聽得懂的方式說。' },
-  3: { hint: '精油、三張鬼臉', def: '陪伴不是替誰解決問題，而是待在旁邊，一起笑得很醜也沒關係。' },
-  4: { hint: '要翻過來讀的鏡子', def: '自信不是從來不動搖，而是動搖的時候，也不用假裝沒事。' },
-  5: { hint: '守夜人藏起的卡片', def: '守護，是有人在你沒注意的地方替你看著；而你也願意，在對的時候打開。' },
-  6: { hint: '改回來的考卷', def: '接納不是假裝沒有裂痕，而是帶著裂痕，依然被好好地使用。' },
-  7: { hint: '三十雙手', def: '你以為只能自己推開的門，一直有人願意把手借給你。' },
-  8: { hint: '兩扇門', def: '取捨不是要選對，而是選了之後好好走下去；沒選的那條，也可以溫柔地記得。' },
-  9: { hint: '倒著播放的自己', def: '肯定不是等別人說你很好，而是回頭看見：這些，都是你自己走過來的。' },
-  10: { hint: '所有符號一起共鳴', def: '成為不是變成另一個人，而是帶著走過的一切，繼續成為自己。' },
+  1: { hint: '停電，只開 2、3、5' },
+  2: { hint: '五隻貓、一個笑話、倒著的訊號' },
+  3: { hint: '精油、三張鬼臉' },
+  4: { hint: '鏡前選的詞、鏡中的時鐘' },
+  5: { hint: '守夜人藏起的卡片' },
+  6: { hint: '改回來的考卷' },
+  7: { hint: '三十雙手' },
+  8: { hint: '兩扇門' },
+  9: { hint: '給三十歲的自己' },
+  10: { hint: '所有符號一起共鳴' },
 };
+const DAY_COLORS = ['#3ff4ff', '#ffb547', '#7dffb2', '#b48cff', '#ffd36e', '#ff8f6b', '#6fb8ff', '#ff6fae', '#9df0ff', '#f6f1ff'];
 const mkAudio = (url) => { if (!url) return null; const a = new Audio(url); a.preload = 'auto'; a.setAttribute('playsinline', ''); return a; };
 const mmdd = (ymd, add) => { const d = new Date(ymd + 'T12:00:00+08:00'); d.setDate(d.getDate() + add); return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`; };
 
@@ -1139,7 +1141,7 @@ async function finaleMedia(A) {
     const au = ev.filter((x) => x.kind === 'audio');
     if (d.day === 9) { const v = au.find((x) => x.step_id === 's_voice') || au[au.length - 1]; if (v) voice = mkAudio(await signedUrl(v.path)); }
     else if (au.length) audio = mkAudio(await signedUrl(au[0].path));
-    chapters.push({ day: d.day, date: mmdd(start, d.day - 1), zone: `第 ${d.day} 區 ${d.title}`, word: FINALE_WORDS_ORDER[d.day - 1], def: FINALE_DAYS[d.day]?.def || '', photos, audio, missed: d.status !== 'COMPLETED' });
+    chapters.push({ day: d.day, date: mmdd(start, d.day - 1), zone: `第 ${d.day} 區`, title: d.title, hint: FINALE_DAYS[d.day]?.hint || '', photos, audio, missed: d.status !== 'COMPLETED' });
   }
   let photo = null; try { photo = await rpc('finale_photo', { p: S.pid }); } catch (_) {}
   const song = A.song ? mkAudio(await signedUrl(A.song, 'gifts')) : null;
@@ -1163,7 +1165,9 @@ async function finale() {
   loading.remove();
   const thirtyKey = 'p030.thirty.' + S.pid;
   const showHunt = () => { huntBox.innerHTML = ''; hunt(huntBox); };
-  const runFilm = () => playFilm({ chapters: M.chapters, ending: M.ending, onDone: (what) => {
+  let fav = prog.favorite_day || null;
+  const bodies = () => M.chapters.map((c) => ({ day: c.day, title: c.title, thumb: M.thumbs[c.day], color: DAY_COLORS[(c.day - 1) % 10], fav: c.day === fav, missed: c.missed }));
+  const runFilm = () => playFilm({ chapters: M.chapters.map((c) => ({ ...c, fav: c.day === fav })), bodies: bodies(), ending: M.ending, onDone: (what) => {
     if (what === 'replay') return runFilm();
     if (M.song) { try { M.song.currentTime = 0; M.song.play().catch(() => {}); } catch (_) {} }
     localStorage.setItem(thirtyKey, '1');
@@ -1171,66 +1175,77 @@ async function finale() {
   } });
   function renderAfter() {
     body.innerHTML = '';
-    body.append(h('div', { class: 'card glow' }, h('div', { class: 'kicker' }, 'FILE 030 · UNLOCKED'), h('p', {}, '十個片段都找回了自己的名字。'),
+    body.append(h('div', { class: 'card glow' }, h('div', { class: 'kicker' }, 'FILE 030 · UNLOCKED'), h('p', {}, '你的宇宙，已經開始轉動。'),
       h('button', { class: 'btn primary block', onclick: () => { primeAll(M); runFilm(); } }, '▶ 播放回顧影片：11/08–11/18'),
       localStorage.getItem(thirtyKey) ? h('button', { class: 'btn block', style: 'margin-top:8px', onclick: () => { if (M.song) { M.song.currentTime = 0; M.song.play().catch(() => {}); } celebrate({ song: M.song, onHunt: () => huntBox.scrollIntoView({ behavior: 'smooth' }) }); } }, '我 30 歲了！') : null));
   }
   if (prog.words_at) { renderAfter(); if (localStorage.getItem(thirtyKey)) showHunt(); return; }
-  wordsGame(A, M, body, () => runFilm());
+  favoriteGame(A, M, body, async (d) => { fav = d; await spinUniverse(bodies(), M.chapters.find((c) => c.day === d)); renderAfter(); runFilm(); });
 }
 
-// 最後一關：把十個詞放回每一天
-function wordsGame(A, M, box, onSolved) {
-  const assign = {}; let picked = null;
-  const pool = h('div', { class: 'fw-pool' });
+// 最後一關：回顧這十天，選一個你最喜歡、或玩得最開心的關卡
+function favoriteGame(A, M, box, onPicked) {
+  let picked = null;
   const grid = h('div', { class: 'fw-grid' });
   const msg = h('div', { class: 'msg' });
-  const send = h('button', { class: 'btn primary block', disabled: '' }, '解鎖檔案室');
+  const send = h('button', { class: 'btn primary block', disabled: '' }, '就是這一關');
   const cards = {};
+  const allVoid = A.days.every((d) => d.status !== 'COMPLETED');
   const paint = () => {
-    pool.innerHTML = '';
-    const used = new Set(Object.values(assign));
-    for (const w of A.words) {
-      if (used.has(w)) continue;
-      pool.append(h('button', { class: 'fw-chip' + (picked === w ? ' on' : ''), onclick: () => { picked = picked === w ? null : w; sfx('tap'); paint(); } }, w));
-    }
-    if (!pool.children.length) pool.append(h('span', { class: 'dim', style: 'font-size:12px' }, '十個詞都放好了。'));
-    for (const d of A.days) {
-      const slot = cards[d.day].querySelector('.fw-slot');
-      slot.textContent = assign[d.day] || (picked ? '點這裡放入' : '＿＿');
-      slot.classList.toggle('filled', !!assign[d.day]);
-      cards[d.day].classList.toggle('ready', !!picked && !assign[d.day]);
-    }
-    send.disabled = A.days.some((d) => !assign[d.day]);
+    for (const d of A.days) cards[d.day].classList.toggle('on', picked === d.day);
+    send.disabled = !picked;
   };
   for (const d of A.days) {
     const sym = (d.symbols || [])[0];
     const thumb = M.thumbs[d.day];
-    const card = h('button', { class: 'fw-card' + (d.status === 'COMPLETED' ? '' : ' void'), onclick: () => {
-      if (picked) { for (const k of Object.keys(assign)) if (assign[k] === picked) delete assign[k]; assign[d.day] = picked; picked = null; sfx('match'); }
-      else if (assign[d.day]) { delete assign[d.day]; sfx('tap'); }
-      paint();
-    } },
-      h('div', { class: 'fw-img', style: thumb ? `background-image:url("${thumb.replace(/"/g, '%22')}")` : '' }, sym ? h('span', { class: 'fw-sym', html: glyphSVG(sym.data.symbol) }) : null),
+    const can = allVoid || d.status === 'COMPLETED';
+    const card = h('button', { class: 'fw-card fav' + (d.status === 'COMPLETED' ? '' : ' void'), onclick: () => { if (!can) return; picked = picked === d.day ? null : d.day; sfx('tap'); paint(); } },
+      h('div', { class: 'fw-img', style: thumb ? `background-image:url("${thumb.replace(/"/g, '%22')}")` : '' }, sym ? h('span', { class: 'fw-sym', html: glyphSVG(sym.data.symbol) }) : null, h('span', { class: 'fw-star' }, '★')),
       h('div', { class: 'fw-t' }, `${mmdd(S.state.start_date, d.day - 1)}・${d.title}`),
-      h('div', { class: 'fw-h' }, FINALE_DAYS[d.day]?.hint || ''),
-      h('div', { class: 'fw-slot' }, '＿＿'));
+      h('div', { class: 'fw-h' }, d.status === 'COMPLETED' ? FINALE_DAYS[d.day]?.hint || '' : '這一天你沒有來'));
     cards[d.day] = card; grid.append(card);
   }
   send.onclick = async () => {
     primeAll(M); // iPhone：在這一下點擊中先解鎖影片與歌曲的聲音
-    send.disabled = true; msg.className = 'msg'; msg.textContent = '比對中……';
+    send.disabled = true; msg.className = 'msg'; msg.textContent = '';
     try {
-      const r = await rpc('finale_words', { p: S.pid, answer: A.days.map((d) => assign[d.day] || '') });
-      if (r.correct) { sfx('complete'); msg.className = 'msg good'; msg.textContent = '檔案室解鎖。'; await new Promise((res) => setTimeout(res, 900)); onSolved(); box.innerHTML = ''; box.append(h('div', { class: 'card glow' }, h('p', {}, '十個片段都找回了自己的名字。'), h('button', { class: 'btn primary block', onclick: () => { primeAll(M); onSolved(); } }, '▶ 播放回顧影片：11/08–11/18'))); }
-      else { sfx('bad'); msg.className = 'msg bad'; msg.textContent = `有 ${r.right} 個放對了。再看看每一天的提示。`; send.disabled = false; }
+      await rpc('finale_favorite', { p: S.pid, d: picked });
+      sfx('complete'); box.innerHTML = ''; onPicked(picked);
     } catch (e) { msg.className = 'msg bad'; msg.textContent = errText(e); send.disabled = false; }
   };
-  box.append(h('div', { class: 'card glow' }, h('div', { class: 'kicker' }, 'FILE 030 · LAST LOCK'), h('h2', { style: 'margin-top:4px' }, '檔案室的最後一道鎖'),
-    h('p', {}, '十個片段的標籤都掉了。把每一天，放回它的名字。'),
-    h('p', { class: 'dim', style: 'font-size:12px' }, '先點一個詞，再點它屬於的那一天；點已經放好的那一天，可以把詞拿回來。')),
-    pool, grid, msg, send);
+  box.append(h('div', { class: 'card glow' }, h('div', { class: 'kicker' }, 'FILE 030 · LAST LOCK'), h('h2', { style: 'margin-top:4px' }, '回顧這十天'),
+    h('p', {}, '這十個關卡，都是你自己走過來的。'),
+    h('p', {}, '選一個你最喜歡、或玩得最開心的。'),
+    h('p', { class: 'dim', style: 'font-size:12px' }, '沒有標準答案，點一下選擇，再點一次取消。')),
+    grid, msg, send);
   paint();
+}
+
+// 選完之後：十個關卡化成星球，開始轉動，越轉越快，然後進入回顧影片
+const esc = (x) => String(x ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+function spinUniverse(bodies, favCh) {
+  return new Promise((done) => {
+    const ov = h('div', { class: 'cosmos' });
+    const cap = h('div', { class: 'cosmos-cap' });
+    document.body.append(ov);
+    const cos = mountCosmos(ov, bodies, { speed: 0.05 });
+    ov.append(cap);
+    ambience('ceremony', true);
+    const say = (html) => { cap.innerHTML = html; cap.classList.remove('on'); void cap.offsetWidth; cap.classList.add('on'); };
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+    (async () => {
+      say(`<div class="film-line">你選了</div><div class="film-word">${esc(favCh?.title || '')}</div>`); sfx('ping');
+      await wait(2800); cos.speed(0.35);
+      say('<div class="film-line">其他的每一關，也都還在。<br>開心的、卡住的、做不到的，都在。</div>');
+      await wait(3600); cos.speed(1.2);
+      say('<div class="film-line">它們開始轉動了。</div>'); sfx('sink');
+      await wait(3000); cos.speed(7);
+      say('<div class="film-line">你的宇宙，一直都在運轉。</div>');
+      await wait(2800);
+      ov.classList.add('out'); await wait(700);
+      cos.stop(); ov.remove(); done();
+    })();
+  });
 }
 
 // 完整歸檔紀錄（收在最下面）

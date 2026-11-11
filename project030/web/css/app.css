@@ -806,3 +806,18 @@ body::before { animation: none; }
 .tr-to small { color: #b9cbd8; font-size: 12px; }
 .tr-end { margin-top: 14px; font-size: 13px; color: #cfe9ff; text-align: center; letter-spacing: .06em; }
 @keyframes trflip { 0% { opacity: 0; transform: perspective(500px) rotateY(-90deg); } 100% { opacity: 1; transform: none; } }
+
+/* 終章：選最喜歡的關卡 → 宇宙轉動 */
+.fw-card.fav { transition: border-color .25s, box-shadow .25s, transform .25s; }
+.fw-card.fav.on { border-color: #ffd79a; box-shadow: 0 0 18px rgba(255, 215, 154, .45); transform: translateY(-2px); }
+.fw-star { position: absolute; right: 8px; top: 6px; font-size: 22px; color: #ffd79a; opacity: 0; transform: scale(.4); transition: opacity .25s, transform .25s; text-shadow: 0 0 10px rgba(255, 181, 71, .8); }
+.fw-card.fav.on .fw-star { opacity: 1; transform: none; }
+.cosmos { position: fixed; inset: 0; z-index: 255; background: #05070f; overflow: hidden; animation: cosin .9s ease; }
+.cosmos.out { opacity: 0; transition: opacity .7s; }
+@keyframes cosin { from { opacity: 0; } }
+.cosmos-cv { position: absolute; inset: 0; display: block; }
+.cosmos-cap { position: absolute; left: 0; right: 0; bottom: calc(70px + env(safe-area-inset-bottom)); padding: 0 24px; text-align: center; color: #fff; opacity: 0; transform: translateY(10px); transition: opacity .9s, transform .9s; }
+.cosmos-cap.on { opacity: 1; transform: none; }
+.film-bg .cosmos-cv { opacity: .6; }
+.film-fav { margin-top: 8px; font-size: 14px; letter-spacing: .2em; color: #ffd79a; text-shadow: 0 0 10px rgba(255, 181, 71, .7); }
+.film-end .btn.ghost { background: rgba(1, 4, 10, .6); }
