@@ -480,8 +480,13 @@ function drawSteps(L, box) {
       el.append(msg);
       if (!s.optional) activeShown = true;
     } else {
-      const rv = renderRevealed(s);
-      if (rv) el.append(rv);
+      // 投影卡 A：數字只在相機裡的卡片上出現，掃完不另外顯示；可以再掃一次重看
+      if (s.type === 'ar' && s.reveal?.overlay === 'safe') {
+        el.append(h('button', { class: 'btn block', onclick: () => makeCtx(L, s, el, h('div'), box).openAR(s, true) }, '再次掃描卡片'));
+      } else {
+        const rv = renderRevealed(s);
+        if (rv) el.append(rv);
+      }
       if (s.type === 'evidence') el.append(ctxEvidenceList(s, L));
     }
     box.append(el);
@@ -540,10 +545,11 @@ function makeCtx(L, s, el, msg, box) {
       } catch (e) { msg.className = 'msg bad'; msg.textContent = errText(e); return null; }
       finally { if (btn) btn.disabled = false; }
     },
-    openAR(step) {
+    openAR(step, again) {
       const ar = startAR({
         cardLabel: step.card,
         onDetect: async (targetIndex) => {
+          if (again) return targetIndex === step.target ? { correct: true, reveal: step.reveal } : { correct: false };
           const r = await rpc('submit_step', { p: S.pid, d: L.day, step_id: step.id, answer: { target: targetIndex } });
           if (r.correct) setTimeout(async () => { (await ar).close(); await afterSuccess(L, r); }, 6000);
           return r;
