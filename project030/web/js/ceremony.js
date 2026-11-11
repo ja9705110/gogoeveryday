@@ -1,4 +1,5 @@
 // 每日回顧儀式：片段浮上海面 → 當天的紀錄 → 符號 → 星球新層 → 結語
+import { TRAIT_BY_ID } from './traits.js';
 import { glyphSVG } from './glyphs.js';
 import { signedUrl } from './api.js';
 import { mountPlanet, layerStates, LAYERS } from './planet.js';
@@ -24,7 +25,7 @@ const EPILOGUE = {
   3: { main: () => ['你從廚房那本書裡，找到了調配的方法。', '六個數字，是六種用法與肌膚。照顧一個人，從來都需要細節。', '三個不同的人，陪你一起扮了鬼臉。植物喝下了歡樂，又長出了新的葉子。'],
     alt: () => ['溫室枯了，但根還在。', '你澆了水。新長出來的葉子，和原本的不一樣——也沒有比較差。'],
     next: '明天，鏡子裡會出現一個房間——比外面多一盞燈。' },
-  4: { main: () => ['鏡子裡的數字，要翻過來讀才是真的。別人對你的看法也是——那是他們那一側的樣子，不是全部的你。', '房間裡沒有時鐘，只有鏡子裡有。你不需要一直照著別人的時間走。', '你拍下了鏡子裡的自己。有人說你很棒時，你不太相信；有人說了不同的話，你就假裝很堅強。', '原來「自信」不是從來不動搖，而是動搖的時候，也不用假裝沒事。一封邀請函到了——你本來的樣子，值得被好好看見。'],
+  4: { main: (c) => [...traitLines(c['choice:traits']), '房間裡沒有時鐘，只有鏡子裡有。你不需要一直照著別人的時間走。', '你拍下了鏡子裡的自己。有人說你很棒時，你不太相信；有人說了不同的話，你就假裝很堅強。', '原來「自信」不是從來不動搖，而是動搖的時候，也不用假裝沒事。一封邀請函到了——你本來的樣子，值得被好好看見。'],
     alt: () => ['鏡子碎了，但你把它拼回來了。', '邀請函有一點刮痕——它還是找到了你。'],
     next: '明天，守夜人藏起的投影卡，會在這個家的「電的源頭」附近。' },
   5: { main: () => ['卡片藏在你每天都會打開、卻很少注意的地方——是守夜人替你放的。', '保險箱不是真的在這裡，密碼也只出現在投影上。打開它的方法，一直只有你知道。', '裡面只有一張舊照片：「第 7 天，再用一次。」有些過去不是包袱，而是之後會派上用場的東西。', '原來「守護」不只是把東西鎖好，而是有人在你沒注意的地方替你看著；而你也願意，在對的時候把它打開。'],
@@ -50,6 +51,15 @@ const EPILOGUE = {
     alt: () => ['環沒有完全閉合。', '也許它本來就不需要閉合。'],
     next: '明天，第 030 號檔案室將會開啟。' },
 };
+// 第 4 區：用他自己選的特質寫結語
+function traitLines(ids) {
+  const picked = (Array.isArray(ids) ? ids : []).map((id) => TRAIT_BY_ID[id]).filter(Boolean);
+  const flips = picked.filter((t) => t.flip).slice(0, 3);
+  const out = ['你在鏡子前替自己選了很多詞，有好的，也有你不太喜歡的。'];
+  if (flips.length) out.push(`鏡子把你不喜歡的那幾個翻了過來：${flips.map((t) => `「${t.label}」是${t.flip[0]}`).join('，')}。原來有些缺點，翻過來讀才是真的。`);
+  else out.push('鏡子說，你看見的那些好，全部都是真的。');
+  return out;
+}
 const ACTION = { explore: '探索', preserve: '保存', adjust: '調整環境', rest: '靜置' };
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const fmtT = (iso) => (iso ? new Date(iso).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }) : '');

@@ -478,4 +478,21 @@ select pg_temp.as_user('00000000-0000-0000-0000-00000000000b', 'player@test.dev'
 set role authenticated;
 select pg_temp.fails($$select public.finale_words('$$ || :'pid' || $$', '["開始","理解","陪伴","自信","守護","接納","連結","取捨","肯定","成為"]')$$, 'P030_FINALE_LOCKED', 'last lock unavailable before the birthday');
 reset role; set search_path = public, extensions;
+-- ════════════ 第 4 區：鏡前的自己 ════════════
+reset role; set search_path = public, extensions;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a', 'admin@test.dev');
+set role authenticated;
+select public.admin_create_test_profile('鏡廳', null) as mr \gset
+select public.admin_test_jump(:'mr', 4) \g /dev/null
+select pg_temp.ok((public.open_level(:'mr', 4) -> 'steps' -> 0 ->> 'id') = 's_traits' and (public.open_level(:'mr', 4) -> 'steps' -> 0 ->> 'widget') = 'traits', 'day 4 starts with the traits mirror');
+select pg_temp.fails($$select public.save_traits('$$ || :'mr' || $$', 4, 's_traits', '["gentle","kind"]')$$, 'P030_BAD_ANSWER', 'needs at least 3 traits');
+select pg_temp.fails($$select public.save_traits('$$ || :'mr' || $$', 4, 's_traits', '["gentle","kind","<script>"]')$$, 'P030_BAD_ANSWER', 'only trait codes accepted');
+select pg_temp.fails($$select public.save_traits('$$ || :'mr' || $$', 4, 's_mclock', '["gentle","kind","sensitive"]')$$, 'P030_NO_SUCH_STEP', 'only on the traits step');
+select pg_temp.ok((public.save_traits(:'mr', 4, 's_traits', '["gentle","sensitive","tough_act","unsure"]') ->> 'count')::int = 4, 'traits saved');
+select pg_temp.ok((public.get_state(:'mr') #> '{stats,choices,choice:traits}') = '["gentle","sensitive","tough_act","unsure"]'::jsonb, 'traits available to the recap');
+select pg_temp.ok((public.submit_step(:'mr', 4, 's_traits', '{}') ->> 'correct')::boolean, 'continue after the mirror');
+select public.submit_step(:'mr', 4, 's_clock_intro', '{}') \g /dev/null
+select pg_temp.ok((public.submit_step(:'mr', 4, 's_mclock', '{"value":"0215"}') ->> 'correct')::boolean, 'mirror clock still follows');
+select public.admin_delete_test_profile(:'mr') \g /dev/null
+reset role; set search_path = public, extensions;
 \echo ALL TESTS PASSED

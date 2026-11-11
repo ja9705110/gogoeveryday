@@ -3,6 +3,7 @@ import { glyphSVG, NAMES } from './glyphs.js';
 import { signedUrl } from './api.js';
 import { signalUrl } from './signal.js';
 import { duck } from './audio.js';
+import { TRAITS, TRAIT_BY_ID } from './traits.js';
 
 export const h = (tag, attrs = {}, ...kids) => {
   const el = document.createElement(tag);
@@ -240,6 +241,46 @@ W.listen = (s, ctx) => {
   return box;
 };
 
+// 鏡前的自己：選出像自己的特質 → 鏡子把缺點翻過來
+W.traits = (s, ctx) => {
+  const box = h('div', { class: 'trw' });
+  const min = s.min || 3;
+  const sel = new Set(Array.isArray(ctx.savedTraits) ? ctx.savedTraits : []);
+  const reflect = (ids) => {
+    box.innerHTML = '';
+    const picked = ids.map((id) => TRAIT_BY_ID[id]).filter(Boolean);
+    const good = picked.filter((t) => !t.flip), flips = picked.filter((t) => t.flip);
+    const mirror = h('div', { class: 'tr-mirror' }, h('div', { class: 'tr-k' }, '鏡子亮了起來。'));
+    if (good.length) mirror.append(h('div', { class: 'tr-sub' }, '這些，你已經看見了：'), h('div', { class: 'tr-good' }, ...good.map((t) => h('span', {}, t.label))));
+    if (flips.length) {
+      mirror.append(h('div', { class: 'tr-sub' }, '這些，鏡子把它們翻了過來：'));
+      const list = h('div', { class: 'tr-flips' });
+      flips.forEach((t, i) => list.append(h('div', { class: 'tr-flip', style: `animation-delay:${0.6 + i * 0.55}s` },
+        h('div', { class: 'tr-from' }, t.label), h('div', { class: 'tr-arrow' }, '→'), h('div', { class: 'tr-to' }, h('b', {}, t.flip[0]), h('small', {}, t.flip[1])))));
+      mirror.append(list);
+    } else mirror.append(h('div', { class: 'tr-sub' }, '你看見了這麼多好的自己。鏡子說：它們都是真的。'));
+    mirror.append(h('div', { class: 'tr-end' }, '鏡子裡的字，要翻過來讀才是真的。'));
+    box.append(mirror, h('button', { class: 'btn primary block', style: 'margin-top:10px', onclick: (e) => ctx.send({}, e.target) }, '繼續'));
+  };
+  if (sel.size >= min) { reflect([...sel]); return box; }
+  const count = h('span', { class: 'mono dim', style: 'font-size:12px' });
+  const go = h('button', { class: 'btn primary block', disabled: '' }, '照鏡子');
+  const chips = h('div', { class: 'tr-chips' });
+  const paint = () => { count.textContent = `已選 ${sel.size} 個${sel.size < min ? `（至少 ${min} 個）` : ''}`; go.disabled = sel.size < min; };
+  for (const t of TRAITS) {
+    const c = h('button', { class: 'tr-chip', onclick: () => { sel.has(t.id) ? sel.delete(t.id) : sel.add(t.id); c.classList.toggle('on', sel.has(t.id)); paint(); } }, t.label);
+    chips.append(c);
+  }
+  go.onclick = async () => {
+    go.disabled = true; go.textContent = '鏡子正在讀取……';
+    try { await ctx.saveTraits([...sel]); reflect([...sel]); }
+    catch (e) { ctx.toast(String(e.message || e)); go.disabled = false; go.textContent = '照鏡子'; }
+  };
+  box.append(chips, h('div', { class: 'row', style: 'margin:8px 0' }, count), go);
+  paint();
+  return box;
+};
+
 W.text = (s, ctx) => {
   const inp = h('input', { type: 'text', placeholder: s.placeholder || '', autocomplete: 'off' });
   return h('div', {}, inp, h('div', { style: 'height:8px' }), h('button', { class: 'btn primary block', onclick: (e) => ctx.send({ value: inp.value }, e.target) }, '送出'));
@@ -387,7 +428,7 @@ export function renderRevealed(step) {
 }
 
 export function renderWidget(step, ctx) {
-  const f = W[step.type];
+  const f = W[step.widget || step.type];
   return f ? f(step, ctx) : h('div', { class: 'dim' }, '未知的機關：' + step.type);
 }
 export { NAMES };
