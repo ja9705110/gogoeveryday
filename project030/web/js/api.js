@@ -47,8 +47,9 @@ export function errText(e) {
   if (fn) {
     const NEED = { admin_test_jump: 20, admin_evo_results: 24, evo_begin: 24, evo_confirm: 24, evo_pick: 24, evo_redo_final: 24, evo_state: 24, finale_words: 30, finale_song_allowed: 30, save_traits: 31, finale_favorite: 32, use_happy_ticket: 33, admin_grant_ticket: 33, happy_tickets: 33, finale_color: 34 };
     const n = NEED[fn];
-    return n ? `資料庫還沒有安裝這個功能（${fn}）。請到 Supabase 的 SQL Editor 貼上並執行 ${n} 號 SQL（檔名開頭 20261108000${String(n).padStart(3, '0')}），之後重新整理再試。` : `資料庫還沒有安裝這個功能（${fn}）。請確認 Supabase 已經貼上最新的 SQL。`;
+    return `資料庫還沒有安裝這個功能（${fn}${n ? `，${n} 號` : ''}）。請到 Supabase 的 SQL Editor 貼上並執行 catchup_all.sql（全部補齊），之後重新整理再試。`;
   }
+  if (/Could not find the '?[a-z_]+'? column|column .* does not exist|relation .* does not exist|schema cache/i.test(m)) return '資料庫還少了一些更新。請到 Supabase 的 SQL Editor 貼上並執行 catchup_all.sql（全部補齊），之後重新整理再試。';
   if (/Failed to fetch|NetworkError|Load failed/i.test(m)) return '連線中斷。請檢查網路後再試一次。';
   if (/JWT|session|refresh token/i.test(m)) return '登入已過期，請重新登入。';
   return m.replace(/^.*?P030_/, '');
