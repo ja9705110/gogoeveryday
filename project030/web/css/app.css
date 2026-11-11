@@ -815,10 +815,13 @@ body::before { animation: none; }
 .cosmos { position: fixed; inset: 0; z-index: 255; background: #05070f; overflow: hidden; animation: cosin .9s ease; }
 .cosmos.out { opacity: 0; transition: opacity .7s; }
 @keyframes cosin { from { opacity: 0; } }
+.cosmos-wrap { position: absolute; inset: 0; overflow: hidden; }
 .cosmos-cv { position: absolute; inset: 0; display: block; }
+.cosmos-planet { position: absolute; pointer-events: none; opacity: 0; }
+.cosmos-cap { z-index: 2; }
 .cosmos-cap { position: absolute; left: 0; right: 0; bottom: calc(70px + env(safe-area-inset-bottom)); padding: 0 24px; text-align: center; color: #fff; opacity: 0; transform: translateY(10px); transition: opacity .9s, transform .9s; }
 .cosmos-cap.on { opacity: 1; transform: none; }
-.film-bg .cosmos-cv { opacity: .6; }
+.film-bg .cosmos-wrap { opacity: .9; }
 .film-fav { margin-top: 8px; font-size: 14px; letter-spacing: .2em; color: #ffd79a; text-shadow: 0 0 10px rgba(255, 181, 71, .7); }
 .film-end .btn.ghost { background: rgba(1, 4, 10, .6); }
 .film-quote { font-size: 18px; line-height: 1.8; letter-spacing: .04em; color: #fff3dc; text-shadow: 0 2px 12px #000; max-height: 40vh; overflow: hidden; }

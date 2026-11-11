@@ -1256,7 +1256,7 @@ async function finale() {
   const thirtyKey = 'p030.thirty.' + S.pid;
   const showHunt = () => { huntBox.innerHTML = ''; hunt(huntBox); };
   let fav = prog.favorite_day || null;
-  const universe = () => ({ levels: M.chapters.map((c) => ({ day: c.day, title: c.title, thumb: M.thumbs[c.day], color: DAY_COLORS[(c.day - 1) % 10], missed: c.missed })), emotions: FINALE_EMOTIONS, me: M.me, name: 'Jasper' });
+  const universe = () => ({ levels: M.chapters.map((c) => ({ day: c.day, title: c.title, thumb: M.thumbs[c.day], color: DAY_COLORS[(c.day - 1) % 10], missed: c.missed })), emotions: FINALE_EMOTIONS, states: layerStates(S.state.levels), name: 'Jasper' });
   const runFilm = () => playFilm({ chapters: M.chapters.map((c) => ({ ...c, fav: c.day === fav })), universe: universe(), ending: M.ending, onDone: (what) => {
     if (what === 'replay') return runFilm();
     localStorage.setItem(thirtyKey, '1');
