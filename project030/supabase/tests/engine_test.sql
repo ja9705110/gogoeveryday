@@ -454,4 +454,18 @@ select public.admin_test_reset(:'ev') \g /dev/null
 select pg_temp.ok((select count(*) from public.evo_runs where profile_id = :'ev') = 0, 'test reset clears evolution');
 select public.admin_delete_test_profile(:'ev') \g /dev/null
 reset role; set search_path = public, extensions;
+-- ════════════ 每天完成後的一段話 ════════════
+reset role; set search_path = public, extensions;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a', 'admin@test.dev');
+set role authenticated;
+delete from public.reward_photos where day in (2, 3);
+insert into public.reward_photos (day, stage, photo, caption) values (2, 1, null, '第二天辛苦了。'), (3, 1, null, '第三天的話');
+select pg_temp.ok((select count(*) from public.reward_photos where day = 2 and photo is null) = 1, 'message without photo can be stored');
+select public.admin_create_test_profile('留言', null) as mg \gset
+select public.admin_test_jump(:'mg', 3) \g /dev/null
+select pg_temp.ok((public.stage_photos(:'mg', 2) -> 0 ->> 'caption') = '第二天辛苦了。' and (public.stage_photos(:'mg', 2) -> 0 ->> 'photo') is null, 'completed day returns the message');
+select pg_temp.ok(jsonb_array_length(public.stage_photos(:'mg', 3)) = 0, 'message hidden until the day is completed');
+select pg_temp.ok((select array_agg((x ->> 'day')::int) from jsonb_array_elements(public.reward_index(:'mg')) x) = array[1, 2], 'new-message index lists only completed days with photo or message');
+select public.admin_delete_test_profile(:'mg') \g /dev/null
+reset role; set search_path = public, extensions;
 \echo ALL TESTS PASSED
