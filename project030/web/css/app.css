@@ -838,3 +838,4 @@ body::before { animation: none; }
 .ticket-s { font-size: 13px; opacity: .85; }
 .ticket.big { animation: ticketin .9s cubic-bezier(.2, 1.4, .4, 1); margin-bottom: 12px; }
 @keyframes ticketin { from { transform: scale(.6) rotate(-6deg); opacity: 0; } }
+.party-gift { font-size: 20px; padding: 16px 30px; letter-spacing: .1em; animation: evopulse 1.6s ease-in-out infinite; }
