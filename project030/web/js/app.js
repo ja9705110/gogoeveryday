@@ -352,21 +352,6 @@ function home() {
   shell('home', wrap);
   pendingCeremony(st);
   maybeOmen(st);
-  newMessages(wrap);
-}
-
-// 已完成的區域有新的照片或留言（例如之後才補上的） → 首頁提示，可重播那一天的回顧
-async function newMessages(wrap) {
-  let idx = [];
-  try { idx = await rpc('reward_index', { p: S.pid }); } catch (_) { return; }
-  const fresh = idx.filter((x) => localStorage.getItem(ceremonyKey(S.pid, x.day)) && (localStorage.getItem(`p030.msg.${S.pid}.${x.day}`) || '') < x.updated_at);
-  if (!fresh.length || !wrap.isConnected) return;
-  const card = h('div', { class: 'card evo-alert', style: 'border-color:rgba(255,181,71,.6)' },
-    h('div', { class: 'kicker', style: 'color:var(--accent2)' }, 'SEALED MESSAGE · 封存的訊息'),
-    h('div', {}, `第 ${fresh.map((x) => x.day).join('、')} 區的碎片裡，多了一段給你的訊息。`),
-    h('div', { class: 'row wrap', style: 'gap:6px;margin-top:8px' }, ...fresh.map((x) => h('button', { class: 'btn sm', onclick: () => openCeremony(x.day, { replay: true }) }, `打開第 ${x.day} 區`))));
-  const anchor = wrap.querySelector('.objective');
-  anchor ? anchor.before(card) : wrap.append(card);
 }
 
 // ── 區域 ──
@@ -583,8 +568,6 @@ async function openCeremony(day, { replay = false } = {}) {
     localStorage.setItem(ceremonyKey(S.pid, day), '1');
     let photos = [];
     try { photos = await rpc('stage_photos', { p: S.pid, d: day }); } catch (_) {}
-    const seenAt = photos.map((x) => x.updated_at || '').sort().pop();
-    if (seenAt) localStorage.setItem(`p030.msg.${S.pid}.${day}`, seenAt);
     playCeremony({ L: L2, state: S.state, photos, onClose: () => { if (!replay) location.hash = '#/'; route(); } });
   } catch (e) { toast(errText(e)); route(); }
 }
