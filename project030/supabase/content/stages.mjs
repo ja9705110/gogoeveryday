@@ -133,7 +133,7 @@ export const stages = {
       story('s_clock_intro', ['第二面鏡子裡，掛著一個時鐘。', '但這個房間裡，沒有任何時鐘。'], { ...S(2, '鏡中時鐘') }),
       { id: 's_mclock', type: 'keypad', title: '鏡中時鐘', length: 4, ...S(2, '鏡中時鐘'),
         clue: [{ type: 'clock', h: 2, m: 15, mirror: true, caption: '鏡子裡的時鐘。' }], prompt: '真正的時間是幾點幾分？（四位數）' },
-      { id: 's_photo', type: 'evidence', title: '另一邊', kinds: ['photo'], gate: true, ...S(3, '另一邊'),
+      { id: 's_photo', type: 'evidence', title: '另一邊', kinds: ['photo'], gate: true, pick: true, ...S(3, '另一邊'),
         prompt: '鏡廳需要一張「另一邊」的你。', pending_text: '影像已送出。鏡面正在校正……' },
       story('s_letter', ['鏡子後方滑出一個信封。', '封面寫著：影像校正邀請函。', '「請決定，影像中的你應該是什麼樣子。」'], { ...S(3, '另一邊') }),
     ],

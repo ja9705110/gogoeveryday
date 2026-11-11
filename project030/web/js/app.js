@@ -787,12 +787,18 @@ function evidenceWidget(L, s, msg) {
     box.append(ta, h('div', { style: 'height:8px' }), h('button', { class: 'btn primary block', onclick: (e) => { if (ta.value.trim()) submit('text', null, null, ta.value.trim(), e.target); } }, '提交紀錄'));
   }
   if (s.kinds.includes('photo')) {
+    // 只有第 4 區的鏡中自拍可以從相簿選；其他關卡維持只能現場拍
+    const pick = s.pick || (L.day === 4 && s.id === 's_photo');
     const inp = h('input', { type: 'file', accept: 'image/*', capture: 'environment', class: 'hidden' });
+    const lib = pick ? h('input', { type: 'file', accept: 'image/*', class: 'hidden' }) : null;
     const prev = h('img', { style: 'max-width:100%;border-radius:8px;display:none' });
     let file = null;
-    inp.onchange = async () => { file = inp.files[0]; if (!file) return; file = await shrinkImage(file); prev.src = URL.createObjectURL(file); prev.style.display = 'block'; send.disabled = false; };
+    const onPick = (el) => async () => { file = el.files[0]; if (!file) return; file = await shrinkImage(file); prev.src = URL.createObjectURL(file); prev.style.display = 'block'; send.disabled = false; };
+    inp.onchange = onPick(inp); if (lib) lib.onchange = onPick(lib);
     const send = h('button', { class: 'btn primary block', disabled: true, onclick: (e) => file && submit('photo', file, 'jpg', null, e.target) }, '提交照片');
-    box.append(inp, h('button', { class: 'btn block', onclick: () => inp.click() }, '拍照或選擇照片'), prev, h('div', { style: 'height:8px' }), send);
+    box.append(inp, h('button', { class: 'btn block', onclick: () => inp.click() }, pick ? '拍照' : '拍照或選擇照片'));
+    if (lib) box.append(lib, h('div', { style: 'height:6px' }), h('button', { class: 'btn block', onclick: () => lib.click() }, '從相簿選擇'));
+    box.append(prev, h('div', { style: 'height:8px' }), send);
   }
   if (s.kinds.includes('audio')) box.append(audioRecorder((blob, ext, btn) => submit('audio', blob, ext, null, btn)));
   return box;
