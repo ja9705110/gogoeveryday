@@ -1144,26 +1144,43 @@ const mmdd = (ymd, add) => { const d = new Date(ymd + 'T12:00:00+08:00'); d.setD
 async function finaleMedia(A) {
   const start = S.state.start_date;
   const chapters = []; const thumbs = {}; let voice = null;
+  // 一組照片（五隻貓、三個人…）：把每一張個別取回來，一張一張放
+  const setShots = async (day, stepId) => {
+    try {
+      const folder = `${S.pid}/${day}/set-${stepId}`;
+      const { data } = await sb.storage.from('evidence').list(folder, { limit: 200, sortBy: { column: 'name', order: 'desc' } });
+      const pick = {};
+      for (const f of data || []) { const m = f.name.match(/^(\d+)-/); if (m && !pick[m[1]]) pick[m[1]] = `${folder}/${f.name}`; }
+      const out = [];
+      for (const i of Object.keys(pick).map(Number).sort((x, y) => x - y)) { const u = await signedUrl(pick[i]); if (u) out.push(u); }
+      return out;
+    } catch (_) { return []; }
+  };
   for (const d of A.days) {
-    const ev = (d.evidence || []).filter((e) => e.path);
-    const photos = [];
-    for (const e of ev.filter((x) => x.kind === 'photo').slice(-2)) { const u = await signedUrl(e.path); if (u) photos.push(u); }
-    for (const ph of (d.day_photos || []).filter((x) => x.photo).slice(0, 1)) photos.push(ph.photo);
-    thumbs[d.day] = photos[0] || null;
-    let audio = null;
-    const au = ev.filter((x) => x.kind === 'audio');
-    if (d.day === 9) { const v = au.find((x) => x.step_id === 's_voice') || au[au.length - 1]; if (v) voice = mkAudio(await signedUrl(v.path)); }
-    else if (au.length) audio = mkAudio(await signedUrl(au[0].path));
-    chapters.push({ day: d.day, date: mmdd(start, d.day - 1), zone: `第 ${d.day} 區`, title: d.title, hint: FINALE_DAYS[d.day]?.hint || '', photos, audio, missed: d.status !== 'COMPLETED' });
+    const items = []; const audios = [];
+    for (const e of d.evidence || []) {
+      if (e.kind === 'photo' && e.path) {
+        const set = e.path.includes('/set-final-') ? await setShots(d.day, e.step_id) : [];
+        if (set.length) set.forEach((u) => items.push({ type: 'photo', url: u }));
+        else { const u = await signedUrl(e.path); if (u) items.push({ type: 'photo', url: u }); }
+      } else if (e.kind === 'audio' && e.path) {
+        const u = await signedUrl(e.path); if (!u) continue;
+        if (d.day === 9 && e.step_id === 's_voice') voice = mkAudio(u); // 給三十歲的自己：放在影片最後
+        else audios.push(mkAudio(u));
+      } else if (e.kind === 'text' && e.text) items.push({ type: 'text', text: e.text });
+    }
+    for (const ph of (d.day_photos || []).filter((x) => x.photo)) items.push({ type: 'photo', url: ph.photo });
+    thumbs[d.day] = (items.find((x) => x.type === 'photo') || {}).url || null;
+    chapters.push({ day: d.day, date: mmdd(start, d.day - 1), zone: `第 ${d.day} 區`, title: d.title, hint: FINALE_DAYS[d.day]?.hint || '', items, audios, missed: d.status !== 'COMPLETED' });
   }
   let photo = null; try { photo = await rpc('finale_photo', { p: S.pid }); } catch (_) {}
-  // 宇宙中心的「他」：你上傳的終章照片；沒有的話用他在鏡廳拍的自己
+  // 宇宙中心的他：你上傳的終章照片；沒有的話用他在鏡廳拍的自己
   let me = photo;
   if (!me) { const d4 = A.days.find((d) => d.day === 4); const r = (d4?.evidence || []).filter((e) => e.kind === 'photo' && e.path && e.step_id === 's_photo').pop(); if (r) me = await signedUrl(r.path); }
   const song = A.song ? mkAudio(await signedUrl(A.song, 'gifts')) : null;
   return { chapters, thumbs, ending: { voice, photo }, song, me };
 }
-const primeAll = (M) => [M.song, M.ending.voice, ...M.chapters.map((c) => c.audio)].forEach(primeAudio);
+const primeAll = (M) => [M.song, M.ending.voice, ...M.chapters.flatMap((c) => c.audios)].forEach(primeAudio);
 
 async function finale() {
   let A;
@@ -1182,10 +1199,10 @@ async function finale() {
   const thirtyKey = 'p030.thirty.' + S.pid;
   const showHunt = () => { huntBox.innerHTML = ''; hunt(huntBox); };
   let fav = prog.favorite_day || null;
-  const universe = () => ({ levels: M.chapters.map((c) => ({ day: c.day, title: c.title, thumb: M.thumbs[c.day], color: DAY_COLORS[(c.day - 1) % 10], missed: c.missed })), emotions: FINALE_EMOTIONS, me: M.me });
+  const universe = () => ({ levels: M.chapters.map((c) => ({ day: c.day, title: c.title, thumb: M.thumbs[c.day], color: DAY_COLORS[(c.day - 1) % 10], missed: c.missed })), emotions: FINALE_EMOTIONS, me: M.me, name: 'Jasper' });
   const runFilm = () => playFilm({ chapters: M.chapters.map((c) => ({ ...c, fav: c.day === fav })), universe: universe(), ending: M.ending, onDone: (what) => {
     if (what === 'replay') return runFilm();
-    if (M.song) { try { M.song.currentTime = 0; M.song.play().catch(() => {}); } catch (_) {} }
+    primeAudio(M.song); // 先生日快樂歌，唱完才播 NEON（在這一下點擊中先解鎖）
     localStorage.setItem(thirtyKey, '1');
     celebrate({ song: M.song, onHunt: () => { renderAfter(); showHunt(); huntBox.scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
   } });
@@ -1193,7 +1210,7 @@ async function finale() {
     body.innerHTML = '';
     body.append(h('div', { class: 'card glow' }, h('div', { class: 'kicker' }, 'FILE 030 · UNLOCKED'), h('p', {}, '你的宇宙，已經開始轉動。'),
       h('button', { class: 'btn primary block', onclick: () => { primeAll(M); runFilm(); } }, '▶ 播放回顧影片：11/08–11/18'),
-      localStorage.getItem(thirtyKey) ? h('button', { class: 'btn block', style: 'margin-top:8px', onclick: () => { if (M.song) { M.song.currentTime = 0; M.song.play().catch(() => {}); } celebrate({ song: M.song, onHunt: () => huntBox.scrollIntoView({ behavior: 'smooth' }) }); } }, '我 30 歲了！') : null));
+      localStorage.getItem(thirtyKey) ? h('button', { class: 'btn block', style: 'margin-top:8px', onclick: () => { primeAudio(M.song); celebrate({ song: M.song, onHunt: () => huntBox.scrollIntoView({ behavior: 'smooth' }) }); } }, '我 30 歲了！') : null));
   }
   if (prog.words_at) { renderAfter(); if (localStorage.getItem(thirtyKey)) showHunt(); return; }
   favoriteGame(A, M, body, async (d) => { fav = d; await spinUniverse(universe(), d, M.chapters.find((c) => c.day === d)); renderAfter(); runFilm(); });
