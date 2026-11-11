@@ -821,3 +821,9 @@ body::before { animation: none; }
 .film-bg .cosmos-cv { opacity: .6; }
 .film-fav { margin-top: 8px; font-size: 14px; letter-spacing: .2em; color: #ffd79a; text-shadow: 0 0 10px rgba(255, 181, 71, .7); }
 .film-end .btn.ghost { background: rgba(1, 4, 10, .6); }
+.film-quote { font-size: 18px; line-height: 1.8; letter-spacing: .04em; color: #fff3dc; text-shadow: 0 2px 12px #000; max-height: 40vh; overflow: hidden; }
+.film-mic { position: absolute; left: 16px; top: calc(26px + env(safe-area-inset-top)); z-index: 3; font-size: 12px; letter-spacing: .15em; color: #ffd79a; opacity: 0; transition: opacity .5s; }
+.film.talking .film-mic { opacity: 1; animation: evopulse 1.6s ease-in-out infinite; }
+.party-s { transition: opacity .6s; }
+.party-s.on { animation: lyricin .8s ease; }
+@keyframes lyricin { from { opacity: 0; transform: translateY(8px); } }

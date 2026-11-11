@@ -5,7 +5,7 @@
 //   mode 'story'：一步一步來（focus → split → showLevels → splitAll → gather）
 //   mode 'orbit'：一開始就是所有情緒圍繞著他（回顧影片的背景）
 export function mountCosmos(host, opts) {
-  const { levels = [], emotions = {}, me = null } = opts;
+  const { levels = [], emotions = {}, me = null, name = '你' } = opts;
   const labels = opts.labels !== false;
   const cv = document.createElement('canvas');
   cv.className = 'cosmos-cv';
@@ -101,11 +101,15 @@ export function mountCosmos(host, opts) {
     placed = true;
     if (meAlpha > 0.02) {
       const r = 0.1 * m * (1 + 0.03 * Math.sin(now / 500));
-      if (meImg) circleImg(meImg, cx, cy, r, '#ffd79a', meAlpha);
+      if (meImg) {
+        circleImg(meImg, cx, cy, r, '#ffd79a', meAlpha);
+        g.globalAlpha = meAlpha; g.fillStyle = '#ffe7b8'; g.font = `700 ${Math.round(r * 0.36)}px "Noto Sans TC", system-ui, sans-serif`; g.textAlign = 'center';
+        g.shadowColor = 'rgba(255,181,71,.8)'; g.shadowBlur = 12; g.fillText(name, cx, cy + r + r * 0.5); g.shadowBlur = 0; g.globalAlpha = 1;
+      }
       else {
         g.globalAlpha = meAlpha; const gr = g.createRadialGradient(cx, cy, 0, cx, cy, r * 1.8); gr.addColorStop(0, '#fff6dc'); gr.addColorStop(0.5, '#ffd79a'); gr.addColorStop(1, '#ffd79a00');
         g.fillStyle = gr; g.beginPath(); g.arc(cx, cy, r * 1.8, 0, 6.283); g.fill();
-        g.fillStyle = '#2a1a05'; g.font = `700 ${Math.round(r * 0.62)}px "Noto Sans TC", system-ui, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('你', cx, cy); g.textBaseline = 'alphabetic'; g.globalAlpha = 1;
+        g.fillStyle = '#2a1a05'; g.font = `700 ${Math.round(r * (name.length > 2 ? 0.42 : 0.62))}px "Noto Sans TC", system-ui, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(name, cx, cy); g.textBaseline = 'alphabetic'; g.globalAlpha = 1;
       }
     }
     front.forEach(drawEmotion);
