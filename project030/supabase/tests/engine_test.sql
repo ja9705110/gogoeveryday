@@ -473,10 +473,22 @@ select pg_temp.ok((select words_at is not null and words_tries = 3 from public.f
 select pg_temp.ok((public.finale_hunt(:'fz') ->> 'total') is not null, 'hunt opens after the last lock (no definition needed)');
 select pg_temp.ok(public.finale_song_allowed(), 'song readable once the finale is open');
 select public.admin_delete_test_profile(:'fz') \g /dev/null
+-- 終章：選一個最喜歡的關卡
+select public.admin_create_test_profile('終章最愛', null) as fv \gset
+select public.admin_test_jump(:'fv', 11) \g /dev/null
+select pg_temp.fails($$select public.finale_hunt('$$ || :'fv' || $$')$$, 'P030_DEFINE_FIRST', 'hunt locked before picking a favourite');
+select pg_temp.fails($$select public.finale_favorite('$$ || :'fv' || $$', 12)$$, 'P030_BAD_ANSWER', 'favourite must be one of the ten zones');
+select pg_temp.ok((public.finale_favorite(:'fv', 3) ->> 'day')::int = 3, 'favourite zone saved');
+select pg_temp.ok((select favorite_day = 3 and words_at is not null from public.finale_progress where profile_id = :'fv'), 'favourite unlocks the archive');
+select pg_temp.ok((public.finale_archive(:'fv') -> 'progress' ->> 'favorite_day')::int = 3, 'archive reports the favourite');
+select pg_temp.ok((public.finale_hunt(:'fv') ->> 'total') is not null, 'hunt opens after picking a favourite');
+select pg_temp.ok((public.get_state(:'fv') -> 'stats' -> 'choices' ->> 'choice:favorite')::int = 3, 'favourite visible to admin via choices');
+select public.admin_delete_test_profile(:'fv') \g /dev/null
 reset role; set search_path = public, extensions;
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000b', 'player@test.dev');
 set role authenticated;
 select pg_temp.fails($$select public.finale_words('$$ || :'pid' || $$', '["開始","理解","陪伴","自信","守護","接納","連結","取捨","肯定","成為"]')$$, 'P030_FINALE_LOCKED', 'last lock unavailable before the birthday');
+select pg_temp.fails($$select public.finale_favorite('$$ || :'pid' || $$', 1)$$, 'P030_FINALE_LOCKED', 'favourite pick unavailable before the birthday');
 reset role; set search_path = public, extensions;
 -- ════════════ 第 4 區：鏡前的自己 ════════════
 reset role; set search_path = public, extensions;

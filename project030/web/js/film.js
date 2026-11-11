@@ -1,5 +1,6 @@
 // 11/18 終章：回顧影片「11/08–11/18」與「我 30 歲了！」慶祝畫面
 import { sfx, ambience, duck } from './audio.js';
+import { mountCosmos } from './cosmos.js';
 
 const wait = (ms, tok) => new Promise((r) => { const id = setTimeout(r, ms); if (tok) tok.timers.push(() => { clearTimeout(id); r(); }); });
 const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; };
@@ -11,9 +12,11 @@ export function primeAudio(a) {
   try { a.muted = true; const pr = a.play(); if (pr) pr.then(() => { a.pause(); a.currentTime = 0; a.muted = false; }).catch(() => { a.muted = false; }); } catch (_) { a.muted = false; }
 }
 
-// chapters: [{ date, zone, word, def, photos: [url], audio: HTMLAudioElement|null, missed }]
+// chapters: [{ date, zone, title, hint, photos: [url], audio: HTMLAudioElement|null, missed, fav }]
+// bodies: 背景宇宙的十顆星球（mountCosmos）
 // ending: { voice: HTMLAudioElement|null, photo: url|null }
-export function playFilm({ chapters, ending, onDone }) {
+// 不替任何一天下定義：只放他當天的照片、聲音、日期和關卡名稱
+export function playFilm({ chapters, bodies, ending, onDone }) {
   const ov = el('div', 'film');
   const bg = el('div', 'film-bg');
   const img = el('div', 'film-img');
@@ -22,12 +25,14 @@ export function playFilm({ chapters, ending, onDone }) {
   const skip = el('button', 'btn ghost sm film-skip', '略過');
   ov.append(bg, img, cap, bar, skip);
   document.body.append(ov);
+  const cos = bodies && bodies.length ? mountCosmos(bg, bodies, { speed: 0.25, labels: false, planetScale: 0.8 }) : null;
   const tok = { stop: false, timers: [] };
   const total = 1 + chapters.length + 1; let done = 0;
   const progress = () => { bar.firstChild.style.width = `${Math.min(100, (100 * done) / total)}%`; };
   const clearAll = () => { tok.timers.splice(0).forEach((f) => f()); };
   const stopAudio = () => { [ending.voice, ...chapters.map((c) => c.audio)].forEach((a) => { try { a && a.pause(); } catch (_) {} }); duck(false); };
-  skip.onclick = () => { tok.stop = true; clearAll(); stopAudio(); };
+  const endCosmos = () => { if (cos) cos.stop(); };
+  skip.onclick = () => { tok.stop = true; clearAll(); stopAudio(); clearImg(); if (ending.photo) setTimeout(() => showImg(ending.photo), 1250); };
   ambience('ceremony', true);
 
   const caption = (html) => { cap.innerHTML = html; cap.classList.remove('on'); void cap.offsetWidth; cap.classList.add('on'); };
@@ -57,17 +62,18 @@ export function playFilm({ chapters, ending, onDone }) {
     for (const c of chapters) {
       if (tok.stop) break;
       clearImg();
-      caption(`<div class="film-date">${esc(c.date)}・${esc(c.zone)}</div><div class="film-word">${esc(c.word)}</div>`);
+      const star = c.fav ? '<div class="film-fav">★ 你最喜歡的一關</div>' : '';
+      caption(`<div class="film-date">${esc(c.date)}・${esc(c.zone)}</div><div class="film-word">${esc(c.title)}</div>${star}`);
       sfx('ping'); await wait(2600, tok); if (tok.stop) break;
       if (c.missed) {
-        caption(`<div class="film-date">${esc(c.date)}・${esc(c.zone)}</div><div class="film-line">這一段，你沒有來。<br>但它一樣是你。</div>`);
+        caption(`<div class="film-date">${esc(c.date)}・${esc(c.title)}</div><div class="film-line">這一段，你沒有來。<br>但它一樣在你的宇宙裡轉動。</div>`);
         await wait(3600, tok);
       } else {
-        caption(`<div class="film-date">${esc(c.date)}・${esc(c.word)}</div><div class="film-def">${esc(c.def)}</div>`);
+        caption(`<div class="film-date">${esc(c.date)}・${esc(c.title)}</div>${c.hint ? `<div class="film-def">${esc(c.hint)}</div>` : ''}${star}`);
         const clip = playClip(c.audio, 9000);
         const shots = c.photos.length ? c.photos.slice(0, 3) : [];
-        if (!shots.length) await wait(4200, tok);
-        for (const u of shots) { if (tok.stop) break; showImg(u); await wait(3400, tok); }
+        if (!shots.length) await wait(3600, tok);
+        for (const u of shots) { if (tok.stop) break; showImg(u); await wait(c.fav ? 4200 : 3400, tok); }
         await clip;
       }
       done++; progress();
@@ -78,9 +84,13 @@ export function playFilm({ chapters, ending, onDone }) {
       caption('<div class="film-date">11/18</div><div class="film-line">你對三十歲的自己說：</div><div class="film-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>');
       await wait(1200, tok); await playClip(ending.voice, 90000);
     }
-    if (!tok.stop && ending.photo) { showImg(ending.photo); await wait(800, tok); }
-    if (!tok.stop) { caption('<div class="film-word">30｜未完成的我</div>'); sfx('complete'); await wait(3200, tok); }
-    if (!tok.stop) { caption('<div class="film-line">定義權限已移交本人。<br>檔案狀態：持續更新中。</div>'); await wait(3200, tok); }
+    // 尾聲：宇宙一直在轉
+    clearImg(); if (cos) cos.speed(0.6);
+    for (const line of ['很多時候，我們會覺得自己停在原地。', '但其實每一分、每一秒，<br>你的世界都一直在運轉。', '每一個好，每一個壞，<br>都成了你宇宙的養分。', '讓你的宇宙，越來越豐富。', '所以，珍惜每一分、每一秒。']) {
+      if (tok.stop) break; caption(`<div class="film-line">${line}</div>`); await wait(3400, tok);
+    }
+    if (!tok.stop && cos) cos.speed(1.6);
+    if (!tok.stop && ending.photo) { showImg(ending.photo); sfx('complete'); await wait(3200, tok); }
     done = total; progress();
     stopAudio();
     skip.remove();
@@ -89,8 +99,8 @@ export function playFilm({ chapters, ending, onDone }) {
     const again = el('button', 'btn ghost sm', '再看一次');
     const box = el('div', 'film-end'); box.append(go, again);
     caption(''); ov.append(box);
-    again.onclick = () => { ov.remove(); onDone && onDone('replay'); };
-    go.onclick = () => { ov.remove(); onDone && onDone('thirty'); };
+    again.onclick = () => { endCosmos(); ov.remove(); onDone && onDone('replay'); };
+    go.onclick = () => { endCosmos(); ov.remove(); onDone && onDone('thirty'); };
   })();
 }
 
