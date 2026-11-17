@@ -328,6 +328,8 @@ async function overview(body) {
         h('p', { class: 'dim', style: 'font-size:12px' }, '第 4 天鏡廳，他點選「像自己」的詞。缺點會在鏡子裡翻成另一面。'),
         h('div', { style: 'display:flex;flex-wrap:wrap;gap:6px' }, ...picked.map((t) => h('span', { class: 'status-pill', style: t.flip ? 'color:#cfe9ff' : 'color:#ffd79a' }, t.flip ? `${t.label} → ${t.flip[0]}` : t.label)))));
     }
+    const fn = (p.stats.choices || {})['choice:note'];
+    if (fn) body.append(h('div', { class: 'card', style: 'border-color:rgba(255,215,154,.6)' }, h('h2', {}, `終章・${ov.settings.player_name || '壽星'}送給三十歲自己的話`), h('p', { style: 'font-size:17px' }, '「' + String(fn) + '」')));
     const fc = (p.stats.choices || {})['choice:color'];
     if (fc) body.append(h('div', { class: 'card' }, h('h2', {}, `終章・${ov.settings.player_name || '壽星'}代表自己的顏色`),
       h('div', { class: 'row' }, h('span', { style: `display:inline-block;width:42px;height:42px;border-radius:50%;background:${String(fc).replace(/[^#0-9a-f]/gi, '')};box-shadow:0 0 14px ${String(fc).replace(/[^#0-9a-f]/gi, '')}` }), h('span', { class: 'mono', style: 'margin-left:10px' }, String(fc)))));
@@ -594,6 +596,72 @@ async function finale(body) {
       cur,
       !('song_path' in data) ? h('div', { class: 'msg bad' }, '資料庫還沒有「終章歌曲」欄位：請先在 Supabase 貼上 30 號 SQL（20261108000030_finale_film.sql），再回來上傳。') : null,
       player, sin, h('button', { class: 'btn primary', style: 'margin-top:8px', onclick: () => sin.click() }, data.song_path ? '更換歌曲' : '上傳歌曲'), smsg));
+  }
+  // 給他的話：回顧影片的結尾，一行一段字幕（只存在資料庫，生日當天才會送到玩家端）
+  {
+    const has = 'letter' in data;
+    const ta = h('textarea', { rows: 16, placeholder: '一行一段字幕。例如：\n這十天，有好幾天你沒有來。\n我沒有催你……', style: 'width:100%' }); ta.value = data.letter || '';
+    const lmsg = h('div', { class: 'msg' });
+    const save = h('button', { class: 'btn primary', style: 'margin-top:8px' }, '儲存');
+    save.onclick = async () => {
+      save.disabled = true; lmsg.className = 'msg'; lmsg.textContent = '儲存中…';
+      try { const { error: e } = await sb.from('finale_config').update({ letter: ta.value.trim() || null, updated_at: new Date().toISOString() }).eq('id', 1); if (e) throw e; data.letter = ta.value; lmsg.className = 'msg good'; lmsg.textContent = `已儲存（${ta.value.split(/\n+/).filter((x) => x.trim()).length} 段字幕）。`; }
+      catch (e) { lmsg.className = 'msg bad'; lmsg.textContent = errText(e); }
+      save.disabled = false;
+    };
+    body.append(h('div', { class: 'card' }, h('h2', {}, '給他的話（回顧影片結尾）'),
+      h('p', { class: 'dim', style: 'font-size:13px' }, '在十天的回顧之後播放：一行就是一段字幕，依序出現；播放時，他的宇宙會慢慢崩離。接著是下面的「回憶」，最後他寫一句話給三十歲的自己，宇宙重新轉動。'),
+      !has ? h('div', { class: 'msg bad' }, '資料庫還沒有這個欄位：請先在 Supabase 貼上 catchup_all.sql（全部補齊）。') : null, ta, save, lmsg));
+  }
+  // 回憶：小時候的照片、家人朋友的影片（存在私人資料夾 gifts/finale/memories/）
+  {
+    const has = 'memories' in data;
+    const items = [...(data.memories || [])];
+    const list = h('div');
+    const mmsg = h('div', { class: 'msg' });
+    const persist = async () => { const { error: e } = await sb.from('finale_config').update({ memories: items, updated_at: new Date().toISOString() }).eq('id', 1); if (e) throw e; data.memories = [...items]; };
+    const draw = () => {
+      list.innerHTML = '';
+      items.forEach((m, i) => {
+        const prev = m.kind === 'video' ? h('video', { controls: '', preload: 'metadata', playsinline: '', style: 'width:120px;max-height:120px;background:#000' }) : h('img', { style: 'width:120px;max-height:120px;object-fit:cover' });
+        signedUrl(m.path, 'gifts').then((u) => u && (prev.src = u));
+        const cap = h('input', { type: 'text', placeholder: m.kind === 'video' ? '說明（例如：媽媽想對你說）' : '說明（例如：五歲的你）', value: m.caption || '' });
+        cap.oninput = () => { m.caption = cap.value; };
+        const mv = (d) => { const j = i + d; if (j < 0 || j >= items.length) return; [items[i], items[j]] = [items[j], items[i]]; draw(); };
+        list.append(h('div', { class: 'card', style: 'display:flex;gap:10px;align-items:flex-start' }, prev,
+          h('div', { style: 'flex:1' }, h('div', { class: 'mono faint', style: 'font-size:11px' }, `${i + 1}・${m.kind === 'video' ? '影片' : '照片'}`), cap,
+            h('div', { class: 'row', style: 'margin-top:6px' },
+              h('button', { class: 'btn sm ghost', onclick: () => mv(-1) }, '↑'), h('button', { class: 'btn sm ghost', onclick: () => mv(1) }, '↓'),
+              h('button', { class: 'btn sm ghost', onclick: async () => { if (!confirm('刪除這一項？')) return; const [x] = items.splice(i, 1); draw(); try { await persist(); sb.storage.from('gifts').remove([x.path]).catch(() => {}); mmsg.className = 'msg good'; mmsg.textContent = '已刪除。'; } catch (e) { mmsg.className = 'msg bad'; mmsg.textContent = errText(e); } } }, '刪除')))));
+      });
+      if (!items.length) list.append(h('div', { class: 'dim', style: 'font-size:13px' }, '還沒有上傳。'));
+    };
+    const inp = h('input', { type: 'file', accept: 'image/*,video/*', multiple: '', class: 'hidden' });
+    inp.onchange = async () => {
+      const files = [...inp.files]; inp.value = ''; if (!files.length) return;
+      let ok = 0;
+      for (const [n, f] of files.entries()) {
+        const isVideo = /^video\//.test(f.type) || /\.(mov|mp4|m4v|webm)$/i.test(f.name);
+        mmsg.className = 'msg'; mmsg.textContent = `上傳中… ${n + 1} / ${files.length}${isVideo ? '（影片比較大，需要一點時間）' : ''}`;
+        try {
+          let blob = f, ext = (f.name.split('.').pop() || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          if (isVideo) { if (f.size > 50 * 1024 * 1024) throw new Error(`「${f.name}」超過 50 MB，請先壓縮（例如用 LINE 傳給自己再存下來）或剪短。`); ext = ext || 'mp4'; }
+          else { const bmp = await createImageBitmap(f); const k = Math.min(1, 1800 / Math.max(bmp.width, bmp.height)); const c = document.createElement('canvas'); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k); c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height); blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.88)); ext = 'jpg'; }
+          const path = `finale/memories/${Date.now()}-${n}.${ext}`;
+          const ctype = isVideo ? (f.type || ({ mov: 'video/quicktime', webm: 'video/webm' }[ext] || 'video/mp4')) : 'image/jpeg';
+          const { error: e1 } = await sb.storage.from('gifts').upload(path, blob, { contentType: ctype, upsert: false });
+          if (e1) throw e1;
+          items.push({ kind: isVideo ? 'video' : 'photo', path, caption: '' }); ok++;
+        } catch (e) { mmsg.className = 'msg bad'; mmsg.textContent = errText(e); }
+      }
+      try { await persist(); draw(); if (ok) { mmsg.className = 'msg good'; mmsg.textContent = `已上傳 ${ok} 個。可以加上說明、調整順序，再按「儲存」。`; } } catch (e) { mmsg.className = 'msg bad'; mmsg.textContent = errText(e); }
+    };
+    const saveM = h('button', { class: 'btn primary', onclick: async () => { try { await persist(); mmsg.className = 'msg good'; mmsg.textContent = '已儲存順序與說明。'; } catch (e) { mmsg.className = 'msg bad'; mmsg.textContent = errText(e); } } }, '儲存');
+    body.append(h('div', { class: 'card' }, h('h2', {}, '回憶：小時候的照片、家人朋友的影片'),
+      h('p', { class: 'dim', style: 'font-size:13px' }, '「給他的話」之後依序播放。照片會自動縮小；影片每個 50 MB 以內（iPhone 錄的 .mov 可以直接傳）。影片在他手機上要點一下「▶ 有人想對你說話」才會播放，這樣才有聲音。檔案存在私人資料夾，生日當天之前他看不到。'),
+      !has ? h('div', { class: 'msg bad' }, '資料庫還沒有這個欄位：請先在 Supabase 貼上 catchup_all.sql（全部補齊）。') : null,
+      list, inp, h('div', { class: 'row wrap', style: 'margin-top:8px' }, h('button', { class: 'btn', onclick: () => inp.click() }, '＋ 上傳照片或影片'), saveM), mmsg));
+    draw();
   }
   // 最終照片：星球在終章會化為這張照片（只存在資料庫，生日當天才會送到玩家端）
   const prev = h('img', { style: 'max-width:220px;max-height:280px;display:' + (data.photo ? 'block' : 'none') + ';margin:8px 0;border:1px solid var(--line)' });

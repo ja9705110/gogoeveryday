@@ -486,12 +486,21 @@ select pg_temp.ok((public.get_state(:'fv') -> 'stats' -> 'choices' ->> 'choice:f
 select pg_temp.fails($$select public.finale_color('$$ || :'fv' || $$', 'red; drop')$$, 'P030_BAD_ANSWER', 'colour must be #rrggbb');
 select pg_temp.ok((public.finale_color(:'fv', '#3FA9F5') ->> 'color') = '#3fa9f5', 'colour saved');
 select pg_temp.ok((public.finale_archive(:'fv') -> 'choices' ->> 'choice:color') = '#3fa9f5', 'archive returns his colour');
+reset role; set search_path = public, extensions;
+update public.finale_config set letter = '第一行' || chr(10) || '第二行', memories = '[{"kind":"photo","path":"finale/memories/a.jpg","caption":"小時候"}]' where id = 1;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a', 'admin@test.dev');
+set role authenticated;
+select pg_temp.ok((public.finale_extras(:'fv') ->> 'letter') like '第一行%' and jsonb_array_length(public.finale_extras(:'fv') -> 'memories') = 1, 'finale gives the letter and memories');
+select pg_temp.fails($$select public.finale_note('$$ || :'fv' || $$', '   ')$$, 'P030_BAD_ANSWER', 'note cannot be empty');
+select pg_temp.ok((public.finale_note(:'fv', '三十歲，辛苦了。') ->> 'ok')::boolean, 'note to the 30-year-old self saved');
+select pg_temp.ok((public.finale_archive(:'fv') -> 'progress' ->> 'note') = '三十歲，辛苦了。', 'archive returns the note');
 select public.admin_delete_test_profile(:'fv') \g /dev/null
 reset role; set search_path = public, extensions;
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000b', 'player@test.dev');
 set role authenticated;
 select pg_temp.fails($$select public.finale_words('$$ || :'pid' || $$', '["開始","理解","陪伴","自信","守護","接納","連結","取捨","肯定","成為"]')$$, 'P030_FINALE_LOCKED', 'last lock unavailable before the birthday');
 select pg_temp.fails($$select public.finale_favorite('$$ || :'pid' || $$', 1)$$, 'P030_FINALE_LOCKED', 'favourite pick unavailable before the birthday');
+select pg_temp.fails($$select public.finale_extras('$$ || :'pid' || $$')$$, 'P030_FINALE_LOCKED', 'letter and memories hidden before the birthday');
 reset role; set search_path = public, extensions;
 -- ════════════ 第 4 區：鏡前的自己 ════════════
 reset role; set search_path = public, extensions;

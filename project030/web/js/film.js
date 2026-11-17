@@ -21,7 +21,12 @@ const realPlay = (a) => { a._prime = null; a.muted = false; return a.play(); };
 // universe: 背景宇宙（所有情緒圍繞著他轉動，mountCosmos）
 // ending: { voice: HTMLAudioElement|null, photo: url|null }
 // 不替任何一天下定義：只放他當天的照片、聲音、日期和關卡名稱
-export function playFilm({ chapters, universe, ending, onDone }) {
+// 沒有填「給他的話」時的備用結尾
+const DEFAULT_LETTER = ['很多時候，我們會覺得自己停在原地。', '但其實每一分、每一秒，你的世界都一直在運轉。', '每一個好，每一個壞，都成了你宇宙的養分。', '所以，珍惜每一分、每一秒。'];
+
+// letter：給他的話（每一行一段字幕）；memories：[{ kind: 'photo'|'video', url, caption }]
+// note：他已經寫過的那句話（重播時）；onNote(text)：送出他寫給三十歲自己的話
+export function playFilm({ chapters, universe, ending, letter = '', memories = [], note = null, onNote, onDone }) {
   const ov = el('div', 'film');
   const bg = el('div', 'film-bg');
   const img = el('div', 'film-img');
@@ -29,6 +34,7 @@ export function playFilm({ chapters, universe, ending, onDone }) {
   const bar = el('div', 'film-bar', '<i></i>');
   const mic = el('div', 'film-mic', '🎙 你的聲音');
   const skip = el('button', 'btn ghost sm film-skip', '略過');
+  let activeVideo = null;
   ov.append(bg, img, cap, bar, mic, skip);
   document.body.append(ov);
   const cos = universe ? mountCosmos(bg, { ...universe, mode: 'orbit', speed: 0.25, cy: 0.42 }) : null;
@@ -38,7 +44,7 @@ export function playFilm({ chapters, universe, ending, onDone }) {
   const clearAll = () => { tok.timers.splice(0).forEach((f) => f()); };
   const stopAudio = () => { [ending.voice, ...chapters.flatMap((c) => c.audios || [])].forEach((a) => { try { a && a.pause(); } catch (_) {} }); duck(false); };
   const endCosmos = () => { if (cos) cos.stop(); };
-  skip.onclick = () => { tok.stop = true; clearAll(); stopAudio(); clearImg(); if (ending.photo) setTimeout(() => showImg(ending.photo), 1250); };
+  skip.onclick = () => { tok.stop = true; clearAll(); stopAudio(); clearImg(); if (activeVideo) activeVideo(); };
   ambience('ceremony', true);
 
   const caption = (html) => { cap.innerHTML = html; cap.classList.remove('on'); void cap.offsetWidth; cap.classList.add('on'); };
@@ -58,6 +64,36 @@ export function playFilm({ chapters, universe, ending, onDone }) {
     duck(false);
   };
 
+  // 家人的影片：點一下才播放（iPhone 要「點擊」才能有聲音）
+  const playVideo = (m) => new Promise((resolve) => {
+    const box = el('div', 'film-video');
+    const v = document.createElement('video'); v.src = m.url; v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'auto';
+    const tap = el('button', 'btn primary film-vplay', '▶ 有人想對你說話');
+    const cap2 = el('div', 'film-vcap', m.caption ? esc(m.caption) : '');
+    const next = el('button', 'btn ghost sm film-vnext', '繼續 ›');
+    box.append(v, cap2, tap, next); ov.append(box);
+    let ended = false;
+    const end = () => { if (ended) return; ended = true; activeVideo = null; try { v.pause(); } catch (_) {} duck(false); box.classList.add('out'); setTimeout(() => box.remove(), 500); resolve(); };
+    activeVideo = end;
+    tap.onclick = () => { tap.remove(); duck(true); v.play().catch(() => {}); };
+    v.onended = end; next.onclick = end;
+  });
+  // 送三十歲的自己一句話
+  const askNote = () => new Promise((resolve) => {
+    const box = el('div', 'film-note');
+    box.innerHTML = '<div class="kicker">TO: JASPER, 30</div><h2>最後，送三十歲的自己一句話。</h2>';
+    const ta = document.createElement('textarea'); ta.maxLength = 500; ta.placeholder = '寫給三十歲的你……';
+    const msg = el('div', 'msg');
+    const send = el('button', 'btn primary block', '送出');
+    box.append(ta, msg, send); ov.append(box); setTimeout(() => ta.focus(), 300);
+    send.onclick = async () => {
+      const t = ta.value.trim(); if (!t) { msg.className = 'msg bad'; msg.textContent = '寫一句話給自己吧，一句就好。'; return; }
+      send.disabled = true;
+      try { onNote && (await onNote(t)); } catch (_) {}
+      box.classList.add('out'); setTimeout(() => box.remove(), 500); resolve(t);
+    };
+  });
+
   (async () => {
     // 序幕
     for (const line of ['第 1118 號觀察員', '11/08 – 11/18', '這十天，其實是你的三十年。', '有些你經歷過，有些也許還沒有。<br>就當作，是給你的一面鏡子。']) {
@@ -72,8 +108,11 @@ export function playFilm({ chapters, universe, ending, onDone }) {
       caption(`<div class="film-date">${esc(c.date)}・${esc(c.zone)}</div><div class="film-word">${esc(c.title)}</div>${star}`);
       sfx('ping'); await wait(2600, tok); if (tok.stop) break;
       if (c.missed) {
-        caption(`<div class="film-date">${esc(c.date)}・${esc(c.title)}</div><div class="film-line">這一段，你沒有來。<br>但它一樣在你的宇宙裡轉動。</div>`);
-        await wait(3600, tok);
+        // 錯過的那一天：錯過了就不會再回來，它沉回海底，從宇宙裡消失
+        ov.classList.add('missing');
+        caption(`<div class="film-date">${esc(c.date)}・${esc(c.title)}</div><div class="film-line">這一段，你錯過了。<br>錯過的，就不會再回來——<br>它沉回了海底，從你的宇宙裡消失。</div>`);
+        sfx('sink'); await wait(4200, tok);
+        ov.classList.remove('missing');
       } else {
         // 這一天他留下的每一張照片、每一段文字；錄音同時一段一段播放
         const base = `<div class="film-date">${esc(c.date)}・${esc(c.title)}</div>`;
@@ -102,16 +141,40 @@ export function playFilm({ chapters, universe, ending, onDone }) {
       caption('<div class="film-date">11/18</div><div class="film-line">你對三十歲的自己說：</div><div class="film-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>');
       await wait(1200, tok); await playClip(ending.voice, 90000);
     }
-    // 尾聲：宇宙一直在轉
-    clearImg(); if (cos) cos.speed(0.6);
-    for (const line of ['很多時候，我們會覺得自己停在原地。', '但其實每一分、每一秒，<br>你的世界都一直在運轉。', '每一個好，每一個壞，<br>都成了你宇宙的養分。', '讓你的宇宙，越來越豐富。', '所以，珍惜每一分、每一秒。']) {
-      if (tok.stop) break; caption(`<div class="film-line">${line}</div>`); await wait(3400, tok);
+    // 尾聲一：給他的話。說著說著，宇宙開始崩離
+    clearImg();
+    const lines = String(letter || '').split(/\n+/).map((x) => x.trim()).filter(Boolean);
+    if (!tok.stop) {
+      if (cos) cos.collapse();
+      for (const line of (lines.length ? lines : DEFAULT_LETTER)) {
+        if (tok.stop) break;
+        caption(`<div class="film-letter">${esc(line)}</div>`);
+        await wait(Math.min(10000, 2800 + line.length * 120), tok);
+      }
     }
-    if (!tok.stop && cos) cos.speed(1.6);
-    if (!tok.stop && ending.photo) { showImg(ending.photo); sfx('complete'); await wait(3200, tok); }
-    done = total; progress();
+    // 尾聲二：小時候的照片、家人朋友想對他說的話
+    const mem = (memories || []).filter((m) => m && m.url);
+    if (!tok.stop && mem.length) {
+      caption('<div class="film-line">接下來，是一直站在你身後的人。</div>'); await wait(3400, tok);
+      for (const m of mem) {
+        if (tok.stop) break;
+        if (m.kind === 'video') { clearImg(); caption(''); await playVideo(m); }
+        else { showImg(m.url); caption(m.caption ? `<div class="film-def">${esc(m.caption)}</div>` : ''); await wait(4200, tok); }
+      }
+      clearImg();
+    }
     stopAudio();
     skip.remove();
+    // 尾聲三：送三十歲的自己一句話 → 原本要崩離的宇宙，再一次轉動
+    if (cos) cos.collapse();
+    const said = note || (await askNote());
+    const t2 = { stop: false, timers: [] };
+    if (cos) cos.respin(); sfx('complete');
+    caption(`<div class="film-line">你對三十歲的自己說：</div><div class="film-quote">「${esc(said)}」</div>`); await wait(Math.min(9000, 4200 + said.length * 80), t2);
+    caption('<div class="film-line">不管你選了什麼，<br>家人和朋友，永遠是你背後的後盾。</div>'); await wait(4600, t2);
+    caption('<div class="film-line">所以你的宇宙，<br>會再一次轉動。</div>'); await wait(3800, t2);
+    if (ending.photo) { showImg(ending.photo); await wait(3200, t2); }
+    done = total; progress();
     // 結尾按鈕
     const go = el('button', 'btn primary film-go', '我 30 歲了！');
     const again = el('button', 'btn ghost sm', '再看一次');
