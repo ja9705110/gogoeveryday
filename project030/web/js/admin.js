@@ -616,10 +616,36 @@ async function finale(body) {
   // 回憶：小時候的照片、家人朋友的影片（存在私人資料夾 gifts/finale/memories/）
   {
     const has = 'memories' in data;
-    const items = [...(data.memories || [])];
+    const items = (data.memories || []).filter((m) => m.kind !== 'music');
+    let music = (data.memories || []).find((m) => m.kind === 'music') || null; // 回憶的背景音樂（最好的時光）
     const list = h('div');
     const mmsg = h('div', { class: 'msg' });
-    const persist = async () => { const { error: e } = await sb.from('finale_config').update({ memories: items, updated_at: new Date().toISOString() }).eq('id', 1); if (e) throw e; data.memories = [...items]; };
+    const persist = async () => { const all = [...items, ...(music ? [music] : [])]; const { error: e } = await sb.from('finale_config').update({ memories: all, updated_at: new Date().toISOString() }).eq('id', 1); if (e) throw e; data.memories = all; };
+    // 背景音樂
+    const mPlayer = h('audio', { controls: '', preload: 'none', style: 'width:100%;margin-top:6px;display:' + (music ? 'block' : 'none') });
+    if (music) signedUrl(music.path, 'gifts').then((u) => u && (mPlayer.src = u));
+    const mName = h('div', { class: 'mono', style: 'font-size:12px' }, music ? '目前：' + (music.caption || music.path.split('/').pop()) : '尚未上傳');
+    const mInp = h('input', { type: 'file', class: 'hidden' });
+    mInp.onchange = async () => {
+      const f = mInp.files[0]; mInp.value = ''; if (!f) return;
+      const ext = (f.name.split('.').pop() || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (!/^audio\//.test(f.type || '') && !['mp3', 'm4a', 'aac', 'wav'].includes(ext)) { mmsg.className = 'msg bad'; mmsg.textContent = `這不是音樂檔（${f.name}）。請選 mp3 或 m4a。`; return; }
+      if (f.size > 50 * 1024 * 1024) { mmsg.className = 'msg bad'; mmsg.textContent = '音樂檔超過 50 MB。'; return; }
+      mmsg.className = 'msg'; mmsg.textContent = '背景音樂上傳中…';
+      try {
+        const path = `finale/memories/bgm-${Date.now()}.${ext || 'mp3'}`;
+        const ctype = /^audio\//.test(f.type || '') ? f.type : ({ m4a: 'audio/mp4', aac: 'audio/aac', wav: 'audio/wav' }[ext] || 'audio/mpeg');
+        const { error: e1 } = await sb.storage.from('gifts').upload(path, f, { contentType: ctype, upsert: false }); if (e1) throw e1;
+        const old = music; music = { kind: 'music', path, caption: f.name.replace(/\.[^.]+$/, '') }; await persist();
+        if (old) sb.storage.from('gifts').remove([old.path]).catch(() => {});
+        const u = await signedUrl(path, 'gifts'); if (u) { mPlayer.src = u; mPlayer.style.display = 'block'; }
+        mName.textContent = '目前：' + music.caption; mmsg.className = 'msg good'; mmsg.textContent = '背景音樂已上傳：' + f.name;
+      } catch (e) { mmsg.className = 'msg bad'; mmsg.textContent = errText(e); }
+    };
+    const musicBox = h('div', { class: 'card', style: 'border-color:rgba(255,215,154,.45)' }, h('b', {}, '♪ 背景音樂（例如：最好的時光）'),
+      h('p', { class: 'dim', style: 'font-size:12px;margin:4px 0' }, '回憶一開始，他點「▶ 打開回憶」就開始播；看家人影片時會先暫停，看完點「繼續」接著播；一直陪到他寫完那句話，按下「我 30 歲了！」才停。'),
+      mName, mPlayer, mInp, h('div', { class: 'row', style: 'margin-top:6px' }, h('button', { class: 'btn sm', onclick: () => mInp.click() }, music ? '更換音樂' : '上傳音樂'),
+        h('button', { class: 'btn sm ghost', onclick: async () => { if (!music || !confirm('移除背景音樂？')) return; const old = music; music = null; try { await persist(); sb.storage.from('gifts').remove([old.path]).catch(() => {}); mName.textContent = '尚未上傳'; mPlayer.style.display = 'none'; mmsg.className = 'msg good'; mmsg.textContent = '已移除背景音樂。'; } catch (e) { mmsg.className = 'msg bad'; mmsg.textContent = errText(e); } } }, '移除')));
     const draw = () => {
       list.innerHTML = '';
       items.forEach((m, i) => {
@@ -676,7 +702,7 @@ async function finale(body) {
     body.append(h('div', { class: 'card' }, h('h2', {}, '回憶：小時候的照片、家人朋友的影片'),
       h('p', { class: 'dim', style: 'font-size:13px' }, '「給他的話」之後依序播放。照片會自動縮小；影片每個 50 MB 以內（iPhone 錄的 .mov 可以直接傳）。影片在他手機上要點一下「▶ 有人想對你說話」才會播放，這樣才有聲音。檔案存在私人資料夾，生日當天之前他看不到。'),
       !has ? h('div', { class: 'msg bad' }, '資料庫還沒有這個欄位：請先在 Supabase 貼上 catchup_all.sql（全部補齊）。') : null,
-      list, inp, h('div', { class: 'row wrap', style: 'margin-top:8px' }, h('button', { class: 'btn', onclick: () => inp.click() }, '＋ 上傳照片或影片'), saveM), mmsg));
+      musicBox, list, inp, h('div', { class: 'row wrap', style: 'margin-top:8px' }, h('button', { class: 'btn', onclick: () => inp.click() }, '＋ 上傳照片或影片'), saveM), mmsg));
     draw();
   }
   // 最終照片：星球在終章會化為這張照片（只存在資料庫，生日當天才會送到玩家端）

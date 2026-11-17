@@ -1234,13 +1234,17 @@ async function finaleMedia(A) {
   const song = A.song ? mkAudio(await signedUrl(A.song, 'gifts')) : null;
   const hb = await renderBirthdaySong(); // 生日快樂歌：先做成一般音檔，iPhone 靜音模式也聽得到
   // 給他的話、小時候的照片、家人朋友的影片（只在終章當天從資料庫取得）
-  let letter = '', memories = [];
+  let letter = '', memories = [], bgm = null;
   try {
     const X = await rpc('finale_extras', { p: S.pid });
     letter = X.letter || '';
-    for (const m of X.memories || []) { const u = m && m.path ? await signedUrl(m.path, 'gifts') : null; if (u) memories.push({ kind: m.kind === 'video' ? 'video' : 'photo', url: u, caption: m.caption || '' }); }
+    for (const m of X.memories || []) {
+      const u = m && m.path ? await signedUrl(m.path, 'gifts') : null; if (!u) continue;
+      if (m.kind === 'music') { if (!bgm) { bgm = mkAudio(u); if (bgm) bgm.loop = true; } continue; } // 回憶的背景音樂（最好的時光）
+      memories.push({ kind: m.kind === 'video' ? 'video' : 'photo', url: u, caption: m.caption || '' });
+    }
   } catch (_) {}
-  return { chapters, thumbs, ending: { voice, photo }, song, hb, me, letter, memories, preview: !!real };
+  return { chapters, thumbs, ending: { voice, photo }, song, hb, me, letter, memories, bgm, preview: !!real };
 }
 // 只預先解鎖影片裡的錄音；生日快樂歌與 NEON 都是在按鈕按下的當下才播，不需要（也不能）先試播
 const primeAll = (M) => [M.ending.voice, ...M.chapters.flatMap((c) => c.audios)].forEach(primeAudio);
@@ -1269,7 +1273,7 @@ async function finale() {
   const noteKey = 'p030.note.' + S.pid;
   let note = prog.note || (() => { try { return localStorage.getItem(noteKey); } catch (_) { return null; } })() || null;
   const onNote = async (t) => { note = t; try { localStorage.setItem(noteKey, t); } catch (_) {} try { await rpc('finale_note', { p: S.pid, note: t }); } catch (_) {} };
-  const runFilm = () => playFilm({ chapters: M.chapters.map((c) => ({ ...c, fav: c.day === fav })), universe: universe(), ending: M.ending, letter: M.letter, memories: M.memories, note, onNote, onDone: (what) => {
+  const runFilm = () => playFilm({ chapters: M.chapters.map((c) => ({ ...c, fav: c.day === fav })), universe: universe(), ending: M.ending, letter: M.letter, memories: M.memories, bgm: M.bgm, note, onNote, onDone: (what) => {
     if (what === 'replay') return fullShow();
     localStorage.setItem(thirtyKey, '1');
     celebrate({ song: M.song, hb: M.hb, onHunt: () => { renderAfter(); showHunt(); huntBox.scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
