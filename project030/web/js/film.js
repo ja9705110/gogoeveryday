@@ -22,8 +22,10 @@ const realPlay = (a) => { a._prime = null; a.muted = false; return a.play(); };
 export function makeBgm(url) {
   const C = window.AudioContext || window.webkitAudioContext;
   let ctx = null, gain = null, src = null, buf = null, el = null, started = false, low = false;
-  let finished = null, doneP = Promise.resolve(); // 歌播完的時候
+  let finished = null, doneP = Promise.resolve(), t0 = 0, tick = null; // 第一次完整播完的時候
   const newDone = () => { doneP = new Promise((r) => { finished = r; }); };
+  const songLen = () => (buf ? buf.duration : el && isFinite(el.duration) ? el.duration : 0);
+  const watchFirstPass = () => { t0 = performance.now(); clearInterval(tick); tick = setInterval(() => { const L = songLen(); if (L && (performance.now() - t0) / 1000 >= L) { clearInterval(tick); finished && finished(); } }, 400); };
   const HI = 0.85, LO = 0.14;
   (async () => {
     try {
@@ -41,19 +43,20 @@ export function makeBgm(url) {
       if (buf && ctx) {
         try { ctx.resume(); } catch (_) {}
         gain = ctx.createGain(); gain.gain.setValueAtTime(0, ctx.currentTime); gain.connect(ctx.destination);
-        src = ctx.createBufferSource(); src.buffer = buf; src.loop = false; src.connect(gain); src.onended = () => finished && finished(); src.start(); // 完整播一次，不重複
+        src = ctx.createBufferSource(); src.buffer = buf; src.loop = true; src.connect(gain); src.start(); // 一直重複播，直到他按下「我 30 歲了！」
+        watchFirstPass();
         gain.gain.linearRampToValueAtTime(level(), ctx.currentTime + 2);
       } else { // 還沒解碼好：先用一般播放器（不能調音量，但至少有歌）
-        el = new Audio(url); el.loop = false; el.setAttribute('playsinline', ''); el.onended = () => finished && finished(); el.play().catch(() => finished && finished());
+        el = new Audio(url); el.loop = true; el.setAttribute('playsinline', ''); el.play().catch(() => finished && finished()); watchFirstPass();
       }
     },
     // 影片播放時：音樂不停，只是變小聲
     duck(on) { low = on; if (gain && ctx) gain.gain.setTargetAtTime(level(), ctx.currentTime, 0.6); else if (el) { try { el.volume = on ? 0.2 : 1; if (el.paused) el.play().catch(() => {}); } catch (_) {} } },
-    // 等歌播完（沒在播就馬上結束）
+    // 等歌第一次完整播完（沒在播就馬上結束）；之後歌還會繼續重複播
     whenDone() { return started ? doneP : Promise.resolve(); },
     keepAlive() { if (el && el.paused && started) el.play().catch(() => {}); },
     stop() {
-      started = false; if (finished) finished();
+      started = false; clearInterval(tick); if (finished) finished();
       try { if (gain && ctx) { gain.gain.setTargetAtTime(0, ctx.currentTime, 0.35); const s0 = src; setTimeout(() => { try { s0.stop(); } catch (_) {} }, 1600); } } catch (_) {}
       try { if (el) el.pause(); } catch (_) {}
       gain = null; src = null; el = null;
@@ -253,7 +256,7 @@ export function playFilm({ chapters, universe, ending, letter = '', memories = [
     caption('<div class="film-line">不管你選了什麼，<br>家人和朋友，永遠是你背後的後盾。</div>'); await wait(4600, t2);
     caption('<div class="film-line">所以你的宇宙，<br>會再一次轉動。</div>'); await wait(3800, t2);
     if (ending.photo) { showImg(ending.photo); await wait(3200, t2); }
-    // 讓「最好的時光」完整播完，播完才出現「我 30 歲了！」
+    // 「最好的時光」至少完整播過一遍才出現「我 30 歲了！」；歌會一直重複播，直到他按下去
     if (bgm) { caption(''); await bgm.whenDone(); await wait(800, t2); }
     done = total; progress();
     // 結尾按鈕
