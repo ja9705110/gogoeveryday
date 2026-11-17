@@ -36,13 +36,17 @@ export function mountCosmos(host, opts) {
   const PR = PS * 0.27; // 星球半徑（planet.js 的比例）
 
   const stars = Array.from({ length: 160 }, () => ({ x: Math.random(), y: Math.random(), s: Math.random() * 1.3 + 0.3, tw: Math.random() * 6.28 }));
-  const L = levels.map((l, i) => ({ ...l, img: load(l.thumb), i, alpha: 0, split: false, flash: 0, x: 0, y: 0 }));
+  // 錯過的那幾天沉回了海底，不會出現在宇宙裡
+  const L = levels.filter((l) => !l.missed).map((l, i) => ({ ...l, img: load(l.thumb), i, alpha: 0, split: false, flash: 0, x: 0, y: 0 }));
   const byDay = Object.fromEntries(L.map((l) => [l.day, l]));
   const P = [];
   L.forEach((l) => (emotions[l.day] || []).forEach((w, j) => P.push({ l, word: w, j, state: 'held', x: 0, y: 0, z: 0, alpha: 0, br: 0.5 + Math.random() * 0.5 })));
   // 情緒排在幾圈傾斜的軌道上；內圈轉得快
   P.forEach((p, k) => { p.ring = 0.52 + ((k * 7) % P.length) / Math.max(1, P.length - 1) * 0.5; p.a0 = (k * 2.39996) % 6.283; p.w = 0.3 / (0.3 + p.ring); });
   let focusDay = null, levelsOn = false, meOn = false, meAlpha = 0;
+  // 崩離（cK→1）與重新輪轉；外圈的金色星光＝家人和朋友
+  let cK = 0, cT = 0, supA = 0, supOn = false;
+  const SUP = Array.from({ length: 30 }, (_, i) => ({ a0: (i / 30) * 6.283 + Math.random() * 0.2, ring: 1.12 + (i % 3) * 0.07, s: 1.4 + Math.random() * 1.6 }));
   let k = opts.speed ?? 1, target = k, rot = 0, last = performance.now(), alive = true;
 
   const levelPos = (l, cx, cy, R) => {
@@ -53,7 +57,7 @@ export function mountCosmos(host, opts) {
   };
   // 傾斜的橢圓軌道（跟星環同角度）；z<0 在星球後面
   const orbitPos = (p, cx, cy) => {
-    const a = p.a0 + rot * p.w; const rx = W * 0.5 * p.ring * 1.02, ry = Math.min(H * 0.3, W * 0.62) * p.ring * 0.62;
+    const a = p.a0 + rot * p.w; const spread = 1 + cK * (0.9 + p.br * 0.8); const rx = W * 0.5 * p.ring * 1.02 * spread, ry = Math.min(H * 0.3, W * 0.62) * p.ring * 0.62 * spread;
     const ox = Math.cos(a) * rx, oy = Math.sin(a) * ry;
     return [cx + ox * Math.cos(TILT) - oy * Math.sin(TILT), cy + ox * Math.sin(TILT) + oy * Math.cos(TILT), Math.sin(a)];
   };
@@ -87,6 +91,8 @@ export function mountCosmos(host, opts) {
     if (!alive) return;
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     k += (target - k) * Math.min(1, dt * 1.4); rot += dt * k;
+    cK += (cT - cK) * Math.min(1, dt * (cT > cK ? 0.35 : 0.9));
+    supA += ((supOn ? 1 : 0) - supA) * Math.min(1, dt * 0.8);
     const cx = W / 2, cy = cyOf(), R = Math.min(W, H * 0.9) * 0.5, m = Math.min(W, H);
     // 背景：靛紫色漸層＋慢慢轉動的光芒（跟「重建中的星球」同一種風格）
     let g = gb;
@@ -97,12 +103,12 @@ export function mountCosmos(host, opts) {
     for (let i = 0; i < 8; i++) {
       g.rotate(Math.PI / 4);
       const len = Math.max(W, H) * 0.9;
-      const ray = g.createLinearGradient(0, 0, 0, -len); ray.addColorStop(0, 'rgba(190,170,255,0)'); ray.addColorStop(0.3, 'rgba(190,170,255,.16)'); ray.addColorStop(1, 'rgba(190,170,255,0)');
+      const ray = g.createLinearGradient(0, 0, 0, -len); ray.addColorStop(0, 'rgba(190,170,255,0)'); ray.addColorStop(0.3, `rgba(190,170,255,${(0.16 * (1 - 0.75 * cK)).toFixed(3)})`); ray.addColorStop(1, 'rgba(190,170,255,0)');
       g.fillStyle = ray; g.beginPath(); g.moveTo(-3, 0); g.lineTo(3, 0); g.lineTo(14, -len); g.lineTo(-14, -len); g.fill();
     }
     g.restore();
     for (const s of stars) {
-      s.tw += dt * 1.5; g.globalAlpha = 0.25 + 0.45 * Math.abs(Math.sin(s.tw)); g.fillStyle = '#e6e2ff';
+      s.tw += dt * 1.5; g.globalAlpha = (0.25 + 0.45 * Math.abs(Math.sin(s.tw))) * (1 - 0.6 * cK); g.fillStyle = '#e6e2ff';
       const sx = (s.x * W + rot * 2 * s.s) % W, sy = s.y * H;
       if (k > 2.5) { g.strokeStyle = '#e6e2ff'; g.lineWidth = s.s; g.beginPath(); g.moveTo(sx, sy); g.lineTo(sx - k * 3 * s.s, sy); g.stroke(); } else g.fillRect(sx, sy, s.s, s.s);
     }
@@ -110,7 +116,8 @@ export function mountCosmos(host, opts) {
     gf.clearRect(0, 0, W, H);
     // 軌道線（淡）
     meAlpha += ((meOn ? 1 : 0) - meAlpha) * Math.min(1, dt * 1.1);
-    pc.style.opacity = meAlpha.toFixed(3);
+    pc.style.opacity = (meAlpha * (1 - 0.55 * cK)).toFixed(3);
+    if (cK > 0.01 || pc._f) { pc._f = cK > 0.01; pc.style.filter = `grayscale(${(cK * 0.85).toFixed(2)}) brightness(${(1 - 0.35 * cK).toFixed(2)})`; const j = cK > 0.3 ? cK * 2.2 : 0; pc.style.transform = j ? `translate(${((Math.random() - 0.5) * j).toFixed(1)}px,${((Math.random() - 0.5) * j).toFixed(1)}px)` : ''; }
     if (meAlpha > 0.02) {
       g.save(); g.translate(cx, cy); g.rotate(TILT); g.globalAlpha = 0.5 * meAlpha;
       for (const rr of [0.6, 0.78, 0.96]) { g.strokeStyle = 'rgba(190,170,255,.22)'; g.lineWidth = 1; g.beginPath(); g.ellipse(0, 0, W * 0.5 * rr * 1.02, Math.min(H * 0.3, W * 0.62) * rr * 0.62, 0, 0, 6.283); g.stroke(); }
@@ -141,16 +148,27 @@ export function mountCosmos(host, opts) {
       if (!placed) { p.x = tx; p.y = ty; }
       const f = Math.min(1, dt * (p.state === 'orbit' ? 1.3 : 2.4));
       p.x += (tx - p.x) * f; p.y += (ty - p.y) * f; p.z = z;
-      p.alpha += ((p.state === 'held' ? 0 : 1) - p.alpha) * Math.min(1, dt * 2);
+      p.alpha += ((p.state === 'held' ? 0 : 1 - 0.78 * cK) - p.alpha) * Math.min(1, dt * 2);
       // 在星球正後方的會被星球擋住
       const behind = p.state === 'orbit' && z < 0;
       if (behind && meAlpha > 0.5 && Math.hypot(p.x - cx, p.y - cy) < PR * 0.95) continue;
       drawEmotion(behind ? gb : gf, p);
     }
     placed = true;
+    // 家人和朋友：外圈溫暖的星光，一直在背後撐著
+    if (supA > 0.02) {
+      for (const t of SUP) {
+        const a = t.a0 - rot * 0.12; const rx = W * 0.5 * t.ring, ry = Math.min(H * 0.3, W * 0.62) * t.ring * 0.62;
+        const ox = Math.cos(a) * rx, oy = Math.sin(a) * ry;
+        const x = cx + ox * Math.cos(TILT) - oy * Math.sin(TILT), y = cy + ox * Math.sin(TILT) + oy * Math.cos(TILT);
+        const g2 = Math.sin(a) < 0 ? gb : gf; const tw = 0.7 + 0.3 * Math.sin(now / 400 + t.a0 * 5);
+        g2.globalAlpha = supA * tw; const gr = g2.createRadialGradient(x, y, 0, x, y, t.s * 5); gr.addColorStop(0, '#fff3d6'); gr.addColorStop(0.35, 'rgba(255,200,120,.75)'); gr.addColorStop(1, 'rgba(255,190,110,0)');
+        g2.fillStyle = gr; g2.beginPath(); g2.arc(x, y, t.s * 5, 0, 6.283); g2.fill(); g2.globalAlpha = 1;
+      }
+    }
     // 名字
     if (meAlpha > 0.02 && name) {
-      gf.globalAlpha = meAlpha; gf.fillStyle = '#fff1d6'; gf.font = `700 ${Math.round(Math.max(18, PR * 0.32))}px "Noto Sans TC", system-ui, sans-serif`; gf.textAlign = 'center';
+      gf.globalAlpha = meAlpha * (1 - 0.5 * cK); gf.fillStyle = '#fff1d6'; gf.font = `700 ${Math.round(Math.max(18, PR * 0.32))}px "Noto Sans TC", system-ui, sans-serif`; gf.textAlign = 'center';
       gf.shadowColor = 'rgba(255,190,120,.85)'; gf.shadowBlur = 16; gf.fillText(name, cx, cy + PR + PR * 0.62); gf.shadowBlur = 0; gf.globalAlpha = 1;
     }
     requestAnimationFrame(frame);
@@ -166,6 +184,10 @@ export function mountCosmos(host, opts) {
     showLevels: () => { levelsOn = true; },
     splitAll: (stagger = 260) => new Promise((done) => { const rest = L.filter((l) => !l.split); rest.forEach((l, i) => setTimeout(() => { splitLevel(l); if (i === rest.length - 1) done(); }, i * stagger)); if (!rest.length) done(); }),
     gather: () => { meOn = true; P.forEach((p) => { p.state = 'orbit'; }); },
+    // 崩離：轉速慢下來、情緒四散變淡、星球失去顏色
+    collapse: () => { cT = 1; target = 0.04; },
+    // 重新輪轉：情緒回到身邊，外圈出現家人朋友的星光
+    respin: () => { cT = 0; supOn = true; target = 1.8; setTimeout(() => { if (alive) target = 0.55; }, 3500); },
     stop: () => { alive = false; stopPlanet(); removeEventListener('resize', resize); wrap.remove(); },
   };
 }
@@ -182,9 +204,10 @@ export function mountSeaRise(host, levels) {
   const seed = (i) => { const x = Math.sin(i * 999) * 10000; return x - Math.floor(x); };
   const stars = Array.from({ length: 150 }, () => ({ x: Math.random(), y: Math.random(), r: Math.random() * 1.4 + 0.2, p: Math.random() * 6 }));
   const motes = Array.from({ length: 60 }, () => ({ x: Math.random(), y: Math.random(), s: 0.2 + Math.random() * 0.6 }));
-  const F = levels.map((l, i) => ({ ...l, i, depth: 0.25 + seed(i + 3) * 0.6, x: 0, y: 0, risen: 0, sky: 0, ripple: -1 }));
+  const F = levels.map((l, i) => ({ ...l, i, depth: 0.25 + seed(i + 3) * 0.6, x: 0, y: 0, risen: 0, sky: 0, ripple: -1, sink: 0 }));
+  const UP = F.filter((f) => !f.missed); UP.forEach((f, k) => { f.ri = k; });
   let phase = 'deep', t0 = performance.now(), pan = 0, alive = true, last = t0;
-  const ringPos = (i, cx, cy) => { const R = Math.min(W, H * 0.9) * 0.5; const a = (i / F.length) * 6.283 - 1.57; return [cx + Math.cos(a) * R * 0.66, cy + Math.sin(a) * R * 0.66 * 0.85]; };
+  const ringPos = (i, cx, cy) => { const R = Math.min(W, H * 0.9) * 0.5; const a = (i / Math.max(1, UP.length)) * 6.283 - 1.57; return [cx + Math.cos(a) * R * 0.66, cy + Math.sin(a) * R * 0.66 * 0.85]; };
   const orb = (x, y, r, color, a = 1) => { const gr = g.createRadialGradient(x, y, 0, x, y, r * 3); gr.addColorStop(0, `rgba(${color},${a})`); gr.addColorStop(0.3, `rgba(${color},${a * 0.4})`); gr.addColorStop(1, `rgba(${color},0)`); g.fillStyle = gr; g.beginPath(); g.arc(x, y, r * 3, 0, 7); g.fill(); };
   const frame = (now) => {
     if (!alive) return;
@@ -210,31 +233,41 @@ export function mountSeaRise(host, levels) {
       const bx = W * (0.08 + (f.i / Math.max(1, F.length - 1)) * 0.84);
       const deepY = hz + 40 + f.depth * (H * 0.34 - 40);
       const surfY = hz - 14;
-      let x = bx, y = deepY + (surfY - deepY) * f.risen;
-      if (f.sky > 0) { const [tx, ty] = ringPos(f.i, W / 2, H * 0.44); const k = f.sky * f.sky * (3 - 2 * f.sky); x = bx + (tx - bx) * k; y = surfY + (ty - surfY) * k; f.sky = Math.min(1, f.sky + dt / 2.6); }
+      let x = bx, y = deepY + (surfY - deepY) * f.risen + f.sink * H * 0.42;
+      if (f.missed && f.sink >= 1) continue; // 錯過的：沉回海底、消失
+      if (f.sky > 0) { const [tx, ty] = ringPos(f.ri, W / 2, H * 0.44); const k = f.sky * f.sky * (3 - 2 * f.sky); x = bx + (tx - bx) * k; y = surfY + (ty - surfY) * k; f.sky = Math.min(1, f.sky + dt / 2.6); }
       y += Math.sin(now * 0.002 + f.i) * 3 * (1 - f.sky);
       const col = f.missed ? '180,140,255' : '255,181,71';
       const lit = f.risen >= 1;
-      orb(x, y, lit ? 9 + f.sky * 6 : 6, lit ? col : '63,244,255', lit ? 1 : 0.7);
+      orb(x, y, lit ? 9 + f.sky * 6 : 6, lit ? col : f.sink > 0 ? '120,140,170' : '63,244,255', lit ? 1 : 0.7 * (1 - f.sink));
       // 浮出水面時的漣漪
       if (f.ripple >= 0 && f.ripple < 1) { f.ripple += dt / 1.4; g.strokeStyle = `rgba(${col},${0.6 * (1 - f.ripple)})`; g.lineWidth = 1.2; g.beginPath(); g.ellipse(bx, hz, f.ripple * 60, f.ripple * 12, 0, 0, 7); g.stroke(); }
-      g.font = '10px "Share Tech Mono", monospace'; g.textAlign = 'center'; g.fillStyle = 'rgba(225,245,255,.85)';
+      g.font = '10px "Share Tech Mono", monospace'; g.textAlign = 'center'; g.fillStyle = `rgba(225,245,255,${(0.85 * (1 - f.sink)).toFixed(2)})`;
       g.fillText(f.sky > 0.6 ? f.title : String(f.day).padStart(2, '0'), x, y + 24 + f.sky * 6);
     }
     requestAnimationFrame(frame);
   };
   requestAnimationFrame(frame);
   const rise = (f) => new Promise((done) => { const s = performance.now(); const step = (now) => { if (!alive) return done(); f.risen = Math.min(1, (now - s) / 1500); if (f.risen < 1) requestAnimationFrame(step); else { f.ripple = 0; done(); } }; requestAnimationFrame(step); });
+  const sinkAway = (f) => new Promise((done) => { const s = performance.now(); const step = (now) => { if (!alive) return done(); f.sink = Math.min(1, (now - s) / 2600); if (f.sink < 1) requestAnimationFrame(step); else done(); }; requestAnimationFrame(step); });
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   return {
     async play(say, sfx) {
       say('<div class="film-line">十天前，檔案 030 碎成十個片段，<br>沉入了深海。</div>');
       await wait(3400);
       say('<div class="film-line">每完成一天，<br>就有一個片段浮上海面。</div>');
-      for (const f of F) { if (!alive) return; rise(f).then(() => sfx && sfx('ping')); await wait(520); }
+      for (const f of F) {
+        if (!alive) return;
+        if (f.missed) { sinkAway(f); sfx && sfx('sink'); await wait(700); } // 沒有完成的那一天：浮不上來，沉得更深
+        else { rise(f).then(() => sfx && sfx('ping')); await wait(520); }
+      }
       await wait(1900);
-      say('<div class="film-line">現在，它們一起升上了天空。</div>');
-      phase = 'sky'; F.forEach((f, i) => setTimeout(() => { f.sky = 0.001; }, i * 90));
+      if (F.some((f) => f.missed)) {
+        say('<div class="film-line">沒有完成的那幾天，沒能浮上來。<br>錯過了，就不會再回來——<br>它們沉回了海底。</div>');
+        await wait(4600);
+      }
+      say(UP.length ? '<div class="film-line">浮上來的片段，<br>一起升上了天空。</div>' : '<div class="film-line">這一次，沒有片段升上天空。</div>');
+      phase = 'sky'; UP.forEach((f, i) => setTimeout(() => { f.sky = 0.001; }, i * 90));
       await wait(3400);
     },
     fadeOut: () => new Promise((done) => { cv.style.transition = 'opacity 1.2s'; cv.style.opacity = '0'; setTimeout(() => { alive = false; removeEventListener('resize', resize); cv.remove(); done(); }, 1250); }),

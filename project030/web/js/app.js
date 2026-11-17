@@ -1233,7 +1233,14 @@ async function finaleMedia(A) {
   if (!me) { const d4 = A.days.find((d) => d.day === 4); const r = (d4 ? evOf(d4) : []).filter((e) => e.kind === 'photo' && e.path && e.step_id === 's_photo').pop(); if (r) me = await signedUrl(r.path); }
   const song = A.song ? mkAudio(await signedUrl(A.song, 'gifts')) : null;
   const hb = await renderBirthdaySong(); // 生日快樂歌：先做成一般音檔，iPhone 靜音模式也聽得到
-  return { chapters, thumbs, ending: { voice, photo }, song, hb, me, preview: !!real };
+  // 給他的話、小時候的照片、家人朋友的影片（只在終章當天從資料庫取得）
+  let letter = '', memories = [];
+  try {
+    const X = await rpc('finale_extras', { p: S.pid });
+    letter = X.letter || '';
+    for (const m of X.memories || []) { const u = m && m.path ? await signedUrl(m.path, 'gifts') : null; if (u) memories.push({ kind: m.kind === 'video' ? 'video' : 'photo', url: u, caption: m.caption || '' }); }
+  } catch (_) {}
+  return { chapters, thumbs, ending: { voice, photo }, song, hb, me, letter, memories, preview: !!real };
 }
 // 只預先解鎖影片裡的錄音；生日快樂歌與 NEON 都是在按鈕按下的當下才播，不需要（也不能）先試播
 const primeAll = (M) => [M.ending.voice, ...M.chapters.flatMap((c) => c.audios)].forEach(primeAudio);
@@ -1259,7 +1266,10 @@ async function finale() {
   const colorKey = 'p030.color.' + S.pid;
   let color = (A.choices || {})['choice:color'] || (() => { try { return localStorage.getItem(colorKey); } catch (_) { return null; } })() || null;
   const universe = () => ({ levels: M.chapters.map((c) => ({ day: c.day, title: c.title, thumb: M.thumbs[c.day], color: DAY_COLORS[(c.day - 1) % 10], missed: c.missed })), emotions: FINALE_EMOTIONS, states: layerStates(S.state.levels), name: 'Jasper', tint: color });
-  const runFilm = () => playFilm({ chapters: M.chapters.map((c) => ({ ...c, fav: c.day === fav })), universe: universe(), ending: M.ending, onDone: (what) => {
+  const noteKey = 'p030.note.' + S.pid;
+  let note = prog.note || (() => { try { return localStorage.getItem(noteKey); } catch (_) { return null; } })() || null;
+  const onNote = async (t) => { note = t; try { localStorage.setItem(noteKey, t); } catch (_) {} try { await rpc('finale_note', { p: S.pid, note: t }); } catch (_) {} };
+  const runFilm = () => playFilm({ chapters: M.chapters.map((c) => ({ ...c, fav: c.day === fav })), universe: universe(), ending: M.ending, letter: M.letter, memories: M.memories, note, onNote, onDone: (what) => {
     if (what === 'replay') return fullShow();
     localStorage.setItem(thirtyKey, '1');
     celebrate({ song: M.song, hb: M.hb, onHunt: () => { renderAfter(); showHunt(); huntBox.scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
