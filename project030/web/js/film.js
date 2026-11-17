@@ -89,16 +89,25 @@ export function playFilm({ chapters, universe, ending, letter = '', memories = [
     const next = el('button', 'btn ghost sm film-vnext', '繼續 ›');
     box.append(v, cap2, tap, next); ov.append(box);
     let ended = false;
-    const end = () => { if (ended) return; ended = true; activeVideo = null; try { v.pause(); } catch (_) {} duck(false); box.classList.add('out'); setTimeout(() => box.remove(), 500); resolve(); };
+    const end = () => { if (ended) return; ended = true; activeVideo = null; clearTimeout(stall); try { v.pause(); } catch (_) {} duck(false); box.classList.add('out'); setTimeout(() => box.remove(), 500); resolve(); };
+    // 這台裝置放不出這段影片（例如 iPhone 的 .mov 在電腦上）：說明一下，自動接下一段
+    const fail = () => { if (ended) return; tap.remove(); cap2.textContent = '這段影片在這台裝置上無法播放'; setTimeout(end, 3000); };
+    let stall = null;
     activeVideo = end;
-    tap.onclick = () => { tap.remove(); duck(true); v.play().catch(() => {}); };
+    v.onerror = fail;
+    tap.onclick = () => {
+      tap.remove(); duck(true);
+      v.play().catch(fail);
+      stall = setTimeout(() => { if (!ended && (v.currentTime || 0) < 0.2) fail(); }, 9000); // 9 秒都沒開始播
+      setTimeout(() => next.classList.add('show'), 5000);
+    };
     v.onended = end; next.onclick = end;
   });
   // 送三十歲的自己一句話
-  const askNote = () => new Promise((resolve) => {
+  const askNote = (prev) => new Promise((resolve) => {
     const box = el('div', 'film-note');
-    box.innerHTML = '<div class="kicker">TO: JASPER, 30</div><h2>最後，送三十歲的自己一句話。</h2>';
-    const ta = document.createElement('textarea'); ta.maxLength = 500; ta.placeholder = '寫給三十歲的你……';
+    box.innerHTML = '<div class="kicker">TO: JASPER, 30</div><h2>最後，送三十歲的自己一句話。</h2>' + (prev ? '<p class="dim" style="font-size:12px;margin:-4px 0 8px">你之前寫過這句話，可以改一改，或直接送出。</p>' : '');
+    const ta = document.createElement('textarea'); ta.maxLength = 500; ta.placeholder = '寫給三十歲的你……'; if (prev) ta.value = prev;
     const msg = el('div', 'msg');
     const send = el('button', 'btn primary block', '送出');
     box.append(ta, msg, send); ov.append(box); setTimeout(() => ta.focus(), 300);
@@ -183,7 +192,7 @@ export function playFilm({ chapters, universe, ending, letter = '', memories = [
     skip.remove();
     // 尾聲三：送三十歲的自己一句話 → 原本要崩離的宇宙，再一次轉動
     if (cos) cos.collapse();
-    const said = note || (await askNote());
+    const said = await askNote(note); // 每一次都讓他寫（寫過的話，先帶入上次的內容）
     const t2 = { stop: false, timers: [] };
     if (cos) cos.respin(); sfx('complete');
     caption(`<div class="film-line">你對三十歲的自己說：</div><div class="film-quote">「${esc(said)}」</div>`); await wait(Math.min(9000, 4200 + said.length * 80), t2);
