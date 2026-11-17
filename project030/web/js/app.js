@@ -15,7 +15,7 @@ import { mosaicWidget } from './mosaic.js';
 import { photosetWidget } from './photoset.js';
 import { avatarSVG, choicesFromStats, AVATAR_STEPS } from './avatar.js';
 import { playOmen, playEvolution, EVO_GLYPH } from './evo.js';
-import { playFilm, celebrate, primeAudio, renderBirthdaySong } from './film.js';
+import { playFilm, celebrate, primeAudio, renderBirthdaySong, makeBgm } from './film.js';
 import { mountCosmos, mountSeaRise } from './cosmos.js';
 
 // 資料庫中舊稱呼的統一
@@ -1240,7 +1240,7 @@ async function finaleMedia(A) {
     letter = X.letter || '';
     for (const m of X.memories || []) {
       const u = m && m.path ? await signedUrl(m.path, 'gifts') : null; if (!u) continue;
-      if (m.kind === 'music') { if (!bgm) { bgm = mkAudio(u); if (bgm) bgm.loop = true; } continue; } // 回憶的背景音樂（最好的時光）
+      if (m.kind === 'music') { if (!bgm) bgm = makeBgm(u); continue; } // 念信與回憶的背景音樂（最好的時光）
       memories.push({ kind: m.kind === 'video' ? 'video' : 'photo', url: u, caption: m.caption || '' });
     }
   } catch (_) {}
