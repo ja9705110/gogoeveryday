@@ -48,13 +48,29 @@ export function playFilm({ chapters, universe, ending, letter = '', memories = [
   ambience('ceremony', true);
 
   const caption = (html) => { cap.innerHTML = html; cap.classList.remove('on'); void cap.offsetWidth; cap.classList.add('on'); };
+  // 照片：像一張相紙從宇宙深處浮現——細白邊、柔和陰影、微微傾斜，背後是同一張照片的模糊光暈
+  let tilt = 1;
   const showImg = (url) => {
-    const f = el('div', 'film-frame'); f.style.backgroundImage = `url("${url.replace(/"/g, '%22')}")`;
-    f.style.setProperty('--kx', `${Math.random() * 6 - 3}%`); f.style.setProperty('--ky', `${Math.random() * 6 - 3}%`);
-    img.append(f); requestAnimationFrame(() => f.classList.add('on'));
-    const old = [...img.children].slice(0, -1); setTimeout(() => old.forEach((o) => o.remove()), 1400);
+    const safe = url.replace(/"/g, '%22');
+    const f = el('div', 'film-frame');
+    const glow = el('div', 'ff-glow'); glow.style.backgroundImage = `url("${safe}")`;
+    const print = el('div', 'ff-print'); const pic = new Image(); pic.alt = ''; pic.decoding = 'async';
+    const shine = el('i', 'ff-shine');
+    print.append(pic, shine); f.append(glow, print);
+    tilt = -tilt; f.style.setProperty('--rot', `${(tilt * (1 + Math.random() * 1.8)).toFixed(2)}deg`);
+    f.style.setProperty('--dx', `${(Math.random() * 2 - 1).toFixed(2)}%`);
+    const place = () => {
+      const iw = pic.naturalWidth || 4, ih = pic.naturalHeight || 3;
+      const maxW = Math.min(innerWidth * 0.84, 560), maxH = innerHeight * 0.56;
+      const k = Math.min(maxW / iw, maxH / ih);
+      print.style.width = `${Math.round(iw * k)}px`; print.style.height = `${Math.round(ih * k)}px`;
+      requestAnimationFrame(() => f.classList.add('on'));
+    };
+    pic.onload = place; pic.onerror = place; pic.src = url;
+    img.append(f);
+    [...img.children].slice(0, -1).forEach((o) => { o.classList.add('out'); setTimeout(() => o.remove(), 1300); });
   };
-  const clearImg = () => { [...img.children].forEach((o) => o.classList.remove('on')); setTimeout(() => (img.innerHTML = ''), 1200); };
+  const clearImg = () => { [...img.children].forEach((o) => { o.classList.add('out'); setTimeout(() => o.remove(), 1300); }); };
   const playClip = async (a, maxMs) => {
     if (!a || tok.stop) return;
     duck(true);

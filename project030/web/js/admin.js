@@ -632,9 +632,25 @@ async function finale(body) {
           h('div', { style: 'flex:1' }, h('div', { class: 'mono faint', style: 'font-size:11px' }, `${i + 1}・${m.kind === 'video' ? '影片' : '照片'}`), cap,
             h('div', { class: 'row', style: 'margin-top:6px' },
               h('button', { class: 'btn sm ghost', onclick: () => mv(-1) }, '↑'), h('button', { class: 'btn sm ghost', onclick: () => mv(1) }, '↓'),
+              m.kind === 'photo' ? h('button', { class: 'btn sm ghost', title: '順時針轉 90°', onclick: (e) => rotate(m, e.target) }, '↻ 轉向') : null,
               h('button', { class: 'btn sm ghost', onclick: async () => { if (!confirm('刪除這一項？')) return; const [x] = items.splice(i, 1); draw(); try { await persist(); sb.storage.from('gifts').remove([x.path]).catch(() => {}); mmsg.className = 'msg good'; mmsg.textContent = '已刪除。'; } catch (e) { mmsg.className = 'msg bad'; mmsg.textContent = errText(e); } } }, '刪除')))));
       });
       if (!items.length) list.append(h('div', { class: 'dim', style: 'font-size:13px' }, '還沒有上傳。'));
+    };
+    // 照片轉向：順時針轉 90°，重新存一張，換掉舊的
+    const rotate = async (m, btn) => {
+      btn.disabled = true; mmsg.className = 'msg'; mmsg.textContent = '轉向中…';
+      try {
+        const u = await signedUrl(m.path, 'gifts'); if (!u) throw new Error('讀不到這張照片');
+        const bmp = await createImageBitmap(await (await fetch(u)).blob());
+        const c = document.createElement('canvas'); c.width = bmp.height; c.height = bmp.width;
+        const g = c.getContext('2d'); g.translate(c.width, 0); g.rotate(Math.PI / 2); g.drawImage(bmp, 0, 0);
+        const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.9));
+        const path = `finale/memories/${Date.now()}-r.jpg`;
+        const { error: e1 } = await sb.storage.from('gifts').upload(path, blob, { contentType: 'image/jpeg', upsert: false }); if (e1) throw e1;
+        const old = m.path; m.path = path; await persist(); sb.storage.from('gifts').remove([old]).catch(() => {});
+        draw(); mmsg.className = 'msg good'; mmsg.textContent = '已轉向。';
+      } catch (e) { mmsg.className = 'msg bad'; mmsg.textContent = errText(e); btn.disabled = false; }
     };
     const inp = h('input', { type: 'file', accept: 'image/*,video/*', multiple: '', class: 'hidden' });
     inp.onchange = async () => {

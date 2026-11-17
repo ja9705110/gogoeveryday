@@ -762,9 +762,23 @@ body::before { animation: none; }
 .film { position: fixed; inset: 0; z-index: 260; background: #01040a; overflow: hidden; color: #fff; }
 .film-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 30%, rgba(30, 60, 110, .45), transparent 60%), radial-gradient(ellipse at 50% 110%, rgba(255, 140, 80, .12), transparent 60%); }
 .film-img { position: absolute; inset: 0; }
-.film-frame { position: absolute; inset: -4%; background: center / contain no-repeat; opacity: 0; transform: scale(1.02) translate(0, 0); transition: opacity 1.1s ease, transform 4.5s ease-out; filter: saturate(1.05); }
-.film-frame.on { opacity: 1; transform: scale(1.1) translate(var(--kx), var(--ky)); }
-.film-img::after { content: ''; position: absolute; inset: 0; background: linear-gradient(transparent 50%, rgba(0, 0, 0, .78)); }
+/* 照片：相紙從宇宙深處浮現 */
+.film-frame { position: absolute; inset: 0; pointer-events: none; }
+.ff-glow { position: absolute; inset: -12%; background: center / cover no-repeat; filter: blur(46px) saturate(1.3); opacity: 0; transform: scale(1.15); transition: opacity 1.8s ease, transform 9s ease-out; }
+.film-frame.on .ff-glow { opacity: .38; transform: scale(1.05); }
+.ff-print { position: absolute; left: calc(50% + var(--dx, 0%)); top: 44%; padding: 7px; background: linear-gradient(160deg, #fffdf7, #f1ece2); border-radius: 3px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 255, 255, .25), 0 0 40px rgba(255, 220, 170, .18);
+  transform: translate(-50%, calc(-50% + 34px)) rotate(var(--rot, 0deg)) scale(.9); opacity: 0; filter: blur(10px) brightness(1.4);
+  transition: transform 1.6s cubic-bezier(.16, 1, .3, 1), opacity 1.2s ease, filter 1.4s ease; overflow: hidden; }
+.ff-print img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 1px; }
+.film-frame.on .ff-print { opacity: 1; filter: none; transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) scale(1); animation: ffdrift 9s ease-out 1.4s forwards; }
+@keyframes ffdrift { from { transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) scale(1); } to { transform: translate(-50%, calc(-50% - 10px)) rotate(calc(var(--rot, 0deg) * .6)) scale(1.045); } }
+.ff-shine { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, .55) 46%, rgba(255, 236, 200, .25) 52%, transparent 64%); transform: translateX(-120%); pointer-events: none; mix-blend-mode: screen; }
+.film-frame.on .ff-shine { animation: ffshine 1.9s ease-out .5s forwards; }
+@keyframes ffshine { to { transform: translateX(120%); } }
+.film-frame.out .ff-print { opacity: 0; filter: blur(8px); transform: translate(-50%, calc(-50% - 40px)) rotate(var(--rot, 0deg)) scale(1.06); transition: transform 1.2s ease-in, opacity 1.1s ease, filter 1.1s ease; animation: none; }
+.film-frame.out .ff-glow { opacity: 0; transition: opacity 1.1s ease; }
+.film-img::after { content: ''; position: absolute; inset: 0; background: linear-gradient(transparent 62%, rgba(0, 0, 0, .7)); pointer-events: none; }
 .film-cap { position: absolute; left: 0; right: 0; bottom: calc(90px + env(safe-area-inset-bottom)); padding: 0 24px; text-align: center; z-index: 2; opacity: 0; transform: translateY(10px); transition: opacity .9s, transform .9s; }
 .film-cap.on { opacity: 1; transform: none; }
 .film-line { font-size: 20px; line-height: 1.8; letter-spacing: .06em; text-shadow: 0 2px 12px #000; }
