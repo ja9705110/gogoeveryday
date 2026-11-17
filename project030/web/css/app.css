@@ -887,3 +887,4 @@ body::before { animation: none; }
 .film .film-video .film-vplay { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: auto; white-space: nowrap; z-index: 2; }
 .film .film-video .film-vnext { position: absolute; right: 12px; top: calc(26px + env(safe-area-inset-top)); left: auto; z-index: 2; }
 .film .film-video .film-vnext.show { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .6); color: #fff; }
+.film .film-gate { position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%); z-index: 6; font-size: 18px; padding: 16px 28px; width: auto; white-space: nowrap; animation: evopulse 1.6s ease-in-out infinite; }

@@ -26,7 +26,8 @@ const DEFAULT_LETTER = ['很多時候，我們會覺得自己停在原地。', '
 
 // letter：給他的話（每一行一段字幕）；memories：[{ kind: 'photo'|'video', url, caption }]
 // note：他已經寫過的那句話（重播時）；onNote(text)：送出他寫給三十歲自己的話
-export function playFilm({ chapters, universe, ending, letter = '', memories = [], note = null, onNote, onDone }) {
+// bgm：回憶段落的背景音樂（最好的時光）；都在他點按鈕的那一下開始，iPhone 才會出聲
+export function playFilm({ chapters, universe, ending, letter = '', memories = [], bgm = null, note = null, onNote, onDone }) {
   const ov = el('div', 'film');
   const bg = el('div', 'film-bg');
   const img = el('div', 'film-img');
@@ -35,6 +36,10 @@ export function playFilm({ chapters, universe, ending, letter = '', memories = [
   const mic = el('div', 'film-mic', '🎙 你的聲音');
   const skip = el('button', 'btn ghost sm film-skip', '略過');
   let activeVideo = null;
+  const bgmPlay = () => { if (!bgm) return; try { bgm._prime = null; bgm.muted = false; duck(true); const pr = bgm.play(); if (pr && pr.catch) pr.catch(() => {}); } catch (_) {} };
+  const bgmPause = () => { if (!bgm) return; try { bgm.pause(); } catch (_) {} };
+  // 點一下才繼續（讓音樂在點擊的當下開始）
+  const tapGate = (label) => new Promise((resolve) => { const b = el('button', 'btn primary film-gate', label); ov.append(b); b.onclick = () => { b.remove(); bgmPlay(); resolve(); }; });
   ov.append(bg, img, cap, bar, mic, skip);
   document.body.append(ov);
   const cos = universe ? mountCosmos(bg, { ...universe, mode: 'orbit', speed: 0.25, cy: 0.42 }) : null;
@@ -91,17 +96,19 @@ export function playFilm({ chapters, universe, ending, letter = '', memories = [
     let ended = false;
     const end = () => { if (ended) return; ended = true; activeVideo = null; clearTimeout(stall); try { v.pause(); } catch (_) {} duck(false); box.classList.add('out'); setTimeout(() => box.remove(), 500); resolve(); };
     // 這台裝置放不出這段影片（例如 iPhone 的 .mov 在電腦上）：說明一下，自動接下一段
-    const fail = () => { if (ended) return; tap.remove(); cap2.textContent = '這段影片在這台裝置上無法播放'; setTimeout(end, 3000); };
+    const fail = () => { if (ended) return; tap.remove(); cap2.textContent = '這段影片在這台裝置上無法播放'; setTimeout(() => { end(); bgmPlay(); }, 3000); };
     let stall = null;
     activeVideo = end;
     v.onerror = fail;
     tap.onclick = () => {
-      tap.remove(); duck(true);
+      tap.remove(); bgmPause(); duck(true);
       v.play().catch(fail);
       stall = setTimeout(() => { if (!ended && (v.currentTime || 0) < 0.2) fail(); }, 9000); // 9 秒都沒開始播
       setTimeout(() => next.classList.add('show'), 5000);
     };
-    v.onended = end; next.onclick = end;
+    // 看完：有背景音樂的話，點「繼續」讓歌接著播
+    v.onended = () => { if (!bgm) return end(); const c = el('button', 'btn primary film-vplay', '繼續 ▶'); box.append(c); c.onclick = () => { bgmPlay(); end(); }; };
+    next.onclick = () => { bgmPlay(); end(); };
   });
   // 送三十歲的自己一句話
   const askNote = (prev) => new Promise((resolve) => {
@@ -181,6 +188,7 @@ export function playFilm({ chapters, universe, ending, letter = '', memories = [
     const mem = (memories || []).filter((m) => m && m.url);
     if (!tok.stop && mem.length) {
       caption('<div class="film-line">接下來，是一直站在你身後的人。</div>'); await wait(3400, tok);
+      if (bgm && !tok.stop) { await tapGate('▶ 打開回憶'); }
       for (const m of mem) {
         if (tok.stop) break;
         if (m.kind === 'video') { clearImg(); caption(''); await playVideo(m); }
@@ -205,8 +213,8 @@ export function playFilm({ chapters, universe, ending, letter = '', memories = [
     const again = el('button', 'btn ghost sm', '再看一次');
     const box = el('div', 'film-end'); box.append(go, again);
     caption(''); ov.append(box);
-    again.onclick = () => { endCosmos(); ov.remove(); onDone && onDone('replay'); };
-    go.onclick = () => { endCosmos(); ov.remove(); onDone && onDone('thirty'); };
+    again.onclick = () => { bgmPause(); endCosmos(); ov.remove(); onDone && onDone('replay'); };
+    go.onclick = () => { bgmPause(); endCosmos(); ov.remove(); onDone && onDone('thirty'); };
   })();
 }
 
