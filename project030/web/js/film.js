@@ -17,6 +17,46 @@ export function primeAudio(a) {
 }
 const realPlay = (a) => { a._prime = null; a.muted = false; return a.play(); };
 
+// 背景音樂（最好的時光）：先把整首歌解碼成聲音資料，用 Web Audio 播放——
+// 這樣才能在家人影片播放時把音量降低（iPhone 不允許調整 <audio> 的音量），而且可以和影片同時播放
+export function makeBgm(url) {
+  const C = window.AudioContext || window.webkitAudioContext;
+  let ctx = null, gain = null, src = null, buf = null, el = null, started = false, low = false;
+  const HI = 0.85, LO = 0.14;
+  (async () => {
+    try {
+      try { ctx = new C({ sampleRate: 22050 }); } catch (_) { ctx = new C(); }
+      const ab = await (await fetch(url)).arrayBuffer();
+      buf = await new Promise((res, rej) => { const pr = ctx.decodeAudioData(ab, res, rej); if (pr && pr.then) pr.then(res, rej); });
+    } catch (_) { buf = null; }
+  })();
+  const level = () => (low ? LO : HI);
+  return {
+    // 一定要在他「點擊」的當下呼叫
+    start() {
+      if (started) return; started = true;
+      try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (_) {} // iPhone 靜音模式也要有聲音
+      if (buf && ctx) {
+        try { ctx.resume(); } catch (_) {}
+        gain = ctx.createGain(); gain.gain.setValueAtTime(0, ctx.currentTime); gain.connect(ctx.destination);
+        src = ctx.createBufferSource(); src.buffer = buf; src.loop = true; src.connect(gain); src.start();
+        gain.gain.linearRampToValueAtTime(level(), ctx.currentTime + 2);
+      } else { // 還沒解碼好：先用一般播放器（不能調音量，但至少有歌）
+        el = new Audio(url); el.loop = true; el.setAttribute('playsinline', ''); el.play().catch(() => {});
+      }
+    },
+    // 影片播放時：音樂不停，只是變小聲
+    duck(on) { low = on; if (gain && ctx) gain.gain.setTargetAtTime(level(), ctx.currentTime, 0.6); else if (el) { try { el.volume = on ? 0.2 : 1; if (el.paused) el.play().catch(() => {}); } catch (_) {} } },
+    keepAlive() { if (el && el.paused && started) el.play().catch(() => {}); },
+    stop() {
+      started = false;
+      try { if (gain && ctx) { gain.gain.setTargetAtTime(0, ctx.currentTime, 0.35); const s0 = src; setTimeout(() => { try { s0.stop(); } catch (_) {} }, 1600); } } catch (_) {}
+      try { if (el) el.pause(); } catch (_) {}
+      gain = null; src = null; el = null;
+    },
+  };
+}
+
 // chapters: [{ date, zone, title, hint, items: [{ type: 'photo', url } | { type: 'text', text }], audios: [HTMLAudioElement], missed, fav }]
 // universe: 背景宇宙（所有情緒圍繞著他轉動，mountCosmos）
 // ending: { voice: HTMLAudioElement|null, photo: url|null }
@@ -36,8 +76,8 @@ export function playFilm({ chapters, universe, ending, letter = '', memories = [
   const mic = el('div', 'film-mic', '🎙 你的聲音');
   const skip = el('button', 'btn ghost sm film-skip', '略過');
   let activeVideo = null;
-  const bgmPlay = () => { if (!bgm) return; try { bgm._prime = null; bgm.muted = false; duck(true); const pr = bgm.play(); if (pr && pr.catch) pr.catch(() => {}); } catch (_) {} };
-  const bgmPause = () => { if (!bgm) return; try { bgm.pause(); } catch (_) {} };
+  const bgmPlay = () => { if (!bgm) return; duck(true); bgm.start(); };
+  const bgmPause = () => { if (!bgm) return; bgm.stop(); };
   // 點一下才繼續（讓音樂在點擊的當下開始）
   const tapGate = (label) => new Promise((resolve) => { const b = el('button', 'btn primary film-gate', label); ov.append(b); b.onclick = () => { b.remove(); bgmPlay(); resolve(); }; });
   ov.append(bg, img, cap, bar, mic, skip);
@@ -94,21 +134,22 @@ export function playFilm({ chapters, universe, ending, letter = '', memories = [
     const next = el('button', 'btn ghost sm film-vnext', '繼續 ›');
     box.append(v, cap2, tap, next); ov.append(box);
     let ended = false;
-    const end = () => { if (ended) return; ended = true; activeVideo = null; clearTimeout(stall); try { v.pause(); } catch (_) {} duck(false); box.classList.add('out'); setTimeout(() => box.remove(), 500); resolve(); };
+    const end = () => { if (ended) return; ended = true; activeVideo = null; clearTimeout(stall); try { v.pause(); } catch (_) {} if (bgm) bgm.duck(false); else duck(false); box.classList.add('out'); setTimeout(() => box.remove(), 500); resolve(); };
     // 這台裝置放不出這段影片（例如 iPhone 的 .mov 在電腦上）：說明一下，自動接下一段
-    const fail = () => { if (ended) return; tap.remove(); cap2.textContent = '這段影片在這台裝置上無法播放'; setTimeout(() => { end(); bgmPlay(); }, 3000); };
+    const fail = () => { if (ended) return; tap.remove(); cap2.textContent = '這段影片在這台裝置上無法播放'; setTimeout(end, 3000); };
     let stall = null;
     activeVideo = end;
     v.onerror = fail;
     tap.onclick = () => {
-      tap.remove(); bgmPause(); duck(true);
+      tap.remove(); duck(true);
+      if (bgm) { bgm.start(); bgm.duck(true); } // 音樂繼續，只是變小聲
       v.play().catch(fail);
+      if (bgm) setTimeout(() => bgm.keepAlive(), 600);
       stall = setTimeout(() => { if (!ended && (v.currentTime || 0) < 0.2) fail(); }, 9000); // 9 秒都沒開始播
       setTimeout(() => next.classList.add('show'), 5000);
     };
     // 看完：有背景音樂的話，點「繼續」讓歌接著播
-    v.onended = () => { if (!bgm) return end(); const c = el('button', 'btn primary film-vplay', '繼續 ▶'); box.append(c); c.onclick = () => { bgmPlay(); end(); }; };
-    next.onclick = () => { bgmPlay(); end(); };
+    v.onended = end; next.onclick = end;
   });
   // 送三十歲的自己一句話
   const askNote = (prev) => new Promise((resolve) => {
@@ -157,7 +198,7 @@ export function playFilm({ chapters, universe, ending, letter = '', memories = [
           if (tok.stop) break;
           if (it.type === 'photo') {
             if (!shownHint) { caption(`${base}${c.hint ? `<div class="film-def">${esc(c.hint)}</div>` : ''}${star}`); shownHint = true; }
-            showImg(it.url); await wait(c.fav ? 3600 : 3000, tok);
+            showImg(it.url); await wait(c.fav ? 6200 : 5200, tok);
           } else {
             caption(`${base}<div class="film-quote">「${esc(it.text)}」</div>`); shownHint = false;
             await wait(Math.min(9000, 3500 + it.text.length * 90), tok);
@@ -177,6 +218,8 @@ export function playFilm({ chapters, universe, ending, letter = '', memories = [
     clearImg();
     const lines = String(letter || '').split(/\n+/).map((x) => x.trim()).filter(Boolean);
     if (!tok.stop) {
+      // 念信之前：點一下，「最好的時光」開始播
+      if (bgm) { caption(''); await tapGate('▶ 有一些話，想對你說'); }
       if (cos) cos.collapse();
       for (const line of (lines.length ? lines : DEFAULT_LETTER)) {
         if (tok.stop) break;
@@ -188,11 +231,10 @@ export function playFilm({ chapters, universe, ending, letter = '', memories = [
     const mem = (memories || []).filter((m) => m && m.url);
     if (!tok.stop && mem.length) {
       caption('<div class="film-line">接下來，是一直站在你身後的人。</div>'); await wait(3400, tok);
-      if (bgm && !tok.stop) { await tapGate('▶ 打開回憶'); }
       for (const m of mem) {
         if (tok.stop) break;
         if (m.kind === 'video') { clearImg(); caption(''); await playVideo(m); }
-        else { showImg(m.url); caption(m.caption ? `<div class="film-def">${esc(m.caption)}</div>` : ''); await wait(4200, tok); }
+        else { showImg(m.url); caption(m.caption ? `<div class="film-def">${esc(m.caption)}</div>` : ''); await wait(7000, tok); }
       }
       clearImg();
     }
